@@ -309,14 +309,27 @@ View(X11_29_21_Spatial_Join)
 
 
 
-#Estimated Limited Access Fleet Filter 
+#Estimated Limited Access (LA) Fleet Filter 
 ## This might be temporary; still looking into different integration methods with activity codes
 ```{r}
 LA_Estimate <- X11_29_21_Spatial_Join %>% filter(Agg_LANDED >= 850 & CREW <= 8)
 
-
 ```
 
+#Add in cost data 
+## This comes from the "Estimation of Commercial Fishing Trip Costs Using Sea Sampling Data" paper by Samantha Werner & Geret DePiper
+```{r}
+#Import Data
+X2007_2012 <- read_excel("~/2007_2012.xlsx")
+X2013_2020 <- read_excel("~/2013_2020.xlsx")
+
+#Merge 2007-2012 costs with 2013-2020 costs
+all_yrs_costs <- merge(X2007_2012,X2013_2020, all = TRUE)
+## Created two sets of cost joins.
+### 1. Before LA Estimation
+### 2. After LA Estimation
+cost_join <- merge(X11_29_21_Spatial_Join,all_yrs_costs, by.x = "TRIPID", by.y = "VTR_TRIPID", all.x = TRUE,all.y =FALSE)
+cost_join_LA <-merge(LA_Estimate,all_yrs_costs, by.x = "TRIPID", by.y = "VTR_TRIPID", all.x = TRUE,all.y =FALSE)  
 
 
 
@@ -324,11 +337,7 @@ LA_Estimate <- X11_29_21_Spatial_Join %>% filter(Agg_LANDED >= 850 & CREW <= 8)
 
 
 
-
-
-
-
-
+```
 
 
 ```{r}
