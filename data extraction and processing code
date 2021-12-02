@@ -35,9 +35,16 @@ source("~\R_credentials.R")
 ```
 
 
-# Read in oracle passwords
+# Read in oracle passwords and set network directory
 ```{r oracle_connections, echo=FALSE}
 source("~/R_credentials.R")
+
+#Comment one of these out, depending on whether you are running this code on a server or locally (with VPN) 
+net<-network_location_desktop
+net<-network_location_remote
+
+cost_directory<-file.path(net,"home6/swerner/Drop_off/Trip_Cost_Estimation_2007_2017")
+
 ```
 
 
@@ -334,8 +341,8 @@ LA_Estimate <- X11_29_21_Spatial_Join %>% filter(Agg_LANDED >= 850 & CREW <= 8)
 ## This comes from the "Estimation of Commercial Fishing Trip Costs Using Sea Sampling Data" paper by Samantha Werner & Geret DePiper
 ```{r}
 #Import Data
-X2007_2012 <- read_excel("~/2007_2012.xlsx")
-X2013_2020 <- read_excel("~/2013_2020.xlsx")
+X2007_2012 <- read_excel(file.path(cost_directory,"2007_2012.xlsx"))
+X2013_2020 <- read_excel(file.path(cost_directory,"2013_2020.xlsx"))
 
 #Merge 2007-2012 costs with 2013-2020 costs
 all_yrs_costs <- merge(X2007_2012,X2013_2020, all = TRUE)
