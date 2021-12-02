@@ -34,6 +34,13 @@ source("~\R_credentials.R")
 
 ```
 
+
+# Read in oracle passwords
+```{r oracle_connections, echo=FALSE}
+source("~/R_credentials.R")
+```
+
+
 # Load Offshore Wind Tool Data sets 
 
 The frozen DMIS table from the offshoreWind project (APSD_DMIS_2) is the base dataset for the analysis.
@@ -68,6 +75,7 @@ Data in the VTR schema is needed.  We extract the
 
 
 
+oracle_server = "sole"
 ODBC.CONNECTION <- RODBC::odbcConnect(dsn=oracle_server, uid=oracle_username, pwd=oracle_password, believeNRows=FALSE)
 START.YEAR = 2007
 END.YEAR = 2019
@@ -101,6 +109,7 @@ ODBC.CONNECTION <- RODBC::odbcConnect(dsn=oracle_server, uid=oracle_username, pw
 ##Scallop LA IFQ Linking variables 
 ```{r}
  
+oracle_server = "sole"
 ODBC.CONNECTION <- RODBC::odbcConnect(dsn=oracle_server, uid=oracle_username, pwd=oracle_password, believeNRows=FALSE)
 
 CURRENT.QUERY = paste ("SELECT TRIP_ID, DOCID, ACTIVITY_CODE FROM APSD.t_ssb_trip_current@garfo_nefsc")
