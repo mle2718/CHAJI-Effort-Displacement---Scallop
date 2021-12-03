@@ -57,6 +57,8 @@ source("~\R_credentials.R")
 
 
 # Read in oracle passwords and set network directory
+This is a block of code where we set up the oracle passwords and make R aware of folders on the network.
+
 ```{r oracle_connections, echo=FALSE}
 source("R_credentials.R")
 
