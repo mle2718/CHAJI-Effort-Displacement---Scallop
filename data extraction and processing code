@@ -4,9 +4,20 @@ author: "Marina Chaji"
 date: "11/26/2021"
 output: html_document
 ---
+# Purpose
 
-# Load Packages
-## First time use 
+This code extracts and processes data. Our goal is to construct a dataset that can be used to estimate a location choice model for the Limited Access Scallop Fishery, using data from 2007-2019 (calendar years).  The main datasource is a frozen DMIS table.
+
+# Dependencies
+
+This code depends on:
+1.  Two datasets from the offshoreWind package. These two datasets should be placed into the subfolder offshoreWind-master/data folder.  You can get these data from *fillin location*.
+2. Trip cost estimtes. These can be found at  \\net\home6\swerner\\Drop_off\Trip_Cost_Estimation_2007_2017  
+3. An ability to connect to NEFSC oracle databases (VTR and the Live DMIS tables at APSD.t_ssb_trip_current@garfo_nefsc)
+
+
+## First time use
+Install necessary packages
 ```{r setup, include=FALSE}
 
 install.packages("leaflet")
@@ -20,13 +31,12 @@ install.packages("dbplyr")
 install.packages("tidyverse")
 install.packages("raster")
 install.packages("rgdal")
-
-
 ```
 
+# Project setup
+Load packages,   Read in oracle username and password from "R_credentials.R".  
 
-## After first time use
-```{Library call}
+```{r setup, include=TRUE}
 
 library("leaflet")
 library("tidyverse")
@@ -39,14 +49,38 @@ library("dplyr")
 library("RODBC")
 library("raster")
 library("rgdal")
+library("readxl")
 
+source("~\R_credentials.R")
 
 ```
 
-# Load Offshore Wind Tool Data sets 
-```{r Data Set Loading, echo=FALSE}
 
+# Read in oracle passwords and set network directory
+This is a block of code where we set up the oracle passwords and make R aware of folders on the network.
+
+```{r oracle_connections, echo=FALSE}
+source("R_credentials.R")
+
+#Comment one of these out, depending on whether you are running this code on a server or locally (with VPN) 
+net<-network_location_desktop
+net<-network_location_remote
+offshoreWind_directory<-file.path(net,"home5/dcorvi/OffshoreWind/offshoreWind4/data")
+
+cost_directory<-file.path(net,"work5/socialsci/Trip_Costs/2007-2020/")
+
+```
+
+
+# Load Offshore Wind Tool Data sets 
+
+The frozen DMIS table from the offshoreWind project (APSD_DMIS_2) is the base dataset for the analysis.
+
+
+```{r Data Set Loading, echo=FALSE}
 load("~/offshoreWind-master/data/APSD_DMIS_2.rda")
+```{r Data Set Loading, echo=FALSE}
+load(file.path(offshoreWind_directory, "APSD_DMIS_2.rda"))
 load("~/offshoreWind-master/data-raw/REVENUEFILE.Rdata")
 
 ```
@@ -54,11 +88,26 @@ load("~/offshoreWind-master/data-raw/REVENUEFILE.Rdata")
 
 
 # Loading Data fom Oracle 
+
+The APSD_DMIS_2 table must be supplemented with additional data.  This section queries the Oracle databases to extract additional information.
+
 ## VTR Data
+
+Data in the VTR schema is needed.  We extract the 
+     
+1. TRIPID  - linking field 	
+1. tripcatg  - Indicates whether this is a commercial trip, for hire trip, or another kind of trip 	
+1. operator -   the name of the vessel operator
+1. opernum - the idnumber for the vessel operator
+1. permit -  the permit number of the vessel (vp_num) in the vps schema
+1. nsubtrip -  the number of subtrips corresponding to the trip
+1. crew 	- the number of crew 
+1. not_fished -  Indicator for whether this was a fishing trip or not 	
+
 ```{r, echo=FALSE}
-#### Oracle login credentials
-oracle_username = "mchaji"
-oracle_password = "****"
+
+
+
 oracle_server = "sole"
 ODBC.CONNECTION <- RODBC::odbcConnect(dsn=oracle_server, uid=oracle_username, pwd=oracle_password, believeNRows=FALSE)
 START.YEAR = 2007
@@ -93,8 +142,6 @@ ODBC.CONNECTION <- RODBC::odbcConnect(dsn=oracle_server, uid=oracle_username, pw
 ##Scallop LA IFQ Linking variables 
 ```{r}
  
-oracle_username = "mchaji"
-oracle_password = "****"
 oracle_server = "sole"
 ODBC.CONNECTION <- RODBC::odbcConnect(dsn=oracle_server, uid=oracle_username, pwd=oracle_password, believeNRows=FALSE)
 
@@ -320,8 +367,8 @@ LA_Estimate <- X11_29_21_Spatial_Join %>% filter(Agg_LANDED >= 850 & CREW <= 8)
 ## This comes from the "Estimation of Commercial Fishing Trip Costs Using Sea Sampling Data" paper by Samantha Werner & Geret DePiper
 ```{r}
 #Import Data
-X2007_2012 <- read_excel("~/2007_2012.xlsx")
-X2013_2020 <- read_excel("~/2013_2020.xlsx")
+X2007_2012 <- read_excel(file.path(cost_directory,"2007_2012.xlsx"))
+X2013_2020 <- read_excel(file.path(cost_directory,"2013_2020.xlsx"))
 
 #Merge 2007-2012 costs with 2013-2020 costs
 all_yrs_costs <- merge(X2007_2012,X2013_2020, all = TRUE)
