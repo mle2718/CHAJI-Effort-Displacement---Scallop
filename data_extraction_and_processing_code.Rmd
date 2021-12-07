@@ -6,14 +6,13 @@ output: html_document
 ---
 # Purpose
 
-This code extracts and processes data. Our goal is to construct a dataset that can be used to estimate a location choice model for the Limited Access Scallop Fishery, using data from 2007-2019 (calendar years).  The main datasource is a frozen DMIS table.
+This code extracts and processes data. Our goal is to construct a dataset that can be used to estimate a location choice model at the trip level for the Limited Access Scallop Fishery, using data from 2007-2019 (calendar years).  The main datasource is a frozen DMIS table.
 
 # Dependencies
 
 This code depends on:
-1.  Two datasets from the offshoreWind package. These two datasets should be placed into the subfolder offshoreWind-master/data folder.  You can get these data from *fillin location*.
-2. Trip cost estimtes. These can be found at  \\net\home6\swerner\\Drop_off\Trip_Cost_Estimation_2007_2017  
-3. An ability to connect to NEFSC oracle databases (VTR and the Live DMIS tables at APSD.t_ssb_trip_current@garfo_nefsc)
+1.  Network access to get the APSD_DMIS_2.rda and trip cost data from places on the NEFSC network.
+2. An ability to connect to NEFSC oracle databases (VTR and the Live DMIS tables at APSD.t_ssb_trip_current@garfo_nefsc)
 
 
 ## First time use
@@ -74,7 +73,7 @@ cost_directory<-file.path(net,"work5/socialsci/Trip_Costs/2007-2020/")
 
 # Load Offshore Wind Tool Data sets 
 
-The frozen DMIS table from the offshoreWind project (APSD_DMIS_2) is the base dataset for the analysis.
+The frozen DMIS table from the offshoreWind project (APSD_DMIS_2) is the base dataset for the analysis.  The DMIS data are formed by combining many datasets, including VTR and Dealer.  In brief, the APSD_DMIS_2 dataset contains a mix of trip attributes (port, date),  sub-trip attributes (gear, location) , and catch outcomes (species, pounds, landed, dollar).  You can read more about DMIS [here](https://github.com/NEFSC/READ-SSB-Lee-metadata/blob/master/DMIS.md).
 
 
 ```{r Data Set Loading, echo=FALSE}
@@ -93,7 +92,7 @@ The APSD_DMIS_2 table must be supplemented with additional data.  This section q
 
 ## VTR Data
 
-Data in the VTR schema is needed.  We extract the 
+Some Trip-level data in the VTR schema is needed.  We extract the 
      
 1. TRIPID  - linking field 	
 1. tripcatg  - Indicates whether this is a commercial trip, for hire trip, or another kind of trip 	
@@ -152,7 +151,7 @@ odbcCloseAll()
 
 ```
 
-
+We also extract the activity code from DMIS.  This will describe the type of trip that the vessel has declared into.  The most important types of trips will be Scallop Trips; however, fishing vessels with the proper permits are allowed to retain scallops while declared into other fisheries.  When this happens, the volume of scallops will be much lower.
 
 
 
@@ -184,15 +183,19 @@ Scallops$SOURCE<- NULL
 
 
 # Merging
-## 1. Merge Scallops & VTR.veslog2019t Data Sets
-### This will be done in a way that keeps all columns 
 
-## 2. Join VTR & DMIS Data with Activity Codes
+1. Merge Scallops & VTR Data Sets (RESULT.COMPILED). We keep all columns from both the APSD_DMIS_2 and RESULT.COMPILED datasets. We also:
+     1. Filter out 2020 values 
+     1. Delete Extra PERMIT Column because there were a few missing values.
+     1. Delete all TRIPCATG that are not 1. This isolates all commercial trips
+     1. Drop rows corresponding to a "Not Fished" VTR. 
+2. Join the output of (1) with Activity Codes 
+3. Verify that we get what we think we should get.
 
 ```{r, echo=FALSE}
 
-## 1. 
-#Join pulled data to DMIS data by TRIPIDs
+##1. Merge Scallops & VTR Data Sets (RESULT.COMPILED). We keep all columns from both the APSD_DMIS_2 and RESULT.COMPILED datasets. by VTR.TRIPID=APSD_DMIS_2.DOCID
+
 # all.x = TRUE & all.y = FALSE means I am keeping data with no match from DMIS table but dropping data with no match from the Veslog tables
 
 # DOCID is used because of the following found in the data dictionary "VESLOG Trip record identifier, which is generated internally; Primary key for VESLOGyyyyT; Foreign key to VESLOGyyS, VESLOGyyG. Equivalent to DOCID in VTR DOCUMENT table"
@@ -237,7 +240,14 @@ group_by("YEAR") %>% filter(is.na(OPERNUM))
 
 
 # Data Aggregating Trip Revenues & Delete duplicate TRIPIDs
-## Note: Reported subtrips use the same TRIPID. In order to determine decisions made on an overall trip basis (Leaving & Returning to port) TRIPIDs will be compiled into one. The unique TRIPID record that is being selected will be the trip with the highest reported DOLLAR amount. All subtrip DOLLAR, POUNDS, and LANDED values will be aggregated and assigned to the selected record. This is important to note, because for decision making/ modeling purposes the location will be that of the selected record. 
+Subtrips are generated when a vessel switches gear or areas. Subtrips have identical TRIPID/DOCID.  A trip may have many (8+) subtrips, but most have 1-2.
+
+```{r count_subtrips}
+#Not tested yet. If it doesn't work, it's because of capitals.
+table(VTR_DMIS_AC$NSUBTRIP)
+```
+Since our goal is to estimate a choice model at the trip level, we need to construct trip level variables.  
+ We retained the subtrip attributes  (GEARCODE, DDLAT, DDLON) corresponding to the subtrip with the highest DOLLAR.  We constructed trip-level values for revenue, pounds, and landed (DOLLAR, POUNDS, LANDED).  The trip level variables are prefixed with "Agg_". 
 
 ###  1. Aggregate DOLLAR, POUNDS, LANDED
 ###  2. Add back into orginial data set 
@@ -247,7 +257,7 @@ group_by("YEAR") %>% filter(is.na(OPERNUM))
 
 
 ```{r}
-### 1. Aggregate 
+### 1. Aggregate DOLLAR, POUNDS, LANDED
 Agg_DOL_POUN_LAND <- VTR_DMIS_AC %>%
   group_by(TRIPID) %>%
  summarise(Agg_DOLLAR = sum(DOLLAR), Agg_POUNDS = sum(POUNDS), Agg_LANDED = sum(LANDED))
@@ -356,7 +366,26 @@ View(X11_29_21_Spatial_Join)
 
 
 
-#Estimated Limited Access (LA) Fleet Filter 
+# Estimated Limited Access (LA) Fleet Filter
+We considered filtering out the LADAS scallop fleet by using landings greater than or equal to 850 pounds and Crew less than or equal to 8. These are based on crew limits. In summary:
+
+FY2007-2014: No limit on crew (except for 7 in DMV starting in FY2014)
+FY2015-2019: 8
+
+> Initially, vessels had the same crew limits in access areas as they did on DAS.  However, Framework 18(fishing year 2006) eliminated the seven-person crew limit (five-person limit for small dredge category vessels) for scallop access area trips. The purpose of this was to eliminate inefficiencies caused by the crew limit for fishing activity that is limited by a possession limit. The crew limit was established to control vessels’ shucking capacity when fishing under DAS. 
+
+> Eight years later, Framework 25 (fishing year 2014) imposed a crew limit of seven individuals (the same as DAS) per limited access vessel (five-person limit for small dredge category vessels) in DMV.  The purpose of this was to protect small scallops and discourage vessels from highgrading.
+
+>Framework 26 (fishing year 2015) implemented crew limits for all access areas. In an effort to protect small scallops and discourage vessels from high-grading.  Framework 26 imposed a crew limit of eight individuals (one extra from DAS) per limited access vessel, including the captain, when fishing in any scallop access area. If a vessel is participating in the small dredge program, it may not have more than six people (one extra from DAS) on board, including the captain, on an access area trip. 
+
+>Finally, because the scallops in the NLS–S–D were expected to have lower yield than similar sized scallops in other areas, Framework 32 (fishing year 2020) allowed two additional crew members aboard both limited access full-time (10 in total) and limited access full-time small dredge vessels (8 in total). This allowed vessels to add additional crew members to increase the shucking capacity of the vessel and reach the possession limit in a time more consistent with other access areas. (Travis Ford @ GARFO - Nov 17,2021)
+
+
+FY2007-2014: No limit (except for 7 in DMV starting in FY2014)
+FY2015-2019: 8
+
+
+
 ## This might be temporary; still looking into different integration methods with activity codes
 ```{r}
 LA_Estimate <- X11_29_21_Spatial_Join %>% filter(Agg_LANDED >= 850 & CREW <= 8)
@@ -364,7 +393,8 @@ LA_Estimate <- X11_29_21_Spatial_Join %>% filter(Agg_LANDED >= 850 & CREW <= 8)
 ```
 
 #Add in cost data 
-## This comes from the "Estimation of Commercial Fishing Trip Costs Using Sea Sampling Data" paper by Samantha Werner & Geret DePiper
+
+These data should reference the  "Estimation of Commercial Fishing Trip Costs Using Sea Sampling Data" paper by Samantha Werner & Geret DePiper.  We will likely use the Winsorized trip cost estimates.
 ```{r}
 #Import Data
 X2007_2012 <- read_excel(file.path(cost_directory,"2007_2012.xlsx"))
@@ -378,16 +408,20 @@ all_yrs_costs <- merge(X2007_2012,X2013_2020, all = TRUE)
 cost_join <- merge(X11_29_21_Spatial_Join,all_yrs_costs, by.x = "TRIPID", by.y = "VTR_TRIPID", all.x = TRUE,all.y =FALSE)
 cost_join_LA <-merge(LA_Estimate,all_yrs_costs, by.x = "TRIPID", by.y = "VTR_TRIPID", all.x = TRUE,all.y =FALSE)  
 
-
-
-
-
-
-
 ```
 
+```{r summary_statistics}
+# Here is a placeholder where we will make a few summary statistics tables.  Nothing too fancy. This may be sufficient.
+# This has not been tested. Yet.
 
-```{r}
+summary(cost_join)
+
+table(cost_join$YEAR)
+
+table(cost_join$GEARCODE)
+
+table(cost_join$STATE)
+
 
 
 
