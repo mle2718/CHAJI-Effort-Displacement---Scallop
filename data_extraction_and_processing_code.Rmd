@@ -4,16 +4,99 @@ author: "Marina Chaji"
 date: "11/26/2021"
 output: html_document
 ---
+# Introduction
+
+The main idea of the model is that the fishermen/decision-makers choose from a number of alternatives, where the choice occasion is a fishing trip and selects the one that yields the highest expected utility level on any given choice occasion. By observing and modeling how decision-makers change their preferred site option in response to the changes in the levels of the site attributes, it is possible to determine how decision-makers tradeoff between the different fishing ground characteristics.
+
+# Long Term Objectives
+The project objective is to develop a site-choice model primarily, improve, maintain, and disseminate a standardized fisheries dependent data set and analytical summaries that provide a more precise, accurate, comprehensive, and timely evaluation of area-specific socioeconomic impacts associated with ecosystem fishery management initiatives, offshore energy development, and offshore aquaculture development. The site-choice model and underlying data set will help support fishery and ecosystem management decisions to achieve optimum yield in each fishery and the nation’s most significant benefit.
+
+
 # Purpose
 
-This code extracts and processes data. Our goal is to construct a dataset that can be used to estimate a location choice model for the Limited Access Scallop Fishery, using data from 2007-2019 (calendar years).  The main datasource is a frozen DMIS table.
+This code extracts and processes data. Our goal is to construct a dataset that can be used to estimate a location choice model at the trip level for the Limited Access Scallop Fishery, using data from 2007-2019 (calendar years).  The main datasource is a frozen DMIS table.
 
 # Dependencies
 
 This code depends on:
-1.  Two datasets from the offshoreWind package. These two datasets should be placed into the subfolder offshoreWind-master/data folder.  You can get these data from *fillin location*.
-2. Trip cost estimtes. These can be found at  \\net\home6\swerner\\Drop_off\Trip_Cost_Estimation_2007_2017  
-3. An ability to connect to NEFSC oracle databases (VTR and the Live DMIS tables at APSD.t_ssb_trip_current@garfo_nefsc)
+1.  Network access to get the APSD_DMIS_2.rda and trip cost data from places on the NEFSC network.
+2. An ability to connect to NEFSC oracle databases (VTR and the Live DMIS tables at APSD.t_ssb_trip_current@garfo_nefsc)
+
+
+# Data Overview
+
+##  Description of the data systems
+
+```{r Data Overview, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
+tabl <- "
+| Source  | Name           |
+|------------|:-----------------------------------------------|
+| DMIS_APSD_2   | DMIS is a Northeast Regional Office data record matching system. Primary data sources include Allocation Management System (AMS) Database, Vessel Trip Reports (VTRs), Dealer Reports, Vessel Monitoring System (VMS) Catch Reports, Observer Reports, Vessel Permit Database, and the MQRS database, which tracks limited access fishing eligibilities |
+|VTR (Vessel Trip Reports) | A vessel trip report (VTR) must be received by NMFS or postmarked within 15 days after the reporting month’s end.  For vessels that also hold a NE multispecies permit, VTRs must be submitted weekly by Tuesday of the week after the fishing trip ends.  Copies of VTRs must be retained on board the vessel for 1 year after the last entry on the log and otherwise retained for 3 years after the date of the last entry on the log.  If no fishing activity occurred during a reporting period (week or month), then a VTR must be submitted stating that no fishing trips were taken.  |
+|Vessel Monitoring System (VMS) | All vessels issued a Federal scallop permit are required to have an active VMS unit and must use their VMS unit to declare all vessel activity, including fishing trips and transiting.|
+|Cost data  | Werner et al predict estimate a model of trip costs. Predictions (in and out of sample) are used  |
+
+"
+cat(tabl) 
+```
+
+##  Description of the DMIS_APSD_2 data.
+```{r APSD_DMIS_2 overview, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
+tabl <- "
+| Column  | Description           |
+|------------|:-----------------------------------------------|
+|DOCID | VTR DOCUMENT table record identifier; Primary key, internally generated at scanning based on vessel id and date/time sailed. Each DOCID represents one trip; equivalent to TRIPID in VESLOG tables.|
+|Dates | VTR land date, AMS Land Date, Dealer Sold Date Trip date is broken down into fields Calendar_Year, Month_of_Year, Week_of_Year, and Day_of_Year|
+|DDLAT | Latitude in decimal degrees| 
+|DDLON  | Longitude in decimal degrees| 
+|PERMIT | Six-digit vessel fishing permit number assigned by the NE Regional Office permit system|
+|DOLLAR | This is the value of fish sold.An imputed price is used in cases where the value was not reported.|
+|POUNDS | POUNDS is live weight, (in the shell)|
+|LANDED |  LANDED can be meat weights or shell weights, but is usually meats|
+|TRIP_LENGTH | Trip length is in days; It is calculated from the elapsed time between the date-time sailed and date-time landed. This is a measure of days absent.|
+"
+cat(tabl) 
+```
+While not provided in APSD_DMIS_2, we are using the ACTIVITY_CODE from the live DMIS tables. We join using TRIP_ID, DOCID.  See [here](/external_documentation/vms_declaration_code_glossary_may_2018.pdf)
+
+
+##  Description of the VTR data.
+```{r VTR overview, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
+tabl <- "
+| Column  | Description           |
+|------------|:-----------------------------------------------|
+|TRIPID|VESLOG Trip record identifier, which is generated internally and used for linking|
+|tripcatg | (only commercial categories are selected), recreational and RSA/EFP are not.| 
+|operator| Name of the captain|
+|opernum| Captains Identification number|
+|permit| Six-digit vessel fishing permit number assigned by the NE Regional Office permit system||
+|nsubtrip| Number of subtrips (see description of subtrips|
+|crew| number of crew, including captain|
+"
+cat(tabl) 
+```
+
+##  Description of the VMS data.
+We are currently not using the VMS data directly. 
+
+
+##  Description of the Cost  data.
+```{r Tripcost overview, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
+tabl <- "
+| Column  | Description           |
+|------------|:-----------------------------------------------|
+|Place|holder|
+|Place|holder|
+"
+cat(tabl) 
+```
+
+
+
+
+
+
+
 
 
 ## First time use
@@ -72,7 +155,7 @@ cost_directory<-file.path(net,"work5/socialsci/Trip_Costs/2007-2020/")
 
 # Load Offshore Wind Tool Data sets 
 
-The frozen DMIS table from the offshoreWind project (APSD_DMIS_2) is the base dataset for the analysis.
+The frozen DMIS table from the offshoreWind project (APSD_DMIS_2) is the base dataset for the analysis.  The DMIS data are formed by combining many datasets, including VTR and Dealer.  In brief, the APSD_DMIS_2 dataset contains a mix of trip attributes (port, date),  sub-trip attributes (gear, location) , and catch outcomes (species, pounds, landed, dollar).  You can read more about DMIS [here](https://github.com/NEFSC/READ-SSB-Lee-metadata/blob/master/DMIS.md).
 
 
 ```{r Data Set Loading, echo=FALSE}
@@ -88,16 +171,7 @@ The APSD_DMIS_2 table must be supplemented with additional data.  This section q
 
 ## VTR Data
 
-Data in the VTR schema is needed.  We extract the 
-     
-1. TRIPID  - linking field 	
-1. tripcatg  - Indicates whether this is a commercial trip, for hire trip, or another kind of trip 	
-1. operator -   the name of the vessel operator
-1. opernum - the idnumber for the vessel operator
-1. permit -  the permit number of the vessel (vp_num) in the vps schema
-1. nsubtrip -  the number of subtrips corresponding to the trip
-1. crew 	- the number of crew 
-1. not_fished -  Indicator for whether this was a fishing trip or not 	
+Some Trip-level data in the VTR schema is needed. See table at the top.  We extract them here. 
 
 ```{r, echo=FALSE}
 
@@ -147,7 +221,7 @@ odbcCloseAll()
 
 ```
 
-
+We also extract the activity code from DMIS.  This will describe the type of trip that the vessel has declared into.  The most important types of trips will be Scallop Trips; however, fishing vessels with the proper permits are allowed to retain scallops while declared into other fisheries.  When this happens, the volume of scallops will be much lower.
 
 
 
@@ -179,15 +253,19 @@ Scallops$SOURCE<- NULL
 
 
 # Merging
-## 1. Merge Scallops & VTR.veslog2019t Data Sets
-### This will be done in a way that keeps all columns 
 
-## 2. Join VTR & DMIS Data with Activity Codes
+1. Merge Scallops & VTR Data Sets (RESULT.COMPILED). We keep all columns from both the APSD_DMIS_2 and RESULT.COMPILED datasets. We also:
+     1. Filter out 2020 values 
+     1. Delete Extra PERMIT Column because there were a few missing values.
+     1. Delete all TRIPCATG that are not 1. This isolates all commercial trips
+     1. Drop rows corresponding to a "Not Fished" VTR. 
+2. Join the output of (1) with Activity Codes 
+3. Verify that we get what we think we should get.
 
 ```{r, echo=FALSE}
 
-## 1. 
-#Join pulled data to DMIS data by TRIPIDs
+##1. Merge Scallops & VTR Data Sets (RESULT.COMPILED). We keep all columns from both the APSD_DMIS_2 and RESULT.COMPILED datasets. by VTR.TRIPID=APSD_DMIS_2.DOCID
+
 # all.x = TRUE & all.y = FALSE means I am keeping data with no match from DMIS table but dropping data with no match from the Veslog tables
 
 # DOCID is used because of the following found in the data dictionary "VESLOG Trip record identifier, which is generated internally; Primary key for VESLOGyyyyT; Foreign key to VESLOGyyS, VESLOGyyG. Equivalent to DOCID in VTR DOCUMENT table"
@@ -232,7 +310,14 @@ group_by("YEAR") %>% filter(is.na(OPERNUM))
 
 
 # Data Aggregating Trip Revenues & Delete duplicate TRIPIDs
-## Note: Reported subtrips use the same TRIPID. In order to determine decisions made on an overall trip basis (Leaving & Returning to port) TRIPIDs will be compiled into one. The unique TRIPID record that is being selected will be the trip with the highest reported DOLLAR amount. All subtrip DOLLAR, POUNDS, and LANDED values will be aggregated and assigned to the selected record. This is important to note, because for decision making/ modeling purposes the location will be that of the selected record. 
+Subtrips are generated when a vessel switches gear or areas. Subtrips have identical TRIPID/DOCID.  A trip may have many (8+) subtrips, but most have 1-2.
+
+```{r count_subtrips}
+#Not tested yet. If it doesn't work, it's because of capitals.
+table(VTR_DMIS_AC$NSUBTRIP)
+```
+Since our goal is to estimate a choice model at the trip level, we need to construct trip level variables.  
+ We retained the subtrip attributes  (GEARCODE, DDLAT, DDLON) corresponding to the subtrip with the highest DOLLAR.  We constructed trip-level values for revenue, pounds, and landed (DOLLAR, POUNDS, LANDED).  The trip level variables are prefixed with "Agg_". 
 
 ###  1. Aggregate DOLLAR, POUNDS, LANDED
 ###  2. Add back into orginial data set 
@@ -242,7 +327,7 @@ group_by("YEAR") %>% filter(is.na(OPERNUM))
 
 
 ```{r}
-### 1. Aggregate 
+### 1. Aggregate DOLLAR, POUNDS, LANDED
 Agg_DOL_POUN_LAND <- VTR_DMIS_AC %>%
   group_by(TRIPID) %>%
  summarise(Agg_DOLLAR = sum(DOLLAR), Agg_POUNDS = sum(POUNDS), Agg_LANDED = sum(LANDED))
@@ -351,7 +436,26 @@ View(X11_29_21_Spatial_Join)
 
 
 
-#Estimated Limited Access (LA) Fleet Filter 
+# Estimated Limited Access (LA) Fleet Filter
+We considered filtering out the LADAS scallop fleet by using landings greater than or equal to 850 pounds and Crew less than or equal to 8. These are based on crew limits. In summary:
+
+FY2007-2014: No limit on crew (except for 7 in DMV starting in FY2014)
+FY2015-2019: 8
+
+> Initially, vessels had the same crew limits in access areas as they did on DAS.  However, Framework 18(fishing year 2006) eliminated the seven-person crew limit (five-person limit for small dredge category vessels) for scallop access area trips. The purpose of this was to eliminate inefficiencies caused by the crew limit for fishing activity that is limited by a possession limit. The crew limit was established to control vessels’ shucking capacity when fishing under DAS. 
+
+> Eight years later, Framework 25 (fishing year 2014) imposed a crew limit of seven individuals (the same as DAS) per limited access vessel (five-person limit for small dredge category vessels) in DMV.  The purpose of this was to protect small scallops and discourage vessels from highgrading.
+
+>Framework 26 (fishing year 2015) implemented crew limits for all access areas. In an effort to protect small scallops and discourage vessels from high-grading.  Framework 26 imposed a crew limit of eight individuals (one extra from DAS) per limited access vessel, including the captain, when fishing in any scallop access area. If a vessel is participating in the small dredge program, it may not have more than six people (one extra from DAS) on board, including the captain, on an access area trip. 
+
+>Finally, because the scallops in the NLS–S–D were expected to have lower yield than similar sized scallops in other areas, Framework 32 (fishing year 2020) allowed two additional crew members aboard both limited access full-time (10 in total) and limited access full-time small dredge vessels (8 in total). This allowed vessels to add additional crew members to increase the shucking capacity of the vessel and reach the possession limit in a time more consistent with other access areas. (Travis Ford @ GARFO - Nov 17,2021)
+
+
+FY2007-2014: No limit (except for 7 in DMV starting in FY2014)
+FY2015-2019: 8
+
+
+
 ## This might be temporary; still looking into different integration methods with activity codes
 ```{r}
 LA_Estimate <- X11_29_21_Spatial_Join %>% filter(Agg_LANDED >= 850 & CREW <= 8)
@@ -359,7 +463,8 @@ LA_Estimate <- X11_29_21_Spatial_Join %>% filter(Agg_LANDED >= 850 & CREW <= 8)
 ```
 
 #Add in cost data 
-## This comes from the "Estimation of Commercial Fishing Trip Costs Using Sea Sampling Data" paper by Samantha Werner & Geret DePiper
+
+These data should reference the  "Estimation of Commercial Fishing Trip Costs Using Sea Sampling Data" paper by Samantha Werner & Geret DePiper.  We will likely use the Winsorized trip cost estimates.
 ```{r}
 #Import Data
 X2007_2012 <- read_excel(file.path(cost_directory,"2007_2012.xlsx"))
@@ -373,17 +478,19 @@ all_yrs_costs <- merge(X2007_2012,X2013_2020, all = TRUE)
 cost_join <- merge(X11_29_21_Spatial_Join,all_yrs_costs, by.x = "TRIPID", by.y = "VTR_TRIPID", all.x = TRUE,all.y =FALSE)
 cost_join_LA <-merge(LA_Estimate,all_yrs_costs, by.x = "TRIPID", by.y = "VTR_TRIPID", all.x = TRUE,all.y =FALSE)  
 
-
-
-
-
-
-
 ```
 
+```{r summary_statistics}
+# Here is a placeholder where we will make a few summary statistics tables.  Nothing too fancy. This may be sufficient.
+# This has not been tested. Yet.
 
-```{r}
+summary(cost_join)
 
+table(cost_join$YEAR)
+
+table(cost_join$GEARCODE)
+
+table(cost_join$STATE)
 
 
 ```
