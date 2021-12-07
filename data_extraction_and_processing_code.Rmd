@@ -1,0 +1,400 @@
+---
+title: "Post Activity Code Clean Up 11/21"
+author: "Marina Chaji"
+date: "11/26/2021"
+output: html_document
+---
+# Purpose
+
+This code extracts and processes data. Our goal is to construct a dataset that can be used to estimate a location choice model for the Limited Access Scallop Fishery, using data from 2007-2019 (calendar years).  The main datasource is a frozen DMIS table.
+
+# Dependencies
+
+This code depends on:
+1.  Two datasets from the offshoreWind package. These two datasets should be placed into the subfolder offshoreWind-master/data folder.  You can get these data from *fillin location*.
+2. Trip cost estimtes. These can be found at  \\net\home6\swerner\\Drop_off\Trip_Cost_Estimation_2007_2017  
+3. An ability to connect to NEFSC oracle databases (VTR and the Live DMIS tables at APSD.t_ssb_trip_current@garfo_nefsc)
+
+
+## First time use
+Install necessary packages
+```{r setup, include=FALSE}
+
+install.packages("leaflet")
+install.packages("tidyverse")
+install.packages("sf")
+install.packages("ggplot2")
+install.packages("RODM")
+install.packages("ROracle")
+install.packages("dplyr")
+install.packages("dbplyr")
+install.packages("tidyverse")
+install.packages("raster")
+install.packages("rgdal")
+```
+
+# Project setup
+Load packages,   Read in oracle username and password from "R_credentials.R".  
+
+```{r setup, include=TRUE}
+
+library("leaflet")
+library("tidyverse")
+library("sf")
+library("ggplot2")
+library("RODM")
+library("ROracle")
+library("dbplyr")
+library("dplyr")
+library("RODBC")
+library("raster")
+library("rgdal")
+library("readxl")
+
+source("~\R_credentials.R")
+
+```
+
+
+# Read in oracle passwords and set network directory
+This is a block of code where we set up the oracle passwords and make R aware of folders on the network.
+
+```{r oracle_connections, echo=FALSE}
+source("R_credentials.R")
+
+#Comment one of these out, depending on whether you are running this code on a server or locally (with VPN) 
+net<-network_location_desktop
+net<-network_location_remote
+offshoreWind_directory<-file.path(net,"home5/dcorvi/OffshoreWind/offshoreWind4/data")
+
+cost_directory<-file.path(net,"work5/socialsci/Trip_Costs/2007-2020/")
+
+```
+
+
+# Load Offshore Wind Tool Data sets 
+
+The frozen DMIS table from the offshoreWind project (APSD_DMIS_2) is the base dataset for the analysis.
+
+
+```{r Data Set Loading, echo=FALSE}
+load("~/offshoreWind-master/data/APSD_DMIS_2.rda")
+```{r Data Set Loading, echo=FALSE}
+load(file.path(offshoreWind_directory, "APSD_DMIS_2.rda"))
+load("~/offshoreWind-master/data-raw/REVENUEFILE.Rdata")
+
+```
+
+
+
+# Loading Data fom Oracle 
+
+The APSD_DMIS_2 table must be supplemented with additional data.  This section queries the Oracle databases to extract additional information.
+
+## VTR Data
+
+Data in the VTR schema is needed.  We extract the 
+     
+1. TRIPID  - linking field 	
+1. tripcatg  - Indicates whether this is a commercial trip, for hire trip, or another kind of trip 	
+1. operator -   the name of the vessel operator
+1. opernum - the idnumber for the vessel operator
+1. permit -  the permit number of the vessel (vp_num) in the vps schema
+1. nsubtrip -  the number of subtrips corresponding to the trip
+1. crew 	- the number of crew 
+1. not_fished -  Indicator for whether this was a fishing trip or not 	
+
+```{r, echo=FALSE}
+
+
+
+oracle_server = "sole"
+ODBC.CONNECTION <- RODBC::odbcConnect(dsn=oracle_server, uid=oracle_username, pwd=oracle_password, believeNRows=FALSE)
+START.YEAR = 2007
+END.YEAR = 2019
+for(i in START.YEAR:END.YEAR) {
+  print(i)
+  CURRENT.QUERY = paste("SELECT VTR.veslog",i,"t.TRIPID,tripcatg, operator, opernum, permit, nsubtrip, crew,not_fished  
+                FROM VTR.veslog",i,"t", sep="")
+  YEAR.RESULT = sqlQuery(ODBC.CONNECTION, CURRENT.QUERY)  
+  
+  # Now, the loop compiles the results; the first year must be treated slightly differently###
+  if (i==START.YEAR) {
+    RESULT.COMPILED = YEAR.RESULT
+  } else {
+    RESULT.COMPILED = rbind(RESULT.COMPILED, YEAR.RESULT) }
+}    # End Main Loop
+
+
+##Subtrip Data
+## Note: This data is pulled in order to fill in a large number of blanks in reporting 
+
+ODBC.CONNECTION <- RODBC::odbcConnect(dsn=oracle_server, uid=oracle_username, pwd=oracle_password, believeNRows=FALSE)
+  CURRENT.QUERY = paste ("SELECT VTR.veslog",i,"t.TRIPID,tripcatg, operator, opernum, permit, nsubtrip, crew,not_fished  
+                FROM VTR.veslog",i,"t", sep="")
+  VTR.veslog2019t = sqlQuery(ODBC.CONNECTION, CURRENT.QUERY) 
+
+```
+
+
+
+#Loading Data from Oracle
+##Scallop LA IFQ Linking variables 
+```{r}
+ 
+oracle_server = "sole"
+ODBC.CONNECTION <- RODBC::odbcConnect(dsn=oracle_server, uid=oracle_username, pwd=oracle_password, believeNRows=FALSE)
+
+CURRENT.QUERY = paste ("SELECT TRIP_ID, DOCID, ACTIVITY_CODE FROM APSD.t_ssb_trip_current@garfo_nefsc")
+Scallop_Linkingorg = sqlQuery(ODBC.CONNECTION, CURRENT.QUERY)
+
+odbcCloseAll()
+
+```
+
+
+
+
+
+
+
+# Cleaning 
+## 1. Filter down to only Scallop Species 
+## 2. Seperate Dates & Times and Delete Old Dates Column 
+## 3. Delete Columns that are not need 
+### NESPP3 & SOURCE Values are all the same so this is deleted 
+```{r, echo=FALSE}
+
+Scallops <- APSD_DMIS_2 %>% filter (SPPNAME == "SCALLOPS/BUSHEL")
+
+#Separate Dates & Times
+Scallops$Date <- as.Date(Scallops$DATE_TRIP)
+Scallops$Time <- format(Scallops$DATE_TRIP,"%H:%M:%S")
+
+#Drop columns that are not needed
+Scallops$DATE_TRIP<- NULL
+Scallops$NESPP3<- NULL
+Scallops$SOURCE<- NULL
+
+```
+
+
+
+
+
+
+# Merging
+## 1. Merge Scallops & VTR.veslog2019t Data Sets
+### This will be done in a way that keeps all columns 
+
+## 2. Join VTR & DMIS Data with Activity Codes
+
+```{r, echo=FALSE}
+
+## 1. 
+#Join pulled data to DMIS data by TRIPIDs
+# all.x = TRUE & all.y = FALSE means I am keeping data with no match from DMIS table but dropping data with no match from the Veslog tables
+
+# DOCID is used because of the following found in the data dictionary "VESLOG Trip record identifier, which is generated internally; Primary key for VESLOGyyyyT; Foreign key to VESLOGyyS, VESLOGyyG. Equivalent to DOCID in VTR DOCUMENT table"
+VTR_DMIS_merge <- merge(RESULT.COMPILED,Scallops, by.x = "TRIPID", by.y = "DOCID", all.x = FALSE, all.y = TRUE)
+
+## Filter out 2020 values 
+VTR_DMIS_merge <- VTR_DMIS_merge %>% filter(YEAR != 2020)
+
+# Delete Extra PERMIT Column
+## Note: X was deleted because PERMIT.y had zero NAs and PERMIT.x had 25 
+VTR_DMIS_merge$PERMIT.x <- NULL
+
+# Delete all TRIPCATG that are not 1. This isolates all commercial trips
+## Type of trip: 1=Commercial; 2=Party; 3=Charter; 4=RSA/EFP. Note: RSA/EFP landings represent a small amount of all commercial landings; landings vary by gear type and species.
+
+VTR_DMIS_merge <- VTR_DMIS_merge %>% filter(TRIPCATG == "1")
+VTR_DMIS_merge$TRIPCATG <- NULL
+
+# Delete all NOT_FISHED that are not 0. This indicates whether the 'Did not fish' box was checked on the Vessel Trip Report. 0=Fishing activity; 1=No fishing activity/Negative report.
+VTR_DMIS_merge <- VTR_DMIS_merge %>% filter(NOT_FISHED == "0")
+VTR_DMIS_merge$NOT_FISHED <- NULL
+
+
+## 2. 
+###Join VTR & DMIS Data with Activity Codes 
+# Delete duplicate rows; These are rows that share the same TRIPID, DOLLAR, & TRIP_LENGTH   
+VTR_DMIS_AC <- merge(VTR_DMIS_merge,Scallop_Linkingorg, by.x = "TRIPID", by.y = "DOCID", all.x = TRUE, all.y = FALSE)
+VTR_DMIS_AC <- VTR_DMIS_AC %>% distinct(TRIPID,DOLLAR,TRIP_LENGTH, .keep_all = TRUE)  
+
+## 3. 
+### Testing Reported NAs in new data set (that they are relatively even across all years)
+#### Note: The variable used in this command can be substituted for whatever needs to be tested. In this case I am testing OPERNUM, because that will be used to determine decisions in the model 
+
+testing <- VTR_DMIS_AC %>%
+group_by("YEAR") %>% filter(is.na(OPERNUM))
+
+
+```
+
+
+
+
+
+# Data Aggregating Trip Revenues & Delete duplicate TRIPIDs
+## Note: Reported subtrips use the same TRIPID. In order to determine decisions made on an overall trip basis (Leaving & Returning to port) TRIPIDs will be compiled into one. The unique TRIPID record that is being selected will be the trip with the highest reported DOLLAR amount. All subtrip DOLLAR, POUNDS, and LANDED values will be aggregated and assigned to the selected record. This is important to note, because for decision making/ modeling purposes the location will be that of the selected record. 
+
+###  1. Aggregate DOLLAR, POUNDS, LANDED
+###  2. Add back into orginial data set 
+###  3. Check / Test Maximum DOLLAR values by grouping by TRIPID
+###  4. Drop duplicate TRIPIDs by keeping maximum DOLLAR values 
+
+
+
+```{r}
+### 1. Aggregate 
+Agg_DOL_POUN_LAND <- VTR_DMIS_AC %>%
+  group_by(TRIPID) %>%
+ summarise(Agg_DOLLAR = sum(DOLLAR), Agg_POUNDS = sum(POUNDS), Agg_LANDED = sum(LANDED))
+
+#### Testing to make sure there are no duplicates in TRIPID groups; this should equal 0
+sum(duplicated(Agg_DOL_POUN_LAND$TRIPID))
+
+
+###  2. Add back into original data set 
+#### all = FALSE is used to keep only rows that match from the data frames
+VTR_DMIS_AC_Agg <- merge(VTR_DMIS_AC,Agg_DOL_POUN_LAND, by.x = "TRIPID", by.y = "TRIPID", all.x = TRUE, all.y = FALSE)
+
+
+
+
+### 3.Parse out Maximum Dollar amounts in order to drop lesser subtrips
+VTR_DMIS_AC_Agg <- VTR_DMIS_AC_Agg %>% group_by(TRIPID) %>% filter(DOLLAR == max(DOLLAR))
+### Another way to check this is by running the following code: VTR_DMIS_AC_Agg %>% group_by(TRIPID) %>% arrange(desc(DOLLAR)) %>% slice(1)
+
+## Test out 
+sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))
+
+
+
+
+```
+
+
+
+# Trips reported on land will be dropped from observations 
+## Note: Removing observations on land / not in the water requires the use of the offshorewind package. Unfortunately, you cannot run this on RStudio the current server(s). Thus, I will be saving the VTR_DMIS_AC_Agg data set as a csv, using RStudio on my desktop (code included below), and uploading it back on to the server. 
+
+```{r}
+# 1. Saving most recent data set (VTR_DMIS_AC_Agg) as a rds
+saveRDS(VTR_DMIS_AC_Agg, file = "~/November 2021/VTR_DMIS_AC_Agg.rds")
+```
+##DO NOT RUN THIS CHUNK (It will not work)
+```{r}
+# 2. Code used on desktop is below 
+# Load libraries
+PKG <- c("sp", "rgdal", "raster", "sf", "dplyr", "tidyr", "stringr", "offshorewind")
+for (p in PKG) {
+  if(!require(p,character.only = TRUE)) {
+    install.packages(p)
+    require(p,character.only = TRUE)}
+}
+
+
+#################################################################################################
+# change these variables to read in the current data set and what the network path to the shared drive is on your laptop
+coordinate_table_input <- readRDS("C:/Users/marina.chaji/Downloads/VTR_DMIS_AC_Agg.Rds")
+lat_column = "DDLAT"
+lon_column = "DDLON"
+shapefile_path = "//net.nefsc.noaa.gov/work5/socialsci/Geret_Rasters/Data/offshore_wind_package_data/shapefiles/East_Cst_crop_2020_extended"
+#################################################################################################
+
+crs = CRS("+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0")
+shapefile_area <- SpatialPolygonsDataFrame(aggregate(shapefile_path_to_spatialpolygons(shapefile_path, projection = crs)), data = data.frame("NAME" = "Land"))
+coordinate_table <- as_tibble(coordinate_table_input %>%
+                                rename("LAT" = .data[[lat_column]], "LON" = .data[[lon_column]]) %>%
+                                drop_na(LON, LAT) %>%
+                                mutate(LON = if_else(LON>1, LON*-1, LON )) %>%
+                                relocate(LON, LAT)) # drop LAT LON NAs, correct LON, change column order - check if any longitudes are positive and switch to negative
+
+xy <- coordinate_table[,c(1,2)]
+coordinate_table <- SpatialPointsDataFrame(coords = xy, data = coordinate_table, proj4string = crs)
+coordinate_table <- spTransform(coordinate_table, CRSobj = crs)
+
+vtridx <- over(coordinate_table, shapefile_area)
+
+colnames(vtridx)[1] <- "NAME"
+
+coordinate_table$Area <- vtridx$NAME
+coordinate_table <- coordinate_table@data
+
+coordinate_table <- coordinate_table %>%
+  mutate_if(is.factor, as.character) %>%
+  mutate(Area = if_else(is.na(Area), "Non-land", Area)) %>% # change NAs to read "Non-land"
+  rename("{lat_column}" := LAT, "{lon_column}" := LON) %>%  # change lat lon columns back to original names
+  filter(Area == "Non-land")
+
+# finished table is coordinate_table
+
+# write.csv(coordinate_table, file="coordinate_table.csv")
+```
+#Import data set only including water observations
+## 1. Data is imported from RStudio on Desktop
+## 2. Data is imported from ArcGISPro
+### A spatial join is done with Water data, Ten Minute Squares, & Lease Areas shape file. Points are assigned to Ten Minute Squares and Lease areas on a one to one joint point basis for observations within a square. This can be adjusted later by adding buffers.  
+```{r}
+library(readr)
+water_ac <- read_csv("water_ac.csv")
+
+## Delete unnecessary columns 
+water_ac$...1 <- NULL
+water_ac$Area <- NULL
+
+library(readr)
+X11_29_21_Spatial_Join <- read_csv("11_29_21_Spatial_Join.csv")
+View(X11_29_21_Spatial_Join)
+
+##Check that observations between water points and ArcGIS are the same
+
+```
+
+
+
+
+#Estimated Limited Access (LA) Fleet Filter 
+## This might be temporary; still looking into different integration methods with activity codes
+```{r}
+LA_Estimate <- X11_29_21_Spatial_Join %>% filter(Agg_LANDED >= 850 & CREW <= 8)
+
+```
+
+#Add in cost data 
+## This comes from the "Estimation of Commercial Fishing Trip Costs Using Sea Sampling Data" paper by Samantha Werner & Geret DePiper
+```{r}
+#Import Data
+X2007_2012 <- read_excel(file.path(cost_directory,"2007_2012.xlsx"))
+X2013_2020 <- read_excel(file.path(cost_directory,"2013_2020.xlsx"))
+
+#Merge 2007-2012 costs with 2013-2020 costs
+all_yrs_costs <- merge(X2007_2012,X2013_2020, all = TRUE)
+## Created two sets of cost joins.
+### 1. Before LA Estimation
+### 2. After LA Estimation
+cost_join <- merge(X11_29_21_Spatial_Join,all_yrs_costs, by.x = "TRIPID", by.y = "VTR_TRIPID", all.x = TRUE,all.y =FALSE)
+cost_join_LA <-merge(LA_Estimate,all_yrs_costs, by.x = "TRIPID", by.y = "VTR_TRIPID", all.x = TRUE,all.y =FALSE)  
+
+
+
+
+
+
+
+```
+
+
+```{r}
+
+
+
+```
+
+
+
+
+
+
