@@ -4,6 +4,14 @@ author: "Marina Chaji"
 date: "11/26/2021"
 output: html_document
 ---
+# Introduction
+
+The main idea of the model is that the fishermen/decision-makers choose from a number of alternatives, where the choice occasion is a fishing trip and selects the one that yields the highest expected utility level on any given choice occasion. By observing and modeling how decision-makers change their preferred site option in response to the changes in the levels of the site attributes, it is possible to determine how decision-makers tradeoff between the different fishing ground characteristics.
+
+# Long Term Objectives
+The project objective is to develop a site-choice model primarily, improve, maintain, and disseminate a standardized fisheries dependent data set and analytical summaries that provide a more precise, accurate, comprehensive, and timely evaluation of area-specific socioeconomic impacts associated with ecosystem fishery management initiatives, offshore energy development, and offshore aquaculture development. The site-choice model and underlying data set will help support fishery and ecosystem management decisions to achieve optimum yield in each fishery and the nation’s most significant benefit.
+
+
 # Purpose
 
 This code extracts and processes data. Our goal is to construct a dataset that can be used to estimate a location choice model at the trip level for the Limited Access Scallop Fishery, using data from 2007-2019 (calendar years).  The main datasource is a frozen DMIS table.
@@ -13,6 +21,82 @@ This code extracts and processes data. Our goal is to construct a dataset that c
 This code depends on:
 1.  Network access to get the APSD_DMIS_2.rda and trip cost data from places on the NEFSC network.
 2. An ability to connect to NEFSC oracle databases (VTR and the Live DMIS tables at APSD.t_ssb_trip_current@garfo_nefsc)
+
+
+# Data Overview
+
+##  Description of the data systems
+
+```{r Data Overview, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
+tabl <- "
+| Source  | Name           |
+|------------|:-----------------------------------------------|
+| DMIS_APSD_2   | DMIS is a Northeast Regional Office data record matching system. Primary data sources include Allocation Management System (AMS) Database, Vessel Trip Reports (VTRs), Dealer Reports, Vessel Monitoring System (VMS) Catch Reports, Observer Reports, Vessel Permit Database, and the MQRS database, which tracks limited access fishing eligibilities |
+|VTR (Vessel Trip Reports) | A vessel trip report (VTR) must be received by NMFS or postmarked within 15 days after the reporting month’s end.  For vessels that also hold a NE multispecies permit, VTRs must be submitted weekly by Tuesday of the week after the fishing trip ends.  Copies of VTRs must be retained on board the vessel for 1 year after the last entry on the log and otherwise retained for 3 years after the date of the last entry on the log.  If no fishing activity occurred during a reporting period (week or month), then a VTR must be submitted stating that no fishing trips were taken.  |
+|Vessel Monitoring System (VMS) | All vessels issued a Federal scallop permit are required to have an active VMS unit and must use their VMS unit to declare all vessel activity, including fishing trips and transiting.|
+|Cost data  | Werner et al predict estimate a model of trip costs. Predictions (in and out of sample) are used  |
+
+"
+cat(tabl) 
+```
+
+##  Description of the DMIS_APSD_2 data.
+```{r APSD_DMIS_2 overview, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
+tabl <- "
+| Column  | Description           |
+|------------|:-----------------------------------------------|
+|DOCID | VTR DOCUMENT table record identifier; Primary key, internally generated at scanning based on vessel id and date/time sailed. Each DOCID represents one trip; equivalent to TRIPID in VESLOG tables.|
+|Dates | VTR land date, AMS Land Date, Dealer Sold Date Trip date is broken down into fields Calendar_Year, Month_of_Year, Week_of_Year, and Day_of_Year|
+|DDLAT | Latitude in decimal degrees| 
+|DDLON  | Longitude in decimal degrees| 
+|PERMIT | Six-digit vessel fishing permit number assigned by the NE Regional Office permit system|
+|DOLLAR | This is the value of fish sold.An imputed price is used in cases where the value was not reported.|
+|POUNDS | POUNDS is live weight, (in the shell)|
+|LANDED |  LANDED can be meat weights or shell weights, but is usually meats|
+|TRIP_LENGTH | Trip length is in days; It is calculated from the elapsed time between the date-time sailed and date-time landed. This is a measure of days absent.|
+"
+cat(tabl) 
+```
+While not provided in APSD_DMIS_2, we are using the ACTIVITY_CODE from the live DMIS tables. We join using TRIP_ID, DOCID
+
+
+##  Description of the VTR data.
+```{r VTR overview, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
+tabl <- "
+| Column  | Description           |
+|------------|:-----------------------------------------------|
+|TRIPID|VESLOG Trip record identifier, which is generated internally and used for linking|
+|tripcatg | (only commercial categories are selected), recreational and RSA/EFP are not.| 
+|operator| Name of the captain|
+|opernum| Captains Identification number|
+|permit| Six-digit vessel fishing permit number assigned by the NE Regional Office permit system||
+|nsubtrip| Number of subtrips (see description of subtrips|
+|crew| number of crew, including captain|
+"
+cat(tabl) 
+```
+
+##  Description of the VMS data.
+We are currently not using the VMS data directly. 
+
+
+##  Description of the Cost  data.
+```{r Tripcost overview, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
+tabl <- "
+| Column  | Description           |
+|------------|:-----------------------------------------------|
+|Place|holder|
+|Place|holder|
+"
+cat(tabl) 
+```
+
+
+
+
+
+
+
 
 
 ## First time use
@@ -92,16 +176,7 @@ The APSD_DMIS_2 table must be supplemented with additional data.  This section q
 
 ## VTR Data
 
-Some Trip-level data in the VTR schema is needed.  We extract the 
-     
-1. TRIPID  - linking field 	
-1. tripcatg  - Indicates whether this is a commercial trip, for hire trip, or another kind of trip 	
-1. operator -   the name of the vessel operator
-1. opernum - the idnumber for the vessel operator
-1. permit -  the permit number of the vessel (vp_num) in the vps schema
-1. nsubtrip -  the number of subtrips corresponding to the trip
-1. crew 	- the number of crew 
-1. not_fished -  Indicator for whether this was a fishing trip or not 	
+Some Trip-level data in the VTR schema is needed. See table at the top.  We extract them here. 
 
 ```{r, echo=FALSE}
 
@@ -421,8 +496,6 @@ table(cost_join$YEAR)
 table(cost_join$GEARCODE)
 
 table(cost_join$STATE)
-
-
 
 
 ```
