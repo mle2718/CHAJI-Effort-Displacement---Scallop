@@ -57,7 +57,7 @@ tabl <- "
 "
 cat(tabl) 
 ```
-While not provided in APSD_DMIS_2, we are using the ACTIVITY_CODE from the live DMIS tables. We join using TRIP_ID, DOCID
+While not provided in APSD_DMIS_2, we are using the ACTIVITY_CODE from the live DMIS tables. We join using TRIP_ID, DOCID.  See [here](/external_documentation/vms_declaration_code_glossary_may_2018.pdf)
 
 
 ##  Description of the VTR data.
