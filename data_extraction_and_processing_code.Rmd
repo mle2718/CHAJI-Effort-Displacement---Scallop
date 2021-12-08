@@ -4,6 +4,24 @@ author: "Marina Chaji"
 date: "11/26/2021"
 output: html_document
 ---
+
+
+# Project setup
+Load packages. Install if necessary.
+
+```{r setup, include=TRUE, echo=FALSE, results=FALSE}
+
+PKG <- c("leaflet", "tidyverse", "sf", "ggplot2", "RODM", "ROracle", "dbplyr", "dplyr", "raster","rgdal","readxl")
+for (p in PKG) {
+  if(!require(p,character.only = TRUE)) {
+    install.packages(p)
+    require(p,character.only = TRUE)}
+}
+vintage_string<-Sys.Date()
+vintage_string<-gsub("-","_",vintage_string)
+
+```
+
 # Introduction
 
 The main idea of the model is that the fishermen/decision-makers choose from a number of alternatives, where the choice occasion is a fishing trip and selects the one that yields the highest expected utility level on any given choice occasion. By observing and modeling how decision-makers change their preferred site option in response to the changes in the levels of the site attributes, it is possible to determine how decision-makers tradeoff between the different fishing ground characteristics.
@@ -99,56 +117,18 @@ cat(tabl)
 
 
 
-## First time use
-Install necessary packages
-```{r setup, include=FALSE}
-
-install.packages("leaflet")
-install.packages("tidyverse")
-install.packages("sf")
-install.packages("ggplot2")
-install.packages("RODM")
-install.packages("ROracle")
-install.packages("dplyr")
-install.packages("dbplyr")
-install.packages("tidyverse")
-install.packages("raster")
-install.packages("rgdal")
-```
-
-# Project setup
-Load packages  
-
-```{r setup, include=TRUE}
-
-library("leaflet")
-library("tidyverse")
-library("sf")
-library("ggplot2")
-library("RODM")
-library("ROracle")
-library("dbplyr")
-library("dplyr")
-library("RODBC")
-library("raster")
-library("rgdal")
-library("readxl")
-
-```
-
-
 # Read in oracle passwords and set network directory
 This is a block of code where we set up the oracle passwords and make R aware of folders on the network.
 
-```{r oracle_connections, echo=FALSE}
+```{r oracle_connections, echo=FALSE, results=FALSE}
 source("R_credentials.R")
 
 #Comment one of these out, depending on whether you are running this code on a server or locally (with VPN) 
 net<-network_location_desktop
 net<-network_location_remote
-offshoreWind_directory<-file.path(net,"home5/dcorvi/OffshoreWind/offshoreWind4/data")
+offshoreWind_directory<-file.path(net,"home5", "dcorvi","OffshoreWind","offshoreWind4","data")
 
-cost_directory<-file.path(net,"work5/socialsci/Trip_Costs/2007-2020/")
+cost_directory<-file.path(net,"work5","socialsci","Trip_Costs","2007-2020")
 
 ```
 
@@ -158,9 +138,9 @@ cost_directory<-file.path(net,"work5/socialsci/Trip_Costs/2007-2020/")
 The frozen DMIS table from the offshoreWind project (APSD_DMIS_2) is the base dataset for the analysis.  The DMIS data are formed by combining many datasets, including VTR and Dealer.  In brief, the APSD_DMIS_2 dataset contains a mix of trip attributes (port, date),  sub-trip attributes (gear, location) , and catch outcomes (species, pounds, landed, dollar).  You can read more about DMIS [here](https://github.com/NEFSC/READ-SSB-Lee-metadata/blob/master/DMIS.md).
 
 
-```{r Data Set Loading, echo=FALSE}
+```{r Data Set Loading, echo=FALSE, results=FALSE}
 load(file.path(offshoreWind_directory, "APSD_DMIS_2.rda"))
-load("~/offshoreWind-master/data-raw/REVENUEFILE.Rdata")
+#load("~/offshoreWind-master/data-raw/REVENUEFILE.Rdata")
 ```
 
 
@@ -173,7 +153,7 @@ The APSD_DMIS_2 table must be supplemented with additional data.  This section q
 
 Some Trip-level data in the VTR schema is needed. See table at the top.  We extract them here. 
 
-```{r, echo=FALSE}
+```{r VTR_Query, echo=FALSE, results=FALSE}
 
 
 
@@ -209,7 +189,7 @@ ODBC.CONNECTION <- RODBC::odbcConnect(dsn=oracle_server, uid=oracle_username, pw
 
 #Loading Data from Oracle
 ##Scallop LA IFQ Linking variables 
-```{r}
+```{r DMIS_Query, echo=FALSE}
  
 oracle_server = "sole"
 ODBC.CONNECTION <- RODBC::odbcConnect(dsn=oracle_server, uid=oracle_username, pwd=oracle_password, believeNRows=FALSE)
@@ -232,7 +212,7 @@ We also extract the activity code from DMIS.  This will describe the type of tri
 ## 2. Seperate Dates & Times and Delete Old Dates Column 
 ## 3. Delete Columns that are not need 
 ### NESPP3 & SOURCE Values are all the same so this is deleted 
-```{r, echo=FALSE}
+```{r datacleaning_step1, echo=FALSE}
 
 Scallops <- APSD_DMIS_2 %>% filter (SPPNAME == "SCALLOPS/BUSHEL")
 
@@ -262,7 +242,7 @@ Scallops$SOURCE<- NULL
 2. Join the output of (1) with Activity Codes 
 3. Verify that we get what we think we should get.
 
-```{r, echo=FALSE}
+```{r data_merging1, echo=FALSE}
 
 ##1. Merge Scallops & VTR Data Sets (RESULT.COMPILED). We keep all columns from both the APSD_DMIS_2 and RESULT.COMPILED datasets. by VTR.TRIPID=APSD_DMIS_2.DOCID
 
@@ -326,7 +306,7 @@ Since our goal is to estimate a choice model at the trip level, we need to const
 
 
 
-```{r}
+```{r construct_trip_aggregates}
 ### 1. Aggregate DOLLAR, POUNDS, LANDED
 Agg_DOL_POUN_LAND <- VTR_DMIS_AC %>%
   group_by(TRIPID) %>%
@@ -360,12 +340,14 @@ sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))
 # Trips reported on land will be dropped from observations 
 ## Note: Removing observations on land / not in the water requires the use of the offshorewind package. Unfortunately, you cannot run this on RStudio the current server(s). Thus, I will be saving the VTR_DMIS_AC_Agg data set as a csv, using RStudio on my desktop (code included below), and uploading it back on to the server. 
 
-```{r}
+```{r save_data}
 # 1. Saving most recent data set (VTR_DMIS_AC_Agg) as a rds
-saveRDS(VTR_DMIS_AC_Agg, file = "~/November 2021/VTR_DMIS_AC_Agg.rds")
+saveRDS(VTR_DMIS_AC_Agg, file = paste0("VTR_DMIS_AC_Agg",vintage_string,".rds"))
 ```
+
+
 ##DO NOT RUN THIS CHUNK (It will not work)
-```{r}
+```{r desktop_spatial}
 # 2. Code used on desktop is below 
 # Load libraries
 PKG <- c("sp", "rgdal", "raster", "sf", "dplyr", "tidyr", "stringr", "offshorewind")
@@ -378,7 +360,7 @@ for (p in PKG) {
 
 #################################################################################################
 # change these variables to read in the current data set and what the network path to the shared drive is on your laptop
-coordinate_table_input <- readRDS("C:/Users/marina.chaji/Downloads/VTR_DMIS_AC_Agg.Rds")
+coordinate_table_input <- readRDS(paste0("C:/Users/marina.chaji/Downloads/VTR_DMIS_AC_Agg",vintage_string,".Rds"))
 lat_column = "DDLAT"
 lon_column = "DDLON"
 shapefile_path = "//net.nefsc.noaa.gov/work5/socialsci/Geret_Rasters/Data/offshore_wind_package_data/shapefiles/East_Cst_crop_2020_extended"
@@ -417,7 +399,7 @@ coordinate_table <- coordinate_table %>%
 ## 1. Data is imported from RStudio on Desktop
 ## 2. Data is imported from ArcGISPro
 ### A spatial join is done with Water data, Ten Minute Squares, & Lease Areas shape file. Points are assigned to Ten Minute Squares and Lease areas on a one to one joint point basis for observations within a square. This can be adjusted later by adding buffers.  
-```{r}
+```{r reading_spatial_join}
 library(readr)
 water_ac <- read_csv("water_ac.csv")
 
@@ -457,7 +439,7 @@ FY2015-2019: 8
 
 
 ## This might be temporary; still looking into different integration methods with activity codes
-```{r}
+```{r filter_LA1}
 LA_Estimate <- X11_29_21_Spatial_Join %>% filter(Agg_LANDED >= 850 & CREW <= 8)
 
 ```
@@ -465,7 +447,7 @@ LA_Estimate <- X11_29_21_Spatial_Join %>% filter(Agg_LANDED >= 850 & CREW <= 8)
 #Add in cost data 
 
 These data should reference the  "Estimation of Commercial Fishing Trip Costs Using Sea Sampling Data" paper by Samantha Werner & Geret DePiper.  We will likely use the Winsorized trip cost estimates.
-```{r}
+```{r merge_cost_data}
 #Import Data
 X2007_2012 <- read_excel(file.path(cost_directory,"2007_2012.xlsx"))
 X2013_2020 <- read_excel(file.path(cost_directory,"2013_2020.xlsx"))
