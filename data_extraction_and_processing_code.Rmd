@@ -4,6 +4,22 @@ author: "Marina Chaji"
 date: "11/26/2021"
 output: html_document
 ---
+
+
+# Project setup
+Load packages. Install if necessary.
+
+```{r setup, include=TRUE, echo=FALSE}
+
+PKG <- c("leaflet", "tidyverse", "sf", "ggplot2", "RODM", "ROracle", "dbplyr", "dplyr", "raster","rgdal","readxl")
+for (p in PKG) {
+  if(!require(p,character.only = TRUE)) {
+    install.packages(p)
+    require(p,character.only = TRUE)}
+}
+
+```
+
 # Introduction
 
 The main idea of the model is that the fishermen/decision-makers choose from a number of alternatives, where the choice occasion is a fishing trip and selects the one that yields the highest expected utility level on any given choice occasion. By observing and modeling how decision-makers change their preferred site option in response to the changes in the levels of the site attributes, it is possible to determine how decision-makers tradeoff between the different fishing ground characteristics.
@@ -97,43 +113,6 @@ cat(tabl)
 
 
 
-
-
-## First time use
-Install necessary packages
-```{r install, include=FALSE}
-
-install.packages("leaflet")
-install.packages("tidyverse")
-install.packages("sf")
-install.packages("ggplot2")
-install.packages("RODM")
-install.packages("ROracle")
-install.packages("dplyr")
-install.packages("dbplyr")
-install.packages("tidyverse")
-install.packages("raster")
-install.packages("rgdal")
-```
-
-# Project setup
-Load packages  
-
-```{r setup, include=TRUE, echo=FALSE}
-
-library("leaflet")
-library("tidyverse")
-library("sf")
-library("ggplot2")
-library("RODM")
-library("ROracle")
-library("dbplyr")
-library("dplyr")
-library("raster")
-library("rgdal")
-library("readxl")
-
-```
 
 
 # Read in oracle passwords and set network directory
