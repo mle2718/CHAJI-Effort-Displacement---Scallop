@@ -101,7 +101,7 @@ cat(tabl)
 
 ## First time use
 Install necessary packages
-```{r setup, include=FALSE}
+```{r install, include=FALSE}
 
 install.packages("leaflet")
 install.packages("tidyverse")
@@ -119,7 +119,7 @@ install.packages("rgdal")
 # Project setup
 Load packages  
 
-```{r setup, include=TRUE}
+```{r setup, include=TRUE, echo=FALSE}
 
 library("leaflet")
 library("tidyverse")
@@ -129,7 +129,6 @@ library("RODM")
 library("ROracle")
 library("dbplyr")
 library("dplyr")
-library("RODBC")
 library("raster")
 library("rgdal")
 library("readxl")
