@@ -17,6 +17,8 @@ for (p in PKG) {
     install.packages(p)
     require(p,character.only = TRUE)}
 }
+vintage_string<-Sys.Date()
+vintage_string<-gsub("-","_",vintage_string)
 
 ```
 
@@ -340,7 +342,7 @@ sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))
 
 ```{r save_data}
 # 1. Saving most recent data set (VTR_DMIS_AC_Agg) as a rds
-saveRDS(VTR_DMIS_AC_Agg, file = "VTR_DMIS_AC_Agg.rds")
+saveRDS(VTR_DMIS_AC_Agg, file = paste0("VTR_DMIS_AC_Agg",vintage_string,".rds"))
 ```
 ##DO NOT RUN THIS CHUNK (It will not work)
 ```{r desktop_spatial}
@@ -356,7 +358,7 @@ for (p in PKG) {
 
 #################################################################################################
 # change these variables to read in the current data set and what the network path to the shared drive is on your laptop
-coordinate_table_input <- readRDS("C:/Users/marina.chaji/Downloads/VTR_DMIS_AC_Agg.Rds")
+coordinate_table_input <- readRDS(paste0("C:/Users/marina.chaji/Downloads/VTR_DMIS_AC_Agg",vintage_string,".Rds"))
 lat_column = "DDLAT"
 lon_column = "DDLON"
 shapefile_path = "//net.nefsc.noaa.gov/work5/socialsci/Geret_Rasters/Data/offshore_wind_package_data/shapefiles/East_Cst_crop_2020_extended"
