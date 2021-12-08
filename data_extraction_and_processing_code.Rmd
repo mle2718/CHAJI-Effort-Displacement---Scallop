@@ -124,9 +124,9 @@ source("R_credentials.R")
 #Comment one of these out, depending on whether you are running this code on a server or locally (with VPN) 
 net<-network_location_desktop
 net<-network_location_remote
-offshoreWind_directory<-file.path(net,"home5/dcorvi/OffshoreWind/offshoreWind4/data")
+offshoreWind_directory<-file.path(net,"home5", "dcorvi","OffshoreWind","offshoreWind4","data")
 
-cost_directory<-file.path(net,"work5/socialsci/Trip_Costs/2007-2020/")
+cost_directory<-file.path(net,"work5","socialsci","Trip_Costs","2007-2020")
 
 ```
 
