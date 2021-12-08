@@ -9,7 +9,7 @@ output: html_document
 # Project setup
 Load packages. Install if necessary.
 
-```{r setup, include=TRUE, echo=FALSE}
+```{r setup, include=TRUE, echo=FALSE, results=FALSE}
 
 PKG <- c("leaflet", "tidyverse", "sf", "ggplot2", "RODM", "ROracle", "dbplyr", "dplyr", "raster","rgdal","readxl")
 for (p in PKG) {
@@ -120,7 +120,7 @@ cat(tabl)
 # Read in oracle passwords and set network directory
 This is a block of code where we set up the oracle passwords and make R aware of folders on the network.
 
-```{r oracle_connections, echo=FALSE}
+```{r oracle_connections, echo=FALSE, results=FALSE}
 source("R_credentials.R")
 
 #Comment one of these out, depending on whether you are running this code on a server or locally (with VPN) 
@@ -138,7 +138,7 @@ cost_directory<-file.path(net,"work5","socialsci","Trip_Costs","2007-2020")
 The frozen DMIS table from the offshoreWind project (APSD_DMIS_2) is the base dataset for the analysis.  The DMIS data are formed by combining many datasets, including VTR and Dealer.  In brief, the APSD_DMIS_2 dataset contains a mix of trip attributes (port, date),  sub-trip attributes (gear, location) , and catch outcomes (species, pounds, landed, dollar).  You can read more about DMIS [here](https://github.com/NEFSC/READ-SSB-Lee-metadata/blob/master/DMIS.md).
 
 
-```{r Data Set Loading, echo=FALSE}
+```{r Data Set Loading, echo=FALSE, results=FALSE}
 load(file.path(offshoreWind_directory, "APSD_DMIS_2.rda"))
 #load("~/offshoreWind-master/data-raw/REVENUEFILE.Rdata")
 ```
@@ -153,7 +153,7 @@ The APSD_DMIS_2 table must be supplemented with additional data.  This section q
 
 Some Trip-level data in the VTR schema is needed. See table at the top.  We extract them here. 
 
-```{r VTR_Query, echo=FALSE}
+```{r VTR_Query, echo=FALSE, results=FALSE}
 
 
 
@@ -344,6 +344,8 @@ sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))
 # 1. Saving most recent data set (VTR_DMIS_AC_Agg) as a rds
 saveRDS(VTR_DMIS_AC_Agg, file = paste0("VTR_DMIS_AC_Agg",vintage_string,".rds"))
 ```
+
+
 ##DO NOT RUN THIS CHUNK (It will not work)
 ```{r desktop_spatial}
 # 2. Code used on desktop is below 
