@@ -347,7 +347,6 @@ saveRDS(VTR_DMIS_AC_Agg, file = paste0("VTR_DMIS_AC_Agg",vintage_string,".rds"))
 ```
 
 
-## DO NOT RUN THIS CHUNK (It will not work)
 ```{r desktop_spatial}
 
 #################################################################################################
@@ -410,6 +409,9 @@ table(coordinate_table$Area)
 ## 1. Data is imported from RStudio on Desktop
 ## 2. Data is imported from ArcGISPro
 ### A spatial join is done with Water data, Ten Minute Squares, & Lease Areas shape file. Points are assigned to Ten Minute Squares and Lease areas on a one to one joint point basis for observations within a square. This can be adjusted later by adding buffers.  
+
+## DO NOT RUN THIS CHUNK (It will not work)
+
 ```{r reading_spatial_join}
 library(readr)
 water_ac <- read_csv("water_ac.csv")
