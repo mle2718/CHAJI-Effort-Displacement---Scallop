@@ -313,7 +313,7 @@ Agg_DOL_POUN_LAND <- VTR_DMIS_AC %>%
 
 #### Testing to make sure there are no duplicates in TRIPID groups; this should equal 0
 sum(duplicated(Agg_DOL_POUN_LAND$TRIPID))
-
+stopifnot(sum(duplicated(Agg_DOL_POUN_LAND$TRIPID))==0)
 
 ###  2. Add back into original data set 
 #### all = FALSE is used to keep only rows that match from the data frames
@@ -329,7 +329,7 @@ VTR_DMIS_AC_Agg <- VTR_DMIS_AC_Agg %>% group_by(TRIPID) %>% filter(DOLLAR == max
 ## Test out 
 sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))
 
-
+stopifnot(sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))==0)
 
 
 ```
