@@ -5,3 +5,4 @@ R_credentials.R
 *.Rds
 *.Rproj
 *.Rhistory
+*.csv
