@@ -178,7 +178,6 @@ for(i in START.YEAR:END.YEAR) {
 ##Subtrip Data
 ## Note: This data is pulled in order to fill in a large number of blanks in reporting 
 
-ODBC.CONNECTION <- RODBC::odbcConnect(dsn=oracle_server, uid=oracle_username, pwd=oracle_password, believeNRows=FALSE)
   CURRENT.QUERY = paste ("SELECT VTR.veslog",i,"t.TRIPID,tripcatg, operator, opernum, permit, nsubtrip, crew,not_fished  
                 FROM VTR.veslog",i,"t", sep="")
   VTR.veslog2019t = sqlQuery(ODBC.CONNECTION, CURRENT.QUERY) 
@@ -192,7 +191,6 @@ ODBC.CONNECTION <- RODBC::odbcConnect(dsn=oracle_server, uid=oracle_username, pw
 ```{r DMIS_Query, echo=FALSE}
  
 oracle_server = "sole"
-ODBC.CONNECTION <- RODBC::odbcConnect(dsn=oracle_server, uid=oracle_username, pwd=oracle_password, believeNRows=FALSE)
 
 CURRENT.QUERY = paste ("SELECT TRIP_ID, DOCID, ACTIVITY_CODE FROM APSD.t_ssb_trip_current@garfo_nefsc")
 Scallop_Linkingorg = sqlQuery(ODBC.CONNECTION, CURRENT.QUERY)
