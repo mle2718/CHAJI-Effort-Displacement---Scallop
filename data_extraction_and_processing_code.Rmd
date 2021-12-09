@@ -293,7 +293,6 @@ group_by("YEAR") %>% filter(is.na(OPERNUM))
 Subtrips are generated when a vessel switches gear or areas. Subtrips have identical TRIPID/DOCID.  A trip may have many (8+) subtrips, but most have 1-2.
 
 ```{r count_subtrips}
-#Not tested yet. If it doesn't work, it's because of capitals.
 table(VTR_DMIS_AC$NSUBTRIP)
 ```
 Since our goal is to estimate a choice model at the trip level, we need to construct trip level variables.  
@@ -360,7 +359,7 @@ for (p in PKG) {
 
 #################################################################################################
 # change these variables to read in the current data set and what the network path to the shared drive is on your laptop
-coordinate_table_input <- readRDS(paste0("C:/Users/marina.chaji/Downloads/VTR_DMIS_AC_Agg",vintage_string,".Rds"))
+coordinate_table_input <- readRDS(paste0("C:/Users/marina.chaji/Downloads/VTR_DMIS_AC_Agg",vintage_string,".rds"))
 lat_column = "DDLAT"
 lon_column = "DDLON"
 shapefile_path = "//net.nefsc.noaa.gov/work5/socialsci/Geret_Rasters/Data/offshore_wind_package_data/shapefiles/East_Cst_crop_2020_extended"
