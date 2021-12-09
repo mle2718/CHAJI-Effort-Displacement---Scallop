@@ -293,7 +293,6 @@ group_by("YEAR") %>% filter(is.na(OPERNUM))
 Subtrips are generated when a vessel switches gear or areas. Subtrips have identical TRIPID/DOCID.  A trip may have many (8+) subtrips, but most have 1-2.
 
 ```{r count_subtrips}
-#Not tested yet. If it doesn't work, it's because of capitals.
 table(VTR_DMIS_AC$NSUBTRIP)
 ```
 Since our goal is to estimate a choice model at the trip level, we need to construct trip level variables.  
