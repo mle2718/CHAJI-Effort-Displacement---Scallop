@@ -11,7 +11,7 @@ Load packages. Install if necessary.
 
 ```{r setup, include=TRUE, echo=FALSE, results=FALSE}
 
-PKG <- c("leaflet", "tidyverse", "sf", "ggplot2", "RODM", "ROracle", "dbplyr", "dplyr", "raster","rgdal","readxl")
+PKG <- c("sp","leaflet", "tidyverse", "sf", "ggplot2", "RODM", "ROracle", "dbplyr", "dplyr", "raster","rgdal","readxl")
 for (p in PKG) {
   if(!require(p,character.only = TRUE)) {
     install.packages(p)
@@ -129,6 +129,8 @@ net<-network_location_remote
 offshoreWind_directory<-file.path(net,"home5", "dcorvi","OffshoreWind","offshoreWind4","data")
 
 cost_directory<-file.path(net,"work5","socialsci","Trip_Costs","2007-2020")
+shapefile_path = file.path(net,"work5","socialsci","Geret_Rasters","Data","offshore_wind_package_data","shapefiles",
+"East_Cst_crop_2020_extended")
 
 ```
 
@@ -345,41 +347,48 @@ saveRDS(VTR_DMIS_AC_Agg, file = paste0("VTR_DMIS_AC_Agg",vintage_string,".rds"))
 ```
 
 
-##DO NOT RUN THIS CHUNK (It will not work)
+## DO NOT RUN THIS CHUNK (It will not work)
 ```{r desktop_spatial}
-# 2. Code used on desktop is below 
-# Load libraries
-PKG <- c("sp", "rgdal", "raster", "sf", "dplyr", "tidyr", "stringr", "offshorewind")
-for (p in PKG) {
-  if(!require(p,character.only = TRUE)) {
-    install.packages(p)
-    require(p,character.only = TRUE)}
-}
-
 
 #################################################################################################
-# change these variables to read in the current data set and what the network path to the shared drive is on your laptop
-coordinate_table_input <- readRDS(paste0("C:/Users/marina.chaji/Downloads/VTR_DMIS_AC_Agg",vintage_string,".rds"))
+coordinate_table_input <- VTR_DMIS_AC_Agg
 lat_column = "DDLAT"
 lon_column = "DDLON"
-shapefile_path = "//net.nefsc.noaa.gov/work5/socialsci/Geret_Rasters/Data/offshore_wind_package_data/shapefiles/East_Cst_crop_2020_extended"
 #################################################################################################
-
 crs = CRS("+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0")
-shapefile_area <- SpatialPolygonsDataFrame(aggregate(shapefile_path_to_spatialpolygons(shapefile_path, projection = crs)), data = data.frame("NAME" = "Land"))
+
+
+# Finagle the input data (the LONs must be converted to negative, drop NAs.  )
 coordinate_table <- as_tibble(coordinate_table_input %>%
                                 rename("LAT" = .data[[lat_column]], "LON" = .data[[lon_column]]) %>%
                                 drop_na(LON, LAT) %>%
                                 mutate(LON = if_else(LON>1, LON*-1, LON )) %>%
                                 relocate(LON, LAT)) # drop LAT LON NAs, correct LON, change column order - check if any longitudes are positive and switch to negative
 
-xy <- coordinate_table[,c(1,2)]
+#Pull out just the LON and LAT
+
+xy <- coordinate_table[,c("LON","LAT")]
+# convert data to a SpatialPointsDataFrame and do an spTransform
 coordinate_table <- SpatialPointsDataFrame(coords = xy, data = coordinate_table, proj4string = crs)
+# Next line probably unnecessary, because we are using data with 1 coordinate system and transforming it to the same coordinate system.
 coordinate_table <- spTransform(coordinate_table, CRSobj = crs)
+
+
+
+# Read in the land/water shapefile and coerce it to a SpatialPolygonsDataFrame, apply the crs projection, and make a column called "NAME" with the value "LAND"
+shapefile_area = as(st_read(file.path(shapefile_path,"East_Cst_crop_2020_extended.shp")), "Spatial")
+shapefile_area <- spTransform(shapefile_area, CRSobj = crs)
+shapefile_area$NAME="LAND"
+
+
+
+
 
 vtridx <- over(coordinate_table, shapefile_area)
 
-colnames(vtridx)[1] <- "NAME"
+#Print a table of the number of observations on land
+table(vtridx$NAME)
+
 
 coordinate_table$Area <- vtridx$NAME
 coordinate_table <- coordinate_table@data
@@ -392,8 +401,11 @@ coordinate_table <- coordinate_table %>%
 
 # finished table is coordinate_table
 
-# write.csv(coordinate_table, file="coordinate_table.csv")
+table(coordinate_table$Area)
+
+ write.csv(coordinate_table, file=paste0("coordinate_table",vintage_string,".csv"))
 ```
+
 #Import data set only including water observations
 ## 1. Data is imported from RStudio on Desktop
 ## 2. Data is imported from ArcGISPro
