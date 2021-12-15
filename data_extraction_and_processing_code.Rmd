@@ -269,9 +269,9 @@ VTR_DMIS_merge$NOT_FISHED <- NULL
 
 ## 2. 
 ###Join VTR & DMIS Data with Activity Codes 
-# Delete duplicate rows; These are rows that share the same TRIPID, DOLLAR, & TRIP_LENGTH   
+# Delete duplicate rows; These are rows that share the same TRIPID, DOLLAR,LANDED, & TRIP_LENGTH   
 VTR_DMIS_AC <- merge(VTR_DMIS_merge,Scallop_Linkingorg, by.x = "TRIPID", by.y = "DOCID", all.x = TRUE, all.y = FALSE)
-VTR_DMIS_AC <- VTR_DMIS_AC %>% distinct(TRIPID,DOLLAR,TRIP_LENGTH, .keep_all = TRUE)  
+VTR_DMIS_AC <- VTR_DMIS_AC %>% distinct(TRIPID,DOLLAR,TRIP_LENGTH,LANDED, .keep_all = TRUE)  
 
 ## 3. 
 ### Testing Reported NAs in new data set (that they are relatively even across all years)
