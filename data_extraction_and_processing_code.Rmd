@@ -121,7 +121,7 @@ cat(tabl)
 This is a block of code where we set up the oracle passwords and make R aware of folders on the network.
 
 ```{r oracle_connections, echo=FALSE, results=FALSE}
-source("R_credentials.R")
+source("/net/home4/mchaji/credentials.R")
 
 #Comment one of these out, depending on whether you are running this code on a server or locally (with VPN) 
 net<-network_location_desktop
@@ -269,7 +269,9 @@ VTR_DMIS_merge$NOT_FISHED <- NULL
 
 ## 2. 
 ###Join VTR & DMIS Data with Activity Codes 
-# Delete duplicate rows; These are rows that share the same TRIPID, DOLLAR,LANDED, & TRIP_LENGTH   
+
+# Delete duplicate rows; These are rows that share the same TRIPID, DOLLAR,LANDED, & TRIP_LENGTH 
+## Note: VTRs are self-reported and there is a potential for records to be submitted to regional office multiple times; on rare occasions this can result in duplicate records being logged.
 VTR_DMIS_AC <- merge(VTR_DMIS_merge,Scallop_Linkingorg, by.x = "TRIPID", by.y = "DOCID", all.x = TRUE, all.y = FALSE)
 VTR_DMIS_AC <- VTR_DMIS_AC %>% distinct(TRIPID,DOLLAR,TRIP_LENGTH,LANDED, .keep_all = TRUE)  
 
@@ -335,19 +337,11 @@ stopifnot(sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))==0)
 
 
 # Trips reported on land will be dropped from observations 
-## Note: Removing observations on land / not in the water requires the use of the offshorewind package. Unfortunately, you cannot run this on RStudio the current server(s). Thus, I will be saving the VTR_DMIS_AC_Agg data set as a csv, using RStudio on my desktop (code included below), and uploading it back on to the server. 
 
-```{r save_data}
-# 1. Saving most recent data set (VTR_DMIS_AC_Agg) as a rds
-saveRDS(VTR_DMIS_AC_Agg, file = paste0("VTR_DMIS_AC_Agg",vintage_string,".rds"))
-```
-
-
-##DO NOT RUN THIS CHUNK (It will not work)
 ```{r desktop_spatial}
-# 2. Code used on desktop is below 
+
 # Load libraries
-PKG <- c("sp", "rgdal", "raster", "sf", "dplyr", "tidyr", "stringr", "offshorewind")
+PKG <- c("sp", "rgdal", "raster", "sf", "dplyr", "tidyr", "stringr", "data.table")
 for (p in PKG) {
   if(!require(p,character.only = TRUE)) {
     install.packages(p)
@@ -356,11 +350,35 @@ for (p in PKG) {
 
 
 #################################################################################################
-# change these variables to read in the current data set and what the network path to the shared drive is on your laptop
-coordinate_table_input <- readRDS(paste0("C:/Users/marina.chaji/Downloads/VTR_DMIS_AC_Agg",vintage_string,".rds"))
+# change these variables to read in the veslogDMISmerge and what the network path to the shared drive is on your laptop
+coordinate_table_input <-VTR_DMIS_AC_Agg
 lat_column = "DDLAT"
 lon_column = "DDLON"
 shapefile_path = "//net.nefsc.noaa.gov/work5/socialsci/Geret_Rasters/Data/offshore_wind_package_data/shapefiles/East_Cst_crop_2020_extended"
+#################################################################################################
+shapefile_path_to_spatialpolygons <- function(shapefile_path,
+                                              projection = CRS("+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0")) {
+
+  # shapefile_path = "C:/Users/dennis.corvi/Documents/R/Projects/OffshoreWindDev/offshoreWind/areas_minus_SF"
+  # projection = CRS("+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0")
+  layer_name = unique(gsub(pattern="(.+)(.shp$)","\\1", ignore.case = TRUE , list.files(path=shapefile_path, pattern = "(.+)(.shp$)", ignore.case =TRUE, recursive=F, full.names=F)))
+  if (length(layer_name)==0) {
+    stop("Shapefile path does not contain a shapefile")
+  }
+  if (length(layer_name) > 1) {
+    file_list <- list.files(shapefile_path, pattern = "*shp$", full.names = TRUE)
+    shapefile_list <- lapply(file_list, sf::read_sf)
+    all_shapes <- sf::st_as_sf(data.table::rbindlist(shapefile_list))
+    all_shapes <- all_shapes[,(names(all_shapes) %in% c("Name"))]
+    all_shapes <- sf::as_Spatial(all_shapes, cast = TRUE, IDs = paste0("ID", seq_along(from)))
+    all_shapes@data$NAME <- all_shapes@data$Name
+    all_shapes@data$Name <- NULL
+  } else { # if only one shape
+    all_shapes <- rgdal::readOGR(dsn=shapefile_path, layer=layer_name, verbose=F)
+  }
+  all_shapes <- spTransform(all_shapes, CRS=projection)
+  return(all_shapes)
+}
 #################################################################################################
 
 crs = CRS("+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0")
