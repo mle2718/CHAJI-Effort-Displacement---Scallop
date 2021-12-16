@@ -354,7 +354,7 @@ for (p in PKG) {
 coordinate_table_input <-VTR_DMIS_AC_Agg
 lat_column = "DDLAT"
 lon_column = "DDLON"
-shapefile_path = "//net.nefsc.noaa.gov/work5/socialsci/Geret_Rasters/Data/offshore_wind_package_data/shapefiles/East_Cst_crop_2020_extended"
+shapefile_path = "~/East_Cst_crop_2020_extended"
 #################################################################################################
 shapefile_path_to_spatialpolygons <- function(shapefile_path,
                                               projection = CRS("+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0")) {
