@@ -295,6 +295,7 @@ Subtrips are generated when a vessel switches gear or areas. Subtrips have ident
 ```{r count_subtrips}
 table(VTR_DMIS_AC$NSUBTRIP)
 ```
+
 Since our goal is to estimate a choice model at the trip level, we need to construct trip level variables.  
  We retained the subtrip attributes  (GEARCODE, DDLAT, DDLON) corresponding to the subtrip with the highest DOLLAR.  We constructed trip-level values for revenue, pounds, and landed (DOLLAR, POUNDS, LANDED).  The trip level variables are prefixed with "Agg_". 
 
@@ -302,37 +303,6 @@ Since our goal is to estimate a choice model at the trip level, we need to const
 ###  2. Add back into orginial data set 
 ###  3. Check / Test Maximum DOLLAR values by grouping by TRIPID
 ###  4. Drop duplicate TRIPIDs by keeping maximum DOLLAR values 
-
-
-
-```{r construct_trip_aggregates}
-### 1. Aggregate DOLLAR, POUNDS, LANDED
-Agg_DOL_POUN_LAND <- VTR_DMIS_AC %>%
-  group_by(TRIPID) %>%
- summarise(Agg_DOLLAR = sum(DOLLAR), Agg_POUNDS = sum(POUNDS), Agg_LANDED = sum(LANDED))
-
-#### Testing to make sure there are no duplicates in TRIPID groups; this should equal 0
-sum(duplicated(Agg_DOL_POUN_LAND$TRIPID))
-stopifnot(sum(duplicated(Agg_DOL_POUN_LAND$TRIPID))==0)
-
-###  2. Add back into original data set 
-#### all = FALSE is used to keep only rows that match from the data frames
-VTR_DMIS_AC_Agg <- merge(VTR_DMIS_AC,Agg_DOL_POUN_LAND, by.x = "TRIPID", by.y = "TRIPID", all.x = TRUE, all.y = FALSE)
-
-
-
-
-### 3.Parse out Maximum Dollar amounts in order to drop lesser subtrips
-VTR_DMIS_AC_Agg <- VTR_DMIS_AC_Agg %>% group_by(TRIPID) %>% filter(DOLLAR == max(DOLLAR))
-### Another way to check this is by running the following code: VTR_DMIS_AC_Agg %>% group_by(TRIPID) %>% arrange(desc(DOLLAR)) %>% slice(1)
-
-## Test out 
-sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))
-
-stopifnot(sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))==0)
-
-
-```
 
 
 
@@ -351,7 +321,7 @@ for (p in PKG) {
 
 #################################################################################################
 # change these variables to read in the veslogDMISmerge and what the network path to the shared drive is on your laptop
-coordinate_table_input <-VTR_DMIS_AC_Agg
+coordinate_table_input <-VTR_DMIS_AC
 lat_column = "DDLAT"
 lon_column = "DDLON"
 shapefile_path = "~/East_Cst_crop_2020_extended"
@@ -410,6 +380,41 @@ coordinate_table <- coordinate_table %>%
 
 # write.csv(coordinate_table, file="coordinate_table.csv")
 ```
+
+```{r construct_trip_aggregates}
+### 1. Aggregate DOLLAR, POUNDS, LANDED
+Agg_DOL_POUN_LAND <- VTR_DMIS_AC %>%
+  group_by(TRIPID) %>%
+ summarise(Agg_DOLLAR = sum(DOLLAR), Agg_POUNDS = sum(POUNDS), Agg_LANDED = sum(LANDED))
+
+#### Testing to make sure there are no duplicates in TRIPID groups; this should equal 0
+sum(duplicated(Agg_DOL_POUN_LAND$TRIPID))
+stopifnot(sum(duplicated(Agg_DOL_POUN_LAND$TRIPID))==0)
+
+###  2. Add back into original data set 
+#### all = FALSE is used to keep only rows that match from the data frames
+VTR_DMIS_AC_Agg <- merge(VTR_DMIS_AC,Agg_DOL_POUN_LAND, by.x = "TRIPID", by.y = "TRIPID", all.x = TRUE, all.y = FALSE)
+
+
+
+
+### 3.Parse out Maximum Dollar amounts in order to drop lesser subtrips
+VTR_DMIS_AC_Agg <- VTR_DMIS_AC_Agg %>% group_by(TRIPID) %>% filter(DOLLAR == max(DOLLAR))
+### Another way to check this is by running the following code: VTR_DMIS_AC_Agg %>% group_by(TRIPID) %>% arrange(desc(DOLLAR)) %>% slice(1)
+
+## Test out 
+sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))
+
+stopifnot(sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))==0)
+
+
+```
+
+
+
+
+
+
 #Import data set only including water observations
 ## 1. Data is imported from RStudio on Desktop
 ## 2. Data is imported from ArcGISPro
