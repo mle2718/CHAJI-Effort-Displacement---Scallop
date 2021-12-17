@@ -415,11 +415,8 @@ coordinate_table <- coordinate_table %>%
 ## 2. Data is imported from ArcGISPro
 ### A spatial join is done with Water data, Ten Minute Squares, & Lease Areas shape file. Points are assigned to Ten Minute Squares and Lease areas on a one to one joint point basis for observations within a square. This can be adjusted later by adding buffers.  
 ```{r reading_spatial_join}
-library(readr)
-water_ac <- read_csv("water_ac.csv")
 
 ## Delete unnecessary columns 
-water_ac$...1 <- NULL
 water_ac$Area <- NULL
 
 library(readr)
