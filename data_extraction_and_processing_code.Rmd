@@ -390,7 +390,6 @@ write.csv(coordinate_table, file="~/December 2021/VTR_DMIS_AC_postwater_1217.csv
 
 ```
 
-<<<<<<< HEAD
 ```{r construct_trip_aggregates}
 ### 1. Aggregate DOLLAR, POUNDS, LANDED
 Agg_DOL_POUN_LAND <- VTR_DMIS_AC %>%
@@ -425,8 +424,6 @@ stopifnot(sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))==0)
 
 
 
-=======
->>>>>>> b4b4fc618ea0bddcdbd384761604ab62c259ff94
 #Import data set only including water observations
 
 ## 1. Data is imported from RStudio on Desktop
