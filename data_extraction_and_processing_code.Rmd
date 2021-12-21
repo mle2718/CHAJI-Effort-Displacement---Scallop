@@ -332,7 +332,7 @@ for (p in PKG) {
 coordinate_table_input <-VTR_DMIS_AC
 lat_column = "DDLAT"
 lon_column = "DDLON"
-shapefile_path = "~/East_Cst_crop_2020_extended"
+shapefile_path = "East_Cst_crop_2020_extended"
 #################################################################################################
 shapefile_path_to_spatialpolygons <- function(shapefile_path,
                                               projection = CRS("+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0")) {
@@ -390,6 +390,7 @@ write.csv(coordinate_table, file="~/December 2021/VTR_DMIS_AC_postwater_1217.csv
 
 ```
 
+<<<<<<< HEAD
 ```{r construct_trip_aggregates}
 ### 1. Aggregate DOLLAR, POUNDS, LANDED
 Agg_DOL_POUN_LAND <- VTR_DMIS_AC %>%
@@ -424,7 +425,10 @@ stopifnot(sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))==0)
 
 
 
+=======
+>>>>>>> b4b4fc618ea0bddcdbd384761604ab62c259ff94
 #Import data set only including water observations
+
 ## 1. Data is imported from RStudio on Desktop
 ## 2. Data is imported from ArcGISPro
 ### A spatial join is done with Water data, Ten Minute Squares, & Lease Areas shape file. Points are assigned to Ten Minute Squares and Lease areas on a one to one joint point basis for observations within a square. This can be adjusted later by adding buffers.  
