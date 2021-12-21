@@ -276,6 +276,13 @@ VTR_DMIS_merge$NOT_FISHED <- NULL
 VTR_DMIS_AC <- merge(VTR_DMIS_merge,Scallop_Linkingorg, by.x = "TRIPID", by.y = "DOCID", all.x = TRUE, all.y = FALSE)
 VTR_DMIS_AC <- VTR_DMIS_AC %>% distinct(TRIPID,DOLLAR,TRIP_LENGTH,LANDED, .keep_all = TRUE)  
 
+#Split Activity codes to allow for easier data management. VMS Declaration code book is broken down by Plan Codes,Program Codes, and Area Identifiers.However data is stored in one long string so this code breaks up the string so each group can be looked at individually. 
+VTR_DMIS_AC$ACTIVITY_CODE <- as.character(VTR_DMIS_AC$ACTIVITY_CODE)
+VTR_DMIS_AC <- VTR_DMIS_AC %>% separate(ACTIVITY_CODE, into = c('Plan Code','Program Code','Area Identifier', sep = '-'))
+VTR_DMIS_AC$`-` <- NULL
+
+
+
 ## 3. 
 ### Testing Reported NAs in new data set (that they are relatively even across all years)
 #### Note: The variable used in this command can be substituted for whatever needs to be tested. In this case I am testing OPERNUM, because that will be used to determine decisions in the model 
@@ -379,7 +386,7 @@ VTR_DMIS_AC <- coordinate_table %>%
 
 # finished table is coordinate_table
 
-write.csv(VTR_DMIS_AC, file="~/December 2021/VTR_DMIS_AC_postwater_1217.csv")
+write.csv(coordinate_table, file="~/December 2021/VTR_DMIS_AC_postwater_1217.csv")
 
 ```
 
