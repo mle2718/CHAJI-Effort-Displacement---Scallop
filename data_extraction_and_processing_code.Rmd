@@ -434,7 +434,6 @@ stopifnot(sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))==0)
 ## Delete unnecessary columns 
 water_ac$Area <- NULL
 
-library(readr)
 X11_29_21_Spatial_Join <- read_csv("11_29_21_Spatial_Join.csv")
 View(X11_29_21_Spatial_Join)
 
