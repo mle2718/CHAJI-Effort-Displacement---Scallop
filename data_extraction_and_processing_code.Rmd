@@ -385,8 +385,8 @@ VTR_DMIS_AC <- coordinate_table %>%
   filter(Area == "Non-land")
 
 # finished table is coordinate_table
-
-write.csv(coordinate_table, file="~/December 2021/VTR_DMIS_AC_postwater_1217.csv")
+dir.create("December 2021", showWarnings="FALSE")
+write.csv(coordinate_table, file=file.path("December 2021","VTR_DMIS_AC_postwater_1217.csv"))
 
 ```
 
