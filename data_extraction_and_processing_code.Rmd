@@ -11,7 +11,7 @@ Load packages. Install if necessary.
 
 ```{r setup, include=TRUE, echo=FALSE, results=FALSE}
 
-PKG <- c("leaflet", "tidyverse", "sf",  "RODM", "dbplyr","raster","rgdal","readxl", "sp", "data.table")
+PKG <- c("leaflet", "tidyverse", "sf",  "RODM", "dbplyr","raster","rgdal","readxl", "data.table")
 for (p in PKG) {
   if(!require(p,character.only = TRUE)) {
     install.packages(p)
