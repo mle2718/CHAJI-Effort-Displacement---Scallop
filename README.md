@@ -4,6 +4,8 @@ This repository contains code to extract and processes data. Our goal is to cons
 # Testing and Functionality
 
 This code has primarily been developed by Marina Chaji and runs on the neptune server at NEFSC. 
+*   R version 4.0.5 (2021-03-31) -- "Shake and Throw"
+*   Rstudio server Version 1.4.1103
 
 # Getting started
 
