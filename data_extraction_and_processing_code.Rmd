@@ -193,7 +193,7 @@ for(i in START.YEAR:END.YEAR) {
  
 oracle_server = "sole"
 
-CURRENT.QUERY = paste ("SELECT TRIP_ID, DOCID, ACTIVITY_CODE FROM APSD.t_ssb_trip_current@garfo_nefsc")
+CURRENT.QUERY = paste ("SELECT TRIP_ID, DOCID, ACTIVITY_CODE, LGC_A, LGC_B, LGC_C, SC_2, SC_1, SC_3, SC_4, SC_5, SC_6, SC_7, SC_8, SC_0, SG_1A, SG_1B FROM APSD.t_ssb_trip_current@garfo_nefsc")
 Scallop_Linkingorg = sqlQuery(ODBC.CONNECTION, CURRENT.QUERY)
 
 odbcCloseAll()
