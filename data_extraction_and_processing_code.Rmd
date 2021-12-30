@@ -75,6 +75,22 @@ tabl <- "
 "
 cat(tabl) 
 ```
+
+
+##  Description of the Extra DMIS data.
+```{r DMIS_extra overview, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
+tabl <- "
+| Column  | Description           |
+|------------|:-----------------------------------------------|
+| TRIP_ID|
+|DOCID | VTR DOCUMENT table record identifier; Primary key, internally generated at scanning based on vessel id and date/time sailed. Each DOCID represents one trip; equivalent to TRIPID in VESLOG tables.|
+|ACTIVITY_CODE| Complicated set of letters and numbers. See below|
+| PLAN_CAT | LGC_A LGC_B, LGC_C, SC_2, SC_3, SC_4, SC_5, SC_6, SC_7, SC_8, SC_9, SG_1A, SG_1B are a collection of true and false variables the indicate if the vessel had a particular permit when the trip was taken.|
+"
+cat(tabl) 
+```
+
+
 While not provided in APSD_DMIS_2, we are using the ACTIVITY_CODE from the live DMIS tables. We join using TRIP_ID, DOCID.  See [here](/external_documentation/vms_declaration_code_glossary_may_2018.pdf)
 
 
