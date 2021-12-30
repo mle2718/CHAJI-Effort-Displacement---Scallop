@@ -189,22 +189,66 @@ for(i in START.YEAR:END.YEAR) {
 
 #Loading Data from Oracle
 ##Scallop LA IFQ Linking variables 
+
+We also extract the activity code from DMIS.  This will describe the type of trip that the vessel has declared into.  The most important types of trips will be Scallop Trips; however, fishing vessels with the proper permits are allowed to retain scallops while declared into other fisheries.  When this happens, the volume of scallops will be much lower.
+
+We  also extract the T/F variables corresponding the the PLAN_CAT in DMIS.  
 ```{r DMIS_Query, echo=FALSE}
  
 oracle_server = "sole"
-
-CURRENT.QUERY = paste ("SELECT TRIP_ID, DOCID, ACTIVITY_CODE, LGC_A, LGC_B, LGC_C, SC_2, SC_1, SC_3, SC_4, SC_5, SC_6, SC_7, SC_8, SC_0, SG_1A, SG_1B FROM APSD.t_ssb_trip_current@garfo_nefsc")
+CURRENT.QUERY = paste ("SELECT TRIP_ID, DOCID, ACTIVITY_CODE, LGC_A, LGC_B, LGC_C, SC_2, SC_3, SC_4, SC_5, SC_6, SC_7, SC_8, SC_9, SG_1A, SG_1B
+ FROM APSD.t_ssb_trip_current@garfo_nefsc")
 Scallop_Linkingorg = sqlQuery(ODBC.CONNECTION, CURRENT.QUERY)
 
 odbcCloseAll()
 
 ```
 
-We also extract the activity code from DMIS.  This will describe the type of trip that the vessel has declared into.  The most important types of trips will be Scallop Trips; however, fishing vessels with the proper permits are allowed to retain scallops while declared into other fisheries.  When this happens, the volume of scallops will be much lower.
+
+We  classify the trips as FullTime, PartTime based on these PLAN_CAT variables.   We also generate categorical variables corresponding to LA and GC columns. Note that a vessel can hold both an LA and a GC permit at the same time. The summary tables below will have lots of observations corresponding to Scallop_Linkingorg[ftpt]=0, LA=0, and GC=0. This is expected.   because it has everything from DMIS.  
 
 
+```{r DMIS_Tidy, echo=FALSE}
+# Bin the LA vessels into full time or part time. 
+Scallop_Linkingorg$ftpt<-"None"
+Scallop_Linkingorg$ftpt[Scallop_Linkingorg$SC_2=="TRUE"]<-"FullTime"
+Scallop_Linkingorg$ftpt[Scallop_Linkingorg$SC_5=="TRUE"]<-"FullTime"
+Scallop_Linkingorg$ftpt[Scallop_Linkingorg$SC_7=="TRUE"]<-"FullTime"
+
+Scallop_Linkingorg$ftpt[Scallop_Linkingorg$SC_6=="TRUE"]<-"PartTime"
+Scallop_Linkingorg$ftpt[Scallop_Linkingorg$SC_3=="TRUE"]<-"PartTime"
+
+# Construct a logical variable for GC
+Scallop_Linkingorg$GC<-(Scallop_Linkingorg$LGC_A=="TRUE" | Scallop_Linkingorg$LGC_B=="TRUE" | Scallop_Linkingorg$LGC_C=="TRUE" | Scallop_Linkingorg$SG_1A=="TRUE" | Scallop_Linkingorg$SG_1B=="TRUE") 
+
+# Construct a logical variable for LA
+Scallop_Linkingorg$LA<-(Scallop_Linkingorg$ftpt=="PartTime" | Scallop_Linkingorg$ftpt=="FullTime")
 
 
+#Make some tables
+table(Scallop_Linkingorg$ftpt)
+
+table(Scallop_Linkingorg$GC)
+
+table(Scallop_Linkingorg$LA,Scallop_Linkingorg$GC)
+
+#Select certain columns
+Scallop_Linkingorg_bak<-Scallop_Linkingorg
+Scallop_Linkingorg<-dplyr::select(Scallop_Linkingorg, c(TRIP_ID,DOCID, ACTIVITY_CODE, ftpt, GC,LA))
+
+is.logical(Scallop_Linkingorg$GC)
+is.logical(Scallop_Linkingorg$LA)
+```
+We don't want to create a single plan column, because a vessel could have multiple kinds of scallop permits. Instead, if we want just the Fulltime LA vessels, we can do something like:
+
+
+```{r DMIS_FT_filter, eval=FALSE}
+
+Limited_Access <-Scallop_Linkingorg %>%filter(LA=="TRUE")
+Limited_Access_ft<-Limited_Access %>%filter(ftpt=="FullTime")
+
+
+```
 
 # Cleaning 
 ## 1. Filter down to only Scallop Species 
