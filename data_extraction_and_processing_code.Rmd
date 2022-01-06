@@ -13,7 +13,7 @@ Load packages. Install if necessary.
 
 ```{r setup, include=TRUE, echo=TRUE, results=FALSE}
 
-PKG <- c("leaflet", "tidyverse", "sf",  "RODM", "dbplyr","raster","rgdal","readxl", "data.table")
+PKG <- c("leaflet", "tidyverse", "sf", "RODBC", "RODM", "dbplyr","raster","rgdal","readxl", "data.table")
 for (p in PKG) {
   if(!require(p,character.only = TRUE)) {
     install.packages(p)
@@ -439,6 +439,8 @@ VTR_DMIS_AC <- coordinate_table %>%
   mutate(Area = if_else(is.na(Area), "Non-land", Area)) %>% # change NAs to read "Non-land"
   rename("{lat_column}" := LAT, "{lon_column}" := LON) %>%  # change lat lon columns back to original names
   filter(Area == "Non-land")
+#Delete Area Variable; Served its purpose as a filter
+VTR_DMIS_AC$Area <- NULL
 
 # finished table is coordinate_table
 dir.create("December 2021", showWarnings="FALSE")
@@ -566,6 +568,35 @@ table(cost_join$STATE)
 
 
 
+```{r construct_trip_aggregates}
+### 1. Aggregate DOLLAR, POUNDS, LANDED
+Agg_DOL_POUN_LAND <- VTR_DMIS_AC %>%
+  group_by(TRIPID) %>%
+ summarise(Agg_DOLLAR = sum(DOLLAR), Agg_POUNDS = sum(POUNDS), Agg_LANDED = sum(LANDED))
+
+#### Testing to make sure there are no duplicates in TRIPID groups; this should equal 0
+sum(duplicated(Agg_DOL_POUN_LAND$TRIPID))
+stopifnot(sum(duplicated(Agg_DOL_POUN_LAND$TRIPID))==0)
+
+###  2. Add back into original data set 
+#### all = FALSE is used to keep only rows that match from the data frames
+VTR_DMIS_AC_Agg <- merge(VTR_DMIS_AC,Agg_DOL_POUN_LAND, by.x = "TRIPID", by.y = "TRIPID", all.x = TRUE, all.y = FALSE)
+
+
+
+
+### 3.Parse out Maximum Dollar amounts in order to drop lesser subtrips
+VTR_DMIS_AC_Agg <- VTR_DMIS_AC_Agg %>% group_by(TRIPID) %>% filter(DOLLAR == max(DOLLAR))
+### Another way to check this is by running the following code: VTR_DMIS_AC_Agg %>% group_by(TRIPID) %>% arrange(desc(DOLLAR)) %>% slice(1)
+
+## Test out 
+sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))
+
+stopifnot(sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))==0)
+
+
+
+```
 
 
 
