@@ -9,9 +9,11 @@ This code has primarily been developed by Marina Chaji and runs on the neptune s
 
 # Getting started
 
-1.  Clone the repository.  We suggest the neptune server on the NEFSC network. Getting git on the neptune server to talk to github is a bit of a pain, but look [here](https://github.com/NEFSC/READ-SSB-LEE-On-the-servers) for the steps to create an access token, store it on neptune, and clone a repository.
-2.  Edit the R_credentials_sample.R. Follow the instructions in comments at the top.
-3.  Use Rstudio to knit the "data_extraction_and_processing_code.Rmd" to html.
+1.  Clone the repository onto the neptune server on the NEFSC network.
+    1.  If you are already using github on neptune, then this is straightforward.
+    2.  If not, you will need to follow the steps here [here](https://github.com/NEFSC/READ-SSB-LEE-On-the-servers) for the steps to create an access token, store it on neptune, and clone a repository.
+3.  Edit the R_credentials_sample.R. Follow the instructions in comments at the top.
+4.  Use Rstudio to knit the "data_extraction_and_processing_code.Rmd" to html.
     
 # Dependencies
 
