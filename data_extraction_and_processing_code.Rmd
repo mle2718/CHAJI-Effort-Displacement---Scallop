@@ -568,7 +568,7 @@ table(cost_join$STATE)
 
 
 
-```{r construct_trip_aggregates}
+```{r construct_trip_aggregates2}
 ### 1. Aggregate DOLLAR, POUNDS, LANDED
 Agg_DOL_POUN_LAND <- VTR_DMIS_AC %>%
   group_by(TRIPID) %>%
