@@ -31,6 +31,9 @@ The main idea of the model is that the fishermen/decision-makers choose from a n
 # Long Term Objectives
 The project objective is to develop a site-choice model primarily, improve, maintain, and disseminate a standardized fisheries dependent data set and analytical summaries that provide a more precise, accurate, comprehensive, and timely evaluation of area-specific socioeconomic impacts associated with ecosystem fishery management initiatives, offshore energy development, and offshore aquaculture development. The site-choice model and underlying data set will help support fishery and ecosystem management decisions to achieve optimum yield in each fishery and the nation’s most significant benefit.
 
+Understanding the effects of wind energy areas that are early in the process may be more impactful from a policy perspective. So, not necessarily the current wind areas, but the next block that may be coming over the next 10-30 years.  Also, cumulative effects may be important.
+
+
 # Empirical Setting
 
 ## Scallop Fishery
@@ -39,7 +42,13 @@ We are modeling the location choices of fishing vessels in the Limited Access Da
 
 ## Wind Energy
 
-Here is a short description of the wind energy areas and how they will close (or not close) area to fishing.  How close will fishing be able to occur within Wind Lease Areas / Turbines?
+Here is a short description of the wind energy areas and how they will close (or not close) area to fishing.  18 wind areas currently under dev.  But many more are likely.
+
+How close will fishing be able to occur within Wind Lease Areas / Turbines?  
+
+The wind energy areas do not match the ten minute squares; we are currently planning on simulating the effects of closing a wind energy area by closing an entire ten minute square that is inside or touching a WEA.  
+
+The buried cable route from a WEA to shore is likely to be closed as well.  Cable buried at shallow depths and marked with concrete.
 
 
 # Purpose
@@ -75,9 +84,9 @@ We have decided to use the DMIS as our primary dataset. DMIS primarily uses Vess
 
 Other possibilities were considered for our primary dataset:
 
-1.  Observer cover a subset of the fishery. According to the 2021 SBRM report, it was approximately 8-10% of effort for the Limited access fleet. This would provide haul level lat-lon and estimates of catch for the sampled subset. We viewed the subset as too limited - it would provide us with observations of approximately 200 Access area and 100 open area trips per year.
+1.  Observer cover a subset of the fishery. According to the 2021 SBRM report, it was approximately 8-10% of effort for the Limited access fleet. This would provide haul level lat-lon and estimates of catch for the sampled subset. We viewed the subset as too limited - it would provide us with observations of approximately 200 Access area and 100 open area trips per year.Observer data contains the sailing and landing port. 
 
-2. VMS - VMS data would provide lat-lon at a high frequency. Other researchers have used this; however we uncomfortable with figuring out how to allocate catch along the VMS track.
+2. VMS - VMS data would provide lat-lon at a high frequency. Other researchers have used this; however we uncomfortable with figuring out how to allocate catch along the VMS track. VMS data contains the sailing and landing port. 
 
 3. Rasters.  The raster data are an intermediate data product that combines trip report with a statistical model describes the distance between observed hauls and the vtr point location. This allows for a smoothing of effort catch across a non-arbitrary grid (like a 10 minute square, statistical area, or just a lat-lon point).
 
@@ -101,7 +110,9 @@ tabl <- "
 cat(tabl) 
 ```
 
-And we have supplemented this with some extra information.
+Ports  -- currently assuming that a trip departs from the same place it lands.  An alternate assumption is  that people just leave from the place where they made their last landing.   
+
+The DDLAT and DDLOn are self reported lat-lons from logbooks(VTRs). We have supplemented this with some extra information.
 
 ```{r DMIS_extra overview, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
 tabl <- "
@@ -399,7 +410,7 @@ Since our goal is to estimate a choice model at the trip level, we need to const
 1. Check / Test Maximum DOLLAR values by grouping by TRIPID
 1. Drop duplicate TRIPIDs by keeping maximum DOLLAR values 
 
-If we have the ability to model fishing choices at a finer scale than at a trip, this can be modified fairly easily.
+This may not be realistic. There are anecodotes of vessels fishing in one spot on the way to another, further offshore spot.  Subtrips may be a bigger issue when we extend to other fisheries.If we have the ability to model fishing choices at a finer scale than at a trip, this can be modified fairly easily.
 
 # Trips reported on land will be dropped from observations 
 
