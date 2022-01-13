@@ -80,7 +80,9 @@ tabl <- "
 cat(tabl) 
 ```
 
-We have decided to use the DMIS as our primary dataset. DMIS primarily uses Vessel Trip Reports (VTRs) for "trip" and "effort" data and dealer databases for landings. A drawback of using these data are that there is a single point (latitude and longitude) for each time a vessel deploys a particular type of gear into a statistical area. In the LADAS scallop fleet, vessels rarely, if ever, will switch gears at sea.  So, a trip is most likely to have multiple VTRs if it switches statistical areas.
+We have decided to use the DMIS as our primary dataset. DMIS primarily uses Vessel Trip Reports (VTRs) for "trip" and "effort" data and dealer databases for landings. A drawback of using these data are that there is a single point (latitude and longitude) for each time a vessel deploys a particular type of gear into a statistical area. In the LADAS scallop fleet, vessels rarely, if ever, will switch gears at sea.  So, a trip is most likely to have multiple VTRs if it switches statistical areas.  
+
+By choosing to represent the trip as a single point, or as inside a homogeneous ten minute square, we may not have the  ability to answer our research question.  Alternatively, do we have the ability to model at the sub-trip level?
 
 Other possibilities were considered for our primary dataset:
 
