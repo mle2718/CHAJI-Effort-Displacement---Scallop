@@ -45,7 +45,7 @@ The roles/responsibilties doesn't quite belong in this spot, and yet here we are
 
 
 # Outside data sources
-We have added the "East_Cst_crop_2020_extended" shapefile to the repository. This can be found at net.nefsc.noaa.gov/work5/socialsci/Geret_Rasters/data/offshore_wind_package_data/shapefiles.
+We have added the "East_Cst_crop_2020_extended" shapefile to the repository. This can be found at net/work5/socialsci/Geret_Rasters/data/offshore_wind_package_data/shapefiles.
 
 There are also some data that we get internally from the network, this can be figured out just by looking through the data processsing code.
 
