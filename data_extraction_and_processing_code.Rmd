@@ -33,9 +33,14 @@ The project objective is to develop a site-choice model primarily, improve, main
 
 # Empirical Setting
 
+## Scallop Fishery
+
 We are modeling the location choices of fishing vessels in the Limited Access Days-at-Sea scallop fishery. There are approximately 300-330 of these fishing vessels.  They are allocated "Open Area Days-at-Sea" and a quantity of trips and/or pounds into the "Access Areas."  They catch approximately 95% of the scallops.  The Limited Access DAS fleet can be further subdivided into Full-Time, Part-Time, and Occasional Fleets.  Vessels primarily use the New Bedford scallop dredge, but a few use a smaller dredge or a bottom trawl.  Over the 13 years in our dataset, there are approximately 40,000 trips taken by this fleet, split roughly evenly into "Open areas" and "Access Areas."
 
-Here is a short description of the wind energy areas.
+## Wind Energy
+
+Here is a short description of the wind energy areas and how they will close (or not close) area to fishing.  How close will fishing be able to occur within Wind Lease Areas / Turbines?
+
 
 # Purpose
 
@@ -128,6 +133,8 @@ tabl <- "
 "
 cat(tabl) 
 ```
+
+
 
 ##  Description of the VMS data.
 We are currently not using the VMS data directly. 
@@ -377,7 +384,8 @@ group_by("YEAR") %>% filter(is.na(OPERNUM))
 
 # Data Aggregating Trip Revenues & Delete duplicate TRIPIDs
 
-Subtrips are generated when a vessel switches gear or areas. Subtrips have identical TRIPID/DOCID.  A trip may have many (8+) subtrips, but most have 1-2.
+Subtrips are generated when a vessel switches gear or statistical areas. Subtrips have identical TRIPID/DOCID.  A trip may have many (8+) subtrips, but the majority of trips observed only have one subtrip (95.7% using original VTR & DMIS merged data set). If a trip has just 1 subtrip, the trip took place in a single statistical area.  If a trip crosses four different statistical areas, the NSUBTRIP is then equal to 4, and the landings, value, latitude, and longitude are reported separately for each area. 
+
 
 ```{r count_subtrips, echo=TRUE}
 table(VTR_DMIS_AC$NSUBTRIP)
@@ -391,6 +399,7 @@ Since our goal is to estimate a choice model at the trip level, we need to const
 1. Check / Test Maximum DOLLAR values by grouping by TRIPID
 1. Drop duplicate TRIPIDs by keeping maximum DOLLAR values 
 
+If we have the ability to model fishing choices at a finer scale than at a trip, this can be modified fairly easily.
 
 # Trips reported on land will be dropped from observations 
 
