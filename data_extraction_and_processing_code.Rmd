@@ -353,7 +353,7 @@ Scallops$SOURCE<- NULL
 VTR_DMIS_merge <- merge(RESULT.COMPILED,Scallops, by.x = "TRIPID", by.y = "DOCID", all.x = FALSE, all.y = TRUE)
 
 ## Filter out 2020 values 
-VTR_DMIS_merge <- VTR_DMIS_merge %>% filter(YEAR != 2020)
+VTR_DMIS_merge <- VTR_DMIS_merge %>% filter(YEAR <= END.YEAR)
 
 # Delete Extra PERMIT Column
 ## Note: X was deleted because PERMIT.y had zero NAs and PERMIT.x had 25 
