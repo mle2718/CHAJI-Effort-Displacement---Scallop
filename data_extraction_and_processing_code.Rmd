@@ -31,6 +31,11 @@ The main idea of the model is that the fishermen/decision-makers choose from a n
 # Long Term Objectives
 The project objective is to develop a site-choice model primarily, improve, maintain, and disseminate a standardized fisheries dependent data set and analytical summaries that provide a more precise, accurate, comprehensive, and timely evaluation of area-specific socioeconomic impacts associated with ecosystem fishery management initiatives, offshore energy development, and offshore aquaculture development. The site-choice model and underlying data set will help support fishery and ecosystem management decisions to achieve optimum yield in each fishery and the nation’s most significant benefit.
 
+# Empirical Setting
+
+We are modeling the location choices of fishing vessels in the Limited Access Days-at-Sea scallop fishery. There are approximately 300-330 of these fishing vessels.  They are allocated "Open Area Days-at-Sea" and a quantity of trips and/or pounds into the "Access Areas."  They catch approximately 95% of the scallops.  The Limited Access DAS fleet can be further subdivided into Full-Time, Part-Time, and Occasional Fleets.  Vessels primarily use the New Bedford scallop dredge, but a few use a smaller dredge or a bottom trawl.  
+
+Here is a short description of the wind energy areas.
 
 # Purpose
 
@@ -46,7 +51,7 @@ This code depends on:
 
 # Data Overview
 
-There are four main data sources (so far) 
+There are four main data sources (so far).  None are perfect.
 
 ```{r Data Overview, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
 tabl <- "
@@ -60,6 +65,8 @@ tabl <- "
 "
 cat(tabl) 
 ```
+
+
 
 ##  DMIS
 We are using the DMIS_APSD_2 table.
@@ -127,7 +134,6 @@ tabl <- "
 "
 cat(tabl) 
 ```
-
 
 
 
