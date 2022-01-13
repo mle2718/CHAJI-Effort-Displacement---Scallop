@@ -33,7 +33,7 @@ The project objective is to develop a site-choice model primarily, improve, main
 
 # Empirical Setting
 
-We are modeling the location choices of fishing vessels in the Limited Access Days-at-Sea scallop fishery. There are approximately 300-330 of these fishing vessels.  They are allocated "Open Area Days-at-Sea" and a quantity of trips and/or pounds into the "Access Areas."  They catch approximately 95% of the scallops.  The Limited Access DAS fleet can be further subdivided into Full-Time, Part-Time, and Occasional Fleets.  Vessels primarily use the New Bedford scallop dredge, but a few use a smaller dredge or a bottom trawl.  
+We are modeling the location choices of fishing vessels in the Limited Access Days-at-Sea scallop fishery. There are approximately 300-330 of these fishing vessels.  They are allocated "Open Area Days-at-Sea" and a quantity of trips and/or pounds into the "Access Areas."  They catch approximately 95% of the scallops.  The Limited Access DAS fleet can be further subdivided into Full-Time, Part-Time, and Occasional Fleets.  Vessels primarily use the New Bedford scallop dredge, but a few use a smaller dredge or a bottom trawl.  Over the 13 years in our dataset, there are approximately 40,000 trips taken by this fleet, split roughly evenly into "Open areas" and "Access Areas."
 
 Here is a short description of the wind energy areas.
 
@@ -66,6 +66,15 @@ tabl <- "
 cat(tabl) 
 ```
 
+We have decided to use the DMIS as our primary dataset. DMIS primarily uses Vessel Trip Reports (VTRs) for "trip" and "effort" data and dealer databases for landings. A drawback of using these data are that there is a single point (latitude and longitude) for each time a vessel deploys a particular type of gear into a statistical area. In the LADAS scallop fleet, vessels rarely, if ever, will switch gears at sea.  So, a trip is most likely to have multiple VTRs if it switches statistical areas.
+
+Other possibilities were considered for our primary dataset:
+
+1.  Observer cover a subset of the fishery. According to the 2021 SBRM report, it was approximately 8-10% of effort for the Limited access fleet. This would provide haul level lat-lon and estimates of catch for the sampled subset. We viewed the subset as too limited - it would provide us with observations of approximately 200 Access area and 100 open area trips per year.
+
+2. VMS - VMS data would provide lat-lon at a high frequency. Other researchers have used this; however we uncomfortable with figuring out how to allocate catch along the VMS track.
+
+3. Rasters.  The raster data are an intermediate data product that combines trip report with a statistical model describes the distance between observed hauls and the vtr point location. This allows for a smoothing of effort catch across a non-arbitrary grid (like a 10 minute square, statistical area, or just a lat-lon point).
 
 
 ##  DMIS
