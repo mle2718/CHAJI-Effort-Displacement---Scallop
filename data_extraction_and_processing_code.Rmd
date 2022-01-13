@@ -40,6 +40,8 @@ Understanding the effects of wind energy areas that are early in the process may
 
 We are modeling the location choices of fishing vessels in the Limited Access Days-at-Sea scallop fishery. There are approximately 300-330 of these fishing vessels.  They are allocated "Open Area Days-at-Sea" and a quantity of trips and/or pounds into the "Access Areas."  They catch approximately 95% of the scallops.  The Limited Access DAS fleet can be further subdivided into Full-Time, Part-Time, and Occasional Fleets.  Vessels primarily use the New Bedford scallop dredge, but a few use a smaller dredge or a bottom trawl.  Over the 13 years in our dataset, there are approximately 40,000 trips taken by this fleet, split roughly evenly into "Open areas" and "Access Areas."
 
+For Fishing Year 2016 and earlier, the fishing year Ran from March 1 to Feb 28/29. For fishing year 2017, the year ran from March 1 to March 31.  For 2018 and later, the fishing year runs from April 1 to March 31.
+
 ## Wind Energy
 
 Here is a short description of the wind energy areas and how they will close (or not close) area to fishing.  18 wind areas currently under dev.  But many more are likely.
