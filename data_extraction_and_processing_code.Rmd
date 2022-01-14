@@ -31,6 +31,27 @@ The main idea of the model is that the fishermen/decision-makers choose from a n
 # Long Term Objectives
 The project objective is to develop a site-choice model primarily, improve, maintain, and disseminate a standardized fisheries dependent data set and analytical summaries that provide a more precise, accurate, comprehensive, and timely evaluation of area-specific socioeconomic impacts associated with ecosystem fishery management initiatives, offshore energy development, and offshore aquaculture development. The site-choice model and underlying data set will help support fishery and ecosystem management decisions to achieve optimum yield in each fishery and the nation’s most significant benefit.
 
+Understanding the effects of wind energy areas that are early in the process may be more impactful from a policy perspective. So, not necessarily the current wind areas, but the next block that may be coming over the next 10-30 years.  Also, cumulative effects may be important.
+
+
+# Empirical Setting
+
+## Scallop Fishery
+
+We are modeling the location choices of fishing vessels in the Limited Access Days-at-Sea scallop fishery. There are approximately 300-330 of these fishing vessels.  They are allocated "Open Area Days-at-Sea" and a quantity of trips and/or pounds into the "Access Areas."  They catch approximately 95% of the scallops.  The Limited Access DAS fleet can be further subdivided into Full-Time, Part-Time, and Occasional Fleets.  Vessels primarily use the New Bedford scallop dredge, but a few use a smaller dredge or a bottom trawl.  Over the 13 years in our dataset, there are approximately 40,000 trips taken by this fleet, split roughly evenly into "Open areas" and "Access Areas."
+
+For Fishing Year 2016 and earlier, the fishing year Ran from March 1 to Feb 28/29. For fishing year 2017, the year ran from March 1 to March 31.  For 2018 and later, the fishing year runs from April 1 to March 31.
+
+## Wind Energy
+
+Here is a short description of the wind energy areas and how they will close (or not close) area to fishing.  18 wind areas currently under dev.  But many more are likely.
+
+How close will fishing be able to occur within Wind Lease Areas / Turbines?  
+
+The wind energy areas do not match the ten minute squares; we are currently planning on simulating the effects of closing a wind energy area by closing an entire ten minute square that is inside or touching a WEA.  
+
+The buried cable route from a WEA to shore is likely to be closed as well.  Cable buried at shallow depths and marked with concrete.
+
 
 # Purpose
 
@@ -46,7 +67,7 @@ This code depends on:
 
 # Data Overview
 
-There are four main data sources (so far) 
+There are four main data sources (so far).  None are perfect.
 
 ```{r Data Overview, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
 tabl <- "
@@ -60,6 +81,19 @@ tabl <- "
 "
 cat(tabl) 
 ```
+
+We have decided to use the DMIS as our primary dataset. DMIS primarily uses Vessel Trip Reports (VTRs) for "trip" and "effort" data and dealer databases for landings. A drawback of using these data are that there is a single point (latitude and longitude) for each time a vessel deploys a particular type of gear into a statistical area. In the LADAS scallop fleet, vessels rarely, if ever, will switch gears at sea.  So, a trip is most likely to have multiple VTRs if it switches statistical areas.  
+
+By choosing to represent the trip as a single point, or as inside a homogeneous ten minute square, we may not have the  ability to answer our research question.  Alternatively, do we have the ability to model at the sub-trip level?
+
+Other possibilities were considered for our primary dataset:
+
+1.  Observer cover a subset of the fishery. According to the 2021 SBRM report, it was approximately 8-10% of effort for the Limited access fleet. This would provide haul level lat-lon and estimates of catch for the sampled subset. We viewed the subset as too limited - it would provide us with observations of approximately 200 Access area and 100 open area trips per year.Observer data contains the sailing and landing port. 
+
+2. VMS - VMS data would provide lat-lon at a high frequency. Other researchers have used this; however we uncomfortable with figuring out how to allocate catch along the VMS track. VMS data contains the sailing and landing port. 
+
+3. Rasters.  The raster data are an intermediate data product that combines trip report with a statistical model describes the distance between observed hauls and the vtr point location. This allows for a smoothing of effort catch across a non-arbitrary grid (like a 10 minute square, statistical area, or just a lat-lon point).
+
 
 ##  DMIS
 We are using the DMIS_APSD_2 table.
@@ -80,7 +114,9 @@ tabl <- "
 cat(tabl) 
 ```
 
-And we have supplemented this with some extra information.
+Ports  -- currently assuming that a trip departs from the same place it lands.  An alternate assumption is  that people just leave from the place where they made their last landing.   
+
+The DDLAT and DDLOn are self reported lat-lons from logbooks(VTRs). We have supplemented this with some extra information.
 
 ```{r DMIS_extra overview, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
 tabl <- "
@@ -113,6 +149,8 @@ tabl <- "
 cat(tabl) 
 ```
 
+
+
 ##  Description of the VMS data.
 We are currently not using the VMS data directly. 
 
@@ -127,7 +165,6 @@ tabl <- "
 "
 cat(tabl) 
 ```
-
 
 
 
@@ -316,7 +353,7 @@ Scallops$SOURCE<- NULL
 VTR_DMIS_merge <- merge(RESULT.COMPILED,Scallops, by.x = "TRIPID", by.y = "DOCID", all.x = FALSE, all.y = TRUE)
 
 ## Filter out 2020 values 
-VTR_DMIS_merge <- VTR_DMIS_merge %>% filter(YEAR != 2020)
+VTR_DMIS_merge <- VTR_DMIS_merge %>% filter(YEAR <= END.YEAR)
 
 # Delete Extra PERMIT Column
 ## Note: X was deleted because PERMIT.y had zero NAs and PERMIT.x had 25 
@@ -362,7 +399,8 @@ group_by("YEAR") %>% filter(is.na(OPERNUM))
 
 # Data Aggregating Trip Revenues & Delete duplicate TRIPIDs
 
-Subtrips are generated when a vessel switches gear or areas. Subtrips have identical TRIPID/DOCID.  A trip may have many (8+) subtrips, but most have 1-2.
+Subtrips are generated when a vessel switches gear or statistical areas. Subtrips have identical TRIPID/DOCID.  A trip may have many (8+) subtrips, but the majority of trips observed only have one subtrip (95.7% using original VTR & DMIS merged data set). If a trip has just 1 subtrip, the trip took place in a single statistical area.  If a trip crosses four different statistical areas, the NSUBTRIP is then equal to 4, and the landings, value, latitude, and longitude are reported separately for each area. 
+
 
 ```{r count_subtrips, echo=TRUE}
 table(VTR_DMIS_AC$NSUBTRIP)
@@ -376,6 +414,7 @@ Since our goal is to estimate a choice model at the trip level, we need to const
 1. Check / Test Maximum DOLLAR values by grouping by TRIPID
 1. Drop duplicate TRIPIDs by keeping maximum DOLLAR values 
 
+This may not be realistic. There are anecodotes of vessels fishing in one spot on the way to another, further offshore spot.  Subtrips may be a bigger issue when we extend to other fisheries.If we have the ability to model fishing choices at a finer scale than at a trip, this can be modified fairly easily.
 
 # Trips reported on land will be dropped from observations 
 
