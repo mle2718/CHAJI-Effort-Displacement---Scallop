@@ -18,17 +18,17 @@ oracle_username<-"<yourid>"
 oracle_password<-"<yoursole_pwd>"
 novapw<-"<yournova_pwd"
 
+# I've commented this out, because we are not using ROracle anymore to access Oracle.
 
+#drv<-dbDriver("Oracle")
+#shost <- "<sole.full.path.to.server.gov>"
+#port <- port_number_here
+#ssid <- "<ssid_here>"
 
-drv<-dbDriver("Oracle")
-shost <- "<sole.full.path.to.server.gov>"
-port <- port_number_here
-ssid <- "<ssid_here>"
-
-sole.connect.string<-paste(
-  "(DESCRIPTION=",
-  "(ADDRESS=(PROTOCOL=tcp)(HOST=", shost, ")(PORT=", port, "))",
-  "(CONNECT_DATA=(SID=", ssid, ")))", sep="")
+#sole.connect.string<-paste(
+# "(DESCRIPTION=",
+# "(ADDRESS=(PROTOCOL=tcp)(HOST=", shost, ")(PORT=", port, "))",
+#  "(CONNECT_DATA=(SID=", ssid, ")))", sep="")
 
 
 # Don't run this here.  You should put it in where you make the query and then close it when you are done with dbDisconnect(sole_conn)
@@ -36,14 +36,14 @@ sole.connect.string<-paste(
 
 
 
-nhost <- "nova.full.path.to.server.gov"
-port <- port_number_here
-ssid2 <- "<nova"
+#nhost <- "nova.full.path.to.server.gov"
+#port <- port_number_here
+#ssid2 <- "<nova"
 
-nova.connect.string<-paste(
-  "(DESCRIPTION=",
-  "(ADDRESS=(PROTOCOL=tcp)(HOST=", nhost, ")(PORT=", port, "))",
-  "(CONNECT_DATA=(SID=", ssid2, ")))", sep="")
+#nova.connect.string<-paste(
+#  "(DESCRIPTION=",
+#  "(ADDRESS=(PROTOCOL=tcp)(HOST=", nhost, ")(PORT=", port, "))",
+#  "(CONNECT_DATA=(SID=", ssid2, ")))", sep="")
 
 # Don't run this here.  You should put it in where you make the query and then close it when you are done with dbDisconnect(nova_conn)
 # nova_conn<-dbConnect(drv, oracle_username, password=oracle_password, dbname=nova.connect.string)
