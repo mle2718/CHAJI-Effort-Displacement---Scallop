@@ -179,6 +179,8 @@ This is a block of code where we set up the oracle passwords and make R aware of
 ```{r oracle_connections, echo=TRUE, results=FALSE}
 source("/net/home4/mchaji/credentials.R")
 
+# Set the network_location_desktop and network_location_remote variables somewhere OUTSIDE of this code.  The best place to do this is in the .Rprofile or .Renviron files that are in your root directory.  
+
 #Comment one of these out, depending on whether you are running this code on a server or locally (with VPN) 
 net<-network_location_desktop
 net<-network_location_remote
