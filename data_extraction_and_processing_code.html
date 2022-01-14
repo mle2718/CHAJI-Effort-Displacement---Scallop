@@ -166,7 +166,7 @@ pre code {
 
 <h1 class="title toc-ignore">Post Activity Code Clean Up</h1>
 <h4 class="author">Marina Chaji</h4>
-<h4 class="date">January 03, 2022, 20:42</h4>
+<h4 class="date">January 14, 2022, 15:27</h4>
 
 </div>
 
@@ -174,7 +174,7 @@ pre code {
 <div id="project-setup" class="section level1" number="1">
 <h1 number="1"><span class="header-section-number">1</span> Project setup</h1>
 <p>Load packages. Install if necessary.</p>
-<pre class="r"><code>PKG &lt;- c(&quot;leaflet&quot;, &quot;tidyverse&quot;, &quot;sf&quot;,  &quot;RODM&quot;, &quot;dbplyr&quot;,&quot;raster&quot;,&quot;rgdal&quot;,&quot;readxl&quot;, &quot;data.table&quot;)
+<pre class="r"><code>PKG &lt;- c(&quot;leaflet&quot;, &quot;tidyverse&quot;, &quot;sf&quot;, &quot;RODBC&quot;, &quot;RODM&quot;, &quot;dbplyr&quot;,&quot;raster&quot;,&quot;rgdal&quot;,&quot;readxl&quot;, &quot;data.table&quot;)
 for (p in PKG) {
   if(!require(p,character.only = TRUE)) {
     install.packages(p)
@@ -192,8 +192,8 @@ for (p in PKG) {
 ## x dplyr::lag()    masks stats::lag()</code></pre>
 <pre><code>## Loading required package: sf</code></pre>
 <pre><code>## Linking to GEOS 3.7.2, GDAL 3.1.3, PROJ 6.3.2</code></pre>
-<pre><code>## Loading required package: RODM</code></pre>
 <pre><code>## Loading required package: RODBC</code></pre>
+<pre><code>## Loading required package: RODM</code></pre>
 <pre><code>## Loading required package: dbplyr</code></pre>
 <pre><code>## 
 ## Attaching package: &#39;dbplyr&#39;</code></pre>
@@ -245,22 +245,38 @@ vintage_string&lt;-gsub(&quot;-&quot;,&quot;_&quot;,vintage_string)</code></pre>
 <div id="long-term-objectives" class="section level1" number="3">
 <h1 number="3"><span class="header-section-number">3</span> Long Term Objectives</h1>
 <p>The project objective is to develop a site-choice model primarily, improve, maintain, and disseminate a standardized fisheries dependent data set and analytical summaries that provide a more precise, accurate, comprehensive, and timely evaluation of area-specific socioeconomic impacts associated with ecosystem fishery management initiatives, offshore energy development, and offshore aquaculture development. The site-choice model and underlying data set will help support fishery and ecosystem management decisions to achieve optimum yield in each fishery and the nation’s most significant benefit.</p>
+<p>Understanding the effects of wind energy areas that are early in the process may be more impactful from a policy perspective. So, not necessarily the current wind areas, but the next block that may be coming over the next 10-30 years. Also, cumulative effects may be important.</p>
 </div>
-<div id="purpose" class="section level1" number="4">
-<h1 number="4"><span class="header-section-number">4</span> Purpose</h1>
+<div id="empirical-setting" class="section level1" number="4">
+<h1 number="4"><span class="header-section-number">4</span> Empirical Setting</h1>
+<div id="scallop-fishery" class="section level2" number="4.1">
+<h2 number="4.1"><span class="header-section-number">4.1</span> Scallop Fishery</h2>
+<p>We are modeling the location choices of fishing vessels in the Limited Access Days-at-Sea scallop fishery. There are approximately 300-330 of these fishing vessels. They are allocated “Open Area Days-at-Sea” and a quantity of trips and/or pounds into the “Access Areas.” They catch approximately 95% of the scallops. The Limited Access DAS fleet can be further subdivided into Full-Time, Part-Time, and Occasional Fleets. Vessels primarily use the New Bedford scallop dredge, but a few use a smaller dredge or a bottom trawl. Over the 13 years in our dataset, there are approximately 40,000 trips taken by this fleet, split roughly evenly into “Open areas” and “Access Areas.”</p>
+<p>For Fishing Year 2016 and earlier, the fishing year Ran from March 1 to Feb 28/29. For fishing year 2017, the year ran from March 1 to March 31. For 2018 and later, the fishing year runs from April 1 to March 31.</p>
+</div>
+<div id="wind-energy" class="section level2" number="4.2">
+<h2 number="4.2"><span class="header-section-number">4.2</span> Wind Energy</h2>
+<p>Here is a short description of the wind energy areas and how they will close (or not close) area to fishing. 18 wind areas currently under dev. But many more are likely.</p>
+<p>How close will fishing be able to occur within Wind Lease Areas / Turbines?</p>
+<p>The wind energy areas do not match the ten minute squares; we are currently planning on simulating the effects of closing a wind energy area by closing an entire ten minute square that is inside or touching a WEA.</p>
+<p>The buried cable route from a WEA to shore is likely to be closed as well. Cable buried at shallow depths and marked with concrete.</p>
+</div>
+</div>
+<div id="purpose" class="section level1" number="5">
+<h1 number="5"><span class="header-section-number">5</span> Purpose</h1>
 <p>This code extracts and processes data. Our goal is to construct a dataset that can be used to estimate a location choice model at the trip level for the Limited Access Scallop Fishery, using data from 2007-2019 (calendar years). The main datasource is a frozen DMIS table.</p>
 </div>
-<div id="dependencies" class="section level1" number="5">
-<h1 number="5"><span class="header-section-number">5</span> Dependencies</h1>
+<div id="dependencies" class="section level1" number="6">
+<h1 number="6"><span class="header-section-number">6</span> Dependencies</h1>
 <p>This code depends on:</p>
 <ol style="list-style-type: decimal">
 <li>Network access to get the APSD_DMIS_2.rda and trip cost data from places on the NEFSC network.</li>
 <li>The ability to connect to NEFSC oracle databases (VTR and the Live DMIS tables at <a href="mailto:APSD.t_ssb_trip_current@garfo_nefsc" class="email">APSD.t_ssb_trip_current@garfo_nefsc</a>)</li>
 </ol>
 </div>
-<div id="data-overview" class="section level1" number="6">
-<h1 number="6"><span class="header-section-number">6</span> Data Overview</h1>
-<p>There are four main data sources (so far)</p>
+<div id="data-overview" class="section level1" number="7">
+<h1 number="7"><span class="header-section-number">7</span> Data Overview</h1>
+<p>There are four main data sources (so far). None are perfect.</p>
 <table>
 <colgroup>
 <col width="20%" />
@@ -291,8 +307,16 @@ vintage_string&lt;-gsub(&quot;-&quot;,&quot;_&quot;,vintage_string)</code></pre>
 </tr>
 </tbody>
 </table>
-<div id="dmis" class="section level2" number="6.1">
-<h2 number="6.1"><span class="header-section-number">6.1</span> DMIS</h2>
+<p>We have decided to use the DMIS as our primary dataset. DMIS primarily uses Vessel Trip Reports (VTRs) for “trip” and “effort” data and dealer databases for landings. A drawback of using these data are that there is a single point (latitude and longitude) for each time a vessel deploys a particular type of gear into a statistical area. In the LADAS scallop fleet, vessels rarely, if ever, will switch gears at sea. So, a trip is most likely to have multiple VTRs if it switches statistical areas.</p>
+<p>By choosing to represent the trip as a single point, or as inside a homogeneous ten minute square, we may not have the ability to answer our research question. Alternatively, do we have the ability to model at the sub-trip level?</p>
+<p>Other possibilities were considered for our primary dataset:</p>
+<ol style="list-style-type: decimal">
+<li><p>Observer cover a subset of the fishery. According to the 2021 SBRM report, it was approximately 8-10% of effort for the Limited access fleet. This would provide haul level lat-lon and estimates of catch for the sampled subset. We viewed the subset as too limited - it would provide us with observations of approximately 200 Access area and 100 open area trips per year.Observer data contains the sailing and landing port.</p></li>
+<li><p>VMS - VMS data would provide lat-lon at a high frequency. Other researchers have used this; however we uncomfortable with figuring out how to allocate catch along the VMS track. VMS data contains the sailing and landing port.</p></li>
+<li><p>Rasters. The raster data are an intermediate data product that combines trip report with a statistical model describes the distance between observed hauls and the vtr point location. This allows for a smoothing of effort catch across a non-arbitrary grid (like a 10 minute square, statistical area, or just a lat-lon point).</p></li>
+</ol>
+<div id="dmis" class="section level2" number="7.1">
+<h2 number="7.1"><span class="header-section-number">7.1</span> DMIS</h2>
 <p>We are using the DMIS_APSD_2 table.</p>
 <table>
 <colgroup>
@@ -344,7 +368,8 @@ vintage_string&lt;-gsub(&quot;-&quot;,&quot;_&quot;,vintage_string)</code></pre>
 </tr>
 </tbody>
 </table>
-<p>And we have supplemented this with some extra information.</p>
+<p>Ports – currently assuming that a trip departs from the same place it lands. An alternate assumption is that people just leave from the place where they made their last landing.</p>
+<p>The DDLAT and DDLOn are self reported lat-lons from logbooks(VTRs). We have supplemented this with some extra information.</p>
 <table>
 <colgroup>
 <col width="20%" />
@@ -377,8 +402,8 @@ vintage_string&lt;-gsub(&quot;-&quot;,&quot;_&quot;,vintage_string)</code></pre>
 </table>
 <p>ACTIVITY_CODE and a set of PLAN_CAT categorica variables are used from the live DMIS tables. We join using TRIP_ID, DOCID. See <a href="/external_documentation/vms_declaration_code_glossary_may_2018.pdf">here</a></p>
 </div>
-<div id="description-of-the-vtr-data." class="section level2" number="6.2">
-<h2 number="6.2"><span class="header-section-number">6.2</span> Description of the VTR data.</h2>
+<div id="description-of-the-vtr-data." class="section level2" number="7.2">
+<h2 number="7.2"><span class="header-section-number">7.2</span> Description of the VTR data.</h2>
 <table>
 <colgroup>
 <col width="20%" />
@@ -422,12 +447,12 @@ vintage_string&lt;-gsub(&quot;-&quot;,&quot;_&quot;,vintage_string)</code></pre>
 </tbody>
 </table>
 </div>
-<div id="description-of-the-vms-data." class="section level2" number="6.3">
-<h2 number="6.3"><span class="header-section-number">6.3</span> Description of the VMS data.</h2>
+<div id="description-of-the-vms-data." class="section level2" number="7.3">
+<h2 number="7.3"><span class="header-section-number">7.3</span> Description of the VMS data.</h2>
 <p>We are currently not using the VMS data directly.</p>
 </div>
-<div id="description-of-the-cost-data." class="section level2" number="6.4">
-<h2 number="6.4"><span class="header-section-number">6.4</span> Description of the Cost data.</h2>
+<div id="description-of-the-cost-data." class="section level2" number="7.4">
+<h2 number="7.4"><span class="header-section-number">7.4</span> Description of the Cost data.</h2>
 <table>
 <thead>
 <tr class="header">
@@ -448,10 +473,12 @@ vintage_string&lt;-gsub(&quot;-&quot;,&quot;_&quot;,vintage_string)</code></pre>
 </table>
 </div>
 </div>
-<div id="read-in-oracle-passwords-and-set-network-directory" class="section level1" number="7">
-<h1 number="7"><span class="header-section-number">7</span> Read in oracle passwords and set network directory</h1>
+<div id="read-in-oracle-passwords-and-set-network-directory" class="section level1" number="8">
+<h1 number="8"><span class="header-section-number">8</span> Read in oracle passwords and set network directory</h1>
 <p>This is a block of code where we set up the oracle passwords and make R aware of folders on the network.</p>
 <pre class="r"><code>source(&quot;/net/home4/mchaji/credentials.R&quot;)
+
+# Set the network_location_desktop and network_location_remote variables somewhere OUTSIDE of this code.  The best place to do this is in the .Rprofile or .Renviron files that are in your root directory.  
 
 #Comment one of these out, depending on whether you are running this code on a server or locally (with VPN) 
 net&lt;-network_location_desktop
@@ -460,18 +487,18 @@ offshoreWind_directory&lt;-file.path(net,&quot;home5&quot;, &quot;dcorvi&quot;,&
 
 cost_directory&lt;-file.path(net,&quot;work5&quot;,&quot;socialsci&quot;,&quot;Trip_Costs&quot;,&quot;2007-2020&quot;)</code></pre>
 </div>
-<div id="load-offshore-wind-tool-data-sets" class="section level1" number="8">
-<h1 number="8"><span class="header-section-number">8</span> Load Offshore Wind Tool Data sets</h1>
+<div id="load-offshore-wind-tool-data-sets" class="section level1" number="9">
+<h1 number="9"><span class="header-section-number">9</span> Load Offshore Wind Tool Data sets</h1>
 <p>The frozen DMIS table from the offshoreWind project (APSD_DMIS_2) is the base dataset for the analysis. The DMIS data are formed by combining many datasets, including VTR and Dealer. In brief, the APSD_DMIS_2 dataset contains a mix of trip attributes (port, date), sub-trip attributes (gear, location) , and catch outcomes (species, pounds, landed, dollar). You can read more about DMIS <a href="https://github.com/NEFSC/READ-SSB-Lee-metadata/blob/master/DMIS.md">here</a>.</p>
 <pre class="r"><code>load(file.path(offshoreWind_directory, &quot;APSD_DMIS_2.rda&quot;))
 #load(&quot;~/offshoreWind-master/data-raw/REVENUEFILE.Rdata&quot;)
 #load(&quot;~/offshoreWind-master/data/APSD_DMIS_2.Rdata&quot;)</code></pre>
 </div>
-<div id="loading-data-fom-oracle" class="section level1" number="9">
-<h1 number="9"><span class="header-section-number">9</span> Loading Data fom Oracle</h1>
+<div id="loading-data-fom-oracle" class="section level1" number="10">
+<h1 number="10"><span class="header-section-number">10</span> Loading Data fom Oracle</h1>
 <p>The APSD_DMIS_2 table must be supplemented with additional data. This section queries the Oracle databases to extract additional information.</p>
-<div id="vtr-data" class="section level2" number="9.1">
-<h2 number="9.1"><span class="header-section-number">9.1</span> VTR Data</h2>
+<div id="vtr-data" class="section level2" number="10.1">
+<h2 number="10.1"><span class="header-section-number">10.1</span> VTR Data</h2>
 <p>Some Trip-level data in the VTR schema is needed. See table at the top. We extract them here.</p>
 <pre class="r"><code>oracle_server = &quot;sole&quot;
 ODBC.CONNECTION &lt;- RODBC::odbcConnect(dsn=oracle_server, uid=oracle_username, pwd=oracle_password, believeNRows=FALSE)
@@ -499,8 +526,8 @@ for(i in START.YEAR:END.YEAR) {
                 FROM VTR.veslog&quot;,i,&quot;t&quot;, sep=&quot;&quot;)
   VTR.veslog2019t = sqlQuery(ODBC.CONNECTION, CURRENT.QUERY) </code></pre>
 </div>
-<div id="scallop-la-ifq-linking-variables" class="section level2" number="9.2">
-<h2 number="9.2"><span class="header-section-number">9.2</span> Scallop LA IFQ Linking variables</h2>
+<div id="scallop-la-ifq-linking-variables" class="section level2" number="10.2">
+<h2 number="10.2"><span class="header-section-number">10.2</span> Scallop LA IFQ Linking variables</h2>
 <p>We also extract the activity code from DMIS. This will describe the type of trip that the vessel has declared into. The most important types of trips will be Scallop Trips; however, fishing vessels with the proper permits are allowed to retain scallops while declared into other fisheries. When this happens, the volume of scallops will be much lower.</p>
 <p>We also extract the T/F variables corresponding the the PLAN_CAT in DMIS.</p>
 <pre class="r"><code>oracle_server = &quot;sole&quot;
@@ -553,8 +580,8 @@ is.logical(Scallop_Linkingorg$GC)</code></pre>
 Limited_Access_ft&lt;-Limited_Access %&gt;%filter(ftpt==&quot;FullTime&quot;)</code></pre>
 </div>
 </div>
-<div id="data-cleaning" class="section level1" number="10">
-<h1 number="10"><span class="header-section-number">10</span> Data Cleaning</h1>
+<div id="data-cleaning" class="section level1" number="11">
+<h1 number="11"><span class="header-section-number">11</span> Data Cleaning</h1>
 <ol style="list-style-type: decimal">
 <li>Filter down to only Scallop Species</li>
 <li>Seperate Dates &amp; Times and Delete Old Dates Column</li>
@@ -572,8 +599,8 @@ Scallops$DATE_TRIP&lt;- NULL
 Scallops$NESPP3&lt;- NULL
 Scallops$SOURCE&lt;- NULL</code></pre>
 </div>
-<div id="merging" class="section level1" number="11">
-<h1 number="11"><span class="header-section-number">11</span> Merging</h1>
+<div id="merging" class="section level1" number="12">
+<h1 number="12"><span class="header-section-number">12</span> Merging</h1>
 <ol style="list-style-type: decimal">
 <li>Merge Scallops &amp; VTR Data Sets (RESULT.COMPILED). We keep all columns from both the APSD_DMIS_2 and RESULT.COMPILED datasets. We also:
 <ol style="list-style-type: decimal">
@@ -593,7 +620,7 @@ Scallops$SOURCE&lt;- NULL</code></pre>
 VTR_DMIS_merge &lt;- merge(RESULT.COMPILED,Scallops, by.x = &quot;TRIPID&quot;, by.y = &quot;DOCID&quot;, all.x = FALSE, all.y = TRUE)
 
 ## Filter out 2020 values 
-VTR_DMIS_merge &lt;- VTR_DMIS_merge %&gt;% filter(YEAR != 2020)
+VTR_DMIS_merge &lt;- VTR_DMIS_merge %&gt;% filter(YEAR &lt;= END.YEAR)
 
 # Delete Extra PERMIT Column
 ## Note: X was deleted because PERMIT.y had zero NAs and PERMIT.x had 25 
@@ -634,9 +661,9 @@ VTR_DMIS_AC &lt;- VTR_DMIS_AC %&gt;% separate(ACTIVITY_CODE, into = c(&#39;Plan 
 testing &lt;- VTR_DMIS_AC %&gt;%
 group_by(&quot;YEAR&quot;) %&gt;% filter(is.na(OPERNUM))</code></pre>
 </div>
-<div id="data-aggregating-trip-revenues-delete-duplicate-tripids" class="section level1" number="12">
-<h1 number="12"><span class="header-section-number">12</span> Data Aggregating Trip Revenues &amp; Delete duplicate TRIPIDs</h1>
-<p>Subtrips are generated when a vessel switches gear or areas. Subtrips have identical TRIPID/DOCID. A trip may have many (8+) subtrips, but most have 1-2.</p>
+<div id="data-aggregating-trip-revenues-delete-duplicate-tripids" class="section level1" number="13">
+<h1 number="13"><span class="header-section-number">13</span> Data Aggregating Trip Revenues &amp; Delete duplicate TRIPIDs</h1>
+<p>Subtrips are generated when a vessel switches gear or statistical areas. Subtrips have identical TRIPID/DOCID. A trip may have many (8+) subtrips, but the majority of trips observed only have one subtrip (95.7% using original VTR &amp; DMIS merged data set). If a trip has just 1 subtrip, the trip took place in a single statistical area. If a trip crosses four different statistical areas, the NSUBTRIP is then equal to 4, and the landings, value, latitude, and longitude are reported separately for each area.</p>
 <pre class="r"><code>table(VTR_DMIS_AC$NSUBTRIP)</code></pre>
 <pre><code>## 
 ##      1      2      3      4      5      6      7      8 
@@ -649,15 +676,16 @@ We retained the subtrip attributes (GEARCODE, DDLAT, DDLON) corresponding to the
 <li>Check / Test Maximum DOLLAR values by grouping by TRIPID</li>
 <li>Drop duplicate TRIPIDs by keeping maximum DOLLAR values</li>
 </ol>
+<p>This may not be realistic. There are anecodotes of vessels fishing in one spot on the way to another, further offshore spot. Subtrips may be a bigger issue when we extend to other fisheries.If we have the ability to model fishing choices at a finer scale than at a trip, this can be modified fairly easily.</p>
 </div>
-<div id="trips-reported-on-land-will-be-dropped-from-observations" class="section level1" number="13">
-<h1 number="13"><span class="header-section-number">13</span> Trips reported on land will be dropped from observations</h1>
+<div id="trips-reported-on-land-will-be-dropped-from-observations" class="section level1" number="14">
+<h1 number="14"><span class="header-section-number">14</span> Trips reported on land will be dropped from observations</h1>
 <pre class="r"><code>#################################################################################################
 # change these variables to read in the veslogDMISmerge and what the network path to the shared drive is on your laptop
 coordinate_table_input &lt;-VTR_DMIS_AC
 lat_column = &quot;DDLAT&quot;
 lon_column = &quot;DDLON&quot;
-shapefile_path = &quot;East_Cst_crop_2020_extended&quot;
+shapefile_path = &quot;shapefiles/East_Cst_crop_2020_extended&quot;
 #################################################################################################
 shapefile_path_to_spatialpolygons &lt;- function(shapefile_path,
                                               projection = CRS(&quot;+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0&quot;)) {
@@ -709,6 +737,8 @@ VTR_DMIS_AC &lt;- coordinate_table %&gt;%
   mutate(Area = if_else(is.na(Area), &quot;Non-land&quot;, Area)) %&gt;% # change NAs to read &quot;Non-land&quot;
   rename(&quot;{lat_column}&quot; := LAT, &quot;{lon_column}&quot; := LON) %&gt;%  # change lat lon columns back to original names
   filter(Area == &quot;Non-land&quot;)
+#Delete Area Variable; Served its purpose as a filter
+VTR_DMIS_AC$Area &lt;- NULL
 
 # finished table is coordinate_table
 dir.create(&quot;December 2021&quot;, showWarnings=&quot;FALSE&quot;)
@@ -739,8 +769,8 @@ sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))</code></pre>
 <pre><code>## [1] 0</code></pre>
 <pre class="r"><code>stopifnot(sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))==0)</code></pre>
 </div>
-<div id="import-data-set-only-including-water-observations" class="section level1" number="14">
-<h1 number="14"><span class="header-section-number">14</span> Import data set only including water observations</h1>
+<div id="import-data-set-only-including-water-observations" class="section level1" number="15">
+<h1 number="15"><span class="header-section-number">15</span> Import data set only including water observations</h1>
 <ol style="list-style-type: decimal">
 <li>Data is imported from RStudio on Desktop</li>
 <li>Data is imported from ArcGISPro</li>
@@ -754,8 +784,8 @@ View(X11_29_21_Spatial_Join)
 
 ##Check that observations between water points and ArcGIS are the same</code></pre>
 </div>
-<div id="estimated-limited-access-la-fleet-filter" class="section level1" number="15">
-<h1 number="15"><span class="header-section-number">15</span> Estimated Limited Access (LA) Fleet Filter</h1>
+<div id="estimated-limited-access-la-fleet-filter" class="section level1" number="16">
+<h1 number="16"><span class="header-section-number">16</span> Estimated Limited Access (LA) Fleet Filter</h1>
 <p>We considered filtering out the LADAS scallop fleet by using landings greater than or equal to 850 pounds and Crew less than or equal to 8. These are based on crew limits. In summary:</p>
 <p>FY2007-2014: No limit on crew (except for 7 in DMV starting in FY2014) FY2015-2019: 8</p>
 <blockquote>
@@ -771,15 +801,13 @@ View(X11_29_21_Spatial_Join)
 <p>Finally, because the scallops in the NLS–S–D were expected to have lower yield than similar sized scallops in other areas, Framework 32 (fishing year 2020) allowed two additional crew members aboard both limited access full-time (10 in total) and limited access full-time small dredge vessels (8 in total). This allowed vessels to add additional crew members to increase the shucking capacity of the vessel and reach the possession limit in a time more consistent with other access areas. (Travis Ford @ GARFO - Nov 17,2021)</p>
 </blockquote>
 <p>FY2007-2014: No limit (except for 7 in DMV starting in FY2014) FY2015-2019: 8</p>
-<div id="this-might-be-temporary-still-looking-into-different-integration-methods-with-activity-codes" class="section level2" number="15.1">
-<h2 number="15.1"><span class="header-section-number">15.1</span> This might be temporary; still looking into different integration methods with activity codes</h2>
-<pre class="r"><code>X11_29_21_Spatial_Join&lt;-VTR_DMIS_AC_Agg
-
-LA_Estimate &lt;- X11_29_21_Spatial_Join %&gt;% filter(Agg_LANDED &gt;= 850 &amp; CREW &lt;= 8)</code></pre>
+<div id="this-might-be-temporary-still-looking-into-different-integration-methods-with-activity-codes" class="section level2" number="16.1">
+<h2 number="16.1"><span class="header-section-number">16.1</span> This might be temporary; still looking into different integration methods with activity codes</h2>
+<pre class="r"><code>LA_Estimate &lt;- X11_29_21_Spatial_Join %&gt;% filter(Agg_LANDED &gt;= 850 &amp; CREW &lt;= 8)</code></pre>
 </div>
 </div>
-<div id="add-in-cost-data" class="section level1" number="16">
-<h1 number="16"><span class="header-section-number">16</span> Add in cost data</h1>
+<div id="add-in-cost-data" class="section level1" number="17">
+<h1 number="17"><span class="header-section-number">17</span> Add in cost data</h1>
 <p>These data should reference the “Estimation of Commercial Fishing Trip Costs Using Sea Sampling Data” paper by Samantha Werner &amp; Geret DePiper. We will likely use the Winsorized trip cost estimates.</p>
 <pre class="r"><code>#Import Data
 X2007_2012 &lt;- read_excel(file.path(cost_directory,&quot;2007_2012.xlsx&quot;))
@@ -793,106 +821,42 @@ all_yrs_costs &lt;- merge(X2007_2012,X2013_2020, all = TRUE)
 cost_join &lt;- merge(X11_29_21_Spatial_Join,all_yrs_costs, by.x = &quot;TRIPID&quot;, by.y = &quot;VTR_TRIPID&quot;, all.x = TRUE,all.y =FALSE)
 cost_join_LA &lt;-merge(LA_Estimate,all_yrs_costs, by.x = &quot;TRIPID&quot;, by.y = &quot;VTR_TRIPID&quot;, all.x = TRUE,all.y =FALSE)  </code></pre>
 </div>
-<div id="some-summary-statistcs" class="section level1" number="17">
-<h1 number="17"><span class="header-section-number">17</span> Some summary statistcs</h1>
+<div id="some-summary-statistcs" class="section level1" number="18">
+<h1 number="18"><span class="header-section-number">18</span> Some summary statistcs</h1>
 <pre class="r"><code># Here is a placeholder where we will make a few summary statistics tables.  Nothing too fancy. This may be sufficient.
 # This has not been tested. Yet.
 
-summary(cost_join)</code></pre>
-<pre><code>##      TRIPID              DDLON            DDLAT         OPERATOR        
-##  Min.   :2.679e+06   Min.   :-75.92   Min.   :36.00   Length:159194     
-##  1st Qu.:3.151e+06   1st Qu.:-73.55   1st Qu.:39.35   Class :character  
-##  Median :3.990e+06   Median :-72.90   Median :40.18   Mode  :character  
-##  Mean   :5.088e+11   Mean   :-71.97   Mean   :40.33                     
-##  3rd Qu.:4.878e+06   3rd Qu.:-70.17   3rd Qu.:41.08                     
-##  Max.   :4.105e+13   Max.   :-66.03   Max.   :44.77                     
-##                                                                         
-##     OPERNUM            NSUBTRIP          CREW            IMGID          
-##  Min.   :  410392   Min.   :1.000   Min.   : 1.000   Min.   :2.468e+06  
-##  1st Qu.:10002711   1st Qu.:1.000   1st Qu.: 3.000   1st Qu.:2.869e+06  
-##  Median :10009462   Median :1.000   Median : 3.000   Median :3.722e+06  
-##  Mean   :10009015   Mean   :1.019   Mean   : 3.831   Mean   :5.078e+13  
-##  3rd Qu.:10014818   3rd Qu.:1.000   3rd Qu.: 5.000   3rd Qu.:4.642e+06  
-##  Max.   :10024074   Max.   :8.000   Max.   :33.000   Max.   :4.105e+15  
-##  NA&#39;s   :4310                       NA&#39;s   :135      NA&#39;s   :4          
-##      YEAR             VTR_PORT          VTR_STATE          TRIP_LENGTH     
-##  Length:159194      Length:159194      Length:159194      Min.   : 0.0000  
-##  Class :character   Class :character   Class :character   1st Qu.: 0.5938  
-##  Mode  :character   Mode  :character   Mode  :character   Median : 0.9167  
-##                                                           Mean   : 2.5762  
-##                                                           3rd Qu.: 2.5833  
-##                                                           Max.   :24.7500  
-##                                                                            
-##     PERMIT.y        DEALNUM              DOLLAR              POUNDS         
-##  Min.   :110681   Length:159194      Min.   :      0.5   Min.   :      0.5  
-##  1st Qu.:232150   Class :character   1st Qu.:   2256.0   1st Qu.:   2474.0  
-##  Median :310981   Mode  :character   Median :   4105.0   Median :   3348.0  
-##  Mean   :286321                      Mean   :  36679.4   Mean   :  32945.6  
-##  3rd Qu.:330786                      3rd Qu.:   8938.0   3rd Qu.:   6381.0  
-##  Max.   :550026                      Max.   :1413380.0   Max.   :1186125.0  
-##                                                                             
-##      LANDED            GEARCODE         SECGEARFISH          SPPNAME         
-##  Min.   :     0.29   Length:159194      Length:159194      Length:159194     
-##  1st Qu.:   300.00   Class :character   Class :character   Class :character  
-##  Median :   402.00   Mode  :character   Mode  :character   Mode  :character  
-##  Mean   :  3958.95                                                           
-##  3rd Qu.:   781.00                                                           
-##  Max.   :142392.00                                                           
-##                                                                              
-##       Date                Time             TRIP_ID           Plan Code        
-##  Min.   :2007-05-01   Length:159194      Length:159194      Length:159194     
-##  1st Qu.:2009-05-03   Class :character   Class :character   Class :character  
-##  Median :2012-07-14   Mode  :character   Mode  :character   Mode  :character  
-##  Mean   :2012-12-05                                                           
-##  3rd Qu.:2016-05-29                                                           
-##  Max.   :2019-12-31                                                           
-##                                                                               
-##  Program Code       Area Identifier        ftpt               GC         
-##  Length:159194      Length:159194      Length:159194      Mode :logical  
-##  Class :character   Class :character   Class :character   FALSE:32944    
-##  Mode  :character   Mode  :character   Mode  :character   TRUE :126193   
-##                                                           NA&#39;s :57       
-##                                                                          
-##                                                                          
-##                                                                          
-##      LA              Area             Agg_DOLLAR          Agg_POUNDS       
-##  Mode :logical   Length:159194      Min.   :      0.5   Min.   :      0.5  
-##  FALSE:112941    Class :character   1st Qu.:   2277.0   1st Qu.:   2541.0  
-##  TRUE :46253     Mode  :character   Median :   4200.0   Median :   3365.0  
-##                                     Mean   :  37041.2   Mean   :  33249.0  
-##                                     3rd Qu.:   8962.0   3rd Qu.:   6456.0  
-##                                     Max.   :1413380.0   Max.   :1186125.0  
-##                                                                            
-##    Agg_LANDED            hours          DB_LANDING_YEAR TRIP_COST_2020_DOL
-##  Min.   :     0.29   Min.   :  0.0333   Min.   :2007    Min.   :   16.78  
-##  1st Qu.:   308.00   1st Qu.: 14.2500   1st Qu.:2009    1st Qu.:  647.27  
-##  Median :   404.00   Median : 22.0000   Median :2012    Median : 1231.54  
-##  Mean   :  3995.47   Mean   : 61.8153   Mean   :2012    Mean   : 4684.45  
-##  3rd Qu.:   788.00   3rd Qu.: 62.0000   3rd Qu.:2016    3rd Qu.: 5215.75  
-##  Max.   :142392.00   Max.   :594.0000   Max.   :2019    Max.   :52122.12  
-##                      NA&#39;s   :1          NA&#39;s   :1       NA&#39;s   :1         
-##  TRIP_COST_WINSOR_2020_DOL OBSERVED_COST_DUMMY
-##  Min.   :   29.47          Min.   :0.00000    
-##  1st Qu.:  647.26          1st Qu.:0.00000    
-##  Median : 1231.54          Median :0.00000    
-##  Mean   : 4642.41          Mean   :0.04808    
-##  3rd Qu.: 5215.66          3rd Qu.:0.00000    
-##  Max.   :30595.61          Max.   :1.00000    
-##  NA&#39;s   :1                 NA&#39;s   :1</code></pre>
-<pre class="r"><code>table(cost_join$YEAR)</code></pre>
-<pre><code>## 
-##  2007  2008  2009  2010  2011  2012  2013  2014  2015  2016  2017  2018  2019 
-## 15514 17986 16199 10923 12183 11727 10581  9559 10135 11992 10139 11412 10844</code></pre>
-<pre class="r"><code>table(cost_join$GEARCODE)</code></pre>
-<pre><code>## 
-##     DREDGE-CLAM    DREDGE-OTHER  DREDGE-SCALLOP   GILLNET-OTHER    GILLNET-SINK 
-##            7892              34          124787               1              99 
-##        HANDLINE LONGLINE-BOTTOM           OTHER       POT-OTHER     SEINE-OTHER 
-##              99               3            4075              90               1 
-##    TRAWL-BOTTOM 
-##           22113</code></pre>
-<pre class="r"><code>table(cost_join$STATE)</code></pre>
-<pre><code>## &lt; table of extent 0 &gt;</code></pre>
+summary(cost_join)
+
+table(cost_join$YEAR)
+
+table(cost_join$GEARCODE)
+
+table(cost_join$STATE)</code></pre>
+<pre class="r"><code>### 1. Aggregate DOLLAR, POUNDS, LANDED
+Agg_DOL_POUN_LAND &lt;- VTR_DMIS_AC %&gt;%
+  group_by(TRIPID) %&gt;%
+ summarise(Agg_DOLLAR = sum(DOLLAR), Agg_POUNDS = sum(POUNDS), Agg_LANDED = sum(LANDED))
+
+#### Testing to make sure there are no duplicates in TRIPID groups; this should equal 0
+sum(duplicated(Agg_DOL_POUN_LAND$TRIPID))
+stopifnot(sum(duplicated(Agg_DOL_POUN_LAND$TRIPID))==0)
+
+###  2. Add back into original data set 
+#### all = FALSE is used to keep only rows that match from the data frames
+VTR_DMIS_AC_Agg &lt;- merge(VTR_DMIS_AC,Agg_DOL_POUN_LAND, by.x = &quot;TRIPID&quot;, by.y = &quot;TRIPID&quot;, all.x = TRUE, all.y = FALSE)
+
+
+
+
+### 3.Parse out Maximum Dollar amounts in order to drop lesser subtrips
+VTR_DMIS_AC_Agg &lt;- VTR_DMIS_AC_Agg %&gt;% group_by(TRIPID) %&gt;% filter(DOLLAR == max(DOLLAR))
+### Another way to check this is by running the following code: VTR_DMIS_AC_Agg %&gt;% group_by(TRIPID) %&gt;% arrange(desc(DOLLAR)) %&gt;% slice(1)
+
+## Test out 
+sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))
+
+stopifnot(sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))==0)</code></pre>
 </div>
 
 
