@@ -14,9 +14,9 @@
 
 oracle_server = "sole"
 
-oracle_username<-"<yourid>"
-oracle_password<-"<yoursole_pwd>"
-novapw<-"<yournova_pwd"
+oracle_username<-"yourid"
+oracle_password<-"yoursole_pwd"
+novapw<-"yournova_pwd"
 
 # I've commented this out, because we are not using ROracle anymore to access Oracle.
 
