@@ -1,5 +1,5 @@
 # Purpose
-This repository contains code to extract and processes data. Our goal is to construct a dataset that can be used to estimate a location choice model scallops to understand the effect of wind energy areas on this fleet. We are using data from 2007-2019 (calendar years).  The main datasource is a frozen DMIS table.
+This repository contains [code to extract and processes data](data_extraction_and_processing_code.Rmd). Our goal is to construct a dataset that can be used to estimate a location choice model scallops to understand the effect of wind energy areas on this fleet. We are using data from 2007-2019 (calendar years).  The main datasource is a frozen DMIS table.  Perhaps one day, in the not too distant future, this repository will contain code to estimate the choice model also.
 
 # Testing and Functionality
 
@@ -13,7 +13,7 @@ This code has primarily been developed by Marina Chaji and runs on the neptune s
     1.  If you are already using github on neptune, then this is straightforward.
     2.  If not, you will need to follow the steps here [here](https://github.com/NEFSC/READ-SSB-LEE-On-the-servers) for the steps to create an access token, store it on neptune, and clone a repository.
 3.  Edit the R_credentials_sample.R. Follow the instructions in comments at the top.
-4.  Use Rstudio to knit the "data_extraction_and_processing_code.Rmd" to html.
+4.  Use Rstudio to knit the [code to extract and processes data](data_extraction_and_processing_code.Rmd) to html.
     
 # Dependencies
 
