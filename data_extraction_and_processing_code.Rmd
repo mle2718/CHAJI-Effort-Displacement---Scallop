@@ -145,7 +145,7 @@ tabl <- "
 |permit| Six-digit vessel fishing permit number assigned by the NE Regional Office permit system||
 |nsubtrip| Number of subtrips (see description of subtrips|
 |crew| number of crew, including captain|
-|port| 6 digit numeric code for the port, renamed to VTR\_PORTNUM to make clear is a companion to VTR_PORT and VTR_STATE |
+|port| 6 digit numeric code for the port, renamed to VTR_PORTNUM to make clear is a companion to VTR_PORT and VTR_STATE |
 
 "
 cat(tabl) 
@@ -170,8 +170,13 @@ tabl <- "
 "
 cat(tabl) 
 ```
-The spacepanels data tidies up vtr ports and aggregates them to the US Census county subdivision.  The lat-lons are either the centroid of the geoid and/or adjusted to the coast. There is probably some error here, but if the goal is to use these points to help construct distances or costs to go fishing, they are probably accurate enough.
+The spacepanels data tidies up vtr ports and aggregates them to the [US Census county subdivision](https://www.census.gov/programs-surveys/geography/technical-documentation/complete-technical-documentation.html).  The lat-lons are either the centroid of the geoid and/or adjusted to the coast. There is probably some error here, but if the goal is to use these points to help construct distances or costs to go fishing, they are probably accurate enough.
 
+This dataset includes all trips from 1996-2021. Use the vintage date appended to the end of the file to assess whether the final year of data is "complete" enough for your purposes.  There are known:
+
+* Missing `tripids`. There are about 10-20 per year. They probably correspond to SC/OQ
+* missing `vtr_portnum' There are about 130 obs. These are 2019-present and probably reflect changes in the underlying data that haven't been picked up and cleaned in the code.
+* missing geoid.  There are about 3,000 obs. Many of these are because the vtr_port is "Other State".  However some of them are because 
 
 ##  Description of the VMS data.
 We are currently not using the VMS data directly. 
@@ -207,7 +212,7 @@ source("/net/home4/mchaji/credentials.R")
 net<-network_location_desktop
 net<-network_location_remote
 offshoreWind_directory<-file.path(net,"home5", "dcorvi","OffshoreWind","offshoreWind4","data")
-
+spacepanels_directory<-file.path(net,"home2", "mlee","dropoff","wind")
 cost_directory<-file.path(net,"work5","socialsci","Trip_Costs","2007-2020")
 
 ```
@@ -222,9 +227,26 @@ The frozen DMIS table from the offshoreWind project (APSD_DMIS_2) is the base da
 load(file.path(offshoreWind_directory, "APSD_DMIS_2.rda"))
 #load("~/offshoreWind-master/data-raw/REVENUEFILE.Rdata")
 #load("~/offshoreWind-master/data/APSD_DMIS_2.Rdata")
+
+
 ```
 
 
+# Read in Port lats and lons  
+
+Load in the lats and lons of all ports from the spacepanels directory. Change the column names to clarify that the lat-lons are the ports. Join this to the APSD_DMIS_2 dataset, keeping all rows of the APSD_DMIS_2 dataset and dropping any rows from tripids_geoids that do not match.
+
+```{r readin_spacepanels, echo=TRUE}
+#Import Data
+tripid_geoids<- haven::read_dta(file.path(spacepanels_directory,"just_ports_2020_11_03.dta"))
+#disambiguate
+names(tripid_geoids)[names(tripid_geoids) == 'lat'] <- "port_lat"
+names(tripid_geoids)[names(tripid_geoids) == 'lon'] <- "port_lon"
+tripid_geoids<-tripid_geoids[c("tripid","port", "geoid", "namelsad", "port_lat","port_lon")]
+
+APSD_DMIS_2<-merge(APSD_DMIS_2,tripid_geoids, by.x="DOCID", by.y="tripid", all.x=TRUE, all.y=FALSE)
+```
+This match should be pretty good for source=DMIS. But it will not work for source=SFCLAM.
 
 # Loading Data fom Oracle 
 
