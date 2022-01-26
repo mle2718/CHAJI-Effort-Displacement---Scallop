@@ -160,12 +160,13 @@ tabl <- "
 |------------|:-----------------------------------------------|
 |TRIPID|VESLOG Trip record identifier, which is generated internally and used for linking|
 |geoid| 10 digit county subdivision from US Census. |
+|state_fips| 2 digit state fips code  |
 |portlnd1| string of the name of the port that the vessel operator writes on the VTR.|
 |state1 | 2 letter abbreviation of the state|
 |port| 6 digit port code. Should match vtr_portnum from VTR|
 |namelsad| Name and Legal/Statistical description|
-|lat| Latitude of the geoid|
-|lon| longitude of the geoid| 
+|port_lat| Latitude of the geoid|
+|port_lon| longitude of the geoid| 
 
 "
 cat(tabl) 
@@ -245,9 +246,7 @@ Load in the lats and lons of all ports from the spacepanels directory. Change th
 #Import Data
 tripid_geoids<- haven::read_dta(file.path(spacepanels_directory,"just_ports_2020_11_03.dta"))
 #disambiguate
-names(tripid_geoids)[names(tripid_geoids) == 'lat'] <- "port_lat"
-names(tripid_geoids)[names(tripid_geoids) == 'lon'] <- "port_lon"
-tripid_geoids<-tripid_geoids[c("tripid","geoid", "namelsad", "port_lat","port_lon")]
+tripid_geoids<-tripid_geoids[c("tripid","geoid", "namelsad", "state_fips","port_lat","port_lon")]
 
 APSD_DMIS_2<-merge(APSD_DMIS_2,tripid_geoids, by.x="DOCID", by.y="tripid", all.x=TRUE, all.y=FALSE)
 ```
