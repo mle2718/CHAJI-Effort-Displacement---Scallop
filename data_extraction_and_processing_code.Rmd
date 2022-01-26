@@ -159,10 +159,10 @@ tabl <- "
 | Column  | Description           |
 |------------|:-----------------------------------------------|
 |TRIPID|VESLOG Trip record identifier, which is generated internally and used for linking|
-|vtr_port| string of the name of the port that the vessel operator writes on the VTR|
-|vtr_state | 2 letter abbreviation of the state|
-|vtr_portnum| 6 digit port code. Should match vtr_portnum from VTR|
 |geoid| 10 digit county subdivision from US Census. |
+|portlnd1| string of the name of the port that the vessel operator writes on the VTR.|
+|state1 | 2 letter abbreviation of the state|
+|port| 6 digit port code. Should match vtr_portnum from VTR|
 |namelsad| Name and Legal/Statistical description|
 |lat| Latitude of the geoid|
 |lon| longitude of the geoid| 
@@ -170,13 +170,18 @@ tabl <- "
 "
 cat(tabl) 
 ```
-The spacepanels data tidies up vtr ports and aggregates them to the [US Census county subdivision](https://www.census.gov/programs-surveys/geography/technical-documentation/complete-technical-documentation.html).  The lat-lons are either the centroid of the geoid and/or adjusted to the coast. There is probably some error here, but if the goal is to use these points to help construct distances or costs to go fishing, they are probably accurate enough.
+
+
+The spacepanels data tidies up vtr ports and aggregates them to the [US Census county subdivision](https://www.census.gov/programs-surveys/geography/technical-documentation/complete-technical-documentation.html). You should *not* expect an exact match between portlnd1, state1, and port in the spacepanels dataset compared to the same columns in the raw vtr because some data clean was done on these fields.
+
+*  Geoid is geoid10.  The lat-lons are either the centroid of the geoid and/or adjusted to the coast. There is probably some error here, but if the goal is to use these points to help construct distances or costs to go fishing, they are probably accurate enough.  
 
 This dataset includes all trips from 1996-2021. Use the vintage date appended to the end of the file to assess whether the final year of data is "complete" enough for your purposes.  There are known:
+  
+  *   Missing `tripids`. There are about 10-20 per year. They probably correspond to SC/OQ
+*   Missing `vtr_portnum` There are about 130 obs. These are 2019-present and probably reflect changes in the underlying data that haven't been picked up and cleaned in the code.
+*   Missing `geoid`.  There are about 3,000 obs. Many of these are because the vtr_port is "Other State".  A few are missing because of a new port. Working on this now.
 
-* Missing `tripids`. There are about 10-20 per year. They probably correspond to SC/OQ
-* missing `vtr_portnum' There are about 130 obs. These are 2019-present and probably reflect changes in the underlying data that haven't been picked up and cleaned in the code.
-* missing geoid.  There are about 3,000 obs. Many of these are because the vtr_port is "Other State".  However some of them are because 
 
 ##  Description of the VMS data.
 We are currently not using the VMS data directly. 
@@ -242,7 +247,7 @@ tripid_geoids<- haven::read_dta(file.path(spacepanels_directory,"just_ports_2020
 #disambiguate
 names(tripid_geoids)[names(tripid_geoids) == 'lat'] <- "port_lat"
 names(tripid_geoids)[names(tripid_geoids) == 'lon'] <- "port_lon"
-tripid_geoids<-tripid_geoids[c("tripid","port", "geoid", "namelsad", "port_lat","port_lon")]
+tripid_geoids<-tripid_geoids[c("tripid","geoid", "namelsad", "port_lat","port_lon")]
 
 APSD_DMIS_2<-merge(APSD_DMIS_2,tripid_geoids, by.x="DOCID", by.y="tripid", all.x=TRUE, all.y=FALSE)
 ```
