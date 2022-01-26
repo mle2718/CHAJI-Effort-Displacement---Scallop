@@ -175,11 +175,12 @@ cat(tabl)
 
 The spacepanels data tidies up vtr ports and aggregates them to the [US Census county subdivision](https://www.census.gov/programs-surveys/geography/technical-documentation/complete-technical-documentation.html). You should *not* expect an exact match between portlnd1, state1, and port in the spacepanels dataset compared to the same columns in the raw vtr because some data clean was done on these fields.
 
-*  Geoid is geoid10.  The lat-lons are either the centroid of the geoid and/or adjusted to the coast. There is probably some error here, but if the goal is to use these points to help construct distances or costs to go fishing, they are probably accurate enough.  
+*  `Geoid` is geoid10.  The lat-lons are either the centroid of the geoid and/or adjusted to the coast. There is probably some error here, but if the goal is to use these points to help construct distances or costs to go fishing, they are probably accurate enough.  
 
+*  `namelsad` is a convenient name (Like "Boston city"). However, be aware that there are some places with the same name, so use either the `geoid` or the `namelsad` plus `state` or `state_fips`.  This could also be solved by using the `namelsad` as factor levels 
 This dataset includes all trips from 1996-2021. Use the vintage date appended to the end of the file to assess whether the final year of data is "complete" enough for your purposes.  There are known:
   
-  *   Missing `tripids`. There are about 10-20 per year. They probably correspond to SC/OQ
+*   Missing `tripids`. There are about 10-20 per year. They probably correspond to SC/OQ
 *   Missing `vtr_portnum` There are about 130 obs. These are 2019-present and probably reflect changes in the underlying data that haven't been picked up and cleaned in the code.
 *   Missing `geoid`.  There are about 3,000 obs. Many of these are because the vtr_port is "Other State".  A few are missing because of a new port. Working on this now.
 
