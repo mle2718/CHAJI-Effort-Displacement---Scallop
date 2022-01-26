@@ -222,7 +222,7 @@ START.YEAR = 2007
 END.YEAR = 2019
 for(i in START.YEAR:END.YEAR) {
   print(i)
-  CURRENT.QUERY = paste("SELECT VTR.veslog",i,"t.TRIPID,tripcatg, operator, opernum, permit, nsubtrip, crew,not_fished  
+  CURRENT.QUERY = paste("SELECT VTR.veslog",i,"t.TRIPID,tripcatg, operator, opernum, permit, nsubtrip, crew,not_fished, port as portnum  
                 FROM VTR.veslog",i,"t", sep="")
   YEAR.RESULT = sqlQuery(ODBC.CONNECTION, CURRENT.QUERY)  
   
