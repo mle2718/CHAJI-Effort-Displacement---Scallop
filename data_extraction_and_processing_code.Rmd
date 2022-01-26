@@ -130,7 +130,7 @@ tabl <- "
 cat(tabl) 
 ```
 
-ACTIVITY_CODE and a set of PLAN_CAT categorica variables are used from the live DMIS tables. We join using TRIP_ID, DOCID.  See [here](/external_documentation/vms_declaration_code_glossary_may_2018.pdf)
+ACTIVITY_CODE and a set of PLAN_CAT categorical variables are used from the live DMIS tables. We join using TRIP_ID, DOCID.  See [here](/external_documentation/vms_declaration_code_glossary_may_2018.pdf)
 
 
 ##  Description of the VTR data.
@@ -145,10 +145,32 @@ tabl <- "
 |permit| Six-digit vessel fishing permit number assigned by the NE Regional Office permit system||
 |nsubtrip| Number of subtrips (see description of subtrips|
 |crew| number of crew, including captain|
+|port| 6 digit numeric code for the port, renamed to VTR\_PORTNUM to make clear is a companion to VTR_PORT and VTR_STATE |
+
 "
 cat(tabl) 
 ```
 
+
+
+##  Description of the SPACEPANELS data.
+```{r SPACEPANELS_overview, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
+tabl <- "
+| Column  | Description           |
+|------------|:-----------------------------------------------|
+|TRIPID|VESLOG Trip record identifier, which is generated internally and used for linking|
+|vtr_port| string of the name of the port that the vessel operator writes on the VTR|
+|vtr_state | 2 letter abbreviation of the state|
+|vtr_portnum| 6 digit port code. Should match vtr_portnum from VTR|
+|geoid| 10 digit county subdivision from US Census. |
+|namelsad| Name and Legal/Statistical description|
+|lat| Latitude of the geoid|
+|lon| longitude of the geoid| 
+
+"
+cat(tabl) 
+```
+The spacepanels data tidies up vtr ports and aggregates them to the US Census county subdivision.  The lat-lons are either the centroid of the geoid and/or adjusted to the coast. There is probably some error here, but if the goal is to use these points to help construct distances or costs to go fishing, they are probably accurate enough.
 
 
 ##  Description of the VMS data.
@@ -222,7 +244,7 @@ START.YEAR = 2007
 END.YEAR = 2019
 for(i in START.YEAR:END.YEAR) {
   print(i)
-  CURRENT.QUERY = paste("SELECT VTR.veslog",i,"t.TRIPID,tripcatg, operator, opernum, permit, nsubtrip, crew,not_fished, port as portnum  
+  CURRENT.QUERY = paste("SELECT VTR.veslog",i,"t.TRIPID,tripcatg, operator, opernum, permit, nsubtrip, crew,not_fished, port as VTR_PORTNUM  
                 FROM VTR.veslog",i,"t", sep="")
   YEAR.RESULT = sqlQuery(ODBC.CONNECTION, CURRENT.QUERY)  
   
@@ -238,7 +260,7 @@ for(i in START.YEAR:END.YEAR) {
 
 ## Note: This data is pulled in order to fill in a large number of blanks in reporting 
 
-  CURRENT.QUERY = paste ("SELECT VTR.veslog",i,"t.TRIPID,tripcatg, operator, opernum, permit, nsubtrip, crew,not_fished  
+  CURRENT.QUERY = paste ("SELECT VTR.veslog",i,"t.TRIPID,tripcatg, operator, opernum, permit, nsubtrip, crew,not_fished,port as VTR_PORTNUM   
                 FROM VTR.veslog",i,"t", sep="")
   VTR.veslog2019t = sqlQuery(ODBC.CONNECTION, CURRENT.QUERY) 
 
