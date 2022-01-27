@@ -1,10 +1,11 @@
 ---
 title: "Post Activity Code Clean Up"
 author: "Marina Chaji"
-date: "`r format(Sys.time(), '%B %d, %Y, %H:%M')`" 
+date: "`r format(Sys.time(), '%B %d, %Y, %H:%M')`"
 output:
+  pdf_document: default
   html_document:
-    number_sections: true
+    number_sections: yes
 ---
 
 
@@ -605,7 +606,7 @@ stopifnot(sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))==0)
 
 A spatial join is done with Water data, Ten Minute Squares, & Lease Areas shape file. Points are assigned to Ten Minute Squares and Lease areas on a one to one joint point basis for observations within a square. This can be adjusted later by adding buffers.  
 
-```{r reading_spatial_join}
+```{r reading_spatial_join,echo=TRUE, eval=FALSE}
 
 ## Delete unnecessary columns 
 water_ac$Area <- NULL
@@ -641,7 +642,7 @@ FY2015-2019: 8
 
 
 ## This might be temporary; still looking into different integration methods with activity codes
-```{r filter_LA1}
+```{r filter_LA1, echo=TRUE, eval=FALSE}
 LA_Estimate <- X11_29_21_Spatial_Join %>% filter(Agg_LANDED >= 850 & CREW <= 8)
 
 ```
@@ -649,7 +650,7 @@ LA_Estimate <- X11_29_21_Spatial_Join %>% filter(Agg_LANDED >= 850 & CREW <= 8)
 # Add in cost data 
 
 These data should reference the  "Estimation of Commercial Fishing Trip Costs Using Sea Sampling Data" paper by Samantha Werner & Geret DePiper.  We will likely use the Winsorized trip cost estimates.
-```{r merge_cost_data, echo=TRUE}
+```{r merge_cost_data, echo=TRUE, eval=FALSE}
 #Import Data
 X2007_2012 <- read_excel(file.path(cost_directory,"2007_2012.xlsx"))
 X2013_2020 <- read_excel(file.path(cost_directory,"2013_2020.xlsx"))
@@ -666,7 +667,7 @@ cost_join_LA <-merge(LA_Estimate,all_yrs_costs, by.x = "TRIPID", by.y = "VTR_TRI
 
 # Some summary statistcs
 
-```{r summary_statistics}
+```{r summary_statistics,echo=TRUE, eval=FALSE}
 # Here is a placeholder where we will make a few summary statistics tables.  Nothing too fancy. This may be sufficient.
 # This has not been tested. Yet.
 
@@ -683,7 +684,7 @@ table(cost_join$STATE)
 
 
 
-```{r construct_trip_aggregates2}
+```{r construct_trip_aggregates2,echo=TRUE, eval=FALSE}
 ### 1. Aggregate DOLLAR, POUNDS, LANDED
 Agg_DOL_POUN_LAND <- VTR_DMIS_AC %>%
   group_by(TRIPID) %>%
