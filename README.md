@@ -20,7 +20,7 @@ This code has primarily been developed by Marina Chaji and runs on the neptune s
 
 This code depends on:
 1.  The ability to connect to NEFSC oracle databases (VTR and the Live DMIS tables at APSD.t_ssb_trip_current@garfo_nefsc).  We are using RODBC.  R may need to be aware of where your ORACLE_HOME is  -- take a look [here](https://github.com/NEFSC/READ-SSB-LEE-On-the-servers).  
-2.  The ability to get files from the frozen APSD_DMIS_2 and trip_cost.xlsx files from the network
+2.  The ability to get files from the frozen `APSD_DMIS_2.rda`, `trip_cost.xlsx`, and `just_ports_YYYY_MM_DD.dta` files from the network.
 
 # Project Roles and Responsibilities
 
