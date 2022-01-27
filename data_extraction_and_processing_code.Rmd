@@ -266,8 +266,13 @@ Load in the lats and lons of all ports from the spacepanels directory. Change th
 ```{r readin_spacepanels, echo=TRUE}
 #Import Data
 tripid_geoids<- haven::read_dta(file.path(spacepanels_directory,"just_ports_2022_01_26.dta"))
-#disambiguate
+#Could do all this in one step, but ...
+# Pick the cols that start with previous
+prev<-tripid_geoids[grepl("^previous_", colnames(tripid_geoids))]
+#pick the rest of the cols
 tripid_geoids<-tripid_geoids[c("tripid","geoid", "namelsad", "state_fips","port_lat","port_lon")]
+#cbind the two together
+tripid_geoids<-cbind(tripid_geoids,prev)
 
 APSD_DMIS_2<-merge(APSD_DMIS_2,tripid_geoids, by.x="DOCID", by.y="tripid", all.x=TRUE, all.y=FALSE)
 ```
