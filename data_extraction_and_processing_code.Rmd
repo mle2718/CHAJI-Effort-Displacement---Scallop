@@ -487,11 +487,11 @@ Since our goal is to estimate a choice model at the trip level, we need to const
  We retained the subtrip attributes  (GEARCODE, DDLAT, DDLON) corresponding to the subtrip with the highest DOLLAR.  We constructed trip-level values for revenue, pounds, and landed (DOLLAR, POUNDS, LANDED).  The trip level variables are prefixed with "Agg_". 
 
 1. Aggregate DOLLAR, POUNDS, LANDED
-1. Add back into orginial data set 
+1. Add back into original data set 
 1. Check / Test Maximum DOLLAR values by grouping by TRIPID
 1. Drop duplicate TRIPIDs by keeping maximum DOLLAR values 
 
-This may not be realistic. There are anecodotes of vessels fishing in one spot on the way to another, further offshore spot.  Subtrips may be a bigger issue when we extend to other fisheries.If we have the ability to model fishing choices at a finer scale than at a trip, this can be modified fairly easily.
+This may not be realistic. There are anecdotes of vessels fishing in one spot on the way to another, further offshore spot.  Subtrips may be a bigger issue when we extend to other fisheries.If we have the ability to model fishing choices at a finer scale than at a trip, this can be modified fairly easily.
 
 # Trips reported on land will be dropped from observations 
 
