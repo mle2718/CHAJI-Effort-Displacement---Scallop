@@ -599,27 +599,6 @@ stopifnot(sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))==0)
 
 
 
-# Import data set only including water observations
-
-1. Data is imported from RStudio on Desktop
-1. Data is imported from ArcGISPro
-
-A spatial join is done with Water data, Ten Minute Squares, & Lease Areas shape file. Points are assigned to Ten Minute Squares and Lease areas on a one to one joint point basis for observations within a square. This can be adjusted later by adding buffers.  
-
-```{r reading_spatial_join,echo=TRUE, eval=FALSE}
-
-## Delete unnecessary columns 
-water_ac$Area <- NULL
-
-X11_29_21_Spatial_Join <- read_csv("11_29_21_Spatial_Join.csv")
-View(X11_29_21_Spatial_Join)
-
-##Check that observations between water points and ArcGIS are the same
-
-```
-
-
-
 
 # Estimated Limited Access (LA) Fleet Filter
 We considered filtering out the LADAS scallop fleet by using landings greater than or equal to 850 pounds and Crew less than or equal to 8. These are based on crew limits. In summary:
