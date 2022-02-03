@@ -474,6 +474,55 @@ group_by("YEAR") %>% filter(is.na(OPERNUM))
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Data Aggregating Trip Revenues & Delete duplicate TRIPIDs
 
 Subtrips are generated when a vessel switches gear or statistical areas. Subtrips have identical TRIPID/DOCID.  A trip may have many (8+) subtrips, but the majority of trips observed only have one subtrip (95.7% using original VTR & DMIS merged data set). If a trip has just 1 subtrip, the trip took place in a single statistical area.  If a trip crosses four different statistical areas, the NSUBTRIP is then equal to 4, and the landings, value, latitude, and longitude are reported separately for each area. 
@@ -598,8 +647,6 @@ stopifnot(sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))==0)
 
 
 
-
-
 # Estimated Limited Access (LA) Fleet Filter
 We considered filtering out the LADAS scallop fleet by using landings greater than or equal to 850 pounds and Crew less than or equal to 8. These are based on crew limits. In summary:
 
@@ -662,36 +709,6 @@ table(cost_join$STATE)
 ```
 
 
-
-```{r construct_trip_aggregates2,echo=TRUE, eval=FALSE}
-### 1. Aggregate DOLLAR, POUNDS, LANDED
-Agg_DOL_POUN_LAND <- VTR_DMIS_AC %>%
-  group_by(TRIPID) %>%
- summarise(Agg_DOLLAR = sum(DOLLAR), Agg_POUNDS = sum(POUNDS), Agg_LANDED = sum(LANDED))
-
-#### Testing to make sure there are no duplicates in TRIPID groups; this should equal 0
-sum(duplicated(Agg_DOL_POUN_LAND$TRIPID))
-stopifnot(sum(duplicated(Agg_DOL_POUN_LAND$TRIPID))==0)
-
-###  2. Add back into original data set 
-#### all = FALSE is used to keep only rows that match from the data frames
-VTR_DMIS_AC_Agg <- merge(VTR_DMIS_AC,Agg_DOL_POUN_LAND, by.x = "TRIPID", by.y = "TRIPID", all.x = TRUE, all.y = FALSE)
-
-
-
-
-### 3.Parse out Maximum Dollar amounts in order to drop lesser subtrips
-VTR_DMIS_AC_Agg <- VTR_DMIS_AC_Agg %>% group_by(TRIPID) %>% filter(DOLLAR == max(DOLLAR))
-### Another way to check this is by running the following code: VTR_DMIS_AC_Agg %>% group_by(TRIPID) %>% arrange(desc(DOLLAR)) %>% slice(1)
-
-## Test out 
-sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))
-
-stopifnot(sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))==0)
-
-
-
-```
 
 
 
