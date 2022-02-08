@@ -559,7 +559,7 @@ This may not be realistic. There are anecdotes of vessels fishing in one spot on
 
 # Trips reported on land will be dropped from observations 
 
-```{r desktop_spatial, echo=TRUE}
+```{r spatial land and water, echo=TRUE}
 
 
 
@@ -629,15 +629,21 @@ write.csv(coordinate_table, file=file.path("December 2021","VTR_DMIS_AC_postwate
 ```
 
 
-```{r Spatial Join}
-TMSQ_sp <- st_read("~/January 2022/Ten Minute Squares Cut North and Greater Atlantic")
+```{r Spatial Join 10 minute squares}
+#Step One 
+## Read in your shapefile
+### Note: Viewing the table after this is done is helpful to ensure that the shapefile looks how you expected. You can double-check this by comparing your table in R to your shapefile's attribute table in ArcGIS Pro.
 
-#The line below will plot the "Ten Minute Squares Cut North and Greater Atlantic" shape file. 
+## Import the data set you want to combine with your imported shape file 
+
+
+TMSQ_sp <- st_read("~/January 2022/Ten Minute Squares Cut North and Greater Atlantic")
+## Run the below chunk to see your shapefile plotted out
 qtm(TMSQ_sp) + tm_legend(show = FALSE)
 
+#Creating CRS
 TMSQ_Path_to_spatialpolygons <- function(TMSQ_Path,
                                               projection = CRS("+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0")) {
-
   # TMSQ_Path = "~/January 2022/Ten Minute Squares Cut North and Greater Atlantic"
   # projection = CRS("+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0")
   layer_name = unique(gsub(pattern="(.+)(.shp$)","\\1", ignore.case = TRUE , list.files(path=TMSQ_Path, pattern = "(.+)(.shp$)", ignore.case =TRUE, recursive=F, full.names=F)))
@@ -658,21 +664,17 @@ TMSQ_Path_to_spatialpolygons <- function(TMSQ_Path,
   all_shapes <- spTransform(all_shapes, CRS=projection)
   return(all_shapes)
 }
-
 crs = CRS("+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0")
 
-
- 
-## Code below uses VTR_DMIS_AC data set, converts it into a sf geospatial object, and bins it into the assigned coordinate system (crs).
+## This chunk uses the current data set, converts it into a sf geospatial object, and bins it into the assigned coordinate system (crs).
 
 point_geo <- st_as_sf(VTR_DMIS_AC, 
                       coords = c(x  = "DDLON", y = "DDLAT"), crs = crs )
-
 final_product <- st_join(point_geo, TMSQ_sp, join = st_within)
 
 
-#This chunk uses a "within" join, meaning points within a specific square are given that square value. 
-
+#This chunk uses a "within" join, but other options are available using the sf package 1.0-6. 
+## st_intersects,st_disjoint,st_touches,st_crosses,st_within,st_contains,st_contains_properly,st_overlaps,st_equals,st_covers,st_covered_by,st_equals_exact,st_is_within_distance
 
 
 ```
