@@ -628,6 +628,138 @@ write.csv(coordinate_table, file=file.path("December 2021","VTR_DMIS_AC_postwate
 
 ```
 
+
+```{r Spatial Join}
+TMSQ_sp <- st_read("~/January 2022/Ten Minute Squares Cut North and Greater Atlantic")
+
+#The line below will plot the "Ten Minute Squares Cut North and Greater Atlantic" shape file. 
+qtm(TMSQ_sp) + tm_legend(show = FALSE)
+
+TMSQ_Path_to_spatialpolygons <- function(TMSQ_Path,
+                                              projection = CRS("+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0")) {
+
+  # TMSQ_Path = "~/January 2022/Ten Minute Squares Cut North and Greater Atlantic"
+  # projection = CRS("+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0")
+  layer_name = unique(gsub(pattern="(.+)(.shp$)","\\1", ignore.case = TRUE , list.files(path=TMSQ_Path, pattern = "(.+)(.shp$)", ignore.case =TRUE, recursive=F, full.names=F)))
+  if (length(layer_name)==0) {
+    stop("Shapefile path does not contain a shapefile")
+  }
+  if (length(layer_name) > 1) {
+    file_list <- list.files(TMSQ_Path, pattern = "*shp$", full.names = TRUE)
+    shapefile_list <- lapply(file_list, sf::read_sf)
+    all_shapes <- sf::st_as_sf(data.table::rbindlist(shapefile_list))
+    all_shapes <- all_shapes[,(names(all_shapes) %in% c("MN10SQID"))]
+    all_shapes <- sf::as_Spatial(all_shapes, cast = TRUE, IDs = paste0("ID", seq_along(from)))
+    all_shapes@data$MN10SQID <- all_shapes@data$MN10SQID
+    all_shapes@data$MN10SQID <- NULL
+  } else { # if only one shape
+    all_shapes <- rgdal::readOGR(dsn=TMSQ_Path, layer=layer_name, verbose=F)
+  }
+  all_shapes <- spTransform(all_shapes, CRS=projection)
+  return(all_shapes)
+}
+
+crs = CRS("+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0")
+
+
+ 
+## Code below uses VTR_DMIS_AC data set, converts it into a sf geospatial object, and bins it into the assigned coordinate system (crs).
+
+point_geo <- st_as_sf(VTR_DMIS_AC, 
+                      coords = c(x  = "DDLON", y = "DDLAT"), crs = crs )
+
+final_product <- st_join(point_geo, TMSQ_sp, join = st_within)
+
+
+#This chunk uses a "within" join, meaning points within a specific square are given that square value. 
+
+
+
+```
+
+
+
+```{r}
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ```{r construct_trip_aggregates}
 ### 1. Aggregate DOLLAR, POUNDS, LANDED
 Agg_DOL_POUN_LAND <- VTR_DMIS_AC %>%
