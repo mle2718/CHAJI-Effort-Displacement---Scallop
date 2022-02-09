@@ -630,7 +630,8 @@ dir.create("December 2021", showWarnings="FALSE")
 
 
 ```{r Spatial Joins - Lease Areas and Ten Minute Squares}
-#Step One 
+# Spatial join with ten minute squares 
+
 ## Read in your shapefile
 ### Note: Viewing the table after this is done is helpful to ensure that the shapefile looks how you expected. You can double-check this by comparing your table in R to your shapefile's attribute table in ArcGIS Pro.
 
@@ -654,12 +655,7 @@ final_product <- st_join(point_geo, TMSQ_sp, join = st_within)
 final_product[,c('MN10SQROW','MN10SQCOL','MN30SQID','POINT_Y','POINT_X','geometry','XTXT','YTXT','DG1SQLAT','DG1SQLON','DG1SQID','MN30QUAD','Shape_Leng','Shape_Area', 'MN10SQ')] <- list(NULL)
 
 
-#Step One 
-## Read in your shapefile
-### Note: Viewing the table after this is done is helpful to ensure that the shapefile looks how you expected. You can double-check this by comparing your table in R to your shapefile's attribute table in ArcGIS Pro.
-
-## Import the data set you want to combine with your imported shape file 
-
+#Lease Area Joins
 
 lease_sp <- st_read("~/All_Lease_Areas_Shapefile")
 ## Run the below chunk to see your shapefile plotted out
@@ -680,100 +676,6 @@ final_product_lease <- st_join(point_geo_lease, lease_sp, join = st_within)
 final_product[,c('MN10SQROW','MN10SQCOL','MN30SQID','POINT_Y','POINT_X','geometry','XTXT','YTXT','DG1SQLAT','DG1SQLON','DG1SQID','MN30QUAD','Shape_Leng','Shape_Area', 'MN10SQ')] <- list(NULL)
 
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-```{r}
-
-
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -833,7 +735,7 @@ FY2015-2019: 8
 
 ## This might be temporary; still looking into different integration methods with activity codes
 ```{r filter_LA1, echo=TRUE, eval=FALSE}
-LA_Estimate <- X11_29_21_Spatial_Join %>% filter(Agg_LANDED >= 850 & CREW <= 8)
+LA_Estimate <- VTR_DMIS_AC_Agg %>% filter(Agg_LANDED >= 850 & CREW <= 8)
 
 ```
 
