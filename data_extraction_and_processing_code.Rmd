@@ -629,7 +629,7 @@ dir.create("December 2021", showWarnings="FALSE")
 ```
 
 
-```{r Spatial Join 10 minute squares}
+```{r Spatial Joins - Lease Areas and Ten Minute Squares}
 #Step One 
 ## Read in your shapefile
 ### Note: Viewing the table after this is done is helpful to ensure that the shapefile looks how you expected. You can double-check this by comparing your table in R to your shapefile's attribute table in ArcGIS Pro.
@@ -646,19 +646,14 @@ point_geo <- st_as_sf(VTR_DMIS_AC,
                       coords = c(x  = "DDLON", y = "DDLAT"), crs = crs )
 final_product <- st_join(point_geo, TMSQ_sp, join = st_within)
 
-#Delete unnecessary variables from join 
-final_product[,c('MN10SQROW','MN10SQCOL','MN30SQID','POINT_Y','POINT_X','geometry','XTXT','YTXT','DG1SQLAT','DG1SQLON','DG1SQID','MN30QUAD','Shape_Leng','Shape_Area', 'MN10SQ')] <- list(NULL)
-
 
 #This chunk uses a "within" join, but other options are available using the sf package 1.0-6. 
 ## st_intersects,st_disjoint,st_touches,st_crosses,st_within,st_contains,st_contains_properly,st_overlaps,st_equals,st_covers,st_covered_by,st_equals_exact,st_is_within_distance
 
+#Delete unnecessary variables from join 
+final_product[,c('MN10SQROW','MN10SQCOL','MN30SQID','POINT_Y','POINT_X','geometry','XTXT','YTXT','DG1SQLAT','DG1SQLON','DG1SQID','MN30QUAD','Shape_Leng','Shape_Area', 'MN10SQ')] <- list(NULL)
 
-```
 
-
-
-```{r Spatial Join Lease Areas}
 #Step One 
 ## Read in your shapefile
 ### Note: Viewing the table after this is done is helpful to ensure that the shapefile looks how you expected. You can double-check this by comparing your table in R to your shapefile's attribute table in ArcGIS Pro.
@@ -666,20 +661,23 @@ final_product[,c('MN10SQROW','MN10SQCOL','MN30SQID','POINT_Y','POINT_X','geometr
 ## Import the data set you want to combine with your imported shape file 
 
 
-TMSQ_sp <- st_read("~/All_Lease_Areas_Shapefile")
+lease_sp <- st_read("~/All_Lease_Areas_Shapefile")
 ## Run the below chunk to see your shapefile plotted out
-qtm(TMSQ_sp) + tm_legend(show = FALSE)
+qtm(lease_sp) + tm_legend(show = FALSE)
 
 ## This chunk uses the current data set, converts it into a sf geospatial object, and bins it into the assigned coordinate system (crs).
 
-point_geo <- st_as_sf(final_product, 
+point_geo_lease <- st_as_sf(final_product, 
                       coords = c(x  = "DDLON", y = "DDLAT"), crs = crs )
-final_product_lease <- st_join(point_geo, TMSQ_sp, join = st_within)
+
+final_product_lease <- st_join(point_geo_lease, lease_sp, join = st_within)
 
 
 #This chunk uses a "within" join, but other options are available using the sf package 1.0-6. 
 ## st_intersects,st_disjoint,st_touches,st_crosses,st_within,st_contains,st_contains_properly,st_overlaps,st_equals,st_covers,st_covered_by,st_equals_exact,st_is_within_distance
 
+#Delete unnecessary variables from join 
+final_product[,c('MN10SQROW','MN10SQCOL','MN30SQID','POINT_Y','POINT_X','geometry','XTXT','YTXT','DG1SQLAT','DG1SQLON','DG1SQID','MN30QUAD','Shape_Leng','Shape_Area', 'MN10SQ')] <- list(NULL)
 
 ```
 
