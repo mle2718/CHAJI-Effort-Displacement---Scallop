@@ -624,7 +624,7 @@ VTR_DMIS_AC$Area <- NULL
 
 # finished table is coordinate_table
 dir.create("December 2021", showWarnings="FALSE")
-write.csv(coordinate_table, file=file.path("December 2021","VTR_DMIS_AC_postwater_1217.csv"))
+
 
 ```
 
