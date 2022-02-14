@@ -21,7 +21,7 @@ output:
 
 
 
-```{r setup, include=TRUE, echo=TRUE, results=FALSE}
+```{r setup, include=TRUE, echo=FALSE, results='hide', message=F, warning=F}
 # Project setup
 # Load packages. Install if necessary.
 
@@ -78,7 +78,7 @@ For Fishing Year 2016 and earlier, the fishing year Ran from March 1 to Feb 28/2
 
 ## Wind Energy
 
-Here is a short description of the wind energy areas and how they will close (or not close) area to fishing.  18 wind areas currently under dev.  But many more are likely.
+Here is a short description of the wind energy areas, how large they are,  and how they will close (or not close) area to fishing.  18 wind areas currently under dev.  But many more are likely.
 
 How close will fishing be able to occur within Wind Lease Areas / Turbines?  
 
@@ -88,6 +88,22 @@ The buried cable route from a WEA to shore is likely to be closed as well.  Cabl
 
 # Data
 
+There are four main data sources (so far).  None are perfect.
+
+We have decided to use the DMIS as our primary dataset. DMIS primarily uses Vessel Trip Reports (VTRs) for "trip" and "effort" data and dealer databases for landings. A drawback of using these data are that there is a single point (latitude and longitude) for each time a vessel deploys a particular type of gear into a statistical area. In the LADAS scallop fleet, vessels rarely, if ever, will switch gears at sea.  So, a trip is most likely to have multiple VTRs if it switches statistical areas.
+
+
+Other possibilities were considered for our primary dataset:
+
+1.  Observer cover a subset of the fishery. According to the 2021 SBRM report, it was approximately 8-10% of effort for the Limited access fleet. This would provide haul level lat-lon and estimates of catch for the sampled subset. We viewed the subset as too limited - it would provide us with observations of approximately 200 Access area and 100 open area trips per year.Observer data contains the sailing and landing port. 
+
+2. VMS - VMS data would provide lat-lon at a high frequency. Other researchers have used this; however we uncomfortable with figuring out how to allocate catch along the VMS track. VMS data contains the sailing and landing port. 
+
+3. Rasters.  The raster data are an intermediate data product that combines trip report with a statistical model describes the distance between observed hauls and the vtr point location. This allows for a smoothing of effort catch across a non-arbitrary grid (like a 10 minute square, statistical area, or just a lat-lon point).
+
 Further detail about our data can be found [here](data_extraction_and_processing_code.Rmd).
 
 # Methods
+
+1. FishSET
+1. Spatial Econometrics
