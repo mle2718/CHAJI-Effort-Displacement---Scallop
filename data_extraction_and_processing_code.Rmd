@@ -14,7 +14,12 @@ Load packages. Install if necessary.
 
 ```{r setup, include=TRUE, echo=TRUE, results=FALSE}
 
-PKG <- c("leaflet", "tidyverse", "sf", "RODBC", "RODM", "dbplyr","raster","rgdal","readxl", "data.table", "tmaptools", "tmap", "dplyr")
+# Set Path
+here::i_am("data_extracting_and_processing_code.Rmd")
+
+
+
+PKG <- c("here","leaflet", "tidyverse", "sf", "RODBC", "RODM", "dbplyr","raster","rgdal","readxl", "data.table", "tmaptools", "tmap", "dplyr")
 for (p in PKG) {
   if(!require(p,character.only = TRUE)) {
     install.packages(p)
@@ -24,6 +29,31 @@ vintage_string<-Sys.Date()
 vintage_string<-gsub("-","_",vintage_string)
 
 ```
+
+
+```{r folder_create, include=TRUE, echo=TRUE, results=FALSE}
+
+# Set up some folders
+
+dir.create(here("data"), showWarnings="FALSE")
+dir.create(here("data", "external"), showWarnings="FALSE")
+dir.create(here("data", "external","shapefiles"), showWarnings="FALSE")
+dir.create(here("data", "intermediate"), showWarnings="FALSE")
+dir.create(here("data", "main"), showWarnings="FALSE")
+dir.create(here("data","external","shapefiles","East_Cst_crop_2020_extended"), showWarnings="FALSE")
+dir.create(here("data","external","shapefiles","Ten Minute Squares Cut North and Greater Atlantic"), showWarnings="FALSE")
+dir.create(here("data","external","shapefiles","All_Lease_Areas_Shapefile"), showWarnings="FALSE")
+
+```
+# Organization
+
+We will:
+
+1. Try to avoid copying data; when we rely on data from other people, we will read it directly into memory from the network location or Oracle.
+1. Sometimes this is unnecessary, so we will copy external data into the "data/external" folder. We will have a separate subfolder for shapefiles.
+1. Store an intermediate data product in "data/intermediate".
+1. Store final data products in "data/main."
+1. Use a vintage "suffix" to denote when we have extracted data.
 
 # Introduction
 
