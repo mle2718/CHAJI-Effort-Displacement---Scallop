@@ -55,6 +55,32 @@ We will:
 1. Store final data products in "data/main."
 1. Use a vintage "suffix" to denote when we have extracted data.
 
+
+
+# Read in oracle passwords and set network directory
+This is a block of code where we set up the oracle passwords and make R aware of folders on the network.
+
+```{r oracle_connections, echo=TRUE, results=FALSE}
+source(here("credentials.R"))
+
+# Set the network_location_desktop and network_location_remote variables somewhere OUTSIDE of this code.  The best place to do this is in the .Rprofile or .Renviron files that are in your root directory.  
+
+#Comment one of these out, depending on whether you are running this code on a server or locally (with VPN) 
+net<-network_location_desktop
+net<-network_location_remote
+
+# These are not part of the project path
+offshoreWind_directory<-file.path(net,"home5", "dcorvi","OffshoreWind","offshoreWind4","data")
+spacepanels_directory<-file.path(net,"home2", "mlee","dropoff","wind")
+cost_directory<-file.path(net,"work5","socialsci","Trip_Costs","2007-2020")
+
+# Set up paths.
+East_Cst_crop_2020_path<- here("data","external","shapefiles","East_Cst_crop_2020_extended")
+TMSQ_path<-here("data","external","shapefiles","Ten Minute Squares Cut North and Greater Atlantic")
+All_Lease_Areas_Shapefile_path<-here("data","external","shapefiles","All_Lease_Areas_Shapefile")
+```
+
+
 # Introduction
 
 The main idea of the model is that the fishermen/decision-makers choose from a number of alternatives, where the choice occasion is a fishing trip and selects the one that yields the highest expected utility level on any given choice occasion. By observing and modeling how decision-makers change their preferred site option in response to the changes in the levels of the site attributes, it is possible to determine how decision-makers tradeoff between the different fishing ground characteristics.
@@ -255,25 +281,6 @@ cat(tabl)
 
 
 
-
-
-
-# Read in oracle passwords and set network directory
-This is a block of code where we set up the oracle passwords and make R aware of folders on the network.
-
-```{r oracle_connections, echo=TRUE, results=FALSE}
-source("/net/home4/mchaji/credentials.R")
-
-# Set the network_location_desktop and network_location_remote variables somewhere OUTSIDE of this code.  The best place to do this is in the .Rprofile or .Renviron files that are in your root directory.  
-
-#Comment one of these out, depending on whether you are running this code on a server or locally (with VPN) 
-net<-network_location_desktop
-net<-network_location_remote
-offshoreWind_directory<-file.path(net,"home5", "dcorvi","OffshoreWind","offshoreWind4","data")
-spacepanels_directory<-file.path(net,"home2", "mlee","dropoff","wind")
-cost_directory<-file.path(net,"work5","socialsci","Trip_Costs","2007-2020")
-
-```
 
 
 # Load Offshore Wind Tool Data sets 
@@ -524,50 +531,6 @@ VTR_DMIS_AC <- merge(VTR_DMIS_AC,all_yrs_costs, by.x = "TRIPID", by.y = "VTR_TRI
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # Data Aggregating Trip Revenues & Delete duplicate TRIPIDs
 
 Subtrips are generated when a vessel switches gear or statistical areas. Subtrips have identical TRIPID/DOCID.  A trip may have many (8+) subtrips, but the majority of trips observed only have one subtrip (95.7% using original VTR & DMIS merged data set). If a trip has just 1 subtrip, the trip took place in a single statistical area.  If a trip crosses four different statistical areas, the NSUBTRIP is then equal to 4, and the landings, value, latitude, and longitude are reported separately for each area. 
@@ -598,9 +561,9 @@ This may not be realistic. There are anecdotes of vessels fishing in one spot on
 coordinate_table_input <-VTR_DMIS_AC
 lat_column = "DDLAT"
 lon_column = "DDLON"
-shapefile_path = "shapefiles/East_Cst_crop_2020_extended"
+
 #################################################################################################
-shapefile_path_to_spatialpolygons <- function(shapefile_path,
+shapefile_path_to_spatialpolygons <- function(East_Cst_crop_2020_path,
                                               projection = CRS("+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0")) {
 
   # shapefile_path = "C:/Users/dennis.corvi/Documents/R/Projects/OffshoreWindDev/offshoreWind/areas_minus_SF"
@@ -652,9 +615,6 @@ VTR_DMIS_AC <- coordinate_table %>%
 #Delete Area Variable; Served its purpose as a filter
 VTR_DMIS_AC$Area <- NULL
 
-# finished table is coordinate_table
-dir.create("December 2021", showWarnings="FALSE")
-
 
 ```
 
@@ -668,7 +628,7 @@ dir.create("December 2021", showWarnings="FALSE")
 ## Import the data set you want to combine with your imported shape file 
 
 
-TMSQ_sp <- st_read("~/January 2022/Ten Minute Squares Cut North and Greater Atlantic")
+TMSQ_sp <- st_read(TMSQ_path)
 ## Run the below chunk to see your shapefile plotted out
 qtm(TMSQ_sp) + tm_legend(show = FALSE)
 
@@ -687,7 +647,7 @@ final_product[,c('MN10SQROW','MN10SQCOL','MN30SQID','POINT_Y','POINT_X','geometr
 
 #Lease Area Joins
 
-lease_sp <- st_read("~/All_Lease_Areas_Shapefile")
+lease_sp <- st_read(All_Lease_Areas_Shapefile_path)
 ## Run the below chunk to see your shapefile plotted out
 qtm(lease_sp) + tm_legend(show = FALSE)
 
@@ -704,6 +664,12 @@ final_product_lease <- st_join(point_geo_lease, lease_sp, join = st_within)
 
 #Delete unnecessary variables from join 
 final_product[,c('MN10SQROW','MN10SQCOL','MN30SQID','POINT_Y','POINT_X','geometry','XTXT','YTXT','DG1SQLAT','DG1SQLON','DG1SQID','MN30QUAD','Shape_Leng','Shape_Area', 'MN10SQ')] <- list(NULL)
+
+
+#save to RDS
+final_product_savename<-paste0("final_product_",vintage_string,".Rds")
+saveRDS(final_product, file=here("data","main",final_product_savename))
+
 
 ```
 
@@ -736,12 +702,7 @@ sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))
 stopifnot(sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))==0)
 
 
-
 ```
-
-
-
-
 
 # Estimated Limited Access (LA) Fleet Filter
 We considered filtering out the LADAS scallop fleet by using landings greater than or equal to 850 pounds and Crew less than or equal to 8. These are based on crew limits. In summary:
