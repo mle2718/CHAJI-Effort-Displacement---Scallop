@@ -15,7 +15,7 @@ Load packages. Install if necessary.
 ```{r setup, include=TRUE, echo=TRUE, results=FALSE}
 
 # Set Path
-here::i_am("data_extracting_and_processing_code.Rmd")
+here::i_am("data_extraction_and_processing_code.Rmd")
 
 
 
