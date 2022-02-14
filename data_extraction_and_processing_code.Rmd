@@ -29,9 +29,11 @@ vintage_string<-Sys.Date()
 vintage_string<-gsub("-","_",vintage_string)
 
 ```
+# Organization
 
 
-```{r folder_create, include=TRUE, echo=TRUE, results=FALSE}
+```{r folder_create, include=TRUE, echo=FALSE, results=FALSE}
+# You only need to run this once, but nothing bad will happen if you keep include=TRUE.
 
 # Set up some folders
 
@@ -45,7 +47,6 @@ dir.create(here("data","external","shapefiles","Ten Minute Squares Cut North and
 dir.create(here("data","external","shapefiles","All_Lease_Areas_Shapefile"), showWarnings="FALSE")
 
 ```
-# Organization
 
 We will:
 
@@ -57,7 +58,7 @@ We will:
 
 
 
-# Read in oracle passwords and set network directory
+## Read in oracle passwords and set network directory
 This is a block of code where we set up the oracle passwords and make R aware of folders on the network.
 
 ```{r oracle_connections, echo=TRUE, results=FALSE}
@@ -79,7 +80,6 @@ East_Cst_crop_2020_path<- here("data","external","shapefiles","East_Cst_crop_202
 TMSQ_path<-here("data","external","shapefiles","Ten Minute Squares Cut North and Greater Atlantic")
 All_Lease_Areas_Shapefile_path<-here("data","external","shapefiles","All_Lease_Areas_Shapefile")
 ```
-
 
 # Introduction
 
@@ -514,7 +514,7 @@ group_by("YEAR") %>% filter(is.na(OPERNUM))
 # Add in cost data 
 
 These data should reference the  "Estimation of Commercial Fishing Trip Costs Using Sea Sampling Data" paper by Samantha Werner & Geret DePiper.  We will likely use the Winsorized trip cost estimates.
-```{r merge_cost_data, echo=TRUE, eval=FALSE}
+```{r merge_cost_data, echo=TRUE, eval=TRUE}
 #Import Data
 X2007_2012 <- read_excel(file.path(cost_directory,"2007_2012.xlsx"))
 X2013_2020 <- read_excel(file.path(cost_directory,"2013_2020.xlsx"))
@@ -561,9 +561,9 @@ This may not be realistic. There are anecdotes of vessels fishing in one spot on
 coordinate_table_input <-VTR_DMIS_AC
 lat_column = "DDLAT"
 lon_column = "DDLON"
-
+shapefile_path<-East_Cst_crop_2020_path
 #################################################################################################
-shapefile_path_to_spatialpolygons <- function(East_Cst_crop_2020_path,
+shapefile_path_to_spatialpolygons <- function(shapefile_path,
                                               projection = CRS("+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0")) {
 
   # shapefile_path = "C:/Users/dennis.corvi/Documents/R/Projects/OffshoreWindDev/offshoreWind/areas_minus_SF"
