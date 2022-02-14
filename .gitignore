@@ -1,8 +1,10 @@
 .Rproj.user
 R_credentials.R
+credentials.R
 .Rproj.user
 *.rds
 *.Rds
 *.Rproj
 *.Rhistory
 *.csv
+*.Rds
