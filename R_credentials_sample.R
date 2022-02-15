@@ -1,7 +1,7 @@
 #  A place to store your username and password.  
 #  To use this:
 #    make a copy of this file.
-#    Name the copy "R_credentials.R"
+#    Name the copy "credentials.R"
 #    Place it in your root directory.  
 #    Fill in your oracle_username, oracle_password.  
 
