@@ -41,7 +41,7 @@ for (p in PKG) {
 # You might need to manually set the vintage_string
 vintage_string<-Sys.Date()
 vintage_string<-gsub("-","_",vintage_string)
-vintage_string<-"2022_02_14"
+vintage_string<-"2022_02_16"
 
 #####################################################################################################
 #
@@ -51,9 +51,8 @@ vintage_string<-"2022_02_14"
 # document. 
 #####################################################################################################
 # Load in the data.  
-
-final_product_savename<-paste0("final_product_",vintage_string,".Rds")
-# final_product<-readRDS(final_product, file=here("data","main",final_product_savename))
+final_product_savename<-paste0("final_product_lease",vintage_string,".Rds")
+final_product_lease<-readRDS(here("data","main",final_product_savename))
 ```
 
 
@@ -102,6 +101,36 @@ Other possibilities were considered for our primary dataset:
 3. Rasters.  The raster data are an intermediate data product that combines trip report with a statistical model describes the distance between observed hauls and the vtr point location. This allows for a smoothing of effort catch across a non-arbitrary grid (like a 10 minute square, statistical area, or just a lat-lon point).
 
 Further detail about our data can be found [here](data_extraction_and_processing_code.Rmd).
+
+## Some summary statistcs
+
+The filter we are doing is has scallop landings.
+```{r summary_statistics,echo=TRUE, eval=TRUE}
+# Here are a few summary statistics tables.  Nothing too fancy. This may be sufficient.
+
+summary(final_product_lease)
+
+table(final_product_lease$NSUBTRIP)
+
+table(final_product_lease$YEAR)
+
+table(final_product_lease$GEARCODE)
+
+table(final_product_lease$ftpt)
+
+table(final_product_lease$VTR_STATE)
+
+table(final_product_lease$`Plan Code`)
+table(final_product_lease$`Program Code`)
+
+```
+The "SES" Plan code corresponds to declaring into the Scallop Fishery (Limited access or General Category).
+
+The Program codes of most interest are probably:
+
+1. SES-SAA - Scallop Access Area
+1. SES-SCA - Scallop Days at Sea
+1. SES-SCG General Category Scallop
 
 # Methods
 
