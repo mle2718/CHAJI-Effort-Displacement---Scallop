@@ -550,6 +550,56 @@ Since our goal is to estimate a choice model at the trip level, we need to const
 
 This may not be realistic. There are anecdotes of vessels fishing in one spot on the way to another, further offshore spot.  Subtrips may be a bigger issue when we extend to other fisheries.If we have the ability to model fishing choices at a finer scale than at a trip, this can be modified fairly easily.
 
+
+## DEPRECATED - Code to aggregate subtrip landings to subtrips.
+
+We are now pulling subtrips along to the end instead of aggregating.  If you want to contract multi-area or multi-gear trips down to a single observation, this is how you would do it.
+
+```{r construct_trip_aggregates, echo=TRUE, eval=FALSE}
+### 1. Aggregate DOLLAR, POUNDS, LANDED
+Agg_DOL_POUN_LAND <- VTR_DMIS_AC %>%
+  group_by(TRIPID) %>%
+ summarise(Agg_DOLLAR = sum(DOLLAR), Agg_POUNDS = sum(POUNDS), Agg_LANDED = sum(LANDED))
+
+#### Testing to make sure there are no duplicates in TRIPID groups; this should equal 0
+sum(duplicated(Agg_DOL_POUN_LAND$TRIPID))
+stopifnot(sum(duplicated(Agg_DOL_POUN_LAND$TRIPID))==0)
+
+###  2. Add back into original data set 
+#### all = FALSE is used to keep only rows that match from the data frames
+VTR_DMIS_AC_Agg <- merge(VTR_DMIS_AC,Agg_DOL_POUN_LAND, by.x = "TRIPID", by.y = "TRIPID", all.x = TRUE, all.y = FALSE)
+
+
+
+
+### 3.Parse out Maximum Dollar amounts in order to drop lesser subtrips
+VTR_DMIS_AC_Agg <- VTR_DMIS_AC_Agg %>% group_by(TRIPID) %>% filter(DOLLAR == max(DOLLAR))
+### Another way to check this is by running the following code: VTR_DMIS_AC_Agg %>% group_by(TRIPID) %>% arrange(desc(DOLLAR)) %>% slice(1)
+
+## Test out 
+sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))
+
+stopifnot(sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))==0)
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Trips reported on land will be dropped from observations 
 
 ```{r spatial land and water, echo=TRUE, eval=TRUE}
@@ -673,44 +723,54 @@ final_product_lease[,c('geometry')]<-NULL
 
 
 #save to RDS
-final_product_savename<-paste0("final_product_",vintage_string,".Rds")
-saveRDS(final_product, file=here("data","main",final_product_savename))
+final_product_savename<-paste0("final_product_lease",vintage_string,".Rds")
+saveRDS(final_product_lease, file=here("data","main",final_product_savename))
+
+# to read this in, you will want to do the here::i_am dance and then read in
+# final_product_savename<-paste0("final_product_lease",vintage_string,".Rds")
+# final_product_lease<-readRDS(here("data","main",final_product_savename))
+
+
 ```
+
+# Some summary statistcs
+
+
+```{r summary_statistics,echo=TRUE, eval=TRUE}
+# Here is a placeholder where we will make a few summary statistics tables.  Nothing too fancy. This may be sufficient.
+# This has not been tested. Yet.
+
+summary(final_product_lease)
+
+table(final_product_lease$YEAR)
+
+table(final_product_lease$GEARCODE)
+
+table(final_product_lease$ftpt)
+
+table(final_product_lease$VTR_STATE)
+
+table(final_product_lease$`Plan Code`)
+table(final_product_lease$`Program Code`)
+
+
+```
+
+
+```{r 10minute_square_plot,echo=FALSE, eval=TRUE,fig.cap = "10 minutes squares" }
+ qtm(TMSQ_sp) + tm_legend(show = FALSE)
+```
+
+
+
+```{r Wind_Energy_Plot,echo=FALSE, eval=TRUE,fig.cap = "Wind Energy Areas" }
+qtm(lease_sp) + tm_legend(show = FALSE)
+```
+
+
 # Here is some code that we are no longer using. 
 
-## Code to aggregate subtrip landings to subtrips.
-```{r construct_trip_aggregates, echo=TRUE, eval=FALSE}
-### 1. Aggregate DOLLAR, POUNDS, LANDED
-Agg_DOL_POUN_LAND <- VTR_DMIS_AC %>%
-  group_by(TRIPID) %>%
- summarise(Agg_DOLLAR = sum(DOLLAR), Agg_POUNDS = sum(POUNDS), Agg_LANDED = sum(LANDED))
-
-#### Testing to make sure there are no duplicates in TRIPID groups; this should equal 0
-sum(duplicated(Agg_DOL_POUN_LAND$TRIPID))
-stopifnot(sum(duplicated(Agg_DOL_POUN_LAND$TRIPID))==0)
-
-###  2. Add back into original data set 
-#### all = FALSE is used to keep only rows that match from the data frames
-VTR_DMIS_AC_Agg <- merge(VTR_DMIS_AC,Agg_DOL_POUN_LAND, by.x = "TRIPID", by.y = "TRIPID", all.x = TRUE, all.y = FALSE)
-
-
-
-
-### 3.Parse out Maximum Dollar amounts in order to drop lesser subtrips
-VTR_DMIS_AC_Agg <- VTR_DMIS_AC_Agg %>% group_by(TRIPID) %>% filter(DOLLAR == max(DOLLAR))
-### Another way to check this is by running the following code: VTR_DMIS_AC_Agg %>% group_by(TRIPID) %>% arrange(desc(DOLLAR)) %>% slice(1)
-
-## Test out 
-sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))
-
-stopifnot(sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))==0)
-
-
-```
-
-# Code to filter on the Limited Access (LA) Fleet using landings and crew size
-
-
+## Code to filter on the Limited Access (LA) Fleet using landings and crew size
 We considered filtering out the LADAS scallop fleet by using landings greater than or equal to 850 pounds and Crew less than or equal to 8. These are based on crew limits. We are using the activities codes instead.  In summary:
 
 FY2007-2014: No limit on crew (except for 7 in DMV starting in FY2014)
@@ -732,34 +792,5 @@ FY2015-2019: 8
 LA_Estimate <- VTR_DMIS_AC_Agg %>% filter(Agg_LANDED >= 850 & CREW <= 8)
 ```
 
-
-
-# Some summary statistcs
-
-```{r summary_statistics,echo=TRUE, eval=FALSE}
-# Here is a placeholder where we will make a few summary statistics tables.  Nothing too fancy. This may be sufficient.
-# This has not been tested. Yet.
-
-summary(final_product)
-
-table(final_product$YEAR)
-
-table(final_product$GEARCODE)
-
-table(final_product$STATE)
-
-
-```
-
-
-```{r 10minute_square_plot,echo=FALSE, eval=TRUE,fig.cap = "10 minutes squares" }
- qtm(TMSQ_sp) + tm_legend(show = FALSE)
-```
-
-
-
-```{r Wind_Energy_Plot,echo=FALSE, eval=TRUE,fig.cap = "Wind Energy Areas" }
-qtm(lease_sp) + tm_legend(show = FALSE)
-```
 
 
