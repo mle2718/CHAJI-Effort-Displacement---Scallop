@@ -552,7 +552,7 @@ This may not be realistic. There are anecdotes of vessels fishing in one spot on
 
 # Trips reported on land will be dropped from observations 
 
-```{r spatial land and water, echo=TRUE}
+```{r spatial land and water, echo=TRUE, eval=TRUE}
 
 
 
@@ -619,7 +619,7 @@ VTR_DMIS_AC$Area <- NULL
 ```
 
 
-```{r Spatial Joins - Lease Areas and Ten Minute Squares}
+```{r Spatial Joins - Lease Areas and Ten Minute Squares,echo=TRUE, eval=TRUE}
 # Spatial join with ten minute squares 
 
 ## Read in your shapefile
@@ -630,26 +630,27 @@ VTR_DMIS_AC$Area <- NULL
 
 TMSQ_sp <- st_read(TMSQ_path)
 ## Run the below chunk to see your shapefile plotted out
-qtm(TMSQ_sp) + tm_legend(show = FALSE)
+#qtm(TMSQ_sp) + tm_legend(show = FALSE)
 
 
 point_geo <- st_as_sf(VTR_DMIS_AC, 
                       coords = c(x  = "DDLON", y = "DDLAT"), crs = crs )
+
 final_product <- st_join(point_geo, TMSQ_sp, join = st_within)
 
 
 #This chunk uses a "within" join, but other options are available using the sf package 1.0-6. 
 ## st_intersects,st_disjoint,st_touches,st_crosses,st_within,st_contains,st_contains_properly,st_overlaps,st_equals,st_covers,st_covered_by,st_equals_exact,st_is_within_distance
 
-#Delete unnecessary variables from join 
-final_product[,c('MN10SQROW','MN10SQCOL','MN30SQID','POINT_Y','POINT_X','geometry','XTXT','YTXT','DG1SQLAT','DG1SQLON','DG1SQID','MN30QUAD','Shape_Leng','Shape_Area', 'MN10SQ')] <- list(NULL)
+#Delete unnecessary variables from join: keep the geometry, MN30SQID, and MN10SQID columns 
+final_product[,c('MN10SQROW','MN10SQCOL','POINT_Y','POINT_X','XTXT','YTXT','DG1SQLAT','DG1SQLON','DG1SQID','MN30QUAD','Shape_Leng','Shape_Area', 'MN10SQ')] <- list(NULL)
 
-
+#final_product$geometry_old<-final_product$geometry
 #Lease Area Joins
 
 lease_sp <- st_read(All_Lease_Areas_Shapefile_path)
 ## Run the below chunk to see your shapefile plotted out
-qtm(lease_sp) + tm_legend(show = FALSE)
+#qtm(lease_sp) + tm_legend(show = FALSE)
 
 ## This chunk uses the current data set, converts it into a sf geospatial object, and bins it into the assigned coordinate system (crs).
 
@@ -658,24 +659,27 @@ point_geo_lease <- st_as_sf(final_product,
 
 final_product_lease <- st_join(point_geo_lease, lease_sp, join = st_within)
 
+#geometry carries over all the way from the initial read in.
+identical(final_product_lease$geometry, point_geo$geometry)
+
+#however, we don't need the geometry colum, it's just a combination of the DDLAT and DDLON
+final_product_lease[,c('geometry')]<-NULL
 
 #This chunk uses a "within" join, but other options are available using the sf package 1.0-6. 
 ## st_intersects,st_disjoint,st_touches,st_crosses,st_within,st_contains,st_contains_properly,st_overlaps,st_equals,st_covers,st_covered_by,st_equals_exact,st_is_within_distance
 
-#Delete unnecessary variables from join 
-final_product[,c('MN10SQROW','MN10SQCOL','MN30SQID','POINT_Y','POINT_X','geometry','XTXT','YTXT','DG1SQLAT','DG1SQLON','DG1SQID','MN30QUAD','Shape_Leng','Shape_Area', 'MN10SQ')] <- list(NULL)
+
+
 
 
 #save to RDS
 final_product_savename<-paste0("final_product_",vintage_string,".Rds")
 saveRDS(final_product, file=here("data","main",final_product_savename))
-
-
 ```
+# Here is some code that we are no longer using. 
 
-
-
-```{r construct_trip_aggregates}
+## Code to aggregate subtrip landings to subtrips.
+```{r construct_trip_aggregates, echo=TRUE, eval=FALSE}
 ### 1. Aggregate DOLLAR, POUNDS, LANDED
 Agg_DOL_POUN_LAND <- VTR_DMIS_AC %>%
   group_by(TRIPID) %>%
@@ -704,8 +708,10 @@ stopifnot(sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))==0)
 
 ```
 
-# Estimated Limited Access (LA) Fleet Filter
-We considered filtering out the LADAS scallop fleet by using landings greater than or equal to 850 pounds and Crew less than or equal to 8. These are based on crew limits. In summary:
+# Code to filter on the Limited Access (LA) Fleet using landings and crew size
+
+
+We considered filtering out the LADAS scallop fleet by using landings greater than or equal to 850 pounds and Crew less than or equal to 8. These are based on crew limits. We are using the activities codes instead.  In summary:
 
 FY2007-2014: No limit on crew (except for 7 in DMV starting in FY2014)
 FY2015-2019: 8
@@ -722,12 +728,8 @@ FY2015-2019: 8
 FY2007-2014: No limit (except for 7 in DMV starting in FY2014)
 FY2015-2019: 8
 
-
-
-## This might be temporary; still looking into different integration methods with activity codes
 ```{r filter_LA1, echo=TRUE, eval=FALSE}
 LA_Estimate <- VTR_DMIS_AC_Agg %>% filter(Agg_LANDED >= 850 & CREW <= 8)
-
 ```
 
 
@@ -738,18 +740,26 @@ LA_Estimate <- VTR_DMIS_AC_Agg %>% filter(Agg_LANDED >= 850 & CREW <= 8)
 # Here is a placeholder where we will make a few summary statistics tables.  Nothing too fancy. This may be sufficient.
 # This has not been tested. Yet.
 
-summary(cost_join)
+summary(final_product)
 
-table(cost_join$YEAR)
+table(final_product$YEAR)
 
-table(cost_join$GEARCODE)
+table(final_product$GEARCODE)
 
-table(cost_join$STATE)
+table(final_product$STATE)
 
 
 ```
 
 
+```{r 10minute_square_plot,echo=FALSE, eval=TRUE,fig.cap = "10 minutes squares" }
+ qtm(TMSQ_sp) + tm_legend(show = FALSE)
+```
 
+
+
+```{r Wind_Energy_Plot,echo=FALSE, eval=TRUE,fig.cap = "Wind Energy Areas" }
+qtm(lease_sp) + tm_legend(show = FALSE)
+```
 
 
