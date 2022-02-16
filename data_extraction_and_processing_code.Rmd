@@ -737,8 +737,7 @@ saveRDS(final_product_lease, file=here("data","main",final_product_savename))
 
 
 ```{r summary_statistics,echo=TRUE, eval=TRUE}
-# Here is a placeholder where we will make a few summary statistics tables.  Nothing too fancy. This may be sufficient.
-# This has not been tested. Yet.
+# Here are a few summary statistics tables.  Nothing too fancy. This may be sufficient.
 
 summary(final_product_lease)
 
