@@ -46,7 +46,6 @@ vintage_string<-"2022_02_16"
 This is the data from the most recent Kiteworks folder that was shared with the 
 FishSET team in Oct/Nov of last year. 
 ```{r data}
-
 # load in Oct 18 data.
 scallop_10_18 <- read_csv(here("data","main","cost_join_10_18.csv"))
 
@@ -58,7 +57,13 @@ final_product_lease<-readRDS(here("data","main",final_product_savename))
 #scallop_10_18<-final_product_lease
 
 # Load in 10 minute squares
-tenMinSqr_new <- st_read(here("data","external","shapefiles","Ten Minute Squares Cut North and Greater Atlantic"))
+tenMinSqr_new <- 
+  here("data",
+       "external",
+       "shapefiles",
+       "Ten Minute Squares Cut North and Greater Atlantic") %>% 
+  st_read() %>% 
+  st_zm() # remove Z/M dimensions from feature
 
 ```
    
@@ -81,8 +86,8 @@ scallop_10_18 %>%
 This is the approach we take in FishSET to assign observations to zones.
 ```{r zone assign}
 # create sf version of data, convert to WGS84
-crs <- "+proj=longlat +datum=WGS84"
 # crs <- st_crs(tenMinSqr_new) # using crs from ten minute squares didn't change results
+crs <- 4326
 
 scallop_sf <- 
   st_as_sf(x = scallop_10_18, coords = c("DDLON", "DDLAT"), 
@@ -228,7 +233,10 @@ leaflet() %>%
 Similar to the plot above, but comparing the unassigned points in `ZoneID` with
 `MN10SQID`. 
 ```{r compare5}
-fs_na <- scallop_10_18 %>% 
+
+if (sum(is.na(scallop_10_18$ZoneID)) > 0) {
+  
+  fs_na <- scallop_10_18 %>% 
   filter(is.na(ZoneID)) %>% 
   pull(MN10SQID)
 
@@ -246,6 +254,7 @@ leaflet() %>%
   addMarkers(data = filter(scallop_10_18, is.na(ZoneID)),
              lng = ~DDLON, lat = ~DDLAT,
              label = ~lapply(unite_lab, htmltools::HTML)) 
+}
 ```
 
 <br><br>
