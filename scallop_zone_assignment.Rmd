@@ -88,6 +88,7 @@ This is the approach we take in FishSET to assign observations to zones.
 ```{r zone assign}
 # create sf version of data, convert to WGS84
 # crs <- st_crs(tenMinSqr_new) # using crs from ten minute squares didn't change results
+# 4326 is shorthand for WGS84 (https://epsg.io/4326)
 crs <- 4326
 
 scallop_sf <- 
