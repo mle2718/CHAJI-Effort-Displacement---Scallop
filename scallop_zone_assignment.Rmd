@@ -23,9 +23,20 @@ assignment: polygon boundary types, spherical v. planar geometry, and spatial jo
 ## Library
 
 ```{r setup, echo=TRUE, results=FALSE}
-library(sf)
-library(tidyverse)
-library(leaflet)
+
+# Set Path
+here::i_am("scallop_zone_assignment.Rmd")
+
+# Install Packages if necessary and Load Libraries
+PKG <- c("here","leaflet", "tidyverse", "sf")
+for (p in PKG) {
+  if(!require(p,character.only = TRUE)) {
+    install.packages(p)
+    require(p,character.only = TRUE)}
+}
+
+# Set data vintage
+vintage_string<-"2022_02_16"
 ```
    
    
@@ -35,9 +46,20 @@ library(leaflet)
 This is the data from the most recent Kiteworks folder that was shared with the 
 FishSET team in Oct/Nov of last year. 
 ```{r data}
-scallop_10_18 <- read_csv("~/NE Scallops/data/updated/cost_join_10_18.csv")
 
-tenMinSqr_new <- st_read("~/NE Scallops/data/updated/10 Minute Sq")
+# load in Oct 18 data.
+scallop_10_18 <- read_csv(here("data","main","cost_join_10_18.csv"))
+
+# load in final product
+final_product_savename<-paste0("final_product_lease",vintage_string,".Rds")
+final_product_lease<-readRDS(here("data","main",final_product_savename))
+
+# overwrite 
+#scallop_10_18<-final_product_lease
+
+# Load in 10 minute squares
+tenMinSqr_new <- st_read(here("data","external","shapefiles","Ten Minute Squares Cut North and Greater Atlantic"))
+
 ```
    
 <br><br>
