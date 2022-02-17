@@ -703,9 +703,6 @@ final_product_lease <- st_join(point_geo_lease, lease_sp, join = st_within)
 #geometry carries over all the way from the initial read in.
 identical(final_product_lease$geometry, point_geo$geometry)
 
-#however, we don't need the geometry colum, it's just a combination of the DDLAT and DDLON
-final_product_lease[,c('geometry')]<-NULL
-
 #This chunk uses a "within" join, but other options are available using the sf package 1.0-6. 
 ## st_intersects,st_disjoint,st_touches,st_crosses,st_within,st_contains,st_contains_properly,st_overlaps,st_equals,st_covers,st_covered_by,st_equals_exact,st_is_within_distance
 
