@@ -54,7 +54,10 @@ The roles/responsibilties doesn't quite belong in this spot, and yet here we are
 
 
 # Outside data sources
-We have added various shapefiles to the repository. The `East_Cst_crop_2020_extended` shapefile was taken from `/net/work5/socialsci/Geret_Rasters/data/offshore_wind_package_data/shapefiles`, the `All_Lease_Areas_Shapefile` shapefile was taken from `/net/home4/mchaji/All_Lease_Areas_Shapefile`, and the `Ten Minute Squares Cut North and Greater Atlantic` shapefile was taken from `/net/home4/mchaji/All_Lease_Areas_Shapefile/Ten Minute Squares Smaller`.  
+We have added various shapefiles to the repository. 
+1.  `East_Cst_crop_2020_extended` shapefile was taken from `/net/work5/socialsci/Geret_Rasters/data/offshore_wind_package_data/shapefiles`
+2.  `All_Lease_Areas_Shapefile` shapefile was taken from `/net/home4/mchaji/All_Lease_Areas_Shapefile`, a
+3.  `Ten Minute Squares Cut North and Greater Atlantic` shapefile was taken from `/net/home4/mchaji/All_Lease_Areas_Shapefile/Ten Minute Squares Smaller`.  
 
 There are also some data that we get internally from the network, this can be figured out just by looking through the data processsing code.
 
