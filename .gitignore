@@ -8,3 +8,4 @@ credentials.R
 *.Rhistory
 *.csv
 *.Rds
+scallop_zone_assignment_files
