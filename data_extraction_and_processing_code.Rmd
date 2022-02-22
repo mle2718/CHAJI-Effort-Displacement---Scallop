@@ -19,7 +19,7 @@ here::i_am("data_extraction_and_processing_code.Rmd")
 
 
 
-PKG <- c("here","leaflet", "tidyverse", "sf", "RODBC", "RODM", "dbplyr","raster","rgdal","readxl", "data.table", "tmaptools", "tmap", "dplyr")
+PKG <- c("here","leaflet", "tidyverse", "sf", "RODBC", "RODM", "dbplyr","raster","rgdal","readxl", "data.table", "tmaptools", "tmap", "dplyr", "epiDisplay")
 for (p in PKG) {
   if(!require(p,character.only = TRUE)) {
     install.packages(p)
@@ -528,7 +528,25 @@ Subtrips are generated when a vessel switches gear or statistical areas. Subtrip
 
 
 ```{r count_subtrips, echo=TRUE}
+# Update scientific notation 
+options(scipen = 999)
+
+#Subtrip count 
 table(VTR_DMIS_AC$NSUBTRIP)
+
+
+#Subtrip totals with percentage breakdown
+tab1(VTR_DMIS_AC$NSUBTRIP, sort.group = "decreasing", cum.percent = TRUE, graph = TRUE, xlab = "Number of Subtrips", ylab = "Number of Observations", main = "Count of Subtrips for Scallop Fishery")
+
+
+#Average Trip Length by year and subtrip 
+Average_Trip_Length_Scallop <- VTR_DMIS_AC %>% group_by(NSUBTRIP,YEAR) %>% summarise(tibble( mean = mean(TRIP_LENGTH)))
+Average_Trip_Length_Scallop 
+
+# Aggregated & average dollar, pounds, and landed values by subtrip
+Dollar_POUND_LANDED_Scallops <- VTR_DMIS_AC %>% group_by(NSUBTRIP) %>% summarise(Aggregated_DOLLAR = sum(DOLLAR),Average_DOLLAR = mean(DOLLAR), Aggregated_POUNDS = sum(POUNDS), Average_POUNDS = mean(POUNDS), Aggregated_LANDED = sum(LANDED), Average_LANDED = mean(LANDED))
+Dollar_POUND_LANDED_Scallops
+
 ```
 
 Since our goal is to estimate a choice model at the trip level, we need to construct trip level variables.  
