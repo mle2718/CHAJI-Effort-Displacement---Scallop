@@ -524,7 +524,7 @@ VTR_DMIS_AC <- merge(VTR_DMIS_AC,all_yrs_costs, by.x = "TRIPID", by.y = "VTR_TRI
 
 # Data Aggregating Trip Revenues & Delete duplicate TRIPIDs
 
-Subtrips are generated when a vessel switches gear or statistical areas. Subtrips have identical TRIPID/DOCID.  A trip may have many (8+) subtrips, but the majority of trips observed only have one subtrip (95.7% using original VTR & DMIS merged data set). If a trip has just 1 subtrip, the trip took place in a single statistical area.  If a trip crosses four different statistical areas, the NSUBTRIP is then equal to 4, and the landings, value, latitude, and longitude are reported separately for each area. 
+Subtrips are generated when a vessel switches gear or statistical areas. Subtrips have identical TRIPID/DOCID.  A trip may have many (8+) subtrips, but the majority of trips observed only have one subtrip (95.7% using original VTR & DMIS merged data set). If a trip has just 1 subtrip, the trip took place in a single statistical area.  If a trip crosses four different statistical areas, the NSUBTRIP is then equal to 4, and the landings, value, latitude, and longitude are reported separately for each area. For this project based on the proportion of limited access trips that have more than 1 subtrip, the fraction of landings/value, and the trip durations, we are adopting the assumption that trips with 1 subtrip are representative of the entire fishery.
 
 
 ```{r count_subtrips, echo=TRUE}
