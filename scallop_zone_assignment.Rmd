@@ -1,0 +1,377 @@
+---
+title: "Zone Assignment"
+author: "Bryce McManus"
+date: "`r Sys.Date()`"
+output:
+  pdf_document:
+    toc: yes
+  html_document:
+    df_print: paged
+    toc: yes
+  word_document:
+    toc: yes
+always_allow_html: true
+---
+## Intro
+
+This document shows how observations are assigned in FishSET and compares zone
+assignments with those found in the most recent version of the scallop data 
+(provided Oct/Nov 2021). It then illustrates certain factors that can affect zone 
+assignment: polygon boundary types, spherical v. planar geometry, and spatial joins. 
+
+<br><br>
+
+## Library
+
+```{r setup, echo=TRUE, results=FALSE}
+
+# Set Path
+here::i_am("scallop_zone_assignment.Rmd")
+
+# Install Packages if necessary and Load Libraries
+PKG <- c("here","leaflet", "tidyverse", "sf")
+for (p in PKG) {
+  if(!require(p,character.only = TRUE)) {
+    install.packages(p)
+    require(p,character.only = TRUE)}
+}
+
+# Set data vintage
+vintage_string<-"2022_02_16"
+```
+   
+   
+<br><br>
+
+## Data
+This is the data from the most recent Kiteworks folder that was shared with the 
+FishSET team in Oct/Nov of last year. 
+```{r data}
+# load in Oct 18 data.
+scallop_10_18 <- read_csv(here("data","main","cost_join_10_18.csv"))
+
+# load in final product
+final_product_savename<-paste0("final_product_lease",vintage_string,".Rds")
+final_product_lease<-readRDS(here("data","main",final_product_savename))
+
+# overwrite 
+#scallop_10_18<-final_product_lease
+
+# Load in 10 minute squares
+tenMinSqr_new <- 
+  here("data",
+       "external",
+       "shapefiles",
+       "Ten Minute Squares Cut North and Greater Atlantic") %>% 
+  st_read() %>% 
+  st_zm() # remove Z/M dimensions from feature
+
+```
+   
+<br><br>
+
+Check for duplicate trip IDs. 
+```{r}
+nrow(scallop_10_18)
+
+scallop_10_18 %>% 
+  distinct(TRIPID) %>% 
+  nrow()
+```
+ 
+    
+<br><br>
+
+## Zone assignment
+
+This is the approach we take in FishSET to assign observations to zones.
+```{r zone assign}
+# create sf version of data, convert to WGS84
+# crs <- st_crs(tenMinSqr_new) # using crs from ten minute squares didn't change results
+# 4326 is shorthand for WGS84 (https://epsg.io/4326)
+crs <- 4326
+
+scallop_sf <- 
+  st_as_sf(x = scallop_10_18, coords = c("DDLON", "DDLAT"), 
+           crs = crs)
+
+# convert Squares to WGS84 
+tenMinSqr_new <- st_transform(tenMinSqr_new, crs = st_crs(scallop_sf))
+
+# same results as st_within
+inter <- sf::st_intersects(scallop_sf, tenMinSqr_new)
+
+inter_save <- inter 
+ 
+ if (any(lengths(inter) > 1)) { # if more than one zone intersects, assign to closest zone
+  
+  dub <- which(lengths(inter) > 1)
+  inter[dub] <- st_nearest_feature(scallop_sf[dub,], tenMinSqr_new)
+ }
+
+# Add ZoneID column to data
+pts <- as.data.frame(as.numeric(inter))
+colnames(pts) <- "col.id"
+pts$ID <- tenMinSqr_new$MN10SQID[pts$col.id]
+scallop_sf$ZoneID <- pts$ID
+```
+  
+<br><br>
+  
+52 points did not intersect a zone and 195 intersected multiple zones. The rest
+intersected with one zone. Non-intersecting points will show up as `NA` in the 
+`ZoneID` column. 
+```{r}
+table(lengths(inter_save))
+```
+
+<br><br>
+  
+After reassigning zones with 2+ intersections to the nearest zone. 
+```{r}
+table(lengths(inter))
+```
+  
+<br><br>
+  
+## FishSET v. NE zone assignment 
+Just to recap: `ZoneID` is the zone assignment column created using the FishSET
+approach. `MN10SQID` is the zone ID column that came with the updated scallop data.
+There is a 6.15% difference (2086 obs) in zone assignments between `ZoneID` and `MN10SQID`.
+```{r compare1}
+scallop_sf <- scallop_sf %>% 
+  mutate(fs_ne_match = ZoneID == MN10SQID)
+
+# add ZoneID and match col to scallop_10_18
+scallop_10_18 <- 
+  scallop_sf %>% 
+  st_set_geometry(NULL) %>% 
+  select(ZoneID, fs_ne_match) %>% 
+  bind_cols(scallop_10_18, .)
+
+# summary table of matching IDs
+scallop_sf %>% 
+  st_set_geometry(NULL) %>% 
+  summarize(n_obs = n(),
+            id_match = sum(fs_ne_match, na.rm = TRUE),
+            id_no_match = sum(!fs_ne_match, na.rm = TRUE),
+            perc_match = id_match/n() * 100,
+            perc_no_match = 100 - perc_match)
+```
+  
+<br><br>
+  
+All the unassigned points in `ZoneID` fall on a zone intersection.
+```{r compare2}
+s_bbox <- st_bbox(filter(scallop_sf, is.na(ZoneID)))
+
+ggplot() + 
+  geom_sf(data = tenMinSqr_new, fill = "white", color = "black") +
+  geom_sf(data = filter(scallop_sf, is.na(ZoneID)),color = "red") +
+  coord_sf(xlim = c(s_bbox[1], s_bbox[3]), ylim = c(s_bbox[2], s_bbox[4]))
+```
+
+<br><br>
+  
+The difference in zone assignment appears only to occur on zone boundaries and
+intersections.
+```{r compare3}
+ggplot() +
+  geom_sf(data = tenMinSqr_new, fill = "white", color = "black") +
+  geom_sf(data = filter(scallop_sf, fs_ne_match),
+          aes(color = "Match"), 
+          alpha = .2,
+          show.legend = "point") +
+  geom_sf(data = filter(scallop_sf, !fs_ne_match),
+          aes(color = "No match"),
+          show.legend = "point") +
+  coord_sf(xlim = c(s_bbox[1], s_bbox[3]), ylim = c(s_bbox[2], s_bbox[4])) +
+ scale_color_manual(values = c("Match" = "blue", "No match" = "red"))
+```
+  
+
+<br><br>
+
+This leaflet plot shows the first 20 non-matching zone assignments. Each point
+has a label showing the zone assigned by FishSET and by NE. 
+```{r compare4}
+# marker labels for leaflet plots
+scallop_10_18 <- 
+  scallop_10_18 %>% 
+  mutate(ZoneID_lab = paste0("FS: ", ZoneID, "<br/>"),
+         MN10SQID_lab = paste0("NE: ", MN10SQID, "<br/>")) %>% 
+  unite("unite_lab", ZoneID_lab, MN10SQID_lab, sep = " ") %>% 
+  mutate(unite_lab = paste0(unite_lab, "lon: ", DDLON, "<br/>lat: ", DDLAT))
+
+fs_no_match <- scallop_10_18 %>% 
+  filter(fs_ne_match == FALSE) %>% 
+  head(20) %>% 
+  pull(ZoneID)
+
+ne_no_match <- scallop_10_18 %>% 
+  filter(fs_ne_match == FALSE) %>% 
+  head(20) %>% 
+  pull(MN10SQID)
+
+leaflet() %>%
+  addTiles() %>%
+  addPolygons(data = filter(tenMinSqr_new, MN10SQID %in% c(fs_no_match, ne_no_match)),
+              fillColor = "white",
+              fillOpacity = 0.5,
+              color = "black",
+              stroke = TRUE,
+              weight = 1,
+              labelOptions = labelOptions(noHide = TRUE),
+              layerId = ~MN10SQID,
+              label = ~MN10SQID) %>% 
+  addMarkers(data = head(filter(scallop_10_18, fs_ne_match == FALSE), 20),
+             lng = ~DDLON, lat = ~DDLAT,
+             label = ~lapply(unite_lab, htmltools::HTML))
+```
+
+
+<br><br>
+
+Similar to the plot above, but comparing the unassigned points in `ZoneID` with
+`MN10SQID`. 
+```{r compare5}
+
+if (sum(is.na(scallop_10_18$ZoneID)) > 0) {
+  
+  fs_na <- scallop_10_18 %>% 
+  filter(is.na(ZoneID)) %>% 
+  pull(MN10SQID)
+
+leaflet() %>%
+  addTiles() %>%
+  addPolygons(data = filter(tenMinSqr_new, MN10SQID %in% fs_na),
+              fillColor = "white",
+              fillOpacity = 0.5,
+              color = "black",
+              stroke = TRUE,
+              weight = 1,
+              labelOptions = labelOptions(noHide = TRUE),
+              layerId = ~MN10SQID,
+              label = ~MN10SQID) %>% 
+  addMarkers(data = filter(scallop_10_18, is.na(ZoneID)),
+             lng = ~DDLON, lat = ~DDLAT,
+             label = ~lapply(unite_lab, htmltools::HTML)) 
+}
+```
+
+<br><br>
+
+## Factors that may affect point assignment
+
+### Polygon boundary types
+
+Point assignment can vary depending on whether polygon boundaries are treated as 
+“closed”, “open”, or “semi-open”.
+```{r boundary}
+inter_closed <- lengths(st_intersects(scallop_sf, tenMinSqr_new, model = "closed"))
+inter_open <- lengths(st_intersects(scallop_sf, tenMinSqr_new, model = "open"))
+inter_semi <- lengths(st_intersects(scallop_sf, tenMinSqr_new, model = "semi-open"))
+
+bound_type <- tibble(Closed = inter_closed, Open = inter_open, Semi = inter_semi)
+
+pivot_longer(bound_type, cols = c("Closed", "Open", "Semi"), 
+             names_to = "boundary_type", values_to = "Zones_assigned") %>% 
+  group_by(boundary_type) %>% 
+  count(Zones_assigned)
+
+```
+
+<br><br>
+
+### sf version < 1.0
+
+Sf 1.0+ uses spherical geometry (S2) on coordinates, sf < 1.0 uses planar geometry
+(R2). 
+
+```{r r2}
+# test difference in S2 and R2 methods
+sf_use_s2(FALSE)
+
+inter_closed_r2 <- lengths(st_intersects(scallop_sf, tenMinSqr_new, model = "closed"))
+inter_open_r2 <- lengths(st_intersects(scallop_sf, tenMinSqr_new, model = "open"))
+inter_semi_r2 <- lengths(st_intersects(scallop_sf, tenMinSqr_new, model = "semi-open"))
+
+sf_use_s2(TRUE)
+
+bound_type_r2 <- tibble(Closed = inter_closed_r2, 
+                        Open = inter_open_r2, 
+                        Semi = inter_semi_r2)
+
+pivot_longer(bound_type_r2, cols = c("Closed", "Open", "Semi"), 
+             names_to = "boundary_type", values_to = "Zones_assigned") %>% 
+  group_by(boundary_type) %>% 
+  count(Zones_assigned)
+
+```
+
+<br><br>
+
+### Spatial join
+
+Spatial joins will add additional rows if a point intersects more than one zone.
+If an inner join is used (`left = FALSE`), points that don't intersect zones are dropped.
+
+```{r join1}
+
+scallop_sf_join <- st_join(scallop_sf, 
+                           tenMinSqr_new["MN10SQID"], 
+                           suffix = c(".x", ".y"),
+                           left = TRUE)
+
+scallop_sf_join <- 
+  scallop_sf_join %>%
+  mutate(fs_join_match = ZoneID == MN10SQID.y,
+         ne_join_match = MN10SQID.x == MN10SQID.y)
+
+scallop_sf_join %>% 
+  st_set_geometry(NULL) %>% 
+  summarize(n_obs = n(),
+    fs_join_match = sum(fs_join_match, na.rm = TRUE),
+    ne_join_match = sum(ne_join_match, na.rm = TRUE), 
+    fs_ne_match = sum(fs_ne_match, na.rm = TRUE))
+```
+
+<br><br>
+
+Spatial join adds 195 rows: one for each point that intersected two zones. 
+
+```{r join2}
+nrow(scallop_sf_join)
+
+scallop_sf_join %>% 
+  st_set_geometry(NULL) %>% 
+  distinct(TRIPID) %>% 
+  nrow()
+```
+
+<br><br>
+
+Table of matching zones by FishSET, NE, and spatial join approaches. 
+```{r}
+scallop_sf_join %>% 
+    st_set_geometry(NULL) %>% 
+    count(fs_ne_match, fs_join_match, ne_join_match)
+```
+
+<br> 
+All 195 of the cases from the first row of the table above (no shared zone assignments)
+are from points assigned to multiple zones. No approach handled this 
+case in the same way. 
+```{r}
+dup_trip_id <- scallop_10_18$TRIPID[lengths(inter_save) > 1]
+
+scallop_sf_join <- 
+  scallop_sf_join %>% 
+  mutate(dup_zone = TRIPID %in% dup_trip_id)
+
+scallop_sf_join %>% 
+  st_set_geometry(NULL) %>% 
+  filter(!fs_ne_match & !fs_join_match & !ne_join_match) %>% 
+  summarize(dup_zone = sum(dup_zone))
+```
+
