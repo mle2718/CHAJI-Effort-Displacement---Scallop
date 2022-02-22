@@ -549,6 +549,31 @@ Dollar_POUND_LANDED_Scallops
 
 ```
 
+
+```{r count_subtrips_limited_access, echo=TRUE}
+
+#Table with all subtrips where LA is TRUE 
+VTR_DMIS_AC_LA <- VTR_DMIS_AC %>% filter(LA == "TRUE")
+
+#Subtrip totals with percentage breakdown - Limited Access 
+tab1(VTR_DMIS_AC_LA$NSUBTRIP, sort.group = "decreasing", cum.percent = TRUE, graph = TRUE, xlab = "Number of Subtrips", ylab = "Number of Observations", main = "Count of Subtrips for Scallop Limited Access")
+
+
+#Average Trip Length by year and subtrip - Limited Access 
+Average_Trip_Length_LA <- VTR_DMIS_AC_LA %>% group_by(NSUBTRIP,YEAR) %>% summarise(tibble( mean = mean(TRIP_LENGTH)))
+Average_Trip_Length_LA 
+
+
+# Aggregated & average dollar, pounds, and landed values by subtrip - Limited Access 
+Dollar_POUND_LANDED_Scallops_LA <- VTR_DMIS_AC_LA %>% group_by(NSUBTRIP) %>% summarise(Aggregated_DOLLAR = sum(DOLLAR),Average_DOLLAR = mean(DOLLAR), Aggregated_POUNDS = sum(POUNDS), Average_POUNDS = mean(POUNDS), Aggregated_LANDED = sum(LANDED), Average_LANDED = mean(LANDED))
+
+Dollar_POUND_LANDED_Scallops_LA
+
+```
+
+
+
+
 Since our goal is to estimate a choice model at the trip level, we need to construct trip level variables.  
  We retained the subtrip attributes  (GEARCODE, DDLAT, DDLON) corresponding to the subtrip with the highest DOLLAR.  We constructed trip-level values for revenue, pounds, and landed (DOLLAR, POUNDS, LANDED).  The trip level variables are prefixed with "Agg_". 
 
