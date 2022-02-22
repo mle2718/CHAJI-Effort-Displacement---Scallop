@@ -10,6 +10,7 @@ output:
     toc: yes
   word_document:
     toc: yes
+always_allow_html: true
 ---
 ## Intro
 
@@ -23,9 +24,20 @@ assignment: polygon boundary types, spherical v. planar geometry, and spatial jo
 ## Library
 
 ```{r setup, echo=TRUE, results=FALSE}
-library(sf)
-library(tidyverse)
-library(leaflet)
+
+# Set Path
+here::i_am("scallop_zone_assignment.Rmd")
+
+# Install Packages if necessary and Load Libraries
+PKG <- c("here","leaflet", "tidyverse", "sf")
+for (p in PKG) {
+  if(!require(p,character.only = TRUE)) {
+    install.packages(p)
+    require(p,character.only = TRUE)}
+}
+
+# Set data vintage
+vintage_string<-"2022_02_16"
 ```
    
    
@@ -35,9 +47,25 @@ library(leaflet)
 This is the data from the most recent Kiteworks folder that was shared with the 
 FishSET team in Oct/Nov of last year. 
 ```{r data}
-scallop_10_18 <- read_csv("~/NE Scallops/data/updated/cost_join_10_18.csv")
+# load in Oct 18 data.
+scallop_10_18 <- read_csv(here("data","main","cost_join_10_18.csv"))
 
-tenMinSqr_new <- st_read("~/NE Scallops/data/updated/10 Minute Sq")
+# load in final product
+final_product_savename<-paste0("final_product_lease",vintage_string,".Rds")
+final_product_lease<-readRDS(here("data","main",final_product_savename))
+
+# overwrite 
+#scallop_10_18<-final_product_lease
+
+# Load in 10 minute squares
+tenMinSqr_new <- 
+  here("data",
+       "external",
+       "shapefiles",
+       "Ten Minute Squares Cut North and Greater Atlantic") %>% 
+  st_read() %>% 
+  st_zm() # remove Z/M dimensions from feature
+
 ```
    
 <br><br>
@@ -59,8 +87,9 @@ scallop_10_18 %>%
 This is the approach we take in FishSET to assign observations to zones.
 ```{r zone assign}
 # create sf version of data, convert to WGS84
-crs <- "+proj=longlat +datum=WGS84"
 # crs <- st_crs(tenMinSqr_new) # using crs from ten minute squares didn't change results
+# 4326 is shorthand for WGS84 (https://epsg.io/4326)
+crs <- 4326
 
 scallop_sf <- 
   st_as_sf(x = scallop_10_18, coords = c("DDLON", "DDLAT"), 
@@ -206,7 +235,10 @@ leaflet() %>%
 Similar to the plot above, but comparing the unassigned points in `ZoneID` with
 `MN10SQID`. 
 ```{r compare5}
-fs_na <- scallop_10_18 %>% 
+
+if (sum(is.na(scallop_10_18$ZoneID)) > 0) {
+  
+  fs_na <- scallop_10_18 %>% 
   filter(is.na(ZoneID)) %>% 
   pull(MN10SQID)
 
@@ -224,6 +256,7 @@ leaflet() %>%
   addMarkers(data = filter(scallop_10_18, is.na(ZoneID)),
              lng = ~DDLON, lat = ~DDLAT,
              label = ~lapply(unite_lab, htmltools::HTML)) 
+}
 ```
 
 <br><br>
