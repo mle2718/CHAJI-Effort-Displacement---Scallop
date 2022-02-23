@@ -1,6 +1,6 @@
 ---
 title: "Post Activity Code Clean Up"
-author: "Marina Chaji"
+author: "Marina Chaji & Min-Yang Lee"
 date: "`r format(Sys.time(), '%B %d, %Y, %H:%M')`"
 output:
   pdf_document: default
