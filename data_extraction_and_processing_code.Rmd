@@ -757,6 +757,9 @@ identical(final_product_lease$geometry, point_geo$geometry)
 colnames(final_product_lease)[colnames(final_product_lease) == "DDLON_bak"] <- "DDLON"
 colnames(final_product_lease)[colnames(final_product_lease) == "DDLAT_bak"] <- "DDLAT"
 
+stopifnot(is.numeric(final_product_lease$MN10SQID))
+
+stopifnot(is.numeric(final_product_lease$MN30SQID))
 
 #save to RDS
 rds_savename<-paste0("final_product_lease",vintage_string,".Rds")
