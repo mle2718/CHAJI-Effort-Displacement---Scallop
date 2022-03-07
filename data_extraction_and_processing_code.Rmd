@@ -10,21 +10,32 @@ output:
 
 
 # Project setup
-Load packages. Install if necessary.
+here(), load libraries, and set a data vintage.
 
 ```{r setup, include=TRUE, echo=TRUE, results=FALSE}
 
 # Set Path
 here::i_am("data_extraction_and_processing_code.Rmd")
 
+# Please ensure you have the proper packages installed with (install.packages()) or a request to ITD if any libaries do not load.  
 
+library("here")
+library("leaflet")
+library("tidyverse")
+library("sf")
+library("RODBC")
+library("RODM")
+library("dbplyr")
+library("raster")
+library("rgdal")
+library("readxl")
+library("data.table")
+library("tmaptools")
+library("tmap")
+library("dplyr")
+library("epiDisplay")
+library("tmap")
 
-PKG <- c("here","leaflet", "tidyverse", "sf", "RODBC", "RODM", "dbplyr","raster","rgdal","readxl", "data.table", "tmaptools", "tmap", "dplyr", "epiDisplay")
-for (p in PKG) {
-  if(!require(p,character.only = TRUE)) {
-    install.packages(p)
-    require(p,character.only = TRUE)}
-}
 vintage_string<-Sys.Date()
 vintage_string<-gsub("-","_",vintage_string)
 
