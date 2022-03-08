@@ -9,13 +9,10 @@ output: html_document
 Load packages. Install if necessary.
 
 ```{r setup, include=TRUE, echo=TRUE, results=FALSE}
-
 # Set Path
-here::i_am("data_extraction_and_processing_code.Rmd")
+here::i_am("data_extracting.rmd")
 
-
-
-PKG <- c("here","leaflet", "tidyverse", "sf", "RODBC", "RODM", "dbplyr","raster","rgdal","readxl", "data.table", "tmaptools", "tmap", "dplyr", "epiDisplay")
+PKG <- c("RODBC", "RODM","here")
 for (p in PKG) {
   if(!require(p,character.only = TRUE)) {
     install.packages(p)
@@ -26,7 +23,7 @@ vintage_string<-gsub("-","_",vintage_string)
 
 ```
 
-
+# Organization
 
 
 ```{r folder_create, include=TRUE, echo=FALSE, results=FALSE}
@@ -45,9 +42,6 @@ dir.create(here("data","external","shapefiles","All_Lease_Areas_Shapefile"), sho
 
 ```
 
-
-
-
 We will:
 
 1. Try to avoid copying data; when we rely on data from other people, we will read it directly into memory from the network location or Oracle.
@@ -55,7 +49,6 @@ We will:
 1. Store an intermediate data product in "data/intermediate".
 1. Store final data products in "data/main."
 1. Use a vintage "suffix" to denote when we have extracted data.
-
 
 
 ## Read in oracle passwords and set network directory
@@ -82,6 +75,10 @@ All_Lease_Areas_Shapefile_path<-here("data","external","shapefiles","All_Lease_A
 ```
 
 
+
+# Purpose
+
+This code extracts and processes data. Our goal is to construct a dataset that can be used to estimate a location choice model at the trip level for the Limited Access Scallop Fishery, using data from 2007-2019 (calendar years).  The main datasource is a frozen DMIS table.
 
 # Dependencies
 
@@ -337,6 +334,25 @@ odbcCloseAll()
 ```
 
 
+
+
+
+# Add in cost data 
+
+These data should reference the  "Estimation of Commercial Fishing Trip Costs Using Sea Sampling Data" paper by Samantha Werner & Geret DePiper.  We will likely use the Winsorized trip cost estimates.
+```{r merge_cost_data, echo=TRUE, eval=TRUE}
+#Import Data
+X2007_2012 <- read_excel(file.path(cost_directory,"2007_2012.xlsx"))
+X2013_2020 <- read_excel(file.path(cost_directory,"2013_2020.xlsx"))
+
+#Merge 2007-2012 costs with 2013-2020 costs
+all_yrs_costs <- merge(X2007_2012,X2013_2020, all = TRUE)
+## Created two sets of cost joins.
+### 1. Before LA Estimation
+### 2. After LA Estimation
+VTR_DMIS_AC <- merge(VTR_DMIS_AC,all_yrs_costs, by.x = "TRIPID", by.y = "VTR_TRIPID", all.x = TRUE,all.y =FALSE)
+
+```
 
 
 
