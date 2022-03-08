@@ -1,0 +1,343 @@
+---
+title: "data_extracting"
+author: "Marina Chaji"
+date: "3/7/2022"
+output: html_document
+---
+
+# Project setup
+Load packages. Install if necessary.
+
+```{r setup, include=TRUE, echo=TRUE, results=FALSE}
+
+# Set Path
+here::i_am("data_extraction_and_processing_code.Rmd")
+
+
+
+PKG <- c("here","leaflet", "tidyverse", "sf", "RODBC", "RODM", "dbplyr","raster","rgdal","readxl", "data.table", "tmaptools", "tmap", "dplyr", "epiDisplay")
+for (p in PKG) {
+  if(!require(p,character.only = TRUE)) {
+    install.packages(p)
+    require(p,character.only = TRUE)}
+}
+vintage_string<-Sys.Date()
+vintage_string<-gsub("-","_",vintage_string)
+
+```
+
+
+
+
+```{r folder_create, include=TRUE, echo=FALSE, results=FALSE}
+# You only need to run this once, but nothing bad will happen if you keep include=TRUE.
+
+# Set up some folders
+
+dir.create(here("data"), showWarnings="FALSE")
+dir.create(here("data", "external"), showWarnings="FALSE")
+dir.create(here("data", "external","shapefiles"), showWarnings="FALSE")
+dir.create(here("data", "intermediate"), showWarnings="FALSE")
+dir.create(here("data", "main"), showWarnings="FALSE")
+dir.create(here("data","external","shapefiles","East_Cst_crop_2020_extended"), showWarnings="FALSE")
+dir.create(here("data","external","shapefiles","Ten Minute Squares Cut North and Greater Atlantic"), showWarnings="FALSE")
+dir.create(here("data","external","shapefiles","All_Lease_Areas_Shapefile"), showWarnings="FALSE")
+
+```
+
+
+
+
+We will:
+
+1. Try to avoid copying data; when we rely on data from other people, we will read it directly into memory from the network location or Oracle.
+1. Sometimes this is unnecessary, so we will copy external data into the "data/external" folder. We will have a separate subfolder for shapefiles.
+1. Store an intermediate data product in "data/intermediate".
+1. Store final data products in "data/main."
+1. Use a vintage "suffix" to denote when we have extracted data.
+
+
+
+## Read in oracle passwords and set network directory
+This is a block of code where we set up the oracle passwords and make R aware of folders on the network.
+
+```{r oracle_connections, echo=TRUE, results=FALSE}
+source(here("credentials.R"))
+
+# Set the network_location_desktop and network_location_remote variables somewhere OUTSIDE of this code.  The best place to do this is in the .Rprofile or .Renviron files that are in your root directory.  
+
+#Comment one of these out, depending on whether you are running this code on a server or locally (with VPN) 
+net<-network_location_desktop
+net<-network_location_remote
+
+# These are not part of the project path
+offshoreWind_directory<-file.path(net,"home5", "dcorvi","OffshoreWind","offshoreWind4","data")
+spacepanels_directory<-file.path(net,"home2", "mlee","dropoff","wind")
+cost_directory<-file.path(net,"work5","socialsci","Trip_Costs","2007-2020")
+
+# Set up paths.
+East_Cst_crop_2020_path<- here("data","external","shapefiles","East_Cst_crop_2020_extended")
+TMSQ_path<-here("data","external","shapefiles","Ten Minute Squares Cut North and Greater Atlantic")
+All_Lease_Areas_Shapefile_path<-here("data","external","shapefiles","All_Lease_Areas_Shapefile")
+```
+
+
+
+# Dependencies
+
+This code depends on:
+
+1.  Network access to get the APSD_DMIS_2.rda and trip cost data from places on the NEFSC network.
+1.  The ability to connect to NEFSC oracle databases (VTR and the Live DMIS tables at APSD.t_ssb_trip_current@garfo_nefsc)
+
+
+# Data Overview
+
+There are four main data sources (so far).  None are perfect.
+
+```{r Data Overview, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
+tabl <- "
+| Source  | Name           |
+|------------|:-----------------------------------------------|
+| DMIS_APSD_2   | DMIS is a Northeast Regional Office data record matching system. Primary data sources include Allocation Management System (AMS) Database, Vessel Trip Reports (VTRs), Dealer Reports, Vessel Monitoring System (VMS) Catch Reports, Observer Reports, Vessel Permit Database, and the MQRS database, which tracks limited access fishing eligibilities |
+|VTR (Vessel Trip Reports) | A vessel trip report (VTR) must be received by NMFS or postmarked within 15 days after the reporting month’s end.  For vessels that also hold a NE multispecies permit, VTRs must be submitted weekly by Tuesday of the week after the fishing trip ends.  Copies of VTRs must be retained on board the vessel for 1 year after the last entry on the log and otherwise retained for 3 years after the date of the last entry on the log.  If no fishing activity occurred during a reporting period (week or month), then a VTR must be submitted stating that no fishing trips were taken.  |
+|Vessel Monitoring System (VMS) | All vessels issued a Federal scallop permit are required to have an active VMS unit and must use their VMS unit to declare all vessel activity, including fishing trips and transiting.|
+|Cost data  | Werner et al predict estimate a model of trip costs. Predictions (in and out of sample) are used  |
+
+"
+cat(tabl) 
+```
+
+We have decided to use the DMIS as our primary dataset. DMIS primarily uses Vessel Trip Reports (VTRs) for "trip" and "effort" data and dealer databases for landings. A drawback of using these data are that there is a single point (latitude and longitude) for each time a vessel deploys a particular type of gear into a statistical area. In the LADAS scallop fleet, vessels rarely, if ever, will switch gears at sea.  So, a trip is most likely to have multiple VTRs if it switches statistical areas.
+
+There aren't any big incentives (yet) to misreport statistical areas in Scallop.  Unlike groundfish, scallop open areas are all managed with one control (Days-at-Sea).  And fishing in the Access Areas, but reporting open areas could occur. But vessels need to declare in, so this is a very risky proposition if you are caught fishing in an Access Area, but declared into an open area. 
+
+By choosing to represent the trip as a single point, or as inside a homogeneous ten minute square, we may not have the  ability to answer our research question.  Alternatively, do we have the ability to model at the sub-trip level?
+
+Other possibilities were considered for our primary dataset:
+
+1.  Observer cover a subset of the fishery. According to the 2021 SBRM report, it was approximately 8-10% of effort for the Limited access fleet. This would provide haul level lat-lon and estimates of catch for the sampled subset. We viewed the subset as too limited - it would provide us with observations of approximately 200 Access area and 100 open area trips per year.Observer data contains the sailing and landing port. 
+
+2. VMS - VMS data would provide lat-lon at a high frequency. Other researchers have used this; however we uncomfortable with figuring out how to allocate catch along the VMS track. VMS data contains the sailing and landing port. 
+
+3. Rasters.  The raster data are an intermediate data product that combines trip report with a statistical model describes the distance between observed hauls and the vtr point location. This allows for a smoothing of effort catch across a non-arbitrary grid (like a 10 minute square, statistical area, or just a lat-lon point).
+
+
+##  DMIS
+We are using the DMIS_APSD_2 table.
+```{r APSD_DMIS_2 overview, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
+tabl <- "
+| Column  | Description           |
+|------------|:-----------------------------------------------|
+|DOCID | VTR DOCUMENT table record identifier; Primary key, internally generated at scanning based on vessel id and date/time sailed. Each DOCID represents one trip; equivalent to TRIPID in VESLOG tables.|
+|Dates | VTR land date, AMS Land Date, Dealer Sold Date Trip date is broken down into fields Calendar_Year, Month_of_Year, Week_of_Year, and Day_of_Year|
+|DDLAT | Latitude in decimal degrees| 
+|DDLON  | Longitude in decimal degrees| 
+|PERMIT | Six-digit vessel fishing permit number assigned by the NE Regional Office permit system|
+|DOLLAR | This is the value of fish sold.An imputed price is used in cases where the value was not reported.|
+|POUNDS | POUNDS is live weight, (in the shell)|
+|LANDED |  LANDED can be meat weights or shell weights, but is usually meats|
+|TRIP_LENGTH | Trip length is in days; It is calculated from the elapsed time between the date-time sailed and date-time landed. This is a measure of days absent.|
+"
+cat(tabl) 
+```
+
+Ports  -- currently assuming that a trip departs from the same place it lands.  An alternate assumption is  that people just leave from the place where they made their last landing.   
+
+The DDLAT and DDLOn are self reported lat-lons from logbooks(VTRs). We have supplemented this with some extra information.
+
+```{r DMIS_extra overview, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
+tabl <- "
+| Column  | Description           |
+|------------|:-----------------------------------------------|
+| TRIP_ID|
+|DOCID | VTR DOCUMENT table record identifier; Primary key, internally generated at scanning based on vessel id and date/time sailed. Each DOCID represents one trip; equivalent to TRIPID in VESLOG tables.|
+|ACTIVITY_CODE| Complicated set of letters and numbers. See below|
+| PLAN_CAT | LGC_A LGC_B, LGC_C, SC_2, SC_3, SC_4, SC_5, SC_6, SC_7, SC_8, SC_9, SG_1A, SG_1B are a collection of true and false variables the indicate if the vessel had a particular permit when the trip was taken.|
+"
+cat(tabl) 
+```
+
+ACTIVITY_CODE and a set of PLAN_CAT categorical variables are used from the live DMIS tables. We join using TRIP_ID, DOCID.  See [here](/external_documentation/vms_declaration_code_glossary_may_2018.pdf)
+
+
+##  Description of the VTR data.
+```{r VTR overview, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
+tabl <- "
+| Column  | Description           |
+|------------|:-----------------------------------------------|
+|TRIPID|VESLOG Trip record identifier, which is generated internally and used for linking|
+|tripcatg | (only commercial categories are selected), recreational and RSA/EFP are not.| 
+|operator| Name of the captain|
+|opernum| Captains Identification number|
+|permit| Six-digit vessel fishing permit number assigned by the NE Regional Office permit system||
+|nsubtrip| Number of subtrips (see description of subtrips|
+|crew| number of crew, including captain|
+|port| 6 digit numeric code for the port, renamed to VTR_PORTNUM to make clear is a companion to VTR_PORT and VTR_STATE |
+
+"
+cat(tabl) 
+```
+
+
+
+##  Description of the SPACEPANELS data.
+```{r SPACEPANELS_overview, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
+tabl <- "
+| Column  | Description           |
+|------------|:-----------------------------------------------|
+|TRIPID|VESLOG Trip record identifier, which is generated internally and used for linking|
+|geoid| 10 digit county subdivision from US Census. |
+|state_fips| 2 digit state fips code  |
+|portlnd1| string of the name of the port that the vessel operator writes on the VTR.|
+|state1 | 2 letter abbreviation of the state|
+|port| 6 digit port code. Should match vtr_portnum from VTR|
+|namelsad| Name and Legal/Statistical description|
+|port_lat| Latitude of the geoid|
+|port_lon| longitude of the geoid| 
+|previous_geoid| Geoid of landing port for previous trip |
+|previous_state_fips| 2 digit state fips code for previous trip  |
+|previous_namelsad| Name and Legal/Statistical description for previous trip|
+|previous_port_lat| Latitude of the geoid for previous trip|
+|previous_port_lon| longitude of the geoid for previous trip| 
+
+"
+cat(tabl) 
+```
+
+
+The spacepanels data tidies up vtr ports and aggregates them to the [US Census county subdivision](https://www.census.gov/programs-surveys/geography/technical-documentation/complete-technical-documentation.html). You should *not* expect an exact match between portlnd1, state1, and port in the spacepanels dataset compared to the same columns in the raw vtr because some data clean was done on these fields. The code is in the spacepanels repo, "just_ports.do."
+
+*  `Geoid` is geoid10.  The lat-lons are either the centroid of the geoid and/or adjusted to the coast. There is probably some error here, but if the goal is to use these points to help construct distances or costs to go fishing, they are probably accurate enough.  
+
+*  `namelsad` is a convenient name (Like "Boston city"). However, be aware that there are some places with the same name, so use either the `geoid` or the `namelsad` plus `state` or `state_fips`.  This could also be solved by using the `namelsad` as factor levels 
+This dataset includes all trips from 1996-2021. Use the vintage date appended to the end of the file to assess whether the final year of data is "complete" enough for your purposes.  The following corresponds to all trips, not just scallop trips:
+  
+*   Missing `tripids`. there are missing tripids prior to 2003. These correspond to SCOQ.  
+*   Missing `vtr_portnum` There are about 183 obs. These are 2019-2021 and probably reflect changes in the underlying data that haven't been picked up and cleaned in the code. I am not going to deal with these.
+*   Missing `geoid`.  There are about 3,000 obs. Many of these are because the vtr_port is "Other State".  A few are missing because of a new port. 
+
+* There is a set of `previous_` variables. These were constructed using this code:
+
+```{r sample_lag_ports, echo=TRUE, eval=FALSE}
+bysort permit (datelnd1 tripid): gen previous_geoid=geoid[_n-1]
+bysort permit (datelnd1 tripid): gen previous_namelsad=namelsad[_n-1]
+bysort permit (datelnd1 tripid): gen previous_state_fips=state_fips[_n-1]
+```
+
+
+*  It's possible that the previous trip was the same day.  It's also possible that the previous trip was from years before.  
+*The date that I am using here is the `datelnd1` field from VESLOG_T, if those are somehow missing, I have used datesold from VESLOG_S. I am using something from the Clam logbooks, but I'm not positive as to what. I normally used the datesold in VESLOG_S for spacepanels.  
+
+*  More of the `previous_` variables are missing. This is expected, because the first observation of a permit will be missing something. I don't think this will cause too much of a problem.  Some will be missing if the prior trip was a "other state."
+
+
+##  Description of the VMS data.
+We are currently not using the VMS data directly. 
+
+
+##  Description of the Cost  data.
+```{r Tripcost overview, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
+tabl <- "
+| Column  | Description           |
+|------------|:-----------------------------------------------|
+|Place|holder|
+|Place|holder|
+"
+cat(tabl) 
+```
+
+
+
+
+
+
+
+# Load Offshore Wind Tool Data sets 
+
+The frozen DMIS table from the offshoreWind project (APSD_DMIS_2) is the base dataset for the analysis.  The DMIS data are formed by combining many datasets, including VTR and Dealer.  In brief, the APSD_DMIS_2 dataset contains a mix of trip attributes (port, date),  sub-trip attributes (gear, location) , and catch outcomes (species, pounds, landed, dollar).  You can read more about DMIS [here](https://github.com/NEFSC/READ-SSB-Lee-metadata/blob/master/DMIS.md).
+
+
+```{r Data Set Loading, echo=TRUE, results=FALSE}
+load(file.path(offshoreWind_directory, "APSD_DMIS_2.rda"))
+#load("~/offshoreWind-master/data-raw/REVENUEFILE.Rdata")
+#load("~/offshoreWind-master/data/APSD_DMIS_2.Rdata")
+
+
+```
+
+
+# Read in Port lats and lons  
+
+Load in the lats and lons of all ports from the spacepanels directory. Change the column names to clarify that the lat-lons are the ports. Join this to the APSD_DMIS_2 dataset, keeping all rows of the APSD_DMIS_2 dataset and dropping any rows from tripids_geoids that do not match.
+
+```{r readin_spacepanels, echo=TRUE}
+#Import Data
+tripid_geoids<- haven::read_dta(file.path(spacepanels_directory,"just_ports_2022_01_26.dta"))
+#Could do all this in one step, but ...
+# Pick the cols that start with previous
+prev<-tripid_geoids[grepl("^previous_", colnames(tripid_geoids))]
+#pick the rest of the cols
+tripid_geoids<-tripid_geoids[c("tripid","geoid", "namelsad", "state_fips","port_lat","port_lon")]
+#cbind the two together
+tripid_geoids<-cbind(tripid_geoids,prev)
+
+APSD_DMIS_2<-merge(APSD_DMIS_2,tripid_geoids, by.x="DOCID", by.y="tripid", all.x=TRUE, all.y=FALSE)
+```
+This match should be pretty good for source=DMIS. But it will not work for source=SFCLAM.
+
+# Loading Data fom Oracle 
+
+The APSD_DMIS_2 table must be supplemented with additional data.  This section queries the Oracle databases to extract additional information.
+
+## VTR Data
+
+Some Trip-level data in the VTR schema is needed. See table at the top.  We extract them here. 
+
+```{r VTR_Query, echo=TRUE, results=FALSE}
+
+
+
+oracle_server = "sole"
+ODBC.CONNECTION <- RODBC::odbcConnect(dsn=oracle_server, uid=oracle_username, pwd=oracle_password, believeNRows=FALSE)
+START.YEAR = 2007
+END.YEAR = 2019
+for(i in START.YEAR:END.YEAR) {
+  print(i)
+  CURRENT.QUERY = paste("SELECT VTR.veslog",i,"t.TRIPID,tripcatg, operator, opernum, permit, nsubtrip, crew,not_fished, port as VTR_PORTNUM  
+                FROM VTR.veslog",i,"t", sep="")
+  YEAR.RESULT = sqlQuery(ODBC.CONNECTION, CURRENT.QUERY)  
+  
+  # Now, the loop compiles the results; the first year must be treated slightly differently###
+  if (i==START.YEAR) {
+    RESULT.COMPILED = YEAR.RESULT
+  } else {
+    RESULT.COMPILED = rbind(RESULT.COMPILED, YEAR.RESULT) }
+}    # End Main Loop
+
+```
+
+
+
+
+## Scallop LA IFQ Linking variables 
+
+We also extract the activity code from DMIS.  This will describe the type of trip that the vessel has declared into.  The most important types of trips will be Scallop Trips; however, fishing vessels with the proper permits are allowed to retain scallops while declared into other fisheries.  When this happens, the volume of scallops will be much lower.
+
+We  also extract the T/F variables corresponding the the PLAN_CAT in DMIS.  
+```{r DMIS_Query, echo=TRUE}
+ 
+oracle_server = "sole"
+CURRENT.QUERY = paste ("SELECT TRIP_ID, DOCID, ACTIVITY_CODE, LGC_A, LGC_B, LGC_C, SC_2, SC_3, SC_4, SC_5, SC_6, SC_7, SC_8, SC_9, SG_1A, SG_1B
+ FROM APSD.t_ssb_trip_current@garfo_nefsc")
+Scallop_Linkingorg = sqlQuery(ODBC.CONNECTION, CURRENT.QUERY)
+
+odbcCloseAll()
+
+```
+
+
+
+
+
+
