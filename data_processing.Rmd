@@ -35,7 +35,13 @@ We will:
 1. Store final data products in "data/main."
 1. Use a vintage "suffix" to denote when we have extracted data.
 
+```{r setup, include=TRUE, echo=TRUE, results=FALSE}
 
+#Read in RDS
+
+Scallop_Linkingorg <- readRDS(paste0("Scallop_Linkingorg_",vintage_string,.Rds))
+
+```
 
 # Introduction
 
@@ -184,6 +190,11 @@ VTR_DMIS_merge$NOT_FISHED <- NULL
 ## Note: VTRs are self-reported and there is a potential for records to be submitted to regional office multiple times; on rare occasions this can result in duplicate records being logged.
 VTR_DMIS_AC <- merge(VTR_DMIS_merge,Scallop_Linkingorg, by.x = "TRIPID", by.y = "DOCID", all.x = TRUE, all.y = FALSE)
 VTR_DMIS_AC <- VTR_DMIS_AC %>% distinct(TRIPID,DOLLAR,TRIP_LENGTH,LANDED, .keep_all = TRUE)  
+
+## Created two sets of cost joins.
+### 1. Before LA Estimation
+### 2. After LA Estimation
+VTR_DMIS_AC <- merge(VTR_DMIS_AC,all_yrs_costs, by.x = "TRIPID", by.y = "VTR_TRIPID", all.x = TRUE,all.y =FALSE)
 
 #Split Activity codes to allow for easier data management. VMS Declaration code book is broken down by Plan Codes,Program Codes, and Area Identifiers.However data is stored in one long string so this code breaks up the string so each group can be looked at individually. 
 VTR_DMIS_AC$ACTIVITY_CODE <- as.character(VTR_DMIS_AC$ACTIVITY_CODE)
