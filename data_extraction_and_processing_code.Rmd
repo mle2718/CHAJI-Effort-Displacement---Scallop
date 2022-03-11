@@ -304,9 +304,12 @@ load(file.path(offshoreWind_directory, "APSD_DMIS_2.rda"))
 #load("~/offshoreWind-master/data-raw/REVENUEFILE.Rdata")
 #load("~/offshoreWind-master/data/APSD_DMIS_2.Rdata")
 
-
 ```
 
+
+```{r DRC_fix_APSD_DMIS_2, echo=TRUE, results=FALSE}
+APSD_DMIS_2$GEARCODE[APSD_DMIS_2$SECGEARFISH=="DSC"]<-"DREDGE-SCALLOP" 
+```
 
 # Read in Port lats and lons  
 
