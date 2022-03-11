@@ -24,10 +24,8 @@ assignment: polygon boundary types, spherical v. planar geometry, and spatial jo
 ## Library
 
 ```{r setup, echo=TRUE, results=FALSE}
-
 # Set Path
 here::i_am("scallop_zone_assignment.Rmd")
-
 # Install Packages if necessary and Load Libraries
 PKG <- c("here","leaflet", "tidyverse", "sf")
 for (p in PKG) {
@@ -35,7 +33,6 @@ for (p in PKG) {
     install.packages(p)
     require(p,character.only = TRUE)}
 }
-
 # Set data vintage
 vintage_string<-"2022_02_16"
 ```
@@ -49,14 +46,11 @@ FishSET team in Oct/Nov of last year.
 ```{r data}
 # load in Oct 18 data.
 scallop_10_18 <- read_csv(here("data","main","cost_join_10_18.csv"))
-
 # load in final product
 final_product_savename<-paste0("final_product_lease",vintage_string,".Rds")
 final_product_lease<-readRDS(here("data","main",final_product_savename))
-
 # overwrite 
 #scallop_10_18<-final_product_lease
-
 # Load in 10 minute squares
 tenMinSqr_new <- 
   here("data",
@@ -65,7 +59,6 @@ tenMinSqr_new <-
        "Ten Minute Squares Cut North and Greater Atlantic") %>% 
   st_read() %>% 
   st_zm() # remove Z/M dimensions from feature
-
 ```
    
 <br><br>
@@ -73,7 +66,6 @@ tenMinSqr_new <-
 Check for duplicate trip IDs. 
 ```{r}
 nrow(scallop_10_18)
-
 scallop_10_18 %>% 
   distinct(TRIPID) %>% 
   nrow()
@@ -90,17 +82,13 @@ This is the approach we take in FishSET to assign observations to zones.
 # crs <- st_crs(tenMinSqr_new) # using crs from ten minute squares didn't change results
 # 4326 is shorthand for WGS84 (https://epsg.io/4326)
 crs <- 4326
-
 scallop_sf <- 
   st_as_sf(x = scallop_10_18, coords = c("DDLON", "DDLAT"), 
            crs = crs)
-
 # convert Squares to WGS84 
 tenMinSqr_new <- st_transform(tenMinSqr_new, crs = st_crs(scallop_sf))
-
 # same results as st_within
 inter <- sf::st_intersects(scallop_sf, tenMinSqr_new)
-
 inter_save <- inter 
  
  if (any(lengths(inter) > 1)) { # if more than one zone intersects, assign to closest zone
@@ -108,7 +96,6 @@ inter_save <- inter
   dub <- which(lengths(inter) > 1)
   inter[dub] <- st_nearest_feature(scallop_sf[dub,], tenMinSqr_new)
  }
-
 # Add ZoneID column to data
 pts <- as.data.frame(as.numeric(inter))
 colnames(pts) <- "col.id"
@@ -141,14 +128,12 @@ There is a 6.15% difference (2086 obs) in zone assignments between `ZoneID` and 
 ```{r compare1}
 scallop_sf <- scallop_sf %>% 
   mutate(fs_ne_match = ZoneID == MN10SQID)
-
 # add ZoneID and match col to scallop_10_18
 scallop_10_18 <- 
   scallop_sf %>% 
   st_set_geometry(NULL) %>% 
   select(ZoneID, fs_ne_match) %>% 
   bind_cols(scallop_10_18, .)
-
 # summary table of matching IDs
 scallop_sf %>% 
   st_set_geometry(NULL) %>% 
@@ -164,7 +149,6 @@ scallop_sf %>%
 All the unassigned points in `ZoneID` fall on a zone intersection.
 ```{r compare2}
 s_bbox <- st_bbox(filter(scallop_sf, is.na(ZoneID)))
-
 ggplot() + 
   geom_sf(data = tenMinSqr_new, fill = "white", color = "black") +
   geom_sf(data = filter(scallop_sf, is.na(ZoneID)),color = "red") +
@@ -202,17 +186,14 @@ scallop_10_18 <-
          MN10SQID_lab = paste0("NE: ", MN10SQID, "<br/>")) %>% 
   unite("unite_lab", ZoneID_lab, MN10SQID_lab, sep = " ") %>% 
   mutate(unite_lab = paste0(unite_lab, "lon: ", DDLON, "<br/>lat: ", DDLAT))
-
 fs_no_match <- scallop_10_18 %>% 
   filter(fs_ne_match == FALSE) %>% 
   head(20) %>% 
   pull(ZoneID)
-
 ne_no_match <- scallop_10_18 %>% 
   filter(fs_ne_match == FALSE) %>% 
   head(20) %>% 
   pull(MN10SQID)
-
 leaflet() %>%
   addTiles() %>%
   addPolygons(data = filter(tenMinSqr_new, MN10SQID %in% c(fs_no_match, ne_no_match)),
@@ -235,13 +216,11 @@ leaflet() %>%
 Similar to the plot above, but comparing the unassigned points in `ZoneID` with
 `MN10SQID`. 
 ```{r compare5}
-
 if (sum(is.na(scallop_10_18$ZoneID)) > 0) {
   
   fs_na <- scallop_10_18 %>% 
   filter(is.na(ZoneID)) %>% 
   pull(MN10SQID)
-
 leaflet() %>%
   addTiles() %>%
   addPolygons(data = filter(tenMinSqr_new, MN10SQID %in% fs_na),
@@ -271,14 +250,11 @@ Point assignment can vary depending on whether polygon boundaries are treated as
 inter_closed <- lengths(st_intersects(scallop_sf, tenMinSqr_new, model = "closed"))
 inter_open <- lengths(st_intersects(scallop_sf, tenMinSqr_new, model = "open"))
 inter_semi <- lengths(st_intersects(scallop_sf, tenMinSqr_new, model = "semi-open"))
-
 bound_type <- tibble(Closed = inter_closed, Open = inter_open, Semi = inter_semi)
-
 pivot_longer(bound_type, cols = c("Closed", "Open", "Semi"), 
              names_to = "boundary_type", values_to = "Zones_assigned") %>% 
   group_by(boundary_type) %>% 
   count(Zones_assigned)
-
 ```
 
 <br><br>
@@ -291,22 +267,17 @@ Sf 1.0+ uses spherical geometry (S2) on coordinates, sf < 1.0 uses planar geomet
 ```{r r2}
 # test difference in S2 and R2 methods
 sf_use_s2(FALSE)
-
 inter_closed_r2 <- lengths(st_intersects(scallop_sf, tenMinSqr_new, model = "closed"))
 inter_open_r2 <- lengths(st_intersects(scallop_sf, tenMinSqr_new, model = "open"))
 inter_semi_r2 <- lengths(st_intersects(scallop_sf, tenMinSqr_new, model = "semi-open"))
-
 sf_use_s2(TRUE)
-
 bound_type_r2 <- tibble(Closed = inter_closed_r2, 
                         Open = inter_open_r2, 
                         Semi = inter_semi_r2)
-
 pivot_longer(bound_type_r2, cols = c("Closed", "Open", "Semi"), 
              names_to = "boundary_type", values_to = "Zones_assigned") %>% 
   group_by(boundary_type) %>% 
   count(Zones_assigned)
-
 ```
 
 <br><br>
@@ -317,17 +288,14 @@ Spatial joins will add additional rows if a point intersects more than one zone.
 If an inner join is used (`left = FALSE`), points that don't intersect zones are dropped.
 
 ```{r join1}
-
 scallop_sf_join <- st_join(scallop_sf, 
                            tenMinSqr_new["MN10SQID"], 
                            suffix = c(".x", ".y"),
                            left = TRUE)
-
 scallop_sf_join <- 
   scallop_sf_join %>%
   mutate(fs_join_match = ZoneID == MN10SQID.y,
          ne_join_match = MN10SQID.x == MN10SQID.y)
-
 scallop_sf_join %>% 
   st_set_geometry(NULL) %>% 
   summarize(n_obs = n(),
@@ -342,7 +310,6 @@ Spatial join adds 195 rows: one for each point that intersected two zones.
 
 ```{r join2}
 nrow(scallop_sf_join)
-
 scallop_sf_join %>% 
   st_set_geometry(NULL) %>% 
   distinct(TRIPID) %>% 
@@ -364,14 +331,10 @@ are from points assigned to multiple zones. No approach handled this
 case in the same way. 
 ```{r}
 dup_trip_id <- scallop_10_18$TRIPID[lengths(inter_save) > 1]
-
 scallop_sf_join <- 
   scallop_sf_join %>% 
   mutate(dup_zone = TRIPID %in% dup_trip_id)
-
 scallop_sf_join %>% 
   st_set_geometry(NULL) %>% 
   filter(!fs_ne_match & !fs_join_match & !ne_join_match) %>% 
   summarize(dup_zone = sum(dup_zone))
-```
-
