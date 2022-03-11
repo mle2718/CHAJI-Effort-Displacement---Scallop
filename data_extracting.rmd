@@ -12,7 +12,7 @@ Load packages. Install if necessary.
 # Set Path
 here::i_am("data_extracting.rmd")
 
-PKG <- c("RODBC", "RODM","here")
+PKG <- c("RODBC", "RODM","here","readxl")
 for (p in PKG) {
   if(!require(p,character.only = TRUE)) {
     install.packages(p)
