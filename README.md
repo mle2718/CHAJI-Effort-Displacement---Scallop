@@ -8,6 +8,15 @@ We have documentation about the research question, motivation, and fishery conte
 Perhaps one day, in the not too distant future, this repository will contain code to estimate the choice model also.
 
 While the empirical setting that we have chosen is the Limited Access Scallop fishery, we envision this serving as a pilot project that enhances our ability to estimate discrete choice models and conduct spatial analyses for other fisheries.
+
+# A few ground rules for contributing
+
+[Our Code of Conduct](code_of_conduct.md)
+
+1. The *main* branch should always work.  So, commit directly to main if the change cannot break any existing code.    
+2. If you're in doubt, create a branch and develop your code there.  Then, issue a [pull request](https://github.com/NEFSC/READ-SSB-CHAJI-Effort-Displacement---Scallop/compare) and please make sure to request a review.
+
+
 # Testing and Functionality
 
 The data extraction code has primarily been developed by Marina Chaji and runs on the neptune server at NEFSC. 
@@ -62,9 +71,6 @@ We have added various shapefiles to the repository.
 There are also some data that we get internally from the network, this can be figured out just by looking through the data processsing code.
 
 
-# Code of Conduct
-
-[Our Code of Conduct](code_of_conduct.md)
 
 # Disclaimer
 This repository is a scientific product and is not official communication of the National Oceanic and Atmospheric Administration, or the United States Department of Commerce. All NOAA GitHub project code is provided on an ‘as is’ basis and the user assumes responsibility for its use. Any claims against the Department of Commerce or Department of Commerce bureaus stemming from the use of this GitHub project will be governed by all applicable Federal law. Any reference to specific commercial products, processes, or services by service mark, trademark, manufacturer, or otherwise, does not constitute or imply their endorsement, recommendation or favoring by the Department of Commerce. The Department of Commerce seal and logo, or the seal and logo of a DOC bureau, shall not be used in any manner to imply endorsement of any commercial product or activity by DOC or the United States Government.
