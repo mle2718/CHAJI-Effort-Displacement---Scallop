@@ -39,7 +39,11 @@ We will:
 
 #Read in RDS
 
-Scallop_Linkingorg <- readRDS(paste0("Scallop_Linkingorg_",vintage_string,.Rds))
+Scallop_Linkingorg <- readRDS("~/Effort-Displacement---Scallop/data/intermediate/Scallop_Linkingorg.Rds")
+RESULT_COMPILED <- readRDS("~/Effort-Displacement---Scallop/data/intermediate/RESULT_COMPILED.Rds")
+APSD_DMIS_2 <- readRDS("~/Effort-Displacement---Scallop/data/intermediate/APSD_DMIS_2.Rds")
+all_yrs_costs <- readRDS("~/Effort-Displacement---Scallop/data/intermediate/all_yrs_costs.Rds")
+
 
 ```
 
