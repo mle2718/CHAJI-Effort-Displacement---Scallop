@@ -9,7 +9,7 @@ Perhaps one day, in the not too distant future, this repository will contain cod
 
 While the empirical setting that we have chosen is the Limited Access Scallop fishery, we envision this serving as a pilot project that enhances our ability to estimate discrete choice models and conduct spatial analyses for other fisheries.
 
-# A Few Guidelines For Fontributing
+# A Few Guidelines For Contributing
 
 1.  [Our Code of Conduct](code_of_conduct.md)
 2. The *main* branch should always work.  So, commit directly to main if the change cannot break any existing code.    
