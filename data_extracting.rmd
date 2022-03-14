@@ -282,7 +282,7 @@ tripid_geoids<-cbind(tripid_geoids,prev)
 APSD_DMIS_2<-merge(APSD_DMIS_2,tripid_geoids, by.x="DOCID", by.y="tripid", all.x=TRUE, all.y=FALSE)
 
 #save to RDS
-APSD_DMIS_2 <-paste0("APSD_DMIS_2",vintage_string,".Rds")
+APSD_DMIS_2 <-paste0("APSD_DMIS_2",".Rds")
 saveRDS(APSD_DMIS_2, file=here("data","intermediate",APSD_DMIS_2))
 
 ```
@@ -319,8 +319,8 @@ for(i in START.YEAR:END.YEAR) {
 
 
 #save to RDS
-RESULT_COMPILED <-paste0("RESULT.COMPILED",vintage_string,".Rds")
-saveRDS(RESULT_COMPILED, file=here("data","intermediate",RESULT.COMPILED))
+RESULT_COMPILED <-paste0("RESULT.COMPILED",".Rds")
+saveRDS(RESULT_COMPILED, file=here("data","intermediate",RESULT_COMPILED))
 
 
 ```
@@ -345,7 +345,7 @@ odbcCloseAll()
 
 
 #save to RDS
-Scallop_Linkingorg <-paste0("Scallop_Linkingorg",vintage_string,".Rds")
+Scallop_Linkingorg <-paste0("Scallop_Linkingorg",".Rds")
 saveRDS(Scallop_Linkingorg, file=here("data","intermediate",Scallop_Linkingorg))
 ```
 
@@ -367,7 +367,7 @@ all_yrs_costs <- merge(X2007_2012,X2013_2020, all = TRUE)
 
 
 #save to RDS
-all_yrs_costs <-paste0(file.path(data, intermediate, "all_yrs_costs.Rds"))
+all_yrs_costs <-paste0(all_yrs_costs,".Rds")
 saveRDS(all_yrs_costs, file=here("data","intermediate",all_yrs_costs))
 ```
 
