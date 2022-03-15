@@ -22,6 +22,8 @@ The data extraction code has primarily been developed by Marina Chaji and runs o
 *   R version 4.0.5 (2021-03-31) -- "Shake and Throw"
 *   Rstudio server Version 1.4.1103
 
+Don't use mars because it's on an older version of R.
+
 # Getting started
 
 1.  Clone the repository onto the neptune server on the NEFSC network.
