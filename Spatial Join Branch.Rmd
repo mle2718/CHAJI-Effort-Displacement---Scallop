@@ -93,7 +93,7 @@ inter_save <- inter
 # Add ZoneID column to data
 pts <- as.data.frame(as.numeric(inter))
 colnames(pts) <- "col.id"
-pts$ID <- lease$MN10SQID[pts$col.id]
-scallop_sf$lease <- pts$ID
+scallop_sf$lease <- lease$NAME[pts$col.id]
+scallop_sf$lease <- lease$NAME[as.numeric(inter)]
 ```
 
