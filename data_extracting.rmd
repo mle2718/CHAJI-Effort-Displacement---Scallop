@@ -317,12 +317,10 @@ for(i in START.YEAR:END.YEAR) {
     RESULT.COMPILED = rbind(RESULT.COMPILED, YEAR.RESULT) }
 }    # End Main Loop
 
-#Changing format of data frame name 
-RESULT_COMPILED <- RESULT.COMPILED
 
 #save to RDS
-RESULT_COMPILED <-paste0("RESULT_COMPILED",".Rds")
-saveRDS(RESULT_COMPILED, file=here("data","intermediate",RESULT_COMPILED))
+RESULT.COMPILED_name <-paste0("RESULT_COMPILED",".Rds")
+saveRDS(RESULT.COMPILED, file=here("data","intermediate",RESULT_COMPILED))
 
 
 ```
