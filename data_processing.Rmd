@@ -16,7 +16,7 @@ here::i_am("data_processing.Rmd")
 
 
 
-PKG <- c("here","leaflet", "tidyverse", "sf", "dbplyr","raster","rgdal","readxl", "data.table", "tmaptools", "tmap", "dplyr")
+PKG <- c("here","leaflet", "tidyverse", "sf", "dbplyr","raster","rgdal","readxl", "data.table", "tmaptools", "tmap", "dplyr","RODBC", "RODM","here","readxl")
 for (p in PKG) {
   if(!require(p,character.only = TRUE)) {
     install.packages(p)
@@ -46,6 +46,66 @@ all_yrs_costs <- readRDS("~/Effort-Displacement---Scallop/data/intermediate/all_
 
 
 ```
+
+
+# Organization
+
+
+```{r folder_create, include=TRUE, echo=FALSE, results=FALSE}
+# You only need to run this once, but nothing bad will happen if you keep include=TRUE.
+
+# Set up some folders
+
+dir.create(here("data"), showWarnings="FALSE")
+dir.create(here("data", "external"), showWarnings="FALSE")
+dir.create(here("data", "external","shapefiles"), showWarnings="FALSE")
+dir.create(here("data", "intermediate"), showWarnings="FALSE")
+dir.create(here("data", "main"), showWarnings="FALSE")
+dir.create(here("data","external","shapefiles","East_Cst_crop_2020_extended"), showWarnings="FALSE")
+dir.create(here("data","external","shapefiles","Ten Minute Squares Cut North and Greater Atlantic"), showWarnings="FALSE")
+dir.create(here("data","external","shapefiles","All_Lease_Areas_Shapefile"), showWarnings="FALSE")
+
+```
+
+We will:
+
+1. Try to avoid copying data; when we rely on data from other people, we will read it directly into memory from the network location or Oracle.
+1. Sometimes this is unnecessary, so we will copy external data into the "data/external" folder. We will have a separate subfolder for shapefiles.
+1. Store an intermediate data product in "data/intermediate".
+1. Store final data products in "data/main."
+1. Use a vintage "suffix" to denote when we have extracted data.
+
+
+
+## Read in oracle passwords and set network directory
+This is a block of code where we set up the oracle passwords and make R aware of folders on the network.
+
+```{r oracle_connections, echo=TRUE, results=FALSE}
+source(here("credentials.R"))
+
+# Set the network_location_desktop and network_location_remote variables somewhere OUTSIDE of this code.  The best place to do this is in the .Rprofile or .Renviron files that are in your root directory.  
+
+#Comment one of these out, depending on whether you are running this code on a server or locally (with VPN) 
+net<-network_location_desktop
+net<-network_location_remote
+
+# These are not part of the project path
+offshoreWind_directory<-file.path(net,"home5", "dcorvi","OffshoreWind","offshoreWind4","data")
+spacepanels_directory<-file.path(net,"home2", "mlee","dropoff","wind")
+cost_directory<-file.path(net,"work5","socialsci","Trip_Costs","2007-2020")
+
+# Set up paths.
+East_Cst_crop_2020_path<- here("data","external","shapefiles","East_Cst_crop_2020_extended")
+TMSQ_path<-here("data","external","shapefiles","Ten Minute Squares Cut North and Greater Atlantic")
+All_Lease_Areas_Shapefile_path<-here("data","external","shapefiles","All_Lease_Areas_Shapefile")
+```
+
+
+
+
+
+
+
 
 # Introduction
 
@@ -167,7 +227,7 @@ Scallops$SOURCE<- NULL
 # all.x = TRUE & all.y = FALSE means I am keeping data with no match from DMIS table but dropping data with no match from the Veslog tables
 
 # DOCID is used because of the following found in the data dictionary "VESLOG Trip record identifier, which is generated internally; Primary key for VESLOGyyyyT; Foreign key to VESLOGyyS, VESLOGyyG. Equivalent to DOCID in VTR DOCUMENT table"
-VTR_DMIS_merge <- merge(RESULT.COMPILED,Scallops, by.x = "TRIPID", by.y = "DOCID", all.x = FALSE, all.y = TRUE)
+VTR_DMIS_merge <- merge(RESULT_COMPILED,Scallops, by.x = "TRIPID", by.y = "DOCID", all.x = FALSE, all.y = TRUE)
 
 ## Filter out 2020 values 
 VTR_DMIS_merge <- VTR_DMIS_merge %>% filter(YEAR <= END.YEAR)
