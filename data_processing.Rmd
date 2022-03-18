@@ -2,7 +2,9 @@
 title: "data_processing"
 author: "Marina Chaji"
 date: "3/8/2022"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 
@@ -27,6 +29,15 @@ vintage_string<-gsub("-","_",vintage_string)
 
 ```
 
+```{r reset_vintage_string, include=TRUE, echo=TRUE, results=FALSE}
+#This code looks into data_intermediate and sets the vintage_string according to the most recent data
+RESULT_COMPILED_datasets<-list.files(path=here("data","intermediate"), pattern="RESULT_COMPILED")
+RESULT_COMPILED_datasets<-gsub("RESULT_COMPILED_","",RESULT_COMPILED_datasets )
+RESULT_COMPILED_datasets<-gsub(".Rds","",RESULT_COMPILED_datasets)
+vintage_string<-max(RESULT_COMPILED_datasets)
+rm(RESULT_COMPILED_datasets)
+```
+
 We will:
 
 1. Try to avoid copying data; when we rely on data from other people, we will read it directly into memory from the network location or Oracle.
@@ -34,18 +45,6 @@ We will:
 1. Store an intermediate data product in "data/intermediate".
 1. Store final data products in "data/main."
 1. Use a vintage "suffix" to denote when we have extracted data.
-
-```{r read in RDS, include=TRUE, echo=TRUE, results=FALSE}
-
-#Read in RDS
-
-Scallop_Linkingorg <- readRDS("~/Effort-Displacement---Scallop/data/intermediate/Scallop_Linkingorg.Rds")
-RESULT_COMPILED <- readRDS("~/Effort-Displacement---Scallop/data/intermediate/RESULT.COMPILED.Rds")
-APSD_DMIS_2 <- readRDS("~/Effort-Displacement---Scallop/data/intermediate/APSD_DMIS_2.Rds")
-all_yrs_costs <- readRDS("~/Effort-Displacement---Scallop/data/intermediate/all_yrs_costs.Rds")
-
-
-```
 
 
 # Organization
@@ -100,6 +99,18 @@ TMSQ_path<-here("data","external","shapefiles","Ten Minute Squares Cut North and
 All_Lease_Areas_Shapefile_path<-here("data","external","shapefiles","All_Lease_Areas_Shapefile")
 ```
 
+
+```{r read in RDS, include=TRUE, echo=TRUE, results=FALSE}
+
+#Read in RDS
+
+Scallop_Linkingorg <- readRDS(here("data","intermediate",paste0("Scallop_Linkingorg_",vintage_string,".Rds")))
+RESULT_COMPILED <- readRDS(here("data","intermediate",paste0("RESULT_COMPILED_",vintage_string,".Rds")))
+APSD_DMIS_2 <- readRDS(here("data","intermediate",paste0("APSD_DMIS_2_",vintage_string,".Rds")))
+all_yrs_costs <- readRDS(here("data","intermediate",paste0("all_yrs_costs_",vintage_string,".Rds")))
+
+
+```
 
 
 
@@ -470,9 +481,10 @@ identical(final_product_lease$geometry, point_geo$geometry)
 
 
 
-#save to RDS
-final_product_savename<-paste0("final_product_lease",vintage_string,".Rds")
-saveRDS(final_product_lease, file=here("data","main",final_product_savename))
+#save to RDS and CSV
+final_product_savename<-paste0("final_product_lease",vintage_string)
+saveRDS(final_product_lease, file=here("data","main",paste0(final_product_savename,".Rds")))
+write.csv(final_product_lease, file=here("data","main",paste0(final_product_savename,".csv")), row.names=FALSE)
 
 # to read this in, you will want to do the here::i_am dance and then read in
 # final_product_savename<-paste0("final_product_lease",vintage_string,".Rds")
