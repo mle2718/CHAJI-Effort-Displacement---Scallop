@@ -2,7 +2,9 @@
 title: "data_processing"
 author: "Marina Chaji"
 date: "3/8/2022"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 
@@ -40,7 +42,7 @@ We will:
 #Read in RDS
 
 Scallop_Linkingorg <- readRDS("~/Effort-Displacement---Scallop/data/intermediate/Scallop_Linkingorg.Rds")
-RESULT_COMPILED <- readRDS("~/Effort-Displacement---Scallop/data/intermediate/RESULT.COMPILED.Rds")
+RESULT_COMPILED <- readRDS("~/Effort-Displacement---Scallop/data/intermediate/RESULT_COMPILED.Rds")
 APSD_DMIS_2 <- readRDS("~/Effort-Displacement---Scallop/data/intermediate/APSD_DMIS_2.Rds")
 all_yrs_costs <- readRDS("~/Effort-Displacement---Scallop/data/intermediate/all_yrs_costs.Rds")
 
