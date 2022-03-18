@@ -364,7 +364,7 @@ all_yrs_costs <- merge(X2007_2012,X2013_2020, all = TRUE)
 
 
 #save to RDS
-all_yrs_costs_name <-paste0("all_yrs_costs",vintage_string,".Rds")
+all_yrs_costs_name <-paste0("all_yrs_costs_",vintage_string,".Rds")
 saveRDS(all_yrs_costs, file=here("data","intermediate",all_yrs_costs_name))
 ```
 
