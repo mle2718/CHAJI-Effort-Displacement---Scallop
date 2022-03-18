@@ -9,21 +9,32 @@ output:
 
 
 # Project setup
-Load packages. Install if necessary.
+here(), load libraries, and set a data vintage.
 
 ```{r setup, include=TRUE, echo=TRUE, results=FALSE}
 
 # Set Path
 here::i_am("data_processing.Rmd")
 
+# Please ensure you have the proper packages installed with (install.packages()) or a request to ITD if any libaries do not load.  
 
 
-PKG <- c("here","leaflet", "tidyverse", "sf", "dbplyr","raster","rgdal","readxl", "data.table", "tmaptools", "tmap", "dplyr","RODBC", "RODM","here","readxl")
-for (p in PKG) {
-  if(!require(p,character.only = TRUE)) {
-    install.packages(p)
-    require(p,character.only = TRUE)}
-}
+library("here")
+library("leaflet")
+library("tidyverse")
+library("sf")
+library("dbplyr")
+library("raster")
+library("rgdal")
+library("readxl")
+library("data.table")
+library("tmaptools")
+library("tmap")
+library("dplyr")
+library("RODBC")
+library("RODM")
+library("epiDisplay")
+library("tmap")
 vintage_string<-Sys.Date()
 vintage_string<-gsub("-","_",vintage_string)
 
@@ -445,6 +456,11 @@ TMSQ_sp <- st_read(TMSQ_path)
 #qtm(TMSQ_sp) + tm_legend(show = FALSE)
 
 
+# Preserve the DDLAT and DDLON fields
+VTR_DMIS_AC$DDLAT_bak<-VTR_DMIS_AC$DDLAT
+VTR_DMIS_AC$DDLON_bak<-VTR_DMIS_AC$DDLON
+
+
 point_geo <- st_as_sf(VTR_DMIS_AC, 
                       coords = c(x  = "DDLON", y = "DDLAT"), crs = crs )
 
@@ -478,7 +494,14 @@ identical(final_product_lease$geometry, point_geo$geometry)
 ## st_intersects,st_disjoint,st_touches,st_crosses,st_within,st_contains,st_contains_properly,st_overlaps,st_equals,st_covers,st_covered_by,st_equals_exact,st_is_within_distance
 
 
+#Recover the DDLAT and DDLON fields.
+colnames(final_product_lease)[colnames(final_product_lease) == "DDLON_bak"] <- "DDLON"
+colnames(final_product_lease)[colnames(final_product_lease) == "DDLAT_bak"] <- "DDLAT"
 
+stopifnot(is.numeric(final_product_lease$MN10SQID))
+
+stopifnot(is.numeric(final_product_lease$MN30SQID))
+final_product_lease$geometry<-NULL
 
 
 #save to RDS and CSV
@@ -526,6 +549,12 @@ table(final_product_lease$`Program Code`)
 qtm(lease_sp) + tm_legend(show = FALSE)
 ```
 
+
+# R Session Information
+```{r session_info, include=TRUE, echo=TRUE, results=TRUE, eval=TRUE}
+sessionInfo()
+```
+This may be useful for diagnosing and troubleshooting one day.
 
 # Here is some code that we are no longer using. 
 
