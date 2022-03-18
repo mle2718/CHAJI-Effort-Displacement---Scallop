@@ -1,18 +1,28 @@
 # Purpose
 This repository is intended to estimate a location choice model scallops to understand the effect of wind energy areas on this fleet.  Currently, we have [code to extract and processes data](data_extraction_and_processing_code.Rmd). This code constructs aggregates NEFSC data into a dataset that can be imported to FishSET for data exploration and estimation.
 
-We are using data from 2007-2019 (calendar years).  The main datasource is a frozen DMIS table.  
+We are using [DMIS](https://github.com/NEFSC/READ-SSB-Lee-metadata/blob/master/DMIS.md) data from 2007-2019 (calendar years).  The main datasource is a frozen DMIS table, you can see the two pieces of sql used to construct that table [here](https://github.com/NEFSC/READ-SSB-Lee-metadata/blob/master/external/MAKE_DMIS_SFCLAM_122121.sql) and [here](https://github.com/NEFSC/READ-SSB-Lee-metadata/blob/master/external/make_sfclam_only_013022.sql).
 
 We have documentation about the research question, motivation, and fishery context [here](effort_displacement_overview.Rmd).
 
 Perhaps one day, in the not too distant future, this repository will contain code to estimate the choice model also.
 
 While the empirical setting that we have chosen is the Limited Access Scallop fishery, we envision this serving as a pilot project that enhances our ability to estimate discrete choice models and conduct spatial analyses for other fisheries.
+
+# A Few Guidelines For Contributing
+
+1.  [Our Code of Conduct](code_of_conduct.md)
+2. The *main* branch should always work.  So, commit directly to main if the change cannot break any existing code.    
+3. If you're in doubt, create a branch and develop your code there.  Then, issue a [pull request](https://github.com/NEFSC/READ-SSB-CHAJI-Effort-Displacement---Scallop/compare) and please make sure to request a review from the appropriate person.
+
+
 # Testing and Functionality
 
 The data extraction code has primarily been developed by Marina Chaji and runs on the neptune server at NEFSC. 
 *   R version 4.0.5 (2021-03-31) -- "Shake and Throw"
 *   Rstudio server Version 1.4.1103
+
+Don't use mars because it's on an older version of R.
 
 # Getting started
 
@@ -62,9 +72,6 @@ We have added various shapefiles to the repository.
 There are also some data that we get internally from the network, this can be figured out just by looking through the data processsing code.
 
 
-# Code of Conduct
-
-[Our Code of Conduct](code_of_conduct.md)
 
 # Disclaimer
 This repository is a scientific product and is not official communication of the National Oceanic and Atmospheric Administration, or the United States Department of Commerce. All NOAA GitHub project code is provided on an ‘as is’ basis and the user assumes responsibility for its use. Any claims against the Department of Commerce or Department of Commerce bureaus stemming from the use of this GitHub project will be governed by all applicable Federal law. Any reference to specific commercial products, processes, or services by service mark, trademark, manufacturer, or otherwise, does not constitute or imply their endorsement, recommendation or favoring by the Department of Commerce. The Department of Commerce seal and logo, or the seal and logo of a DOC bureau, shall not be used in any manner to imply endorsement of any commercial product or activity by DOC or the United States Government.
