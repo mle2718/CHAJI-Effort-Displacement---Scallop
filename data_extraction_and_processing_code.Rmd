@@ -1,6 +1,6 @@
 ---
 title: "Post Activity Code Clean Up"
-author: "Marina Chaji"
+author: "Marina Chaji & Min-Yang Lee"
 date: "`r format(Sys.time(), '%B %d, %Y, %H:%M')`"
 output:
   pdf_document: default
@@ -10,21 +10,32 @@ output:
 
 
 # Project setup
-Load packages. Install if necessary.
+here(), load libraries, and set a data vintage.
 
 ```{r setup, include=TRUE, echo=TRUE, results=FALSE}
 
 # Set Path
 here::i_am("data_extraction_and_processing_code.Rmd")
 
+# Please ensure you have the proper packages installed with (install.packages()) or a request to ITD if any libaries do not load.  
 
+library("here")
+library("leaflet")
+library("tidyverse")
+library("sf")
+library("RODBC")
+library("RODM")
+library("dbplyr")
+library("raster")
+library("rgdal")
+library("readxl")
+library("data.table")
+library("tmaptools")
+library("tmap")
+library("dplyr")
+library("epiDisplay")
+library("tmap")
 
-PKG <- c("here","leaflet", "tidyverse", "sf", "RODBC", "RODM", "dbplyr","raster","rgdal","readxl", "data.table", "tmaptools", "tmap", "dplyr")
-for (p in PKG) {
-  if(!require(p,character.only = TRUE)) {
-    install.packages(p)
-    require(p,character.only = TRUE)}
-}
 vintage_string<-Sys.Date()
 vintage_string<-gsub("-","_",vintage_string)
 
@@ -293,9 +304,12 @@ load(file.path(offshoreWind_directory, "APSD_DMIS_2.rda"))
 #load("~/offshoreWind-master/data-raw/REVENUEFILE.Rdata")
 #load("~/offshoreWind-master/data/APSD_DMIS_2.Rdata")
 
-
 ```
 
+
+```{r DRC_fix_APSD_DMIS_2, echo=TRUE, results=FALSE}
+APSD_DMIS_2$GEARCODE[APSD_DMIS_2$SECGEARFISH=="DSC"]<-"DREDGE-SCALLOP" 
+```
 
 # Read in Port lats and lons  
 
@@ -334,7 +348,7 @@ START.YEAR = 2007
 END.YEAR = 2019
 for(i in START.YEAR:END.YEAR) {
   print(i)
-  CURRENT.QUERY = paste("SELECT VTR.veslog",i,"t.TRIPID,tripcatg, operator, opernum, permit, nsubtrip, crew,not_fished, port as VTR_PORTNUM  
+  CURRENT.QUERY = paste("SELECT VTR.veslog",i,"t.TRIPID,tripcatg, operator, opernum, nsubtrip, crew,not_fished, port as VTR_PORTNUM  
                 FROM VTR.veslog",i,"t", sep="")
   YEAR.RESULT = sqlQuery(ODBC.CONNECTION, CURRENT.QUERY)  
   
@@ -344,7 +358,6 @@ for(i in START.YEAR:END.YEAR) {
   } else {
     RESULT.COMPILED = rbind(RESULT.COMPILED, YEAR.RESULT) }
 }    # End Main Loop
-
 ```
 
 
@@ -460,9 +473,8 @@ VTR_DMIS_merge <- merge(RESULT.COMPILED,Scallops, by.x = "TRIPID", by.y = "DOCID
 ## Filter out 2020 values 
 VTR_DMIS_merge <- VTR_DMIS_merge %>% filter(YEAR <= END.YEAR)
 
-# Delete Extra PERMIT Column
-## Note: X was deleted because PERMIT.y had zero NAs and PERMIT.x had 25 
-VTR_DMIS_merge$PERMIT.x <- NULL
+# Verify we have a full set of PERMIT
+stopifnot(sum(is.na(VTR_DMIS_merge$PERMIT))==0 ) 
 
 # Delete all TRIPCATG that are not 1. This isolates all commercial trips
 ## Type of trip: 1=Commercial; 2=Party; 3=Charter; 4=RSA/EFP. Note: RSA/EFP landings represent a small amount of all commercial landings; landings vary by gear type and species.
@@ -524,12 +536,55 @@ VTR_DMIS_AC <- merge(VTR_DMIS_AC,all_yrs_costs, by.x = "TRIPID", by.y = "VTR_TRI
 
 # Data Aggregating Trip Revenues & Delete duplicate TRIPIDs
 
-Subtrips are generated when a vessel switches gear or statistical areas. Subtrips have identical TRIPID/DOCID.  A trip may have many (8+) subtrips, but the majority of trips observed only have one subtrip (95.7% using original VTR & DMIS merged data set). If a trip has just 1 subtrip, the trip took place in a single statistical area.  If a trip crosses four different statistical areas, the NSUBTRIP is then equal to 4, and the landings, value, latitude, and longitude are reported separately for each area. 
+Subtrips are generated when a vessel switches gear or statistical areas. Subtrips have identical TRIPID/DOCID.  A trip may have many (8+) subtrips, but the majority of trips observed only have one subtrip (95.7% using original VTR & DMIS merged data set). If a trip has just 1 subtrip, the trip took place in a single statistical area.  If a trip crosses four different statistical areas, the NSUBTRIP is then equal to 4, and the landings, value, latitude, and longitude are reported separately for each area. For this project based on the proportion of limited access trips that have more than 1 subtrip, the fraction of landings/value, and the trip durations, we are adopting the assumption that trips with 1 subtrip are representative of the entire fishery.
 
 
 ```{r count_subtrips, echo=TRUE}
+# Update scientific notation 
+options(scipen = 999)
+
+#Subtrip count 
 table(VTR_DMIS_AC$NSUBTRIP)
+
+
+#Subtrip totals with percentage breakdown
+tab1(VTR_DMIS_AC$NSUBTRIP, sort.group = "decreasing", cum.percent = TRUE, graph = TRUE, xlab = "Number of Subtrips", ylab = "Number of Observations", main = "Count of Subtrips for Scallop Fishery")
+
+
+#Average Trip Length by year and subtrip 
+Average_Trip_Length_Scallop <- VTR_DMIS_AC %>% group_by(NSUBTRIP,YEAR) %>% summarise(tibble( mean = mean(TRIP_LENGTH)))
+Average_Trip_Length_Scallop 
+
+# Aggregated & average dollar, pounds, and landed values by subtrip
+Dollar_POUND_LANDED_Scallops <- VTR_DMIS_AC %>% group_by(NSUBTRIP) %>% summarise(Aggregated_DOLLAR = sum(DOLLAR),Average_DOLLAR = mean(DOLLAR), Aggregated_POUNDS = sum(POUNDS), Average_POUNDS = mean(POUNDS), Aggregated_LANDED = sum(LANDED), Average_LANDED = mean(LANDED))
+Dollar_POUND_LANDED_Scallops
+
 ```
+
+
+```{r count_subtrips_limited_access, echo=TRUE}
+
+#Table with all subtrips where LA is TRUE 
+VTR_DMIS_AC_LA <- VTR_DMIS_AC %>% filter(LA == "TRUE")
+
+#Subtrip totals with percentage breakdown - Limited Access 
+tab1(VTR_DMIS_AC_LA$NSUBTRIP, sort.group = "decreasing", cum.percent = TRUE, graph = TRUE, xlab = "Number of Subtrips", ylab = "Number of Observations", main = "Count of Subtrips for Scallop Limited Access")
+
+
+#Average Trip Length by year and subtrip - Limited Access 
+Average_Trip_Length_LA <- VTR_DMIS_AC_LA %>% group_by(NSUBTRIP,YEAR) %>% summarise(tibble( mean = mean(TRIP_LENGTH)))
+Average_Trip_Length_LA 
+
+
+# Aggregated & average dollar, pounds, and landed values by subtrip - Limited Access 
+Dollar_POUND_LANDED_Scallops_LA <- VTR_DMIS_AC_LA %>% group_by(NSUBTRIP) %>% summarise(Aggregated_DOLLAR = sum(DOLLAR),Average_DOLLAR = mean(DOLLAR), Aggregated_POUNDS = sum(POUNDS), Average_POUNDS = mean(POUNDS), Aggregated_LANDED = sum(LANDED), Average_LANDED = mean(LANDED))
+
+Dollar_POUND_LANDED_Scallops_LA
+
+```
+
+
+
 
 Since our goal is to estimate a choice model at the trip level, we need to construct trip level variables.  
  We retained the subtrip attributes  (GEARCODE, DDLAT, DDLON) corresponding to the subtrip with the highest DOLLAR.  We constructed trip-level values for revenue, pounds, and landed (DOLLAR, POUNDS, LANDED).  The trip level variables are prefixed with "Agg_". 
@@ -673,6 +728,11 @@ TMSQ_sp <- st_read(TMSQ_path)
 ## Run the below chunk to see your shapefile plotted out
 #qtm(TMSQ_sp) + tm_legend(show = FALSE)
 
+# Preserve the DDLAT and DDLON fields
+VTR_DMIS_AC$DDLAT_bak<-VTR_DMIS_AC$DDLAT
+VTR_DMIS_AC$DDLON_bak<-VTR_DMIS_AC$DDLON
+
+
 
 point_geo <- st_as_sf(VTR_DMIS_AC, 
                       coords = c(x  = "DDLON", y = "DDLAT"), crs = crs )
@@ -707,12 +767,22 @@ identical(final_product_lease$geometry, point_geo$geometry)
 ## st_intersects,st_disjoint,st_touches,st_crosses,st_within,st_contains,st_contains_properly,st_overlaps,st_equals,st_covers,st_covered_by,st_equals_exact,st_is_within_distance
 
 
+#Recover the DDLAT and DDLON fields.
+colnames(final_product_lease)[colnames(final_product_lease) == "DDLON_bak"] <- "DDLON"
+colnames(final_product_lease)[colnames(final_product_lease) == "DDLAT_bak"] <- "DDLAT"
 
+stopifnot(is.numeric(final_product_lease$MN10SQID))
 
+stopifnot(is.numeric(final_product_lease$MN30SQID))
 
 #save to RDS
-final_product_savename<-paste0("final_product_lease",vintage_string,".Rds")
-saveRDS(final_product_lease, file=here("data","main",final_product_savename))
+rds_savename<-paste0("final_product_lease",vintage_string,".Rds")
+csv_savename<-paste0("final_product_lease",vintage_string,".csv")
+
+saveRDS(final_product_lease, file=here("data","main",rds_savename))
+write.csv(final_product_lease,file=here("data","main",csv_savename), row.names = FALSE)
+
+# save to RDS
 
 # to read this in, you will want to do the here::i_am dance and then read in
 # final_product_savename<-paste0("final_product_lease",vintage_string,".Rds")

@@ -79,11 +79,14 @@ For Fishing Year 2016 and earlier, the fishing year Ran from March 1 to Feb 28/2
 
 Here is a short description of the wind energy areas, how large they are,  and how they will close (or not close) area to fishing.  18 wind areas currently under dev.  But many more are likely.
 
-How close will fishing be able to occur within Wind Lease Areas / Turbines?  
+How close will fishing be able to occur within Wind Lease Areas / Turbines? 
+> There is no one size fits all approach to the question of distance between wind turbines and where scallop fishing may occur. Based on interviews conducted by the Cooperative Research Branch with scallop industry members, it was determined that operations within 1nm of the turbines are unlikely due to both safety concerns and insurance liability. Captains will have varying levels of risk aversion, and corporations may develop their own guidance to captains of their vessels. The buffer zone between turbines and vessel operations is unlikely to be greater than 5nm.
 
-The wind energy areas do not match the ten minute squares; we are currently planning on simulating the effects of closing a wind energy area by closing an entire ten minute square that is inside or touching a WEA.  
+The wind energy areas do not match the ten minute squares; we are currently planning on simulating the effects of closing a wind energy area by closing an entire ten minute square that is inside or touching a WEA.
+> Wind energy areas and 10 minute squares frequently have partial overlap. We make an assumption in these cases that if X% (TBD, maybe >0%) of a ten minute square is located in a wind energy lease area, that square will be considered off limits to fishing. The presence of wind energy areas will increase transit times for many scallop trips, even if their fishing location was not impacted by turbines. Our model accounts for the increased cost of transit... (TBD) 
 
 The buried cable route from a WEA to shore is likely to be closed as well.  Cable buried at shallow depths and marked with concrete.
+> Scallop dredging will not be possible in areas where buried cables, running from the shore out to the turbines, are located. Cables are buried at shallow depths and reinforced with concrete. Vessel operators will not want to risk damaging their gear by dredging too close to these areas; we estimate that operators will avoid dredging within 0.5nm of any buried cables. The location of the cables is extracted from construction operations plans (there will be more to add here).   
 
 # Data
 
