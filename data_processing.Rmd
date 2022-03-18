@@ -35,12 +35,12 @@ We will:
 1. Store final data products in "data/main."
 1. Use a vintage "suffix" to denote when we have extracted data.
 
-```{r setup, include=TRUE, echo=TRUE, results=FALSE}
+```{r read in RDS, include=TRUE, echo=TRUE, results=FALSE}
 
 #Read in RDS
 
 Scallop_Linkingorg <- readRDS("~/Effort-Displacement---Scallop/data/intermediate/Scallop_Linkingorg.Rds")
-RESULT_COMPILED <- readRDS("~/Effort-Displacement---Scallop/data/intermediate/RESULT_COMPILED.Rds")
+RESULT_COMPILED <- readRDS("~/Effort-Displacement---Scallop/data/intermediate/RESULT.COMPILED.Rds")
 APSD_DMIS_2 <- readRDS("~/Effort-Displacement---Scallop/data/intermediate/APSD_DMIS_2.Rds")
 all_yrs_costs <- readRDS("~/Effort-Displacement---Scallop/data/intermediate/all_yrs_costs.Rds")
 
@@ -230,7 +230,7 @@ Scallops$SOURCE<- NULL
 VTR_DMIS_merge <- merge(RESULT_COMPILED,Scallops, by.x = "TRIPID", by.y = "DOCID", all.x = FALSE, all.y = TRUE)
 
 ## Filter out 2020 values 
-VTR_DMIS_merge <- VTR_DMIS_merge %>% filter(YEAR <= END.YEAR)
+VTR_DMIS_merge <- VTR_DMIS_merge %>% filter(YEAR <= "2019")
 
 # Delete Extra PERMIT Column
 ## Note: X was deleted because PERMIT.y had zero NAs and PERMIT.x had 25 
