@@ -35,6 +35,7 @@ RESULT_COMPILED_datasets<-list.files(path=here("data","intermediate"), pattern="
 RESULT_COMPILED_datasets<-gsub("RESULT_COMPILED_","",RESULT_COMPILED_datasets )
 RESULT_COMPILED_datasets<-gsub(".Rds","",RESULT_COMPILED_datasets)
 vintage_string<-max(RESULT_COMPILED_datasets)
+rm(RESULT_COMPILED_datasets)
 ```
 
 We will:
@@ -103,10 +104,10 @@ All_Lease_Areas_Shapefile_path<-here("data","external","shapefiles","All_Lease_A
 
 #Read in RDS
 
-Scallop_Linkingorg <- readRDS(here("data","intermediate","Scallop_Linkingorg.Rds"))
-RESULT_COMPILED <- readRDS(here("data","intermediate","RESULT_COMPILED.Rds"))
-APSD_DMIS_2 <- readRDS(here("data","intermediate","APSD_DMIS_2.Rds"))
-all_yrs_costs <- readRDS(here("data","intermediate","all_yrs_costs.Rds"))
+Scallop_Linkingorg <- readRDS(here("data","intermediate",paste0("Scallop_Linkingorg_",vintage_string,".Rds")))
+RESULT_COMPILED <- readRDS(here("data","intermediate",paste0("RESULT_COMPILED_",vintage_string,".Rds")))
+APSD_DMIS_2 <- readRDS(here("data","intermediate",paste0("APSD_DMIS_2_",vintage_string,".Rds")))
+all_yrs_costs <- readRDS(here("data","intermediate",paste0("all_yrs_costs_",vintage_string,".Rds")))
 
 
 ```
