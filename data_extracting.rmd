@@ -304,20 +304,17 @@ oracle_server = "sole"
 ODBC.CONNECTION <- RODBC::odbcConnect(dsn=oracle_server, uid=oracle_username, pwd=oracle_password, believeNRows=FALSE)
 START.YEAR = 2007
 END.YEAR = 2019
+RESULT.COMPILED<-list()
+t<-1
 for(i in START.YEAR:END.YEAR) {
   print(i)
   CURRENT.QUERY = paste("SELECT VTR.veslog",i,"t.TRIPID,tripcatg, operator, opernum, permit, nsubtrip, crew,not_fished, port as VTR_PORTNUM  
                 FROM VTR.veslog",i,"t", sep="")
-  YEAR.RESULT = sqlQuery(ODBC.CONNECTION, CURRENT.QUERY)  
-  
-  # Now, the loop compiles the results; the first year must be treated slightly differently###
-  if (i==START.YEAR) {
-    RESULT.COMPILED = YEAR.RESULT
-  } else {
-    RESULT.COMPILED = rbind(RESULT.COMPILED, YEAR.RESULT) }
-}    # End Main Loop
+  RESULT.COMPILED[[t]] = sqlQuery(ODBC.CONNECTION, CURRENT.QUERY)  
+  t<-t+1
+}    
 
-
+RESULT.COMPILED<-do.call(rbind.data.frame, RESULT.COMPILED)
 #save to RDS
 RESULT.COMPILED_name <-paste0("RESULT_COMPILED",".Rds")
 saveRDS(RESULT.COMPILED, file=here("data","intermediate",RESULT.COMPILED_name))
