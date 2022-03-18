@@ -29,6 +29,14 @@ vintage_string<-gsub("-","_",vintage_string)
 
 ```
 
+```{r reset_vintage_string, include=TRUE, echo=TRUE, results=FALSE}
+#This code looks into data_intermediate and sets the vintage_string according to the most recent data
+RESULT_COMPILED_datasets<-list.files(path=here("data","intermediate"), pattern="RESULT_COMPILED")
+RESULT_COMPILED_datasets<-gsub("RESULT_COMPILED_","",RESULT_COMPILED_datasets )
+RESULT_COMPILED_datasets<-gsub(".Rds","",RESULT_COMPILED_datasets)
+vintage_string<-max(RESULT_COMPILED_datasets)
+```
+
 We will:
 
 1. Try to avoid copying data; when we rely on data from other people, we will read it directly into memory from the network location or Oracle.
