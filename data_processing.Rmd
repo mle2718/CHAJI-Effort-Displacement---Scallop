@@ -37,18 +37,6 @@ We will:
 1. Store final data products in "data/main."
 1. Use a vintage "suffix" to denote when we have extracted data.
 
-```{r read in RDS, include=TRUE, echo=TRUE, results=FALSE}
-
-#Read in RDS
-
-Scallop_Linkingorg <- readRDS("~/Effort-Displacement---Scallop/data/intermediate/Scallop_Linkingorg.Rds")
-RESULT_COMPILED <- readRDS("~/Effort-Displacement---Scallop/data/intermediate/RESULT_COMPILED.Rds")
-APSD_DMIS_2 <- readRDS("~/Effort-Displacement---Scallop/data/intermediate/APSD_DMIS_2.Rds")
-all_yrs_costs <- readRDS("~/Effort-Displacement---Scallop/data/intermediate/all_yrs_costs.Rds")
-
-
-```
-
 
 # Organization
 
@@ -102,6 +90,18 @@ TMSQ_path<-here("data","external","shapefiles","Ten Minute Squares Cut North and
 All_Lease_Areas_Shapefile_path<-here("data","external","shapefiles","All_Lease_Areas_Shapefile")
 ```
 
+
+```{r read in RDS, include=TRUE, echo=TRUE, results=FALSE}
+
+#Read in RDS
+
+Scallop_Linkingorg <- readRDS(here("data","intermediate","Scallop_Linkingorg.Rds"))
+RESULT_COMPILED <- readRDS(here("data","intermediate","RESULT_COMPILED.Rds"))
+APSD_DMIS_2 <- readRDS(here("data","intermediate","APSD_DMIS_2.Rds"))
+all_yrs_costs <- readRDS(here("data","intermediate","all_yrs_costs.Rds"))
+
+
+```
 
 
 
@@ -472,9 +472,10 @@ identical(final_product_lease$geometry, point_geo$geometry)
 
 
 
-#save to RDS
-final_product_savename<-paste0("final_product_lease",vintage_string,".Rds")
-saveRDS(final_product_lease, file=here("data","main",final_product_savename))
+#save to RDS and CSV
+final_product_savename<-paste0("final_product_lease",vintage_string)
+saveRDS(final_product_lease, file=here("data","main",paste0(final_product_savename,".Rds")))
+write.csv(final_product_lease, file=here("data","main",paste0(final_product_savename,".csv")), row.names=FALSE)
 
 # to read this in, you will want to do the here::i_am dance and then read in
 # final_product_savename<-paste0("final_product_lease",vintage_string,".Rds")
