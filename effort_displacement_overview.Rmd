@@ -42,6 +42,18 @@ for (p in PKG) {
 vintage_string<-Sys.Date()
 vintage_string<-gsub("-","_",vintage_string)
 vintage_string<-"2022_02_16"
+```
+
+```{r reset_vintage_string, include=TRUE, echo=TRUE, results=FALSE}
+#This code looks into data_intermediate and sets the vintage_string according to the most recent data
+datasets_list<-list.files(path=here("data","intermediate"), pattern="final_product_lease")
+datasets_list<-gsub("final_product_lease","",datasets_list )
+datasets_list<-gsub(".Rds","",datasets_list)
+vintage_string<-max(datasets_list)
+rm(datasets_list)
+```   
+
+```{r read in RDS, include=TRUE, echo=TRUE, results=FALSE}
 
 #####################################################################################################
 #
@@ -54,7 +66,6 @@ vintage_string<-"2022_02_16"
 final_product_savename<-paste0("final_product_lease",vintage_string,".Rds")
 final_product_lease<-readRDS(here("data","main",final_product_savename))
 ```
-
 
 
 # Research Question and Motivation
