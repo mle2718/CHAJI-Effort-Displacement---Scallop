@@ -45,6 +45,7 @@ vintage_string<-gsub("-","_",vintage_string)
 datasets_list<-list.files(path=here("data","intermediate"), pattern="RESULT_COMPILED_")
 datasets_list<-gsub("RESULT_COMPILED_","",datasets_list )
 datasets_list<-gsub(".Rds","",datasets_list)
+datasets_list<-gsub(".csv","",datasets_list)
 vintage_string<-max(datasets_list)
 rm(datasets_list)
 ```
