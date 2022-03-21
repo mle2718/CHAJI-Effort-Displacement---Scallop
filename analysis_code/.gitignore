@@ -1,0 +1,5 @@
+*.csv
+*.Rds
+*.rds
+*.dta
+scallop_analysis*.html
