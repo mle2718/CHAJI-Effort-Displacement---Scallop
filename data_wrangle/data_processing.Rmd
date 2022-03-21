@@ -14,7 +14,7 @@ here(), load libraries, and set a data vintage.
 ```{r setup, include=TRUE, echo=TRUE, results=FALSE}
 
 # Set Path
-here::i_am("data_processing.Rmd")
+here::i_am("data_wrangle/data_processing.Rmd")
 
 # Please ensure you have the proper packages installed with (install.packages()) or a request to ITD if any libaries do not load.  
 
@@ -91,7 +91,7 @@ We will:
 This is a block of code where we set up the oracle passwords and make R aware of folders on the network.
 
 ```{r oracle_connections, echo=TRUE, results=FALSE}
-source(here("credentials.R"))
+source(here("data_wrangle","credentials.R"))
 
 # Set the network_location_desktop and network_location_remote variables somewhere OUTSIDE of this code.  The best place to do this is in the .Rprofile or .Renviron files that are in your root directory.  
 
