@@ -8,18 +8,18 @@ output:
 ---
 
 # Project setup
-Load packages. Install if necessary.
+here(), load libraries, and set a data vintage.
 
 ```{r setup, include=TRUE, echo=TRUE, results=FALSE}
 # Set Path
 here::i_am("data_extracting.rmd")
 
-PKG <- c("RODBC", "RODM","here","readxl")
-for (p in PKG) {
-  if(!require(p,character.only = TRUE)) {
-    install.packages(p)
-    require(p,character.only = TRUE)}
-}
+# Please ensure you have the proper packages installed with (install.packages()) or a request to ITD if any libaries do not load.  
+library("here")
+
+library("RODBC")
+library("RODM")
+library("readxl")
 vintage_string<-Sys.Date()
 vintage_string<-gsub("-","_",vintage_string)
 
@@ -264,6 +264,10 @@ load(file.path(offshoreWind_directory, "APSD_DMIS_2.rda"))
 ```
 
 
+```{r DRC_fix_APSD_DMIS_2, echo=TRUE, results=FALSE}
+APSD_DMIS_2$GEARCODE[APSD_DMIS_2$SECGEARFISH=="DSC"]<-"DREDGE-SCALLOP" 
+```
+
 # Read in Port lats and lons  
 
 Load in the lats and lons of all ports from the spacepanels directory. Change the column names to clarify that the lat-lons are the ports. Join this to the APSD_DMIS_2 dataset, keeping all rows of the APSD_DMIS_2 dataset and dropping any rows from tripids_geoids that do not match.
@@ -369,5 +373,10 @@ saveRDS(all_yrs_costs, file=here("data","intermediate",all_yrs_costs_name))
 ```
 
 
+# R Session Information
+```{r session_info, include=TRUE, echo=TRUE, results=TRUE, eval=TRUE}
+sessionInfo()
+```
+This may be useful for diagnosing and troubleshooting one day.
 
 
