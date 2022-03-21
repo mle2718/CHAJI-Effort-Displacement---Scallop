@@ -1,5 +1,5 @@
 # Purpose
-This repository is intended to estimate a location choice model scallops to understand the effect of wind energy areas on this fleet.  Currently, we have [code to extract and processes data](data_extraction_and_processing_code.Rmd). This code constructs aggregates NEFSC data into a dataset that can be imported to FishSET for data exploration and estimation.
+This repository is intended to estimate a location choice model scallops to understand the effect of wind energy areas on this fleet.  Currently, we have code to [extract data](/data_wrangle/data_extracting.Rmd) and [process data](/data_wrangle/data_processing.Rmd). This code constructs aggregates NEFSC data into a dataset that can be imported to FishSET for data exploration and estimation.  We also have some code to analyse data in the analysis_code folder.
 
 We are using [DMIS](https://github.com/NEFSC/READ-SSB-Lee-metadata/blob/master/DMIS.md) data from 2007-2019 (calendar years).  The main datasource is a frozen DMIS table, you can see the two pieces of sql used to construct that table [here](https://github.com/NEFSC/READ-SSB-Lee-metadata/blob/master/external/MAKE_DMIS_SFCLAM_122121.sql) and [here](https://github.com/NEFSC/READ-SSB-Lee-metadata/blob/master/external/make_sfclam_only_013022.sql).
 
@@ -31,7 +31,7 @@ Don't use mars because it's on an older version of R.
     1.  If not, you will need to follow the steps here [here](https://github.com/NEFSC/READ-SSB-LEE-On-the-servers) for the steps to create an access token, store it on neptune, and clone a repository.
 1.  Rename and edit your local copy of [R_credentials_sample.R](R_credentials_sample.R) to `credentials.R`. Follow the instructions in comments at the top.
 1.  Edit your .Rprofile or .Renviron to be aware of *network_location_desktop* and *network_location_remote* variables.
-1.  Use Rstudio to knit the [code to extract and processes data](data_extraction_and_processing_code.Rmd) to html.
+1.  Use Rstudio to knit the [code to extract and processes data](/data_wrangle/data_extraction_and_processing_code.Rmd) to html.
     
 # Dependencies
 

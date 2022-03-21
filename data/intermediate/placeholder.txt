@@ -1,0 +1,1 @@
+This is the folder where the intermediate outputs of our data processing ends up.
