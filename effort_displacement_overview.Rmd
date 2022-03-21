@@ -29,19 +29,31 @@ output:
 here::i_am("effort_displacement_overview.Rmd")
 
 # Load packages. I have purposefully loaded only a 'skinny' selection of packages.  
-PKG <- c("here","leaflet", "tidyverse", "sf", "dbplyr")
 
-for (p in PKG) {
-  if(!require(p,character.only = TRUE)) {
-    install.packages(p)
-    require(p,character.only = TRUE)}
-}
+library("here")
+library("leaflet")
+library("tidyverse")
+library("sf")
+library("dbplyr")
 
 # Set or reset the data vintage string
 # You might need to manually set the vintage_string
 vintage_string<-Sys.Date()
 vintage_string<-gsub("-","_",vintage_string)
 vintage_string<-"2022_02_16"
+```
+
+```{r reset_vintage_string, include=TRUE, echo=TRUE, results=FALSE}
+#This code looks into data_intermediate and sets the vintage_string according to the most recent data
+datasets_list<-list.files(path=here("data","main"), pattern="final_product_lease")
+datasets_list<-gsub("final_product_lease","",datasets_list )
+datasets_list<-gsub(".Rds","",datasets_list)
+datasets_list<-gsub(".csv","",datasets_list)
+vintage_string<-max(datasets_list)
+rm(datasets_list)
+```   
+
+```{r read in RDS, include=TRUE, echo=TRUE, results=FALSE}
 
 #####################################################################################################
 #
@@ -54,7 +66,6 @@ vintage_string<-"2022_02_16"
 final_product_savename<-paste0("final_product_lease",vintage_string,".Rds")
 final_product_lease<-readRDS(here("data","main",final_product_savename))
 ```
-
 
 
 # Research Question and Motivation
@@ -80,9 +91,11 @@ For Fishing Year 2016 and earlier, the fishing year Ran from March 1 to Feb 28/2
 Here is a short description of the wind energy areas, how large they are,  and how they will close (or not close) area to fishing.  18 wind areas currently under dev.  But many more are likely.
 
 How close will fishing be able to occur within Wind Lease Areas / Turbines? 
+
 > There is no one size fits all approach to the question of distance between wind turbines and where scallop fishing may occur. Based on interviews conducted by the Cooperative Research Branch with scallop industry members, it was determined that operations within 1nm of the turbines are unlikely due to both safety concerns and insurance liability. Captains will have varying levels of risk aversion, and corporations may develop their own guidance to captains of their vessels. The buffer zone between turbines and vessel operations is unlikely to be greater than 5nm.
 
 The wind energy areas do not match the ten minute squares; we are currently planning on simulating the effects of closing a wind energy area by closing an entire ten minute square that is inside or touching a WEA.
+
 > Wind energy areas and 10 minute squares frequently have partial overlap. We make an assumption in these cases that if X% (TBD, maybe >0%) of a ten minute square is located in a wind energy lease area, that square will be considered off limits to fishing. The presence of wind energy areas will increase transit times for many scallop trips, even if their fishing location was not impacted by turbines. Our model accounts for the increased cost of transit... (TBD) 
 
 The buried cable route from a WEA to shore is likely to be closed as well.  Cable buried at shallow depths and marked with concrete.
