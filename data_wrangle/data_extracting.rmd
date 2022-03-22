@@ -5,6 +5,7 @@ date: "3/7/2022"
 output:
   pdf_document: default
   html_document: default
+urlcolor: blue
 ---
 
 # Project setup
@@ -23,6 +24,8 @@ library("readxl")
 vintage_string<-Sys.Date()
 vintage_string<-gsub("-","_",vintage_string)
 
+# You might want to run this code, but not extract and save any data. Set this switch to FALSE to do so.
+extract_switch=FALSE
 ```
 
 # Organization
@@ -87,7 +90,7 @@ This code extracts and processes data. Our goal is to construct a dataset that c
 This code depends on:
 
 1.  Network access to get the APSD_DMIS_2.rda and trip cost data from places on the NEFSC network.
-1.  The ability to connect to NEFSC oracle databases (VTR and the Live DMIS tables at APSD.t_ssb_trip_current@garfo_nefsc)
+1.  The ability to connect to NEFSC oracle databases (VTR and the Live DMIS tables at ``APSD.t_ssb_trip_current@garfo_nefsc``).
 
 
 # Data Overview
@@ -99,7 +102,7 @@ tabl <- "
 | Source  | Name           |
 |------------|:-----------------------------------------------|
 | DMIS_APSD_2   | DMIS is a Northeast Regional Office data record matching system. Primary data sources include Allocation Management System (AMS) Database, Vessel Trip Reports (VTRs), Dealer Reports, Vessel Monitoring System (VMS) Catch Reports, Observer Reports, Vessel Permit Database, and the MQRS database, which tracks limited access fishing eligibilities |
-|VTR (Vessel Trip Reports) | A vessel trip report (VTR) must be received by NMFS or postmarked within 15 days after the reporting month’s end.  For vessels that also hold a NE multispecies permit, VTRs must be submitted weekly by Tuesday of the week after the fishing trip ends.  Copies of VTRs must be retained on board the vessel for 1 year after the last entry on the log and otherwise retained for 3 years after the date of the last entry on the log.  If no fishing activity occurred during a reporting period (week or month), then a VTR must be submitted stating that no fishing trips were taken.  |
+|VTR (Vessel Trip Reports) | A vessel trip report (VTR) must be received by NMFS or postmarked within 15 days after the reporting month’s end.  For vessels that also hold a NE multispecies permit, VTRs must be submitted weekly by Tuesday of the week after the fishing trip ends.  Copies of VTRs must be retained on board the vessel for 1 year after the last entry on the log and otherwise retained for 3 years after the date of the last entry on the log.  If no fishing activity occurred during a reporting period (week or month), then a VTR must be submitted stating that no fishing trips were taken.|
 |Vessel Monitoring System (VMS) | All vessels issued a Federal scallop permit are required to have an active VMS unit and must use their VMS unit to declare all vessel activity, including fishing trips and transiting.|
 |Cost data  | Werner et al predict estimate a model of trip costs. Predictions (in and out of sample) are used  |
 
@@ -123,12 +126,18 @@ Other possibilities were considered for our primary dataset:
 
 
 ##  DMIS
-We are using the DMIS_APSD_2 table.
+We are using the DMIS_APSD_2 table.  This is a custom data query that combines [DMIS](https://github.com/NEFSC/READ-SSB-Lee-metadata/blob/master/DMIS.md) and SFCLAM data and was constructed to support the [Wind Energy tool](https://github.com/dcorvi/offshoreWind).  The sql code can be found [here](https://github.com/NEFSC/READ-SSB-Lee-metadata/blob/master/external/MAKE_DMIS_SFCLAM_122121.sql) and [here](https://github.com/NEFSC/READ-SSB-Lee-metadata/blob/master/external/make_sfclam_only_013022.sql). 
 ```{r APSD_DMIS_2 overview, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
 tabl <- "
 | Column  | Description           |
 |------------|:-----------------------------------------------|
-|DOCID | VTR DOCUMENT table record identifier; Primary key, internally generated at scanning based on vessel id and date/time sailed. Each DOCID represents one trip; equivalent to TRIPID in VESLOG tables.|
+|DOCID | VTR DOCUMENT table record identifier; Primary key, internally generated at scanning based on vessel id and date/time sailed. Each DOCID represents one trip; equivalent to TRIPID in VESLOGyyyyT,S,G tables.  There is no DOCID in older SFCLAM data.|
+|IMGID |VTR IMAGES table primary key; generated internally at scanning. Each IMGID represents one scanned VTR document. Foreign key linking to VTR CATCH table.  Equivalent to the GEARID in VTR.VESLOGyyyyG |
+|SECGEARFISH |A three digit code for the gear used  |
+|GEARCODE |A description of the gears used. This has constructed by aggregating SECGEARFISH |
+|SPPNAME | Common name of the species.|
+|NESPP3 |Three digit code used to identify the species |
+|SOURCE | ==DMIS or ==SFCLAM |
 |Dates | VTR land date, AMS Land Date, Dealer Sold Date Trip date is broken down into fields Calendar_Year, Month_of_Year, Week_of_Year, and Day_of_Year|
 |DDLAT | Latitude in decimal degrees| 
 |DDLON  | Longitude in decimal degrees| 
@@ -141,15 +150,15 @@ tabl <- "
 cat(tabl) 
 ```
 
-Ports  -- currently assuming that a trip departs from the same place it lands.  An alternate assumption is  that people just leave from the place where they made their last landing.   
+Ports  -- We can either assume that a trip departs from the same place it lands.  Or we can use the place where they made their last landing as the sailing port.
 
-The DDLAT and DDLOn are self reported lat-lons from logbooks(VTRs). We have supplemented this with some extra information.
+The DDLAT and DDLON are self reported lat-lons from logbooks(VTRs). We have supplemented this with some extra information.
 
 ```{r DMIS_extra overview, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
 tabl <- "
 | Column  | Description           |
 |------------|:-----------------------------------------------|
-| TRIP_ID|
+| TRIP_ID| Don't use this column except for making a DMIS to DMIS join. |
 |DOCID | VTR DOCUMENT table record identifier; Primary key, internally generated at scanning based on vessel id and date/time sailed. Each DOCID represents one trip; equivalent to TRIPID in VESLOG tables.|
 |ACTIVITY_CODE| Complicated set of letters and numbers. See below|
 | PLAN_CAT | LGC_A LGC_B, LGC_C, SC_2, SC_3, SC_4, SC_5, SC_6, SC_7, SC_8, SC_9, SG_1A, SG_1B are a collection of true and false variables the indicate if the vessel had a particular permit when the trip was taken.|
@@ -157,8 +166,7 @@ tabl <- "
 cat(tabl) 
 ```
 
-ACTIVITY_CODE and a set of PLAN_CAT categorical variables are used from the live DMIS tables. We join using TRIP_ID, DOCID.  See [here](/external_documentation/vms_declaration_code_glossary_may_2018.pdf)
-
+ACTIVITY_CODE and a set of PLAN_CAT categorical variables are used from the live DMIS tables. We join using DOCID.
 
 ##  Description of the VTR data.
 ```{r VTR overview, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
@@ -173,11 +181,10 @@ tabl <- "
 |nsubtrip| Number of subtrips (see description of subtrips|
 |crew| number of crew, including captain|
 |port| 6 digit numeric code for the port, renamed to VTR_PORTNUM to make clear is a companion to VTR_PORT and VTR_STATE |
-
 "
 cat(tabl) 
 ```
-
+A little more information about [VTR](https://github.com/NEFSC/READ-SSB-Lee-metadata/blob/master/veslog.md).
 
 
 ##  Description of the SPACEPANELS data.
@@ -203,9 +210,7 @@ tabl <- "
 "
 cat(tabl) 
 ```
-
-
-The spacepanels data tidies up vtr ports and aggregates them to the [US Census county subdivision](https://www.census.gov/programs-surveys/geography/technical-documentation/complete-technical-documentation.html). You should *not* expect an exact match between portlnd1, state1, and port in the spacepanels dataset compared to the same columns in the raw vtr because some data clean was done on these fields. The code is in the spacepanels repo, "just_ports.do."
+The [spacepanels](https://github.com/NEFSC/READ-SSB-Lee-spacepanels) data tidies up vtr ports and aggregates them to the [US Census county subdivision](https://www.census.gov/programs-surveys/geography/technical-documentation/complete-technical-documentation.html). You should *not* expect an exact match between portlnd1, state1, and port in the spacepanels dataset compared to the same columns in the raw vtr because some data clean was done on these fields. The code is in the spacepanels repo, "just_ports.do."
 
 *  `Geoid` is geoid10.  The lat-lons are either the centroid of the geoid and/or adjusted to the coast. There is probably some error here, but if the goal is to use these points to help construct distances or costs to go fishing, they are probably accurate enough.  
 
@@ -257,14 +262,14 @@ cat(tabl)
 The frozen DMIS table from the offshoreWind project (APSD_DMIS_2) is the base dataset for the analysis.  The DMIS data are formed by combining many datasets, including VTR and Dealer.  In brief, the APSD_DMIS_2 dataset contains a mix of trip attributes (port, date),  sub-trip attributes (gear, location) , and catch outcomes (species, pounds, landed, dollar).  You can read more about DMIS [here](https://github.com/NEFSC/READ-SSB-Lee-metadata/blob/master/DMIS.md).
 
 
-```{r Data Set Loading, echo=TRUE, results=FALSE}
+```{r Data Set Loading, echo=TRUE, results=FALSE,eval=extract_switch}
 load(file.path(offshoreWind_directory, "APSD_DMIS_2.rda"))
 
 
 ```
 
 
-```{r DRC_fix_APSD_DMIS_2, echo=TRUE, results=FALSE}
+```{r DRC_fix_APSD_DMIS_2, echo=TRUE, results=FALSE,eval=extract_switch}
 APSD_DMIS_2$GEARCODE[APSD_DMIS_2$SECGEARFISH=="DSC"]<-"DREDGE-SCALLOP" 
 ```
 
@@ -272,7 +277,7 @@ APSD_DMIS_2$GEARCODE[APSD_DMIS_2$SECGEARFISH=="DSC"]<-"DREDGE-SCALLOP"
 
 Load in the lats and lons of all ports from the spacepanels directory. Change the column names to clarify that the lat-lons are the ports. Join this to the APSD_DMIS_2 dataset, keeping all rows of the APSD_DMIS_2 dataset and dropping any rows from tripids_geoids that do not match.
 
-```{r readin_spacepanels, echo=TRUE}
+```{r readin_spacepanels, echo=TRUE,eval=extract_switch}
 #Import Data
 tripid_geoids<- haven::read_dta(file.path(spacepanels_directory,"just_ports_2022_01_26.dta"))
 #Could do all this in one step, but ...
@@ -300,7 +305,7 @@ The APSD_DMIS_2 table must be supplemented with additional data.  This section q
 
 Some Trip-level data in the VTR schema is needed. See table at the top.  We extract them here. 
 
-```{r VTR_Query, echo=TRUE, results=FALSE}
+```{r VTR_Query, echo=TRUE, results=FALSE,eval=extract_switch}
 
 
 
@@ -334,7 +339,7 @@ saveRDS(RESULT.COMPILED, file=here("data","intermediate",RESULT.COMPILED_name))
 We also extract the activity code from DMIS.  This will describe the type of trip that the vessel has declared into.  The most important types of trips will be Scallop Trips; however, fishing vessels with the proper permits are allowed to retain scallops while declared into other fisheries.  When this happens, the volume of scallops will be much lower.
 
 We  also extract the T/F variables corresponding the the PLAN_CAT in DMIS.  
-```{r DMIS_Query, echo=TRUE}
+```{r DMIS_Query, echo=TRUE,eval=extract_switch}
  
 oracle_server = "sole"
 CURRENT.QUERY = paste ("SELECT TRIP_ID, DOCID, ACTIVITY_CODE, LGC_A, LGC_B, LGC_C, SC_2, SC_3, SC_4, SC_5, SC_6, SC_7, SC_8, SC_9, SG_1A, SG_1B
@@ -357,13 +362,17 @@ saveRDS(Scallop_Linkingorg, file=here("data","intermediate",Scallop_Linkingorg_n
 # Add in cost data 
 
 These data should reference the  "Estimation of Commercial Fishing Trip Costs Using Sea Sampling Data" paper by Samantha Werner & Geret DePiper.  We will likely use the Winsorized trip cost estimates.
-```{r merge_cost_data, echo=TRUE, eval=TRUE}
+```{r merge_cost_data, echo=TRUE, eval=extract_switch}
 #Import Data
 X2007_2012 <- read_excel(file.path(cost_directory,"2007_2012.xlsx"))
 X2013_2020 <- read_excel(file.path(cost_directory,"2013_2020.xlsx"))
 
 #Merge 2007-2012 costs with 2013-2020 costs
 all_yrs_costs <- merge(X2007_2012,X2013_2020, all = TRUE)
+t<-rbind(X2007_2012,X2013_2020)
+
+
+v<-t[order(t$VTR_TRIPID,hours,t$DB_LANDING_YEAR,t$TRIP_COST_2020_DOL,t$TRIP_COST_WINSOR_2020_DOL,t$OBSERVED_COST_DUMMY),]
 
 
 
