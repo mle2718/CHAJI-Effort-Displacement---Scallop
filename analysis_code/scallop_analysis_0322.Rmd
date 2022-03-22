@@ -1,0 +1,2698 @@
+---
+title: "Scallop Data Summary"
+author: "Alan Haynie, Melanie Harsch, Bryce McManus"
+date: '`r Sys.Date()`'
+output:
+  html_document:
+    keep_md: yes
+    toc: true
+    toc_float: true
+    code_folding: show
+---
+
+## Introduction
+
+This summary was done using a combination of FishSET console functions, the tidyverse
+(mainly dplyr and tidyr), and a few formatting functions. There is an option to hide 
+the code chunks at the top and a floating table of contents. All results are included in the 
+output (apologies for the general messiness). You'll need to download the html
+file to view the results (if you try to view the html file in Google Drive it will 
+only show the raw html). 
+
+Here's some background on how FishSET works:
+Everything that runs through FishSET is saved to the "FishSET Folder", 
+which houses all the user's FishSET projects. The FishSET Folder gets created when a user 
+first loads FishSET. Each project folder contains a FishSET Database (sqlite), a 
+log of the function calls, metadata, automatically saved output, and a few other useful 
+features. The project name for this summary is "scallop0322" (the last four 
+digits are month and year) which you'll see in the names of the saved tables. 
+
+The easiest way to give feedback is by using the "Feedback/Comments" Google doc
+in the "Confidential NE scallop data analysis 03/22" folder. It includes an
+outline of the summary and a general feedback section to help organize the comments. 
+Please let us know what you find helpful or unhelpful, what feels unnecessary or 
+underdeveloped, or any thoughts or suggestions you may have. 
+
+<br><br>
+
+## Library
+
+```{r setup, echo=TRUE}
+library(FishSET)
+library(tidyverse) # data wrangling
+library(kableExtra) # table formatting 
+library(sf) # converting geometry points to separate cols
+```
+
+
+```{r}
+# helper functions
+# these haven't been included in FishSET yet
+source("~/FishSET_work/scripts/agg_helper2.R")
+source("~/FishSET_work/scripts/zone_summary_fun.R")
+source("~/scallop summary 0322/format_helpers.R")
+
+sfc_as_cols <- function(x, names = c("x","y")) {
+  
+  stopifnot(inherits(x,"sf") && inherits(sf::st_geometry(x),"sfc_POINT"))
+  ret <- sf::st_coordinates(x)
+  ret <- tibble::as_tibble(ret)
+  stopifnot(length(names) == ncol(ret))
+  x <- x[ , !names(x) %in% names]
+  ret <- setNames(ret,names)
+  dplyr::bind_cols(x,ret)
+}
+# tilt x-axis text
+angled_theme <- function() {
+  
+  ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1, size = 8))
+}
+
+```
+
+
+<br><br>
+
+## Reset project
+
+This chunk "resets" my project by erasing it. This is just to keep things tidy and
+avoid potential errors when kitting the doc. 
+```{r}
+project <- "scallop0322"
+
+if (project_exists(project)) {
+  
+  erase_project(project)
+}
+```
+
+<br><br>
+
+## Data Import
+
+This code chunk should work in the scallop repo. 
+```{r eval=FALSE}
+here::i_am("/analysis_code/scallop_analysis_0322.Rmd")
+
+# This code looks into data_intermediate and sets the vintage_string according to 
+# the most recent data
+datasets_list <- list.files(path = here("data", "main"), pattern = "final_product_lease")
+datasets_list <- gsub("final_product_lease", "", datasets_list )
+datasets_list <- gsub(".Rds", "", datasets_list)
+datasets_list <- gsub(".csv" ,"", datasets_list)
+vintage_string <- max(datasets_list)
+rm(datasets_list)
+
+dat_filepath <- here("data", "main", paste0("final_product_lease", vintage_string, ".Rds"))
+
+final_product_lease <- readRDS(dat_filepath)
+# load data into FishSET DB
+load_maindata(dat = final_product_lease, project = project, over_write = TRUE)
+```
+
+<br><br>
+
+I needed to convert the geometry list column to separate lat/lon columns to be able
+to save the data to the FishSET Database. The FishSET Databases are sqlite files, 
+which can't handle spatial data.
+```{r}
+dat_filepath <- paste0("~/NE Scallops/data/updated/Final Product Lease - March ",
+                       "2022/final_product_lease2022_03_08.Rds")
+
+final_product_lease <- readRDS(dat_filepath)
+
+# convert geometry column to lon lat 
+final_product_lease <- 
+  sfc_as_cols(final_product_lease, names = c("DDLON", "DDLAT")) %>% 
+  sf::st_drop_geometry()
+
+load_maindata(dat = final_product_lease, project = project, over_write = TRUE)
+```
+
+<br><br>
+
+### Spatial data
+Since sqlite can't save spatial data, we save it as a GeoJSON file in the project's 
+data folder.
+```{r}
+# use in scallop repo
+# ten_filepath <- here("data", "external", "shapefiles", 
+#                      "Ten Minute Squares Cut North and Greater Atlantic")
+# lease_filepath <- here("data", "external", "shapefiles", "All_Lease_Areas_Shapefile")
+
+shape_filepath <- "~/Effort-Displacement---Scallop/data/external/shapefiles/"
+lease_filepath <- paste0(shape_filepath, "All_Lease_Areas_Shapefile")
+ten_filepath <- paste0(shape_filepath, 
+                       "Ten Minute Squares Cut North and Greater Atlantic")
+
+load_spatial(lease_filepath, name = "WindClose", over_write = TRUE, project,
+             data.type = "shape")
+
+load_spatial(ten_filepath, name = "TenMNSQR", over_write = TRUE, project,
+             data.type = "shape")
+
+scallop0322TenMNSQRSpatTable <- table_view("scallop0322TenMNSQRSpatTable", 
+                                           project)
+scallop0322WindCloseSpatTable <- table_view("scallop0322WindCloseSpatTable",
+                                            project)
+```
+
+<br><br>
+
+This data contains `r nrow(scallop0322MainDataTable)` rows and 
+`r ncol(scallop0322MainDataTable)` variables. 
+
+<br><br>
+
+### summary table
+```{r}
+summary_stats(scallop0322MainDataTable, project) %>% 
+  pretty_tab_sb()
+```
+
+Here is DOLLAR, POUNDS, and TRIP_LENGTH separately. 
+```{r}
+scallop0322MainDataTable %>% 
+  summarize(across(.cols = c("DOLLAR", "POUNDS", "TRIP_LENGTH"), 
+                   .fns = list(min = min, median = median, mean = mean, max = max, 
+                               NAs = ~sum(is.na(.x)), UniqueObs = n_distinct, 
+                               "No. 0's" = ~sum(.x == 0)), 
+                   .names = "{.col}__{.fn}")) %>% 
+  pivot_longer(cols = everything(), values_to = "value", names_to = "summary") %>% 
+  pretty_lab() %>% 
+  separate(col = "summary", sep = "__", into = c("var", "summary")) %>% 
+  pivot_wider(names_from = "var", values_from = "value") %>% 
+  pretty_tab()
+ 
+```
+
+
+<br><br>
+
+### Duplicate trip IDs
+
+```{r}
+# add a duplicate trip column
+dup_ind <- duplicated(scallop0322MainDataTable$TRIPID)
+dup_ids <- unique(scallop0322MainDataTable$TRIPID[dup_ind])
+
+scallop0322MainDataTable <- 
+  scallop0322MainDataTable %>% 
+  mutate(dup_trip = TRIPID %in% dup_ids)
+
+# number of obs from duplicate tripIDs 
+sum(scallop0322MainDataTable$dup_trip)
+```
+
+
+<br><br>
+
+## QAQC
+
+This section includes our standard QAQC checks. Here I'm only checking whether 
+a potential issue exists and not changing the data in any way (except in the
+empty variable section).
+
+<br><br>
+
+### NA check
+```{r}
+na_filter(scallop0322MainDataTable, 
+          project = project, 
+          replace = FALSE, remove = FALSE, 
+          rep.value = NA, over_write = FALSE)
+```
+
+<br><br>
+
+### NaN check
+```{r}
+nan_filter(scallop0322MainDataTable, 
+           project = project, 
+           replace = FALSE, remove = FALSE, 
+           rep.value = NA, over_write = FALSE)
+```
+
+<br><br>
+
+### Unique rows
+
+```{r}
+unique_filter(scallop0322MainDataTable, project = project, remove = FALSE)
+```
+<br><br>
+
+### Empty variables
+By "empty" we mean containing all NAs.
+```{r}
+empty_vars_filter(scallop0322MainDataTable, project = project, remove = FALSE)
+
+```
+
+<br><br>
+
+This check isn't perfect. For example, it doesn't tell us whether a column is 
+mostly "empty", like the previous_port_lat/lon columns. 
+```{r}
+# previous_port_lat/lon contain nearly all NAs so I'll remove them
+scallop0322MainDataTable <-
+  scallop0322MainDataTable %>% 
+  select(-previous_port_lat, -previous_port_lon)
+```
+<br><br>
+
+### Lon/Lat format
+
+```{r}
+degree(scallop0322MainDataTable, project = project,
+       lat = "DDLAT", lon = "DDLON", 
+       latsign = NULL, lonsign = NULL,
+       replace = FALSE)
+```
+<br><br>
+
+### Spatial QAQC 
+
+```{r}
+spat_qaqc_out <-
+spatial_qaqc(scallop0322MainDataTable, project = project,
+             spat = scallop0322TenMNSQRSpatTable, lon.dat = "DDLON", lat.dat = "DDLAT")
+
+spat_qaqc_out$dataset <- NULL # drop dataset
+spat_qaqc_out$spatial_summary %>% 
+  pretty_lab(cols = "N") %>% 
+   pretty_tab() 
+spat_qaqc_out[2:4]
+```
+<br><br>
+
+## Data creation
+
+### CPUE
+Here I creating a CPUE variable using TRIP_LENGTH and POUNDS. I'm also filtering
+out any infinite values. 
+```{r}
+scallop0322MainDataTable <- 
+  cpue(scallop0322MainDataTable, project,
+       xWeight = "POUNDS",
+       xTime = "TRIP_LENGTH", 
+       name = "CPUE")
+
+scallop0322MainDataTable <- 
+  scallop0322MainDataTable %>% 
+  filter(!is.infinite(CPUE))
+```
+<br><br>
+
+### VPUE
+Same as above but with revenue instead of live catch. 
+```{r}
+scallop0322MainDataTable <- 
+  cpue(scallop0322MainDataTable, project,
+       xWeight = "DOLLAR",
+       xTime = "TRIP_LENGTH", 
+       name = "VPUE")
+
+scallop0322MainDataTable <- 
+  scallop0322MainDataTable %>% 
+  filter(!is.infinite(VPUE))
+```
+<br><br>
+
+### Top 10 Ports
+Top ten ports by frequency. Could also do by catch. 
+```{r}
+top_ten_ports <- 
+scallop0322MainDataTable %>% 
+  count(VTR_PORT, sort = TRUE) %>% 
+  pull(VTR_PORT) %>% 
+  head(10)
+
+scallop0322MainDataTable <- 
+  scallop0322MainDataTable %>% 
+  mutate(TOP_10_PORT = VTR_PORT %in% top_ten_ports)
+```
+
+<br><br>
+
+### Fleet assignment
+
+```{r}
+# create fleet table
+fleet_tab <- data.frame(
+  
+  condition = c('`Plan Code` == "SES" & `Program Code` == "SAA"',
+                '`Plan Code` == "SES" & `Program Code` == "SCA"',
+                '`Plan Code` == "SES" & `Program Code` == "SCG"'),
+  fleet = c("Access Area", "Days at Sea", "General Cat")
+)
+# save fleet table to FishSET DB
+fleet_table(scallop0322MainDataTable, 
+            project = project,
+            table = fleet_tab, save = TRUE)
+
+# Create fleet column 
+fleet_tab_name <- list_tables(project, type = "fleet") # grab tab name
+
+scallop0322MainDataTable <- 
+  fleet_assign(scallop0322MainDataTable, project = project, 
+               fleet_tab = fleet_tab_name)
+```
+<br><br><br>
+
+```{r}
+scallop0322MainDataTable %>% 
+  count(fleet) %>% 
+  mutate(perc = round(n/sum(n) * 100, 1)) %>% 
+  pretty_lab(cols = "n") %>% 
+  pretty_tab()
+```
+
+
+
+<br><br>
+
+### Zone assignment
+```{r}
+scallop0322MainDataTable <- 
+  assignment_column(scallop0322MainDataTable, project = project,
+                    gridfile = scallop0322TenMNSQRSpatTable, 
+                    lon.dat = "DDLON",
+                    lat.dat = "DDLAT", 
+                    cat = "MN10SQID",
+                    closest.pt = FALSE,
+                    hull.polygon = FALSE)
+```
+
+<br><br><br>
+
+Here, I'm interested in comparing how the FishSET zone assignment approach differs from the
+spatial join approach used to process the scallop data. 
+```{r}
+scallop0322MainDataTable %>% 
+  mutate(zone_match = ZoneID == MN10SQID) %>% 
+  count(zone_match) %>% 
+  pretty_lab() %>% 
+  pretty_tab()
+```
+
+
+
+<br><br>
+
+### Closure area assignment
+```{r}
+scallop0322MainDataTable <- 
+  assignment_column(scallop0322MainDataTable, project = project,
+                    gridfile = scallop0322WindCloseSpatTable, 
+                    lon.dat = "DDLON",
+                    lat.dat = "DDLAT", 
+                    cat = "NAME",
+                    closest.pt = FALSE,
+                    hull.polygon = FALSE) 
+
+names(scallop0322MainDataTable)[ncol(scallop0322MainDataTable)] <- "closeID"
+
+scallop0322MainDataTable <- 
+  scallop0322MainDataTable %>% 
+  mutate(in_closure = !is.na(closeID))
+```
+
+<br><br><br>
+
+Checking whether FishSET closure area assignment matches with what's in the scallop data. 
+Looks good. 
+```{r}
+scallop0322MainDataTable %>% 
+  mutate(closure_match = closeID == NAME) %>% 
+  count(closure_match) %>% 
+  pretty_lab() %>% 
+  pretty_tab()
+```
+
+<br><br><br>
+
+`r sum(scallop0322MainDataTable$in_closure)` 
+observations (`r round(sum(scallop0322MainDataTable$in_closure)/nrow(scallop0322MainDataTable) * 100, 2)`%)
+occurred inside a closure area. 
+```{r}
+agg_helper2(scallop0322MainDataTable, value = "in_closure", count = TRUE) %>% 
+  pivot_wider(names_from = "in_closure", values_from = "n") %>% 
+  rename("Outside Closure(s)" = "FALSE", "Inside Closure(s)" = "TRUE") %>% 
+  pretty_lab() %>% 
+  pretty_tab()
+```
+
+<br><br><br>
+Observations inside/outside closures by fleet. 
+```{r}
+agg_helper2(scallop0322MainDataTable, group = "fleet", 
+            value = "in_closure", count = TRUE) %>% 
+  pivot_wider(names_from = "in_closure", values_from = "n") %>% 
+  rename("Outside Closure(s)" = "FALSE", "Inside Closure(s)" = "TRUE") %>% 
+  pretty_lab() %>% 
+  pretty_tab()
+```
+
+<br><br><br>
+Observations inside/outside closures by fleet, LA, and GC. 
+```{r}
+scallop0322MainDataTable %>% 
+  count(fleet, in_closure, LA, GC, .drop = FALSE) %>% 
+  pivot_wider(names_from = "in_closure", 
+              values_from = "n", values_fill = 0) %>% 
+  rename("Outside Closure(s)" = "FALSE", "Inside Closure(s)" = "TRUE") %>% 
+  pretty_lab() %>% 
+  pretty_tab()
+  
+```
+
+
+
+<br><br><br>
+
+Observations inside/outside closures by year. 
+```{r}
+agg_helper2(scallop0322MainDataTable, value = "in_closure", 
+            group = "DB_LANDING_YEAR", 
+            count = TRUE) %>% 
+  pivot_wider(names_from = "in_closure", values_from = "n",
+              values_fill = 0) %>% 
+  arrange(DB_LANDING_YEAR) %>% 
+  rename("Outside closure(s)" = "FALSE", "Inside closure(s)" = "TRUE") %>% 
+  pretty_lab(ignore = "DB_LANDING_YEAR") %>% 
+  pretty_tab()
+```
+
+<br><br><br>
+Observations inside/outside closures by year and fleet. 
+```{r}
+agg_helper2(scallop0322MainDataTable, value = "in_closure", 
+            group = c("DB_LANDING_YEAR", "fleet"), 
+            count = TRUE) %>% 
+  pivot_wider(names_from = "in_closure", values_from = "n",
+              values_fill = 0) %>% 
+  arrange(DB_LANDING_YEAR) %>% 
+  rename("Outside closure(s)" = "FALSE", "Inside closure(s)" = "TRUE") %>% 
+  pretty_lab(ignore = "DB_LANDING_YEAR") %>% 
+  pretty_tab_sb(width = "50%") 
+```
+
+## Zone Summary
+
+### Frequency
+
+Zone frequency (all observations).
+```{r}
+zone_out <- 
+  zone_summary(scallop0322MainDataTable, project = project,
+           spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           output = "tab_plot",
+           count = TRUE,
+           breaks = NULL, n.breaks = 10, na.rm = TRUE)
+
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(cols = "n") %>% 
+  pretty_tab_sb(width = "40%")
+```
+
+<br><br><br>
+
+Zone Percentage.
+```{r}
+zone_out <- 
+  zone_summary(scallop0322MainDataTable, project = project,
+           spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           output = "tab_plot",
+           count = TRUE, fun = "percent",
+           breaks = c(seq(.1, .5, .1), seq(1, 2.5, .5)), 
+           n.breaks = 10, na.rm = TRUE)
+
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(ignore = "ZoneID") %>% 
+  pretty_tab_sb(width = "40%")
+```
+
+<br><br><br>
+
+Zone frequency by fleet. 
+```{r}
+zone_out <-
+  zone_summary(scallop0322MainDataTable,
+               project = project,
+               spat = scallop0322TenMNSQRSpatTable, 
+               lon.dat = "DDLON",
+               lat.dat = "DDLAT", 
+               zone.dat = "ZoneID",
+               zone.spat = "MN10SQID",
+               count = TRUE, var = "fleet",
+               output = "tab_plot",
+               breaks = NULL, n.breaks = 10, na.rm = TRUE)
+zone_out$plot
+zone_out$table %>% 
+  pivot_wider(names_from = "fleet", 
+              values_from = "n", values_fill = 0) %>% 
+  pretty_lab(ignore = "ZoneID") %>% 
+  pretty_tab_sb(width = "50%")
+
+```
+
+
+<br><br><br>
+
+Fleet share of total observations. 
+
+```{r}
+zone_out <-
+  zone_summary(scallop0322MainDataTable,
+               project = project,
+               spat = scallop0322TenMNSQRSpatTable, 
+               lon.dat = "DDLON",
+               lat.dat = "DDLAT", 
+               zone.dat = "ZoneID",
+               zone.spat = "MN10SQID",
+               count = TRUE, var = "fleet", fun = "percent",
+               output = "tab_plot",
+               breaks = NULL, n.breaks = 10, na.rm = TRUE)
+zone_out$plot
+zone_out$table %>% 
+  pivot_wider(names_from = "fleet", 
+              values_from = c("n", "perc"), values_fill = 0) %>% 
+  pretty_lab(ignore = "ZoneID") %>% 
+  pretty_tab_sb()
+```
+
+<br><br>
+
+### Catch
+
+Average live catch (all observations). 
+```{r}
+zone_out <- 
+  zone_summary(scallop0322MainDataTable, project = project,
+           spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           count = FALSE,
+           var = "POUNDS", fun = "mean",
+           breaks = c(100, 500, 1000, 1e4, seq(1e5, 4e5, 5e4)), 
+           output = "tab_plot", na.rm = TRUE)
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(cols = "POUNDS") %>% 
+  pretty_tab_sb(width = "40%")
+```
+
+<br><br><br>
+
+Median live catch (all observations).
+```{r}
+zone_out <- 
+  zone_summary(scallop0322MainDataTable, project = project,
+           spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           count = FALSE,
+           var = "POUNDS", fun = "median",
+           breaks = c(100, 500, 1000, 1e4, seq(1e5, 4e5, 5e4)),
+           output = "tab_plot", na.rm = TRUE)
+zone_out$plot
+zone_out$table %>% 
+   pretty_lab(cols = "POUNDS") %>% 
+  pretty_tab_sb(width = "40%")
+```
+<br><br><br>
+
+Median live catch by fleet.
+```{r}
+zone_out <- 
+  zone_summary(scallop0322MainDataTable, project = project,
+           spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           count = FALSE,
+           var = "POUNDS", fun = "median", group = "fleet",
+           output = "tab_plot", na.rm = TRUE)
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(cols = "POUNDS") %>% 
+  pretty_tab_sb(width = "40%")
+```
+
+<br><br><br>
+
+Median live catch (General Category fleet).
+```{r}
+zone_out <- 
+  scallop0322MainDataTable %>% 
+  filter(fleet == "General Cat") %>% 
+  zone_summary(project = project,
+           spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           count = FALSE,
+           var = "POUNDS", fun = "median",
+           breaks = c(100, 1e3, 2e3, 4e3, 6e3, 1e4, 1.5e4, 2e4, 1e5, 1.5e5, 2e5),
+           output = "tab_plot", na.rm = TRUE)
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(cols = "POUNDS") %>% 
+  pretty_tab_sb(width = "40%")
+```
+
+<br><br><br>
+
+Percent of total live catch all observations. 
+```{r}
+zone_out <- 
+  zone_summary(scallop0322MainDataTable, project = project,
+           spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           count = FALSE,
+           var = "POUNDS", fun = "percent",
+           # breaks = seq(0, 2.4, .2),
+           output = "tab_plot", na.rm = TRUE)
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(cols = c("POUNDS", "POUNDS_perc"), type = "scientific") %>%
+  pretty_tab_sb(width = "40%")
+```
+
+<br><br><br>
+
+Percent of total live catch within Access Area fleet. 
+
+```{r}
+zone_out <- 
+  scallop0322MainDataTable %>% 
+  filter(fleet == "Access Area") %>% 
+  zone_summary(project = project,
+               spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           count = FALSE,
+           var = "POUNDS", fun = "percent",
+           # breaks = seq(0, 2.4, .2),
+           output = "tab_plot", na.rm = TRUE)
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(cols = c("POUNDS", "POUNDS_perc"), type = "scientific") %>%
+  pretty_tab_sb(width = "40%")
+```
+
+<br><br><br>
+
+### Trip Length
+
+Average trip length.
+```{r}
+zone_out <- 
+  zone_summary(scallop0322MainDataTable, project = project,
+           spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           count = FALSE,
+           var = "TRIP_LENGTH", fun = "mean",
+           breaks = c(1, seq(2, 16, 2)),
+           output = "tab_plot", na.rm = TRUE)
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(cols = "TRIP_LENGTH", type = "decimal") %>% 
+  pretty_tab_sb(width = "40%")
+```
+
+<br><br><br>
+
+Average trip length by fleet.
+```{r}
+zone_out <- 
+  zone_summary(scallop0322MainDataTable, project = project,
+           spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           count = FALSE,
+           var = "TRIP_LENGTH", fun = "mean", group = "fleet",
+           # breaks = c(1, seq(2, 16, 2)),
+           output = "tab_plot", na.rm = TRUE)
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(cols = "TRIP_LENGTH", type = "decimal") %>% 
+  pretty_tab_sb(width = "40%")
+```
+
+<br><br><br>
+
+Percent of total trip length. This is summing  trip lengths by zone and dividing 
+by total trip length. Working on fixing the legend labels. 
+```{r}
+zone_out <- 
+  zone_summary(scallop0322MainDataTable, project = project,
+           spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           count = FALSE,
+           var = "TRIP_LENGTH", fun = "percent",
+           na.rm = TRUE, output = "tab_plot")
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(cols = "TRIP_LENGTH") %>% 
+  pretty_lab(cols = "TRIP_LENGTH_perc", type = "scientific") %>% 
+  pretty_tab_sb(width = "50%")
+```
+
+<br><br><br>
+
+Share of trip length by fleet.
+```{r}
+zone_out <- 
+  zone_summary(scallop0322MainDataTable, project = project,
+           spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           count = FALSE,
+           var = "TRIP_LENGTH", fun = "percent", group = "fleet",
+           na.rm = TRUE, output = "tab_plot")
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(cols = "TRIP_LENGTH") %>% 
+  pretty_lab(cols = "TRIP_LENGTH_perc", type = "scientific") %>% 
+  pretty_tab_sb(width = "50%")
+```
+
+<br><br>
+
+### CPUE
+
+Average CPUE for all observations.
+```{r}
+zone_out <- 
+  zone_summary(scallop0322MainDataTable, project = project,
+           spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           count = FALSE,
+           var = "CPUE", fun = "mean",
+           breaks = c(seq(0, 2e4, 2e3), seq(3e4, 9e4, 3e4)), 
+           na.rm = TRUE, output = "tab_plot")
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(cols = "CPUE") %>%
+  pretty_tab_sb(width = "50%")
+```
+
+<br><br><br>
+
+Average CPUE by fleet.
+```{r}
+zone_out <- 
+  zone_summary(scallop0322MainDataTable, project = project,
+           spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           count = FALSE,
+           var = "CPUE", fun = "mean", group = "fleet",
+           # breaks = c(seq(0, 2e4, 2e3), seq(3e4, 9e4, 3e4)), 
+           na.rm = TRUE, output = "tab_plot")
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(cols = "CPUE") %>%
+  pretty_tab_sb(width = "50%")
+```
+
+### VPUE
+
+
+Average VPUE for all observations.
+```{r}
+zone_out <- 
+  zone_summary(scallop0322MainDataTable, project = project,
+           spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           count = FALSE,
+           var = "VPUE", fun = "mean",
+           breaks = c(seq(0, 2e4, 2e3), seq(3e4, 9e4, 3e4)),
+           na.rm = TRUE, output = "tab_plot")
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(cols = "VPUE") %>%
+  pretty_tab_sb(width = "50%")
+```
+
+
+<br><br><br>
+
+Average VPUE by fleet.
+```{r}
+zone_out <- 
+  zone_summary(scallop0322MainDataTable, project = project,
+           spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           count = FALSE,
+           var = "VPUE", fun = "mean", group = "fleet",
+           # breaks = c(seq(0, 2e4, 2e3), seq(3e4, 9e4, 3e4)),
+           na.rm = TRUE, output = "tab_plot")
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(cols = "VPUE") %>%
+  pretty_tab_sb(width = "50%")
+```
+
+## Closure summary
+
+
+Number of observations.
+```{r}
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable, 
+         lon.dat = "DDLON",
+         lat.dat = "DDLAT", 
+         zone.dat = "closeID",
+         zone.spat = "NAME",
+         count = TRUE,
+         breaks = c(1, 10, 50, 100, 250, 500, 750, 1000, 1252),
+         na.rm = TRUE, dat.center = FALSE, 
+         output = "tab_plot")
+
+zone_out$table %>% 
+  pretty_lab() %>% 
+  pretty_tab_sb(width = "40%")
+
+zone_out$plot
+```
+
+
+<br><br><br>
+
+Duplicate trips by closure area. This shows whether observations that occurred
+in a closure area came from duplicate trip IDs. 
+
+```{r}
+agg_helper2(scallop0322MainDataTable, 
+            value = "closeID",
+            group = "dup_trip",
+            count = TRUE) %>% 
+  mutate(dup_trip = if_else(dup_trip, "Duplicate Trip", "Non-Duplicate Trip")) %>% 
+  pivot_wider(names_from = "dup_trip", 
+              values_from = "n", 
+              values_fill = 0) %>% 
+  pretty_lab() %>% 
+  pretty_tab_sb(width = "60%")
+```
+
+<br><br><br>
+
+Percent of observations in closure areas.
+```{r}
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable, 
+         lon.dat = "DDLON",
+         lat.dat = "DDLAT", 
+         zone.dat = "closeID",
+         zone.spat = "NAME",
+         fun = "percent",
+         count = TRUE,
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE, 
+         output = "tab_plot")
+
+zone_out$table %>% 
+  pretty_lab() %>% 
+  pretty_tab_sb(width = "40%")
+
+zone_out$plot
+```
+
+<br><br><br>
+Percent of total revenue by closure area. 
+```{r}
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         lon.dat = "DDLON",
+         lat.dat = "DDLAT",
+         zone.dat = "closeID",
+         zone.spat = "NAME",
+         var = "DOLLAR",
+         fun = "percent",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "tab_plot")
+
+zone_out$table %>% 
+  pretty_lab() %>% 
+  pretty_tab_sb(width = "40%")
+
+zone_out$plot
+```
+
+
+<br><br><br>
+
+Percent of total revenue by fleet. 
+```{r}
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         lon.dat = "DDLON",
+         lat.dat = "DDLAT",
+         zone.dat = "closeID",
+         zone.spat = "NAME",
+         var = "DOLLAR", group = "fleet",
+         fun = "percent",
+         count = FALSE, 
+         # breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "tab_plot")
+
+zone_out$table %>% 
+  pretty_lab() %>% 
+  pretty_tab_sb(width = "50%")
+
+zone_out$plot
+```
+
+<br><br><br>
+
+Average live catch per closure area.
+```{r}
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable, 
+         lon.dat = "DDLON",
+         lat.dat = "DDLAT", 
+         zone.dat = "closeID",
+         zone.spat = "NAME",
+         var = "POUNDS",
+         fun = "mean",
+         count = FALSE,
+         na.rm = TRUE, dat.center = FALSE, 
+         output = "tab_plot")
+
+zone_out$table %>% 
+  pretty_lab() %>% 
+  pretty_tab_sb(width = "40%")
+
+zone_out$plot
+```
+
+<br><br><br>
+
+Average live catch by fleet.
+```{r}
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable, 
+         lon.dat = "DDLON",
+         lat.dat = "DDLAT", 
+         zone.dat = "closeID",
+         zone.spat = "NAME",
+         var = "POUNDS", group = "fleet",
+         fun = "mean",
+         count = FALSE,
+         na.rm = TRUE, dat.center = FALSE, 
+         output = "tab_plot")
+
+zone_out$table %>% 
+  pretty_lab() %>% 
+  pretty_tab_sb(width = "50%")
+
+zone_out$plot
+```
+
+<br><br><br>
+
+Percent of total live catch. 
+```{r}
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable, 
+         lon.dat = "DDLON",
+         lat.dat = "DDLAT", 
+         zone.dat = "closeID",
+         zone.spat = "NAME",
+         var = "POUNDS",
+         fun = "percent",
+         count = FALSE,
+         na.rm = TRUE, dat.center = FALSE, 
+         output = "tab_plot")
+
+zone_out$table %>% 
+  pretty_lab(type = "scientific") %>% 
+  pretty_tab_sb(width = "50%")
+
+zone_out$plot
+```
+
+<br><br><br>
+
+Percent of total live catch. 
+```{r}
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable, 
+         lon.dat = "DDLON",
+         lat.dat = "DDLAT", 
+         zone.dat = "closeID",
+         zone.spat = "NAME",
+         var = "POUNDS", group = "fleet",
+         fun = "percent",
+         count = FALSE,
+         na.rm = TRUE, dat.center = FALSE, 
+         output = "tab_plot")
+
+zone_out$table %>% 
+  pretty_lab(type = "scientific") %>% 
+  pretty_tab_sb(width = "50%")
+
+zone_out$plot
+```
+
+<br><br><br>
+
+Total live catch by year. 
+```{r}
+agg_helper2(scallop0322MainDataTable, "POUNDS", 
+            group = c("DB_LANDING_YEAR", "closeID"), 
+            fun = "sum") %>% 
+  pivot_wider(names_from = DB_LANDING_YEAR, 
+              values_from = POUNDS,
+              values_fill = 0) %>% 
+  pretty_lab() %>% 
+  pretty_tab_sb()
+```
+
+<br><br><br>
+
+Average live catch by year. 
+```{r}
+agg_helper2(scallop0322MainDataTable, "POUNDS", 
+            group = c("DB_LANDING_YEAR", "closeID"), 
+            fun = "mean") %>% 
+  pivot_wider(names_from = DB_LANDING_YEAR, 
+              values_from = POUNDS,
+              values_fill = 0) %>% 
+    pretty_lab() %>% 
+  pretty_tab_sb()
+```
+
+<br><br><br>
+
+Percent of total trip length by year. 
+```{r}
+agg_helper2(scallop0322MainDataTable, "TRIP_LENGTH", 
+            group = c("DB_LANDING_YEAR", "closeID"), 
+            fun = "sum") %>% 
+  mutate(TRIP_LENGTH = TRIP_LENGTH/sum(TRIP_LENGTH) * 100) %>% 
+  pivot_wider(names_from = DB_LANDING_YEAR, 
+              values_from = TRIP_LENGTH,
+              values_fill = 0) %>% 
+  pretty_lab() %>% 
+  pretty_tab_sb()
+```
+
+<br><br><br>
+
+Average CPUE per closure area.
+```{r}
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable, 
+         lon.dat = "DDLON",
+         lat.dat = "DDLAT", 
+         zone.dat = "closeID",
+         zone.spat = "NAME",
+         var = "CPUE",
+         fun = "mean",
+         count = FALSE,
+         na.rm = TRUE, dat.center = FALSE, 
+         output = "tab_plot")
+
+zone_out$table %>% 
+    pretty_lab() %>% 
+  pretty_tab_sb(width = "40%")
+
+zone_out$plot
+```
+
+<br><br><br>
+
+Average CPUE by fleet.
+```{r}
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable, 
+         lon.dat = "DDLON",
+         lat.dat = "DDLAT", 
+         zone.dat = "closeID",
+         zone.spat = "NAME",
+         var = "CPUE", group = "fleet",
+         fun = "mean",
+         count = FALSE,
+         na.rm = TRUE, dat.center = FALSE, 
+         output = "tab_plot")
+
+zone_out$table %>% 
+    pretty_lab() %>% 
+  pretty_tab_sb(width = "40%")
+
+zone_out$plot
+```
+
+<br><br><br>
+
+Average CPUE by year. 
+```{r}
+agg_helper2(scallop0322MainDataTable, "CPUE", 
+            group = c("DB_LANDING_YEAR", "closeID"), 
+            fun = "mean") %>% 
+  pivot_wider(names_from = DB_LANDING_YEAR, 
+              values_from = CPUE,
+              values_fill = 0) %>% 
+  pretty_lab() %>% 
+  pretty_tab_sb()
+
+```
+
+<br><br><br>
+
+Average VPUE per closure area.
+```{r}
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable, 
+         lon.dat = "DDLON",
+         lat.dat = "DDLAT", 
+         zone.dat = "closeID",
+         zone.spat = "NAME",
+         var = "VPUE",
+         fun = "mean",
+         count = FALSE,
+         na.rm = TRUE, dat.center = FALSE, 
+         output = "tab_plot")
+
+zone_out$table %>% 
+  pretty_lab() %>% 
+  pretty_tab_sb(width = "40%")
+
+zone_out$plot
+```
+
+<br><br><br>
+
+Average VPUE per closure area. 
+```{r}
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable, 
+         lon.dat = "DDLON",
+         lat.dat = "DDLAT", 
+         zone.dat = "closeID",
+         zone.spat = "NAME",
+         var = "VPUE", group = "fleet",
+         fun = "mean",
+         count = FALSE,
+         na.rm = TRUE, dat.center = FALSE, 
+         output = "tab_plot")
+
+zone_out$table %>% 
+  pretty_lab() %>% 
+  pretty_tab_sb(width = "40%")
+
+zone_out$plot
+```
+
+<br><br><br>
+
+Average VPUE by year. 
+```{r}
+agg_helper2(scallop0322MainDataTable, "VPUE", 
+            group = c("DB_LANDING_YEAR", "closeID"), 
+            fun = "mean") %>% 
+  pivot_wider(names_from = DB_LANDING_YEAR, 
+              values_from = VPUE,
+              values_fill = 0) %>% 
+  pretty_lab() %>% 
+  pretty_tab_sb()
+```
+
+<br><br>
+
+```{r}
+agg_helper2(scallop0322MainDataTable, "NSUBTRIP", 
+            group = c("DB_LANDING_YEAR", "closeID"), 
+            count = TRUE) %>% 
+  arrange(DB_LANDING_YEAR) %>% 
+  pivot_wider(names_from = DB_LANDING_YEAR, 
+              values_from = n,
+              values_fill = 0) %>% 
+  arrange(closeID, desc(NSUBTRIP)) %>% 
+  pretty_lab() %>% 
+  pretty_tab_sb()
+```
+
+<br><br>
+
+## Outliers
+The "N" column in the outlier tables refers to the number observations that would remain
+in the dataset after a filter ("outlier_check") has been applied to the variable. 
+The rest of the columns are summary statistics of the variable post filter.
+You could run the "outlier_remove" function if you wanted to apply an outlier filter 
+to variable.
+
+### POUNDS
+```{r}
+outlier_table(scallop0322MainDataTable, project,
+              x = "POUNDS") %>% 
+  pretty_lab() %>% 
+  pretty_tab()
+```
+
+```{r}
+outlier_plot(scallop0322MainDataTable, project,
+             x = "POUNDS", 
+             dat.remove = "none",
+             x.dist = "normal",
+             output.screen = TRUE)
+```
+
+```{r}
+outlier_plot(scallop0322MainDataTable, project,
+             x = "POUNDS", 
+             dat.remove = "mean_3SD",
+             x.dist = "normal",
+             output.screen = TRUE)
+```
+
+<br><br>
+
+### TRIP_LENGTH
+
+```{r}
+outlier_table(scallop0322MainDataTable, project,
+              x = "TRIP_LENGTH") %>% 
+  pretty_lab() %>% 
+  pretty_tab()
+```
+
+
+
+```{r}
+outlier_plot(scallop0322MainDataTable, project,
+             x = "TRIP_LENGTH", 
+             dat.remove = "none",
+             x.dist = "normal",
+             output.screen = TRUE)
+```
+
+
+
+```{r}
+outlier_plot(scallop0322MainDataTable, project,
+             x = "TRIP_LENGTH", 
+             dat.remove = "mean_3SD",
+             x.dist = "normal",
+             output.screen = TRUE)
+```
+
+<br><br>
+
+### DOLLAR
+
+```{r}
+outlier_table(scallop0322MainDataTable, project,
+              x = "DOLLAR") %>% 
+  pretty_lab() %>% 
+  pretty_tab()
+```
+
+
+```{r}
+outlier_plot(scallop0322MainDataTable, project,
+             x = "DOLLAR", 
+             dat.remove = "none",
+             x.dist = "normal",
+             output.screen = TRUE)
+```
+
+
+```{r}
+outlier_plot(scallop0322MainDataTable, project,
+             x = "DOLLAR", 
+             dat.remove = "mean_3SD",
+             x.dist = "normal",
+             output.screen = TRUE)
+```
+
+<br><br>
+
+### TRIP_COST_2020_DOL
+
+```{r}
+outlier_table(scallop0322MainDataTable, project,
+              x = "TRIP_COST_2020_DOL") %>% 
+  pretty_lab() %>% 
+  pretty_tab()
+```
+
+
+
+```{r}
+outlier_plot(scallop0322MainDataTable, project,
+             x = "TRIP_COST_2020_DOL", 
+             dat.remove = "none",
+             x.dist = "normal",
+             output.screen = TRUE)
+```
+
+
+```{r}
+outlier_plot(scallop0322MainDataTable, project,
+             x = "TRIP_COST_2020_DOL", 
+             dat.remove = "mean_3SD",
+             x.dist = "normal",
+             output.screen = TRUE)
+```
+
+<br><br>
+
+### TRIP_COST_WINSOR_2020_DOL
+
+
+```{r}
+outlier_table(scallop0322MainDataTable, project,
+              x = "TRIP_COST_WINSOR_2020_DOL") %>% 
+  pretty_lab() %>% 
+  pretty_tab()
+```
+
+
+
+```{r}
+outlier_plot(scallop0322MainDataTable, project,
+             x = "TRIP_COST_WINSOR_2020_DOL", 
+             dat.remove = "none",
+             x.dist = "normal",
+             output.screen = TRUE)
+```
+
+
+```{r}
+outlier_plot(scallop0322MainDataTable, project,
+             x = "TRIP_COST_WINSOR_2020_DOL", 
+             dat.remove = "mean_3SD",
+             x.dist = "normal",
+             output.screen = TRUE)
+```
+
+<br><br>
+
+## Temporal plots
+
+
+```{r}
+temp_plot(scallop0322MainDataTable, project,
+          var.select = "POUNDS",
+          len.fun = "percent",
+          agg.fun = "sum",
+          date.var = "Date")
+```
+
+<br><br><br>
+
+```{r}
+temp_plot(scallop0322MainDataTable, project,
+          var.select = "TRIP_LENGTH",
+          len.fun = "percent",
+          agg.fun = "sum",
+          date.var = "Date")
+```
+
+<br><br><br>
+
+```{r}
+temp_plot(scallop0322MainDataTable, project,
+          var.select = "DOLLAR",
+          len.fun = "percent",
+          agg.fun = "sum",
+          date.var = "Date")
+```
+
+<br><br><br>
+
+```{r}
+temp_plot(scallop0322MainDataTable, project,
+          var.select = "TRIP_COST_2020_DOL",
+          len.fun = "percent",
+          agg.fun = "sum",
+          date.var = "Date")
+```
+
+<br><br><br>
+
+```{r}
+temp_plot(scallop0322MainDataTable, project,
+          var.select = "TRIP_COST_WINSOR_2020_DOL",
+          len.fun = "percent",
+          agg.fun = "sum",
+          date.var = "Date")
+```
+
+<br><br>
+
+## Scatter plots
+
+Trip length by live catch. 
+```{r}
+xy_plot(scallop0322MainDataTable, project,
+        var1 = "TRIP_LENGTH", var2 = "POUNDS",
+        regress = FALSE)
+```
+
+
+<br><br><br>
+
+Trip length by revenue. 
+```{r}
+xy_plot(scallop0322MainDataTable, project,
+        var1 = "TRIP_LENGTH", var2 = "DOLLAR",
+        regress = FALSE)
+```
+
+<br><br><br>
+
+Trip length by trip cost.
+```{r}
+xy_plot(scallop0322MainDataTable, project,
+        var1 = "TRIP_LENGTH", var2 = "TRIP_COST_2020_DOL",
+        regress = FALSE)
+```
+
+
+<br><br><br>
+
+Trip length by trip cost (Winsor).
+```{r}
+xy_plot(scallop0322MainDataTable, project,
+        var1 = "TRIP_LENGTH", var2 = "TRIP_COST_WINSOR_2020_DOL",
+        regress = FALSE)
+```
+
+<br><br><br>
+
+Average revenue by average trip length. 
+```{r}
+scallop0322MainDataTable %>% 
+  group_by(PERMIT.y) %>% 
+  summarize(avg_revenue = mean(DOLLAR),
+            avg_trip_length = mean(TRIP_LENGTH)) %>% 
+  ggplot(aes(x = avg_trip_length, y = avg_revenue)) + 
+  geom_point(alpha = .5) + 
+  FishSET::fishset_theme()
+```
+
+<br><br><br>
+
+Average revenue by average CPUE. 
+```{r}
+scallop0322MainDataTable %>% 
+  group_by(PERMIT.y) %>% 
+  summarize(avg_revenue = mean(DOLLAR),
+            avg_cpue = mean(CPUE)) %>% 
+  ggplot(aes(x = avg_cpue, y = avg_revenue)) + 
+  geom_point(alpha = .5) + 
+  FishSET::fishset_theme()
+```
+
+<br><br>
+
+## Correlation Matrix
+
+```{r}
+corr <- 
+corr_out(scallop0322MainDataTable, project,
+         variables = "all",
+         method = "pearson")
+
+corr$plot + theme(axis.text.x = element_text(size = 7),
+                  axis.text.y = element_text(size = 8))
+
+corr$table %>% pretty_tab_sb()
+```
+
+<br><br>
+
+## Active Vessels
+
+vessel count by year. 
+```{r}
+ves_out <- 
+vessel_count(scallop0322MainDataTable, project,
+             v_id = "PERMIT.y",
+             date = "Date",
+             period = "year", type = "line")
+
+ves_out$table %>% pretty_tab()
+
+ves_out$plot 
+```
+
+<br><br><br>
+
+vessel count by fleet. 
+```{r}
+ves_out <- 
+vessel_count(scallop0322MainDataTable, project,
+             v_id = "PERMIT.y",
+             group = "fleet",
+             type = "bar")
+
+ves_out$table %>% pretty_tab()
+
+ves_out$plot 
+```
+
+<br><br><br>
+
+vessel count by year and fleet. 
+```{r}
+ves_out <- 
+vessel_count(scallop0322MainDataTable, project,
+             v_id = "PERMIT.y",
+             group = "fleet",
+             date = "Date",
+             period = "year", type = "line")
+
+ves_out$table %>% 
+  pretty_lab(cols = "PERMIT.y") %>% 
+  pretty_tab_sb(width = "40%")
+
+ves_out$plot 
+```
+
+<br><br><br>
+
+
+vessel count by gearcode. 
+```{r}
+ves_out <-
+  vessel_count(scallop0322MainDataTable, project,
+               v_id = "PERMIT.y",
+               group = "GEARCODE")
+
+gears <- ves_out$table %>% 
+  arrange(desc(PERMIT.y)) %>% 
+  pull(GEARCODE)
+
+gear1 <- gears[1:4]
+gear2 <- gears[5:10]
+
+ves_out$table %>% 
+  pretty_lab() %>% 
+  pretty_tab()
+
+ves_out$plot + angled_theme()
+```
+<br><br><br>
+
+vessel count by year and gearcode. 
+
+```{r}
+ves_out <-
+  vessel_count(scallop0322MainDataTable, project,
+               v_id = "PERMIT.y",
+               date = "Date",
+               group = "GEARCODE", output = "table",
+               period = "year", type = "line")
+
+ves_out %>% 
+  pivot_wider(names_from = "GEARCODE", values_from = "PERMIT.y") %>% 
+  pretty_tab_sb()
+
+  vessel_count(scallop0322MainDataTable, project,
+               v_id = "PERMIT.y",
+               date = "Date",
+               filter_by = "GEARCODE",
+               filter_value = gear1, 
+               group = "GEARCODE", output = "plot",
+               period = "year", type = "line", tran = "log")
+  
+   vessel_count(scallop0322MainDataTable, project,
+               v_id = "PERMIT.y",
+               date = "Date",
+               filter_by = "GEARCODE",
+               filter_value = gear2, 
+               group = "GEARCODE", output = "plot",
+               period = "year", type = "line")
+
+```
+
+<br><br><br>
+
+Vessel count by top ten port
+
+```{r}
+ves_out <- 
+  vessel_count(scallop0322MainDataTable, project,
+               v_id = "PERMIT.y",
+               group = "VTR_PORT",
+               filter_by = "TOP_10_PORT",
+               filter_value = TRUE)
+
+ves_out$table %>% pretty_tab()
+
+ves_out$plot + angled_theme()
+```
+
+<br><br><br>
+
+Vessel count by top ten port and year.
+```{r}
+ves_out <- 
+  vessel_count(scallop0322MainDataTable, project,
+               v_id = "PERMIT.y",
+               group = "VTR_PORT",
+               date = "Date",
+               period = "year",
+               filter_by = "TOP_10_PORT",
+               filter_value = TRUE,
+               type = "line")
+
+ves_out$table %>% 
+  pivot_wider(names_from = VTR_PORT, values_from = PERMIT.y) %>% 
+  pretty_lab(ignore = "year") %>%
+  pretty_tab_sb()
+
+ves_out$plot
+```
+
+<br><br><br>
+
+Vessel count by top ten port and gearcode.
+```{r}
+ves_out <- 
+  vessel_count(scallop0322MainDataTable, project,
+               v_id = "PERMIT.y",
+               group = c("VTR_PORT", "GEARCODE"),
+               filter_by = "TOP_10_PORT",
+               filter_value = TRUE, type = "line")
+
+ves_out$table %>% 
+  pivot_wider(names_from = GEARCODE, values_from = PERMIT.y) %>% 
+  pretty_lab() %>%
+  pretty_tab_sb()
+
+ves_out$plot + angled_theme()
+```
+
+<br><br>
+
+## Catch
+
+Total live catch by year. 
+```{r}
+catch_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "POUNDS",
+                date = "Date", 
+                period = "year",
+                fun = "sum",
+                type = "line", format_lab = "decimal")
+
+catch_out$table %>% 
+  pretty_lab(cols = "POUNDS") %>%
+  pretty_tab()
+
+catch_out$plot
+```
+
+
+<br><br><br>
+
+Total live catch by fleet. 
+```{r}
+catch_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "POUNDS",
+                group = "fleet",
+                fun = "sum",
+                type = "bar", format_lab = "decimal")
+
+catch_out$table %>% 
+  pretty_lab(cols = "POUNDS") %>%
+  pretty_tab()
+
+catch_out$plot
+```
+
+<br><br><br>
+
+Total live catch by year and fleet. 
+```{r}
+catch_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "POUNDS",
+                date = "Date", 
+                period = "year",
+                group = "fleet",
+                fun = "sum",
+                type = "line", format_lab = "decimal")
+
+catch_out$table %>% 
+  pretty_lab(cols = "POUNDS") %>%
+  pretty_tab_sb(width = "40%")
+
+catch_out$plot
+```
+
+<br><br><br>
+
+Average live catch by year. 
+```{r}
+catch_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "POUNDS",
+                date = "Date", 
+                period = "year",
+                fun = "mean", type = "line")
+
+catch_out$table %>% 
+  pretty_lab(cols = "POUNDS") %>%
+  pretty_tab()
+
+catch_out$plot
+```
+
+<br><br><br>
+
+Average live catch by year and fleet. 
+```{r}
+catch_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "POUNDS",
+                date = "Date", 
+                period = "year",
+                group = "fleet",
+                fun = "mean", type = "line")
+
+catch_out$table %>% 
+  pretty_lab(cols = "POUNDS") %>%
+  pretty_tab_sb(width = "40%")
+
+catch_out$plot
+```
+<br><br><br>
+
+Total live catch by gearcode. 
+```{r}
+catch_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "POUNDS",
+                group = "GEARCODE",
+                fun = "sum", 
+                output = "table")
+
+catch_out %>% 
+  pretty_lab(cols = "POUNDS") %>%
+  pretty_tab()
+
+species_catch(scallop0322MainDataTable, project,
+              species = "POUNDS",
+              group = "GEARCODE",
+              filter_by = "GEARCODE",
+              filter_value = gear1, 
+              fun = "sum",
+              tran = "log",
+              output = "plot") + angled_theme()
+
+species_catch(scallop0322MainDataTable, project,
+              species = "POUNDS",
+              group = "GEARCODE", 
+              filter_by = "GEARCODE",
+              filter_value = gear2, 
+              fun = "sum",
+              tran = "log", output = "plot") + angled_theme()
+```
+
+<br><br><br>
+
+Average live catch by gearcode. 
+```{r}
+catch_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "POUNDS",
+                group = "GEARCODE",
+                fun = "mean", 
+                output = "table")
+
+catch_out %>% 
+  pretty_lab(cols = "POUNDS") %>%
+  pretty_tab()
+
+species_catch(scallop0322MainDataTable, project,
+              species = "POUNDS",
+              group = "GEARCODE",
+              filter_by = "GEARCODE",
+              filter_value = gear1, 
+              fun = "mean",
+              tran = "log",
+              output = "plot") + angled_theme()
+
+species_catch(scallop0322MainDataTable, project,
+              species = "POUNDS",
+              group = "GEARCODE", 
+              filter_by = "GEARCODE",
+              filter_value = gear2, 
+              fun = "mean",
+              tran = "log", output = "plot") + angled_theme()
+```
+
+<br><br><br>
+
+Total live catch by Top 10 port and gearcode. 
+```{r}
+catch_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "POUNDS",
+                group = c("VTR_PORT", "GEARCODE"),
+                filter_by = "TOP_10_PORT",
+                filter_value = TRUE,
+                fun = "sum", type = "line",
+                format_lab = "scientific", tran = "log")
+
+catch_out$table %>% 
+  pivot_wider(names_from = GEARCODE, values_from = POUNDS) %>% 
+  pretty_lab() %>%
+  pretty_tab_sb() 
+  
+catch_out$plot + angled_theme()
+```
+
+<br><br>
+
+## CPUE 
+
+Average CPUE by year.
+```{r}
+cpue_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "CPUE",
+                date = "Date", 
+                period = "year",
+                fun = "mean", type = "line")
+
+cpue_out$table %>% 
+  pretty_lab(cols = "CPUE") %>%
+  pretty_tab()
+cpue_out$plot
+```
+
+<br><br><br>
+
+Average CPUE by year and fleet.
+```{r}
+cpue_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "CPUE",
+                date = "Date", 
+                period = "year",
+                group = "fleet",
+                fun = "mean", type = "line")
+
+cpue_out$table %>% 
+  pretty_lab(cols = "CPUE") %>%
+  pretty_tab_sb(width = "40%")
+cpue_out$plot
+```
+
+
+<br><br><br>
+
+Average CPUE by gearcode.
+```{r}
+cpue_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "CPUE",
+                group = "GEARCODE",
+                fun = "mean", 
+                output = "table")
+
+cpue_out %>% 
+  pretty_lab(cols = "CPUE") %>%
+  pretty_tab()
+
+species_catch(scallop0322MainDataTable, project,
+              species = "CPUE",
+              group = "GEARCODE",
+              filter_by = "GEARCODE",
+              filter_value = gear1, 
+              fun = "mean",
+              output = "plot") + angled_theme()
+
+species_catch(scallop0322MainDataTable, project,
+              species = "CPUE",
+              group = "GEARCODE", 
+              filter_by = "GEARCODE",
+              filter_value = gear2, 
+              fun = "mean",
+              tran = "log", output = "plot") + angled_theme()
+```
+
+<br><br><br>
+
+Average CPUE by year and gearcode. 
+```{r}
+cpue_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "CPUE",
+                group = "GEARCODE",
+                date = "Date", 
+                period = "year",
+                fun = "mean", type = "line", output = "table")
+
+cpue_out %>% 
+  pivot_wider(names_from = GEARCODE, values_from = CPUE) %>% 
+  pretty_lab(ignore = "year") %>%
+  pretty_tab_sb()
+
+species_catch(scallop0322MainDataTable, project,
+              species = "CPUE",
+              group = "GEARCODE",
+              filter_by = "GEARCODE",
+              filter_value = gear1,
+              date = "Date", 
+              period = "year",
+              fun = "mean", type = "line", output = "plot")
+
+species_catch(scallop0322MainDataTable, project,
+              species = "CPUE",
+              group = "GEARCODE",
+              filter_by = "GEARCODE",
+              filter_value = gear2,
+              date = "Date", 
+              period = "year", #tran = "log",
+              fun = "mean", type = "line", output = "plot")
+```
+
+<br><br><br>
+
+Average CPUE by top 10 ports. 
+```{r}
+cpue_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "CPUE",
+                group = "VTR_PORT",
+                filter_by = "TOP_10_PORT",
+                filter_value = TRUE,
+                fun = "mean", type = "line")
+
+cpue_out$table %>% 
+  pretty_lab() %>%
+  pretty_tab()
+
+cpue_out$plot + angled_theme() 
+```
+
+<br><br><br>
+
+Average CPUE by top 10 ports and year. 
+```{r}
+cpue_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "CPUE",
+                group = "VTR_PORT",
+                filter_by = "TOP_10_PORT",
+                filter_value = TRUE,
+                date = "Date", 
+                period = "year",
+                fun = "mean", type = "line")
+
+cpue_out$table %>% 
+  pivot_wider(names_from = VTR_PORT, values_from = CPUE) %>% 
+  pretty_lab(ignore = "year") %>%
+  pretty_tab_sb()
+
+cpue_out$plot
+```
+
+<br><br><br>
+
+## VPUE
+
+Average VPUE by year.
+```{r}
+vpue_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "VPUE",
+                date = "Date", 
+                period = "year",
+                fun = "mean", type = "line")
+
+vpue_out$table %>% 
+  pretty_lab(cols = "VPUE") %>%
+  pretty_tab()
+vpue_out$plot
+```
+
+<br><br><br>
+
+Average VPUE by year and fleet.
+```{r}
+vpue_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "VPUE",
+                date = "Date", 
+                period = "year",
+                group = "fleet",
+                fun = "mean", type = "line")
+
+vpue_out$table %>% 
+  pretty_lab(cols = "VPUE") %>%
+  pretty_tab_sb(width = "40%")
+vpue_out$plot
+```
+
+
+<br><br><br>
+
+Average VPUE by gearcode.
+```{r}
+vpue_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "VPUE",
+                group = "GEARCODE",
+                fun = "mean", type = "line")
+
+vpue_out$table %>% 
+pretty_lab() %>%
+  pretty_tab()
+
+vpue_out$plot + angled_theme()
+```
+
+<br><br><br>
+
+Average VPUE by year and gearcode. 
+```{r}
+vpue_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "VPUE",
+                group = "GEARCODE",
+                date = "Date", 
+                period = "year",
+                fun = "mean", type = "line", output = "table")
+
+vpue_out %>% 
+  pivot_wider(names_from = GEARCODE, values_from = VPUE) %>% 
+  pretty_lab(ignore = "year") %>%
+  pretty_tab_sb()
+
+species_catch(scallop0322MainDataTable, project,
+              species = "VPUE",
+              group = "GEARCODE",
+              filter_by = "GEARCODE",
+              filter_value = gear1,
+              date = "Date", 
+              period = "year",
+              fun = "mean", type = "line", output = "plot") + 
+  scale_y_continuous(breaks = c(0, 2.5e3, 5e3, 7.5e3, 1e4, 1.25e4))
+
+species_catch(scallop0322MainDataTable, project,
+              species = "VPUE",
+              group = "GEARCODE",
+              filter_by = "GEARCODE",
+              filter_value = gear2,
+              date = "Date", 
+              period = "year",
+              fun = "mean", type = "line", output = "plot")
+```
+
+<br><br><br>
+
+Average VPUE by top 10 ports. 
+```{r}
+vpue_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "VPUE",
+                group = "VTR_PORT",
+                filter_by = "TOP_10_PORT",
+                filter_value = TRUE,
+                fun = "mean", type = "line") 
+
+vpue_out$table %>% 
+  pretty_lab() %>%
+  pretty_tab()
+
+vpue_out$plot + angled_theme()
+```
+
+<br><br><br>
+
+Average VPUE by top 10 ports and year. 
+```{r}
+vpue_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "VPUE",
+                group = "VTR_PORT",
+                filter_by = "TOP_10_PORT",
+                filter_value = TRUE,
+                date = "Date", 
+                period = "year",
+                fun = "mean", type = "line")
+
+vpue_out$table %>% 
+  pivot_wider(names_from = VTR_PORT, values_from = VPUE) %>% 
+  pretty_lab(ignore = "year") %>%
+  pretty_tab_sb()
+
+vpue_out$plot
+```
+
+
+
+## Distributions
+
+
+### POUNDS
+KDE, ECDF, and CDF of live catch. 
+```{r}
+density_plot(scallop0322MainDataTable, project,
+             var = "POUNDS", 
+             type = "all", tran = "log")
+```
+
+<br><br>
+
+KDE, ECDF, and CDF of live catch by fleet. 
+```{r}
+density_plot(scallop0322MainDataTable, project,
+             var = "POUNDS",
+             group = "fleet", position = "stack", 
+             type = "all", tran = "log", pages = "multi")
+```
+
+<br><br>
+
+KDE of live catch by year.
+```{r}
+density_plot(scallop0322MainDataTable, project,
+             var = "POUNDS", 
+             facet_by = "DB_LANDING_YEAR",
+             filter_by = "DB_LANDING_YEAR",
+             filter_value = 2007:2013,
+             type = "kde", bw = 1.5, 
+             tran = "log", scale = "free_y")  + 
+  angled_theme()
+
+density_plot(scallop0322MainDataTable, project,
+             var = "POUNDS", 
+             facet_by = "DB_LANDING_YEAR",
+             filter_by = "DB_LANDING_YEAR",
+             filter_value = 2014:2019,
+             type = "kde", bw = 1.5, 
+             tran = "log", scale = "free_y")  + 
+  angled_theme()
+```
+
+<br><br>
+
+KDE of live catch by gearcode. 
+```{r}
+density_plot(scallop0322MainDataTable, project,
+             var = "POUNDS", 
+             filter_by = "GEARCODE",
+             filter_value = gear1,
+             group = "GEARCODE", position = "stack",
+             type = "kde", tran = "log", bw = 1.5)
+density_plot(scallop0322MainDataTable, project,
+             var = "POUNDS", 
+             filter_by = "GEARCODE",
+             filter_value = gear2,
+             group = "GEARCODE", position = "stack",
+             type = "kde", tran = "log", bw = 1.5)
+```
+
+<br><br>
+
+ECDF of live catch by gear. 
+```{r}
+density_plot(scallop0322MainDataTable, project,
+             var = "POUNDS", 
+             filter_by = "GEARCODE",
+             filter_value = gear1,
+             group = "GEARCODE", position = "stack",
+             type = "ecdf", tran = "log")
+
+density_plot(scallop0322MainDataTable, project,
+             var = "POUNDS", 
+             filter_by = "GEARCODE",
+             filter_value = gear2,
+             group = "GEARCODE", position = "stack",
+             type = "ecdf", tran = "log")
+```
+
+<br><br>
+
+KDE of live catch by top 10 port. 
+
+```{r}
+density_plot(scallop0322MainDataTable, project,
+             var = "POUNDS", 
+             facet_by = "VTR_PORT",
+             filter_by = "TOP_10_PORT",
+             filter_value = TRUE,
+             position = "stack",
+             scale = "free_y",
+             bw = 1.5,
+             type = "kde", tran = "log") + angled_theme()
+```
+
+<br><br>
+
+### TRIP_LENGTH
+KDE, ECDF, and CDF of trip length. 
+```{r}
+density_plot(scallop0322MainDataTable, project,
+             var = "TRIP_LENGTH", 
+             type = "all", bw = 1.5, tran = "log")
+```
+
+<br><br>
+
+KDE of trip length by year. 
+```{r}
+density_plot(scallop0322MainDataTable, project,
+             var = "TRIP_LENGTH", 
+             facet_by = "DB_LANDING_YEAR",
+             filter_by = "DB_LANDING_YEAR",
+             filter_value = 2007:2013,
+             type = "kde", bw = 1.5, 
+             tran = "log", scale = "free_y")  + 
+  angled_theme()
+
+density_plot(scallop0322MainDataTable, project,
+             var = "TRIP_LENGTH", 
+             facet_by = "DB_LANDING_YEAR",
+             filter_by = "DB_LANDING_YEAR",
+             filter_value = 2014:2019,
+             type = "kde", bw = 1.5, 
+             tran = "log", scale = "free_y")  + 
+  angled_theme()
+```
+
+<br><br>
+
+KDE, ECDF, and CDF of trip length by fleet. 
+```{r}
+density_plot(scallop0322MainDataTable, project,
+             var = "TRIP_LENGTH",
+             group = "fleet", position = "stack", 
+             type = "all", tran = "log", pages = "multi")
+```
+
+
+<br><br>
+
+KDE of trip length by gearcode. 
+```{r}
+density_plot(scallop0322MainDataTable, project,
+             var = "TRIP_LENGTH", 
+             group = "GEARCODE",
+             filter_by = "GEARCODE",
+             filter_value = gear1,
+             type = c("kde", "ecdf"), pages = "multi",
+             position = "stack", bw = 1.5, tran = "log")
+
+density_plot(scallop0322MainDataTable, project,
+             var = "TRIP_LENGTH", 
+             group = "GEARCODE",
+              filter_by = "GEARCODE",
+             filter_value = gear2,
+             type = c("kde", "ecdf"), pages = "multi",
+             position = "stack", bw = 1.5, tran = "log")
+```
+
+
+
+<br><br>
+
+ECDF and ECDF of trip length by top 10 ports. 
+```{r}
+density_plot(scallop0322MainDataTable, project,
+             var = "TRIP_LENGTH", 
+             group = "VTR_PORT",
+             filter_by = "TOP_10_PORT",
+             filter_value = TRUE,
+             type = c("kde", "ecdf"), 
+             pages = "multi",
+             position = "stack", bw = 1.5, tran = "log")
+```
+
+<br><br>
+
+### CPUE
+
+KDE and ECDF of CPUE. 
+```{r}
+density_plot(scallop0322MainDataTable, project,
+             var = "CPUE", 
+             type = c("kde", "ecdf"), tran = "log", 
+             pages = "multi")
+```
+
+<br><br>
+
+KDE of CPUE by year. 
+
+```{r}
+density_plot(scallop0322MainDataTable, project,
+             var = "CPUE", 
+             facet_by = "DB_LANDING_YEAR",
+             filter_by = "DB_LANDING_YEAR",
+             filter_value = 2007:2013,
+             type = "kde", bw = 1.5, 
+             tran = "log", scale = "free_y")  + 
+  angled_theme()
+
+density_plot(scallop0322MainDataTable, project,
+             var = "CPUE", 
+             facet_by = "DB_LANDING_YEAR",
+             filter_by = "DB_LANDING_YEAR",
+             filter_value = 2014:2019,
+             type = "kde", bw = 1.5, 
+             tran = "log", scale = "free_y")  + 
+  angled_theme()
+```
+
+<br><br>
+
+KDE, ECDF, and CDF of CPUE by fleet. 
+```{r}
+density_plot(scallop0322MainDataTable, project,
+             var = "CPUE", 
+             group = "fleet",
+             type = "all", tran = "log", 
+             pages = "multi", position = "stack")
+```
+
+<br><br>
+
+KDE and ECDF of CPUE by gear. 
+```{r}
+density_plot(scallop0322MainDataTable, project,
+             var = "CPUE", 
+             group = "GEARCODE",
+             filter_by = "GEARCODE",
+             filter_value = gear1,
+             type = c("kde", "ecdf"), tran = "log", 
+             position = "stack",  pages = "multi")
+
+density_plot(scallop0322MainDataTable, project,
+             var = "CPUE", 
+             group = "GEARCODE",
+             filter_by = "GEARCODE",
+             filter_value = gear2,
+             type = c("kde", "ecdf"), tran = "log", 
+             position = "stack",  pages = "multi")
+```
+
+<br><br>
+
+KDE and ECDF of CPUE by top 10 port. 
+```{r}
+
+density_plot(scallop0322MainDataTable, project,
+             var = "CPUE", 
+             facet_by = "VTR_PORT",
+             filter_by = "TOP_10_PORT",
+             filter_value = TRUE, 
+             type = "kde", tran = "log", 
+             position = "stack",  pages = "multi") + angled_theme()
+```
+
+<br><br>
+
+KDE and ECDF of CPUE by top 10 port and fleet. 
+```{r}
+
+density_plot(scallop0322MainDataTable, project,
+             var = "CPUE", 
+             group = "fleet",
+             facet_by = "VTR_PORT",
+             filter_by = "TOP_10_PORT",
+             filter_value = TRUE, 
+             type = "kde", tran = "log", 
+             position = "stack",  pages = "multi") + angled_theme()
+```
+
+<br><br>
+
+### VPUE
+
+KDE and ECDF of VPUE. 
+```{r}
+density_plot(scallop0322MainDataTable, project,
+             var = "VPUE", 
+             type = c("kde", "ecdf"), tran = "log", 
+             pages = "multi")
+```
+
+<br><br>
+
+KDE of VPUE by year. 
+```{r}
+density_plot(scallop0322MainDataTable, project,
+             var = "VPUE", 
+             facet_by = "DB_LANDING_YEAR",
+             filter_by = "DB_LANDING_YEAR",
+             filter_value = 2007:2013,
+             type = "kde", bw = 1.5, 
+             tran = "log", scale = "free_y")  + 
+  angled_theme()
+
+density_plot(scallop0322MainDataTable, project,
+             var = "VPUE", 
+             facet_by = "DB_LANDING_YEAR",
+             filter_by = "DB_LANDING_YEAR",
+             filter_value = 2014:2019,
+             type = "kde", bw = 1.5, 
+             tran = "log", scale = "free_y")  + 
+  angled_theme()
+```
+
+<br><br>
+
+KDE, ECDF, and CDF of VPUE by fleet. 
+```{r}
+density_plot(scallop0322MainDataTable, project,
+             var = "VPUE", 
+             group = "fleet",
+             type = "all", tran = "log", 
+             pages = "multi", position = "stack")
+```
+
+<br><br>
+
+KDE and ECDF of VPUE by gear. 
+```{r}
+density_plot(scallop0322MainDataTable, project,
+             var = "VPUE", 
+             group = "GEARCODE",
+             filter_by = "GEARCODE",
+             filter_value = gear1,
+             type = c("kde", "ecdf"), tran = "log", 
+             position = "stack",  pages = "multi")
+
+density_plot(scallop0322MainDataTable, project,
+             var = "VPUE", 
+             group = "GEARCODE",
+             filter_by = "GEARCODE",
+             filter_value = gear2,
+             type = c("kde", "ecdf"), tran = "log", 
+             position = "stack",  pages = "multi")
+```
+
+<br><br>
+
+KDE and ECDF of VPUE by top 10 port. 
+```{r}
+density_plot(scallop0322MainDataTable, project,
+             var = "VPUE", 
+             facet_by = "VTR_PORT",
+             filter_by = "TOP_10_PORT",
+             filter_value = TRUE, 
+             type = c("kde"), tran = "log", 
+             position = "stack",  pages = "multi") + angled_theme()
+
+density_plot(scallop0322MainDataTable, project,
+             var = "VPUE", 
+             facet_by = "VTR_PORT",
+             filter_by = "TOP_10_PORT",
+             filter_value = TRUE, 
+             type = c("ecdf"), tran = "log", 
+             position = "stack",  pages = "multi") + angled_theme()
+```
+
+
+<br><br>
+
+### TRIP_COST_2020_DOL
+
+KDE and ECDF of trip cost. 
+```{r}
+density_plot(scallop0322MainDataTable, project,
+             var = "TRIP_COST_2020_DOL", 
+             type = c("kde", "ecdf"), tran = "log", 
+             pages = "multi")
+```
+
+<br><br>
+
+KDE of trip cost by year. 
+```{r}
+density_plot(scallop0322MainDataTable, project,
+             var = "TRIP_COST_2020_DOL", 
+             facet_by = "DB_LANDING_YEAR",
+             type = "kde", tran = "log") + angled_theme()
+```
+
+<br><br>
+
+KDE, ECDF, and CDF of trip cost by fleet. 
+```{r}
+density_plot(scallop0322MainDataTable, project,
+             var = "TRIP_COST_2020_DOL", 
+             group = "fleet",
+             type = "all", tran = "log", 
+             pages = "multi", position = "stack")
+```
+
+<br><br>
+
+KDE and ECDF of trip cost by gear. 
+```{r}
+density_plot(scallop0322MainDataTable, project,
+             var = "TRIP_COST_2020_DOL", 
+             group = "GEARCODE",
+             filter_by = "GEARCODE",
+             filter_value = gear1,
+             type = c("kde", "ecdf"), tran = "log", 
+             position = "stack",  pages = "multi")
+
+density_plot(scallop0322MainDataTable, project,
+             var = "TRIP_COST_2020_DOL", 
+             group = "GEARCODE",
+             filter_by = "GEARCODE",
+             filter_value = gear2,
+             type = c("kde", "ecdf"), tran = "log", 
+             position = "stack",  pages = "multi")
+```
+
+
+<br><br>
+
+### TRIP_COST_WINSOR_2020_DOL
+
+KDE and ECDF of trip cost (Winsor). 
+```{r}
+density_plot(scallop0322MainDataTable, project,
+             var = "TRIP_COST_WINSOR_2020_DOL", 
+             type = c("kde", "ecdf"), tran = "log", 
+             pages = "multi")
+```
+
+<br><br>
+
+KDE of trip cost by year (Winsor). 
+```{r}
+density_plot(scallop0322MainDataTable, project,
+             var = "TRIP_COST_WINSOR_2020_DOL", 
+             facet_by = "DB_LANDING_YEAR",
+             type = "kde", tran = "log") + angled_theme()
+```
+
+<br><br>
+
+KDE, ECDF, and CDF of trip cost by fleet (Winsor). 
+```{r}
+density_plot(scallop0322MainDataTable, project,
+             var = "TRIP_COST_WINSOR_2020_DOL", 
+             group = "fleet",
+             type = "all", tran = "log", 
+             pages = "multi", position = "stack")
+```
+<br><br>
+
+
+KDE and ECDF of trip cost by gear (Winsor). 
+```{r}
+density_plot(scallop0322MainDataTable, project,
+             var = "TRIP_COST_WINSOR_2020_DOL", 
+             group = "GEARCODE",
+             filter_by = "GEARCODE",
+             filter_value = gear1, 
+             type = c("kde", "ecdf"), tran = "log", 
+             position = "stack",  pages = "multi")
+
+density_plot(scallop0322MainDataTable, project,
+             var = "TRIP_COST_WINSOR_2020_DOL", 
+             group = "GEARCODE",
+             filter_by = "GEARCODE",
+             filter_value = gear2, 
+             type = c("kde", "ecdf"), tran = "log", 
+             position = "stack",  pages = "multi")
+```
+
+
+
+
+
+
+
+
+
+
+
