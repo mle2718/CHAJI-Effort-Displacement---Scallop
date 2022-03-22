@@ -368,12 +368,7 @@ X2007_2012 <- read_excel(file.path(cost_directory,"2007_2012.xlsx"))
 X2013_2020 <- read_excel(file.path(cost_directory,"2013_2020.xlsx"))
 
 #Merge 2007-2012 costs with 2013-2020 costs
-all_yrs_costs <- merge(X2007_2012,X2013_2020, all = TRUE)
-t<-rbind(X2007_2012,X2013_2020)
-
-
-v<-t[order(t$VTR_TRIPID,hours,t$DB_LANDING_YEAR,t$TRIP_COST_2020_DOL,t$TRIP_COST_WINSOR_2020_DOL,t$OBSERVED_COST_DUMMY),]
-
+all_yrs_costs<-rbind(X2007_2012,X2013_2020)
 
 
 #save to RDS
