@@ -135,15 +135,9 @@ load_maindata(dat = final_product_lease, project = project, over_write = TRUE)
 Since sqlite can't save spatial data, we save it as a GeoJSON file in the project's 
 data folder.
 ```{r}
-# use in scallop repo
-# ten_filepath <- here("data", "external", "shapefiles", 
-#                      "Ten Minute Squares Cut North and Greater Atlantic")
-# lease_filepath <- here("data", "external", "shapefiles", "All_Lease_Areas_Shapefile")
-
-shape_filepath <- "~/Effort-Displacement---Scallop/data/external/shapefiles/"
-lease_filepath <- paste0(shape_filepath, "All_Lease_Areas_Shapefile")
-ten_filepath <- paste0(shape_filepath, 
-                       "Ten Minute Squares Cut North and Greater Atlantic")
+ ten_filepath <- here("data", "external", "shapefiles", 
+                      "Ten Minute Squares Cut North and Greater Atlantic")
+ lease_filepath <- here("data", "external", "shapefiles", "All_Lease_Areas_Shapefile")
 
 load_spatial(lease_filepath, name = "WindClose", over_write = TRUE, project,
              data.type = "shape")
