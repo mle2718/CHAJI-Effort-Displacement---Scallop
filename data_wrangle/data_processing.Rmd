@@ -5,8 +5,7 @@ date: "3/8/2022"
 output:
   pdf_document: default
   html_document: default
-urlcolor: blue
-
+  urlcolor: blue
 ---
 
 
@@ -18,7 +17,7 @@ here(), load libraries, and set a data vintage.
 # Set Path
 here::i_am("data_wrangle/data_processing.Rmd")
 
-# Please ensure you have the proper packages installed with (install.packages()) or a request to ITD if any libaries do not load.  
+# Please ensure you have the proper packages installed with (install.packages()) or a request to ITD if any libraries do not load.  
 
 
 library("here")
@@ -37,6 +36,7 @@ library("RODBC")
 library("RODM")
 library("epiDisplay")
 library("tmap")
+library("tidyverse")
 vintage_string<-Sys.Date()
 vintage_string<-gsub("-","_",vintage_string)
 
@@ -444,80 +444,113 @@ VTR_DMIS_AC$Area <- NULL
 ```
 
 
+# Zone and Lease Assignments 
 
-```{r Spatial Joins - Lease Areas and Ten Minute Squares,echo=TRUE, eval=TRUE}
-# Spatial join with ten minute squares 
+```{r Zone Assignment - Lease Areas and Ten Minute Squares,echo=TRUE, eval=TRUE, results=FALSE}
+
+#Contents used have come from the "Zone Assignment" Rmd created by Bryce McMagnus using FishSET zone assignment methods. Changes have been made to reflect updated data sets and new ten minute squares shapefile.   
+
+# Set data vintage
+vintage_string<-"2022_03_22"
 
 ## Read in your shapefile
 ### Note: Viewing the table after this is done is helpful to ensure that the shapefile looks how you expected. You can double-check this by comparing your table in R to your shapefile's attribute table in ArcGIS Pro.
 
-## Import the data set you want to combine with your imported shape file 
+# Load in 10 minute squares
+tenMinSqr_new <- 
+  here("data",
+       "external",
+       "shapefiles",
+       "Ten Minute Squares Cut North and Greater Atlantic") %>% 
+  st_read() %>% 
+  st_zm() # remove Z/M dimensions from feature
+
+# Load in All Lease Areas 
+lease <- 
+  here("data",
+       "external",
+       "shapefiles",
+       "All_Lease_Areas_Shapefile") %>% 
+  st_read() %>% 
+  st_zm()
 
 
-TMSQ_sp <- st_read(TMSQ_path)
-## Run the below chunk to see your shapefile plotted out
-#qtm(TMSQ_sp) + tm_legend(show = FALSE)
 
 
-# Preserve the DDLAT and DDLON fields
-VTR_DMIS_AC$DDLAT_bak<-VTR_DMIS_AC$DDLAT
-VTR_DMIS_AC$DDLON_bak<-VTR_DMIS_AC$DDLON
+## Zone assignment; This is the approach to assign observations to zones.
+# create sf version of data, convert to WGS84
+# 4326 is shorthand for WGS84 (https://epsg.io/4326)
 
 
-point_geo <- st_as_sf(VTR_DMIS_AC, 
-                      coords = c(x  = "DDLON", y = "DDLAT"), crs = crs )
 
-final_product <- st_join(point_geo, TMSQ_sp, join = st_within)
+## Lease Areas 
 
-
-#This chunk uses a "within" join, but other options are available using the sf package 1.0-6. 
-## st_intersects,st_disjoint,st_touches,st_crosses,st_within,st_contains,st_contains_properly,st_overlaps,st_equals,st_covers,st_covered_by,st_equals_exact,st_is_within_distance
-
-#Delete unnecessary variables from join: keep the geometry, MN30SQID, and MN10SQID columns 
-final_product[,c('MN10SQROW','MN10SQCOL','POINT_Y','POINT_X','XTXT','YTXT','DG1SQLAT','DG1SQLON','DG1SQID','MN30QUAD','Shape_Leng','Shape_Area', 'MN10SQ')] <- list(NULL)
-
-#final_product$geometry_old<-final_product$geometry
-#Lease Area Joins
-
-lease_sp <- st_read(All_Lease_Areas_Shapefile_path)
-## Run the below chunk to see your shapefile plotted out
-#qtm(lease_sp) + tm_legend(show = FALSE)
-
-## This chunk uses the current data set, converts it into a sf geospatial object, and bins it into the assigned coordinate system (crs).
-
-point_geo_lease <- st_as_sf(final_product, 
-                      coords = c(x  = "DDLON", y = "DDLAT"), crs = crs )
-
-final_product_lease <- st_join(point_geo_lease, lease_sp, join = st_within)
-
-#geometry carries over all the way from the initial read in.
-identical(final_product_lease$geometry, point_geo$geometry)
-
-#This chunk uses a "within" join, but other options are available using the sf package 1.0-6. 
-## st_intersects,st_disjoint,st_touches,st_crosses,st_within,st_contains,st_contains_properly,st_overlaps,st_equals,st_covers,st_covered_by,st_equals_exact,st_is_within_distance
+crs <- 4326
+final_product_lease <- 
+  st_as_sf(x = VTR_DMIS_merge, coords = c("DDLON", "DDLAT"), 
+           crs = crs)
+# convert Squares to WGS84 
+lease <- st_transform(lease, crs = st_crs(final_product_lease))
+# same results as st_within
+inter <- sf::st_intersects(final_product_lease, lease)
+inter_save <- inter 
+ 
+ if (any(lengths(inter) > 1)) { # if more than one zone intersects, assign to closest zone
+  
+  dub <- which(lengths(inter) > 1)
+  inter[dub] <- st_nearest_feature(final_product_lease[dub,], lease)
+ }
+# Add ZoneID column to data
+pts <- as.data.frame(as.numeric(inter))
+colnames(pts) <- "col.id"
+final_product_lease$lease <- lease$NAME[pts$col.id]
+final_product_lease$lease <- lease$NAME[as.numeric(inter)]
 
 
-#Recover the DDLAT and DDLON fields.
-colnames(final_product_lease)[colnames(final_product_lease) == "DDLON_bak"] <- "DDLON"
-colnames(final_product_lease)[colnames(final_product_lease) == "DDLAT_bak"] <- "DDLAT"
-
-stopifnot(is.numeric(final_product_lease$MN10SQID))
-
-stopifnot(is.numeric(final_product_lease$MN30SQID))
-final_product_lease$geometry<-NULL
 
 
-#save to RDS and CSV
-final_product_savename<-paste0("final_product_lease",vintage_string)
-saveRDS(final_product_lease, file=here("data","main",paste0(final_product_savename,".Rds")))
-write.csv(final_product_lease, file=here("data","main",paste0(final_product_savename,".csv")), row.names=FALSE)
 
-# to read this in, you will want to do the here::i_am dance and then read in
-# final_product_savename<-paste0("final_product_lease",vintage_string,".Rds")
-# final_product_lease<-readRDS(here("data","main",final_product_savename))
+
+# Zone Assignments 
+tenMinSqr_new <- st_transform(tenMinSqr_new, crs = st_crs(final_product_lease))
+
+# same results as st_within
+inter <- sf::st_intersects(final_product_lease, tenMinSqr_new)
+
+inter_save <- inter 
+ 
+ if (any(lengths(inter) > 1)) { # if more than one zone intersects, assign to closest zone
+  
+  dub <- which(lengths(inter) > 1)
+  inter[dub] <- st_nearest_feature(final_product_lease[dub,], tenMinSqr_new)
+ }
+
+# Add ZoneID column to data
+pts <- as.data.frame(as.numeric(inter))
+colnames(pts) <- "col.id"
+pts$ID <- tenMinSqr_new$MN10SQID[pts$col.id]
+final_product_lease$ZoneID <- pts$ID
+
 
 
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Some summary statistcs
 
@@ -584,4 +617,6 @@ LA_Estimate <- VTR_DMIS_AC_Agg %>% filter(Agg_LANDED >= 850 & CREW <= 8)
 ```
 
 
-
+# to read this in, you will want to do the here::i_am dance and then read in
+# final_product_savename<-paste0("final_product_lease",vintage_string,".Rds")
+# final_product_lease<-readRDS(here("data","main",final_product_savename))
