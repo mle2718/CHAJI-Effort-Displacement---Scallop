@@ -450,9 +450,6 @@ VTR_DMIS_AC$Area <- NULL
 
 #Contents used have come from the "Zone Assignment" Rmd created by Bryce McMagnus using FishSET zone assignment methods. Changes have been made to reflect updated data sets and new ten minute squares shapefile.   
 
-# Set data vintage
-vintage_string<-"2022_03_22"
-
 ## Read in your shapefile
 ### Note: Viewing the table after this is done is helpful to ensure that the shapefile looks how you expected. You can double-check this by comparing your table in R to your shapefile's attribute table in ArcGIS Pro.
 
@@ -576,13 +573,13 @@ table(final_product_lease$`Program Code`)
 
 
 ```{r 10minute_square_plot,echo=FALSE, eval=TRUE,fig.cap = "10 minutes squares" }
- qtm(TMSQ_sp) + tm_legend(show = FALSE)
+ qtm(tenMinSqr_new) + tm_legend(show = FALSE)
 ```
 
 
 
 ```{r Wind_Energy_Plot,echo=FALSE, eval=TRUE,fig.cap = "Wind Energy Areas" }
-qtm(lease_sp) + tm_legend(show = FALSE)
+qtm(lease) + tm_legend(show = FALSE)
 ```
 
 
