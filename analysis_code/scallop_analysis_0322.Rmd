@@ -94,7 +94,7 @@ This code chunk should work in the scallop repo.
 ```{r eval=FALSE}
 here::i_am("/analysis_code/scallop_analysis_0322.Rmd")
 
-# This code looks into data_intermediate and sets the vintage_string according to 
+# This code looks into /data/main and sets the vintage_string according to 
 # the most recent data
 datasets_list <- list.files(path = here("data", "main"), pattern = "final_product_lease")
 datasets_list <- gsub("final_product_lease", "", datasets_list )
