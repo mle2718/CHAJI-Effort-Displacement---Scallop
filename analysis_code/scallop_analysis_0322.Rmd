@@ -353,7 +353,8 @@ scallop0322MainDataTable <-
                fleet_tab = fleet_tab_name)
 ```
 
-```{r retain_AA_DAS, include=FALSE}
+```{r retain_AA_DAS, include=TRUE}
+
 scallop0322MainDataTable <- 
   scallop0322MainDataTable %>% 
   filter(fleet == "Access Area" | fleet == "Days at Sea")
