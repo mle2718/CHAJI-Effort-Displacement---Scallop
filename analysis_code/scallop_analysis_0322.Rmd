@@ -354,8 +354,10 @@ scallop0322MainDataTable <-
 ```
 
 ```{r retain_AA_DAS, include=FALSE}
-scallop0322MainDataTable %>% 
-  filter(scallop0322MainDataTable, fleet == "Access Area" | fleet == "Days at Sea")
+scallop0322MainDataTable <- 
+  scallop0322MainDataTable %>% 
+  filter(fleet == "Access Area" | fleet == "Days at Sea")
+
 ```
 <br><br><br>
 
