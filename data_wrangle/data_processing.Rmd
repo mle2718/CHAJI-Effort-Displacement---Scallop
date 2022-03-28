@@ -161,7 +161,9 @@ The wind energy areas do not match the ten minute squares; we are currently plan
 The buried cable route from a WEA to shore is likely to be closed as well.  Cable buried at shallow depths and marked with concrete.
 
 
-We  classify the trips as FullTime, PartTime based on these PLAN_CAT variables.   We also generate categorical variables corresponding to LA and GC columns. Note that a vessel can hold both an LA and a GC permit at the same time. The summary tables below will have lots of observations corresponding to Scallop_Linkingorg[ftpt]=0, LA=0, and GC=0. This is expected.   because it has everything from DMIS.  
+We  classify the vessels as FullTime, PartTime based on these PLAN_CAT variables that are in DMIS. We also generate categorical variables corresponding to LA and GC columns. Note that a vessel can hold both an LA and a GC permit at the same time. The summary tables below will have lots of observations corresponding to Scallop_Linkingorg[ftpt]=0, LA=0, and GC=0. This is expected, because it has everything from DMIS. 
+
+It's not entirely clear how the the PLAN_CAT variables are constructed in DMIS.  They are derived from permit data, which is generated when the vessel owner renews a permit at the beginning of the fishing year, when an owner transfers a permit, or when a permit is added. The freqency of the underlyingy data is irregular, but approximately annual.  The DMIS algorithm may match to the permit holdings on the day of the trip, or it may match to the permit held at the beginning of the year. When there is a conflict between these variables (PLAN_CAT, ftpt, GC, LA) and the variables based on ACTIVITY_CODE (Plan Code and Program Code), we should prefer the variables based on ACTIVITY_CODE.
 
 
 ```{r DMIS_Tidy, echo=TRUE}
