@@ -352,6 +352,14 @@ scallop0322MainDataTable <-
   fleet_assign(scallop0322MainDataTable, project = project, 
                fleet_tab = fleet_tab_name)
 ```
+By setting this code chunk to include=TRUE, all of the statistics from this point forward are just for the Limited Access Fleet, which takes Access Area and Days-at-Sea trips. 
+```{r retain_AA_DAS, include=TRUE}
+
+scallop0322MainDataTable <- 
+  scallop0322MainDataTable %>% 
+  filter(fleet == "Access Area" | fleet == "Days at Sea")
+
+```
 <br><br><br>
 
 ```{r}
