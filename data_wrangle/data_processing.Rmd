@@ -173,8 +173,13 @@ Scallop_Linkingorg$ftpt[Scallop_Linkingorg$SC_2=="TRUE"]<-"FullTime"
 Scallop_Linkingorg$ftpt[Scallop_Linkingorg$SC_5=="TRUE"]<-"FullTime"
 Scallop_Linkingorg$ftpt[Scallop_Linkingorg$SC_7=="TRUE"]<-"FullTime"
 
-Scallop_Linkingorg$ftpt[Scallop_Linkingorg$SC_6=="TRUE"]<-"PartTime"
 Scallop_Linkingorg$ftpt[Scallop_Linkingorg$SC_3=="TRUE"]<-"PartTime"
+Scallop_Linkingorg$ftpt[Scallop_Linkingorg$SC_6=="TRUE"]<-"PartTime"
+Scallop_Linkingorg$ftpt[Scallop_Linkingorg$SC_8=="TRUE"]<-"PartTime"
+
+Scallop_Linkingorg$ftpt[Scallop_Linkingorg$SC_4=="TRUE"]<-"Occasional"
+Scallop_Linkingorg$ftpt[Scallop_Linkingorg$SC_9=="TRUE"]<-"Occasional"
+
 
 # Construct a logical variable for GC
 Scallop_Linkingorg$GC<-(Scallop_Linkingorg$LGC_A=="TRUE" | Scallop_Linkingorg$LGC_B=="TRUE" | Scallop_Linkingorg$LGC_C=="TRUE" | Scallop_Linkingorg$SG_1A=="TRUE" | Scallop_Linkingorg$SG_1B=="TRUE") 
