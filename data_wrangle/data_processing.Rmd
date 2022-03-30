@@ -37,6 +37,7 @@ library("RODM")
 library("epiDisplay")
 library("tmap")
 library("tidyverse")
+
 vintage_string<-Sys.Date()
 vintage_string<-gsub("-","_",vintage_string)
 
@@ -231,13 +232,35 @@ Scallops$Date <- as.Date(Scallops$DATE_TRIP)
 Scallops$Time <- format(Scallops$DATE_TRIP,"%H:%M:%S")
 
 #Drop columns that are not needed
-Scallops$DATE_TRIP<- NULL
 Scallops$NESPP3<- NULL
 Scallops$SOURCE<- NULL
 
 ```
 
 
+# Constructing scallop fishing years
+
+```{r scallop_fishing_years, echo=TRUE}
+
+Scallops$Scallop_fishing_year<-"None"
+Scallops$Scallop_fishing_year[Scallops$Date >= "2006-03-01" & Scallops$Date <= "2007-02-28"] <- "FY2007"
+Scallops$Scallop_fishing_year[Scallops$Date >= "2007-03-01" & Scallops$Date <= "2008-02-29"] <- "FY2008"
+Scallops$Scallop_fishing_year[Scallops$Date >= "2008-03-01" & Scallops$Date <= "2009-02-28"] <- "FY2009"
+Scallops$Scallop_fishing_year[Scallops$Date >= "2009-03-01" & Scallops$Date <= "2010-02-28"] <- "FY2010"
+Scallops$Scallop_fishing_year[Scallops$Date >= "2010-03-01" & Scallops$Date <= "2011-02-28"] <- "FY2011"
+# Lines under dont work for some reason :,(
+Scallops$Scallop_fishing_year[Scallops$Date >= "2011-03-01" & Scallops$Date <= "2012-02-27",] <- "FY2012"
+
+Scallops$Scallop_fishing_year[Scallops$Date >= "2012-03-01" & Scallops$Date <= "2013-02-28",] <- "FY2013"
+Scallops$Scallop_fishing_year[Scallops$Date >= "2013-03-01" & Scallops$Date <= "2014-02-29",] <- "FY2014"
+Scallops$Scallop_fishing_year[Scallops$Date >= "2014-03-01" & Scallops$Date <= "2015-02-29",] <- "FY2015"
+Scallops$Scallop_fishing_year[Scallops$Date >= "2015-03-01" & Scallops$Date <= "2016-02-29",] <- "FY2016"
+
+Scallops$Scallop_fishing_year[Scallops$Date >= "2016-03-01" & Scallops$Date <= "2017-03-01",] <- "FY2017"
+
+Scallops$Scallop_fishing_year[Scallops$Date >= "2016-03-01" & Scallops$Date <= "2017-02-29",] <- "FY2018"
+
+```
 
 
 
