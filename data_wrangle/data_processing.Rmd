@@ -622,5 +622,5 @@ LA_Estimate <- VTR_DMIS_AC_Agg %>% filter(Agg_LANDED >= 850 & CREW <= 8)
 
 
 # to read this in, you will want to do the here::i_am dance and then read in
-# final_product_savename<-paste0("final_product_lease",vintage_string,".Rds")
-# final_product_lease<-readRDS(here("data","main",final_product_savename))
+# final_product_savename <-paste0("final_product_lease_",vintage_string,".Rds")
+# final_product_lease <-readRDS(here("data","main",final_product_savename))
