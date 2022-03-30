@@ -593,6 +593,8 @@ qtm(lease) + tm_legend(show = FALSE)
 # R Session Information
 ```{r session_info, include=TRUE, echo=TRUE, results=TRUE, eval=TRUE}
 sessionInfo()
+Sys.Date()
+
 ```
 This may be useful for diagnosing and troubleshooting one day.
 
