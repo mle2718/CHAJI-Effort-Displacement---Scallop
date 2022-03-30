@@ -25,7 +25,7 @@ vintage_string<-Sys.Date()
 vintage_string<-gsub("-","_",vintage_string)
 
 # You might want to run this code, but not extract and save any data. Set this switch to FALSE to do so.
-extract_switch=FALSE
+extract_switch=TRUE
 ```
 
 # Organization
