@@ -1,0 +1,6 @@
+This folder houses cable routes for South Fork - Hhills route which is currently in the New York area. 
+Lease Number: OCS-A 0517
+Area (acres): 13699
+Turbines: 16
+Length (miles): 167
+Export Cable Area: 110
