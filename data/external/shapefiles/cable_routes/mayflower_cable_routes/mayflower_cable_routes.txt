@@ -1,0 +1,6 @@
+This folder houses the Mayflower wind lease area cable routes which are located in the Massachusetts/Rhode Island area.
+Lease Number: OCS-A 0521 (remainder)	
+Area (acres): 49,124		
+Turbines: 67	
+Length (miles): 164	
+Export Cable Area: 95
