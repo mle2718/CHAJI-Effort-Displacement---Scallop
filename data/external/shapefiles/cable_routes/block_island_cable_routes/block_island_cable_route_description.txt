@@ -1,0 +1,1 @@
+This folder houses cable route shape files for the Block Island Wind Farm. It is the first commercial offshore wind farm in the United States, located 3.8 miles from Block Island, Rhode Island in the Atlantic Ocean. The five-turbine, 30 MW project was developed by Deepwater Wind.
