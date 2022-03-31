@@ -1,0 +1,135 @@
+---
+title: "cross-check data"
+output:
+  pdf_document: default
+  word_document: default
+---
+# Purpose
+This is code to make sure that Greg, Min-Yang, and Marina's data processing produces the same data.
+
+Although this written as a markdown doc, it is probably better to source the chunks, either all at a time, or in sequence, so the dataframes remain in R environment and you can examine them.
+
+
+# Project setup
+here(), load libraries, and set a data vintage. 
+
+```{r setup, include=TRUE, echo=TRUE, results=FALSE}
+
+# Set Path
+here::i_am("data_wrangle/verify_identical_data.Rmd")
+
+# Please ensure you have the proper packages installed with (install.packages()) or a request to ITD if any libraries do not load.  
+
+
+library("here")
+library("tidyverse")
+library("dbplyr")
+library("data.table")
+vintage_string<-Sys.Date()
+vintage_string<-gsub("-","_",vintage_string)
+
+# Set path by hand. This a little sketchy code, but fine for this purpose. Probably don't reuse this
+net<-network_location_desktop
+net<-network_location_remote
+
+minyang_directory<-file.path(net,"home2", "mlee","Effort-Displacement---Scallop")
+marina_directory<-file.path(net,"home4", "mchaji","Effort-Displacement---Scallop")
+
+greg_directory<-file.path(net,"homeX", "gardini","Effort-Displacement---Scallop")
+
+
+
+```
+
+```{r lookup_minyang_data,  eval=TRUE,include=TRUE}
+#This code looks into min-yang's and sets the vintage_string according to the most recent data
+datasets_list<-list.files(path=file.path(minyang_directory,"data","main"), pattern="final_product_lease_")
+datasets_list<-gsub("final_product_lease_","",datasets_list )
+datasets_list<-gsub(".Rds","",datasets_list)
+datasets_list<-gsub(".csv","",datasets_list)
+lee_vintage_string<-max(datasets_list)
+rm(datasets_list)
+```
+```{r readin_minyang_final_product,  eval=TRUE,include=TRUE}
+
+final_product_lease_lee <- readRDS(file.path(minyang_directory,"data","main",paste0("final_product_lease_",lee_vintage_string,".Rds")))
+Scallop_Linkingorg_lee <- readRDS(file.path(minyang_directory,"data","intermediate",paste0("Scallop_Linkingorg_",lee_vintage_string,".Rds")))
+RESULT_COMPILED_lee <- readRDS(file.path(minyang_directory,"data","intermediate",paste0("RESULT_COMPILED_",lee_vintage_string,".Rds")))
+
+
+```
+
+
+
+
+```{r lookup_marina_data,  eval=TRUE,include=TRUE}
+#This code looks into min-yang's and sets the vintage_string according to the most recent data
+datasets_list<-list.files(path=file.path(marina_directory,"data","main"), pattern="final_product_lease_")
+datasets_list<-gsub("final_product_lease_","",datasets_list )
+datasets_list<-gsub(".Rds","",datasets_list)
+datasets_list<-gsub(".csv","",datasets_list)
+chaji_vintage_string<-max(datasets_list)
+rm(datasets_list)
+```
+
+```{r readin_chaji_data, eval=TRUE,include=TRUE}
+final_product_lease_chaji <- readRDS(file.path(marina_directory,"data","main",paste0("final_product_lease_",chaji_vintage_string,".Rds")))
+
+Scallop_Linkingorg_chaji <- readRDS(file.path(marina_directory,"data","intermediate",paste0("Scallop_Linkingorg_",chaji_vintage_string,".Rds")))
+RESULT_COMPILED_chaji <- readRDS(file.path(marina_directory,"data","intermediate",paste0("RESULT_COMPILED_",chaji_vintage_string,".Rds")))
+
+
+```
+
+
+
+```{r lookup_greg_data, eval=FALSE,include=TRUE}
+#This code looks into min-yang's and sets the vintage_string according to the most recent data
+datasets_list<-list.files(path=file.path(ardini_directory,"data","main"), pattern="final_product_lease")
+datasets_list<-gsub("final_product_lease","",datasets_list )
+datasets_list<-gsub(".Rds","",datasets_list)
+datasets_list<-gsub(".csv","",datasets_list)
+ardini_vintage_string<-max(datasets_list)
+rm(datasets_list)
+```
+
+```{r readin_ardini_data, eval=FALSE, include=TRUE}
+final_product_lease_ardini <- readRDS(file.path(ardini_directory,"data","main",paste0("final_product_lease",ardini_vintage_string,".Rds")))
+Scallop_Linkingorg_ardini <- readRDS(file.path(ardini_directory,"data","intermediate",paste0("Scallop_Linkingorg_",ardini_vintage_string,".Rds")))
+RESULT_COMPILED_ardini <- readRDS(file.path(ardini_directory,"data","intermediate",paste0("RESULT_COMPILED_",ardini_vintage_string,".Rds")))
+
+```
+
+```{r check RESULT_COMPILED, eval=TRUE, include=TRUE, echo=TRUE, results=TRUE}
+nrow(RESULT_COMPILED_chaji)
+nrow(RESULT_COMPILED_lee)
+
+
+colnames(RESULT_COMPILED_chaji)
+colnames(RESULT_COMPILED_lee)
+
+all.equal(RESULT_COMPILED_chaji, RESULT_COMPILED_lee)
+```
+
+
+```{r check Scallop_Linkingorg, eval=TRUE, include=TRUE, echo=TRUE, results=TRUE}
+nrow(Scallop_Linkingorg_chaji)
+nrow(Scallop_Linkingorg_lee)
+
+colnames(Scallop_Linkingorg_chaji)
+colnames(Scallop_Linkingorg_lee)
+
+all.equal(Scallop_Linkingorg_chaji, Scallop_Linkingorg_lee)
+```
+
+
+```{r check final_product_lease, eval=TRUE, include=TRUE, echo=TRUE, results=TRUE}
+nrow(final_product_lease_chaji)
+nrow(final_product_lease_lee)
+
+colnames(final_product_lease_chaji)
+colnames(final_product_lease_lee)
+
+
+#all.equal(final_product_lease_chaji, final_product_lease_lee)
+```
