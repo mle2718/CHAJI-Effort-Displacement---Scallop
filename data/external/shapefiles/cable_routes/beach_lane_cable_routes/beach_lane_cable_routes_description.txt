@@ -1,1 +1,2 @@
 This folder will house the beach lane cable routes. Note: The beach lane cable routes are a part of the South Fork wind lease area which are currently being constructed on the Outer Continental Shelf Offshore Rhode Island as of March 2022.
+Lease Number: OCS-A 0517	Area(acres): 13,699	Turbines:16	Length (in miles): 167	Export Cable Area:110
