@@ -1,0 +1,134 @@
+---
+title: "reading_shapefiles"
+author: "Min-yang Lee"
+date: "4/1/2022"
+output:
+  pdf_document: default
+  html_document: default
+  urlcolor: blue
+---
+# Purpose
+This bit of code looks into the cable_routes folder, find the shapefiles, and loads them into memory. 
+
+# Project setup
+here(), load libraries, and set a data vintage.  
+
+
+
+```{r setup, include=TRUE, echo=TRUE, results=FALSE}
+
+# Set Path
+here::i_am("data_wrangle/find_shapefiles.Rmd")
+
+# Please ensure you have the proper packages installed with (install.packages()) or a request to ITD if any libraries do not load.  
+
+
+library("here")
+library("tidyverse")
+library("sf")
+library("dbplyr")
+library("readxl")
+vintage_string<-Sys.Date()
+vintage_string<-gsub("-","_",vintage_string)
+
+```
+
+
+## Paths
+This is a block of code where we set up the oracle passwords and make R aware of folders on the network.
+
+```{r file_search, echo=TRUE, results=FALSE}
+#source(here("data_wrangle","credentials.R"))
+
+# Set the network_location_desktop and network_location_remote variables somewhere OUTSIDE of this code.  The best place to do this is in the .Rprofile or .Renviron files that are in your root directory.  
+
+
+# Set up paths.
+cable_routes<-here("data", "external","shapefiles","cable_routes")
+
+
+shapefile_list<-list.files(path=cable_routes, pattern=".shp$", recursive=TRUE)
+
+parsed_list1 = do.call(rbind, lapply(shapefile_list, function(xx) {
+  xx = as.data.frame(xx, stringsAsFactors=F)
+  names(xx) = "FILENAME" 
+  return(xx) }) )      
+parsed_list1$NAME = sapply(parsed_list1$FILENAME, USE.NAMES=F, function(zz) {
+  temp = do.call(rbind,strsplit(as.character(zz), split = "/"))
+  return(temp[NCOL(temp)]) })
+parsed_list1$folder = sapply(parsed_list1$FILENAME, USE.NAMES=F, function(zz) {
+  temp = do.call(rbind,strsplit(as.character(zz), split = "/"))
+  return(temp[NCOL(1)]) })
+
+i<-1
+shp1 <- 
+  here("data",
+       "external",
+       "shapefiles",
+       "cable_routes",
+       parsed_list1$folder[i]) %>% 
+  st_read() %>% 
+  st_zm() # remove Z/M dimensions from feature
+
+
+# file 2 doesn't work because of subfoldering.
+i<-2
+shp2 <-
+  here("data",
+       "external",
+       "shapefiles",
+       "cable_routes",
+       parsed_list1$folder[i]) %>%
+  st_read() %>%
+  st_zm() # remove Z/M dimensions from feature
+i<-3
+shp3 <- 
+  here("data",
+       "external",
+       "shapefiles",
+       "cable_routes",
+       parsed_list1$folder[i]) %>% 
+  st_read() %>% 
+  st_zm() # remove Z/M dimensions from feature
+
+
+i<-4
+
+shp4 <- 
+  here("data",
+       "external",
+       "shapefiles",
+       "cable_routes",
+       parsed_list1$folder[i]) %>% 
+  st_read() %>% 
+  st_zm() # remove Z/M dimensions from feature
+
+i<-5
+
+shp5 <- 
+  here("data",
+       "external",
+       "shapefiles",
+       "cable_routes",
+       parsed_list1$folder[i]) %>% 
+  st_read() %>% 
+  st_zm() # remove Z/M dimensions from feature
+
+
+i<-6
+
+shp6 <- 
+  here("data",
+       "external",
+       "shapefiles",
+       "cable_routes",
+       parsed_list1$folder[i]) %>% 
+  st_read() %>% 
+  st_zm() # remove Z/M dimensions from feature
+
+
+```
+
+
+
+
