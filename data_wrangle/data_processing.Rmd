@@ -531,6 +531,8 @@ stopifnot(is.numeric(final_product_lease$MN30SQID))
 
 # Zone and Lease Assignments 
 
+Using the FishSET spatial join method the chunk below will create two new variables, ZoneID and lease_FS. ZoneID will reflect what zone an observation will be binned into after the spatial join. lease_FS contains the name of the wind lease area an observation takes place in using the same join method. Note if an observation is not within a wind lease area the lease_FS value will be NA. 
+
 ```{r Zone Assignment - Lease Areas and Ten Minute Squares,echo=TRUE, eval=TRUE, results=FALSE}
 
 #Contents used have come from the "Zone Assignment" Rmd created by Bryce McMagnus using FishSET zone assignment methods. Changes have been made to reflect updated data sets and new ten minute squares shapefile.   
