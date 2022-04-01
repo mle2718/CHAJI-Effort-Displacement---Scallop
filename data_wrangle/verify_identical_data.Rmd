@@ -25,6 +25,7 @@ library("here")
 library("tidyverse")
 library("dbplyr")
 library("data.table")
+library("arsenal")
 vintage_string<-Sys.Date()
 vintage_string<-gsub("-","_",vintage_string)
 
@@ -143,5 +144,9 @@ colnames(final_product_lease_ardini)
 
 #all.equal(final_product_lease_chaji, final_product_lease_lee)
 #identical(final_product_lease_chaji, final_product_lease_lee)
+
+# Run this chunk if identical() or all.equal() results return as false
+# comparedf(final_product_lease_chaji, final_product_lease_lee)
+# summary(comparedf(final_product_lease_chaji, final_product_lease_lee))
 
 ```
