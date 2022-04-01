@@ -59,9 +59,12 @@ parsed_list1$NAME = sapply(parsed_list1$FILENAME, USE.NAMES=F, function(zz) {
 parsed_list1$folder = sapply(parsed_list1$FILENAME, USE.NAMES=F, function(zz) {
   temp = do.call(rbind,strsplit(as.character(zz), split = "/"))
   return(temp[NCOL(1)]) })
+```
 
-i<-1
-shp1 <- 
+```{r shapefiles_to_list, echo=TRUE, results=FALSE}
+shp<-list()
+for (i in 1:nrow(parsed_list1)){
+shp[[i]] <- 
   here("data",
        "external",
        "shapefiles",
@@ -69,63 +72,7 @@ shp1 <-
        parsed_list1$folder[i]) %>% 
   st_read() %>% 
   st_zm() # remove Z/M dimensions from feature
-
-
-# file 2 doesn't work because of subfoldering.
-i<-2
-shp2 <-
-  here("data",
-       "external",
-       "shapefiles",
-       "cable_routes",
-       parsed_list1$folder[i]) %>%
-  st_read() %>%
-  st_zm() # remove Z/M dimensions from feature
-i<-3
-shp3 <- 
-  here("data",
-       "external",
-       "shapefiles",
-       "cable_routes",
-       parsed_list1$folder[i]) %>% 
-  st_read() %>% 
-  st_zm() # remove Z/M dimensions from feature
-
-
-i<-4
-
-shp4 <- 
-  here("data",
-       "external",
-       "shapefiles",
-       "cable_routes",
-       parsed_list1$folder[i]) %>% 
-  st_read() %>% 
-  st_zm() # remove Z/M dimensions from feature
-
-i<-5
-
-shp5 <- 
-  here("data",
-       "external",
-       "shapefiles",
-       "cable_routes",
-       parsed_list1$folder[i]) %>% 
-  st_read() %>% 
-  st_zm() # remove Z/M dimensions from feature
-
-
-i<-6
-
-shp6 <- 
-  here("data",
-       "external",
-       "shapefiles",
-       "cable_routes",
-       parsed_list1$folder[i]) %>% 
-  st_read() %>% 
-  st_zm() # remove Z/M dimensions from feature
-
+}
 
 ```
 
