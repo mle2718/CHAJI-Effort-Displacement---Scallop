@@ -5,7 +5,7 @@ output:
   word_document: default
 ---
 # Purpose
-This is code to make sure that Greg, Min-Yang, and Marina's data processing produces the same data.
+This is code to make sure that Greg, Min-Yang, and Marina's data processing produces the same data.  It reads in the "most recent" data from Greg, Min-Yang, and Marina's directories. It does a few basic checks, like listing the names of columns and rows of data. It also uses the all.equal() function to check if objects are the same. identical() could be used instead; no thought was put into this decision.
 
 Although this written as a markdown doc, it is probably better to source the chunks, either all at a time, or in sequence, so the dataframes remain in R environment and you can examine them.
 
@@ -111,6 +111,8 @@ colnames(RESULT_COMPILED_lee)
 # colnames(RESULT_COMPILED_ardini)
 
 all.equal(RESULT_COMPILED_chaji, RESULT_COMPILED_lee)
+#identical(RESULT_COMPILED_chaji, RESULT_COMPILED_lee)
+
 # all.equal(RESULT_COMPILED_chaji, RESULT_COMPILED_ardini)
 
 ```
@@ -124,6 +126,8 @@ colnames(Scallop_Linkingorg_chaji)
 colnames(Scallop_Linkingorg_lee)
 
 all.equal(Scallop_Linkingorg_chaji, Scallop_Linkingorg_lee)
+#identical(Scallop_Linkingorg_chaji, Scallop_Linkingorg_lee)
+
 ```
 
 
@@ -138,4 +142,6 @@ colnames(final_product_lease_ardini)
 
 
 #all.equal(final_product_lease_chaji, final_product_lease_lee)
+#identical(final_product_lease_chaji, final_product_lease_lee)
+
 ```
