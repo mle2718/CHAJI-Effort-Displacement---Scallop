@@ -514,6 +514,9 @@ stopifnot(is.numeric(final_product_lease$MN10SQID))
 
 stopifnot(is.numeric(final_product_lease$MN30SQID))
 
+
+# If you are planning on turning off the next chunk which integrates the FishSET method of zone assignment you will need to remove hashtags under "save to RDS" below. 
+
 #save to RDS
 # rds_savename<-paste0("final_product_lease",vintage_string,".Rds")
 # csv_savename<-paste0("final_product_lease",vintage_string,".csv")
@@ -613,6 +616,15 @@ final_product_lease_FS$ZoneID <- pts$ID
 #Delete geometry column & duplicates
 final_product_lease_FS$geometry <- NULL
 final_product_lease_FS <- final_product_lease_FS %>% distinct(TRIPID,DOLLAR,TRIP_LENGTH,LANDED, .keep_all = TRUE)
+final_product_lease <- final_product_lease_FS %>% distinct(TRIPID,DOLLAR,TRIP_LENGTH,LANDED, .keep_all = TRUE)
+
+
+#save to RDS
+rds_savename<-paste0("final_product_lease",vintage_string,".Rds")
+csv_savename<-paste0("final_product_lease",vintage_string,".csv")
+
+saveRDS(final_product_lease, file=here("data","main",rds_savename))
+write.csv(final_product_lease,file=here("data","main",csv_savename), row.names = FALSE)
 
 ```
 
