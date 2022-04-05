@@ -37,7 +37,6 @@ library("RODM")
 library("epiDisplay")
 library("tmap")
 library("tidyverse")
-
 vintage_string<-Sys.Date()
 vintage_string<-gsub("-","_",vintage_string)
 
@@ -238,30 +237,34 @@ Scallops$SOURCE<- NULL
 ```
 
 
-# Constructing scallop fishing years
+#Construct scallop fishing year variable
 
 ```{r scallop_fishing_years, echo=TRUE}
 
-Scallops$Scallop_fishing_year<-"None"
-Scallops$Scallop_fishing_year[Scallops$Date >= "2006-03-01" & Scallops$Date <= "2007-02-28"] <- "FY2007"
-Scallops$Scallop_fishing_year[Scallops$Date >= "2007-03-01" & Scallops$Date <= "2008-02-29"] <- "FY2008"
-Scallops$Scallop_fishing_year[Scallops$Date >= "2008-03-01" & Scallops$Date <= "2009-02-28"] <- "FY2009"
-Scallops$Scallop_fishing_year[Scallops$Date >= "2009-03-01" & Scallops$Date <= "2010-02-28"] <- "FY2010"
-Scallops$Scallop_fishing_year[Scallops$Date >= "2010-03-01" & Scallops$Date <= "2011-02-28"] <- "FY2011"
-# Lines under dont work for some reason :,(
-Scallops$Scallop_fishing_year[Scallops$Date >= "2011-03-01" & Scallops$Date <= "2012-02-27",] <- "FY2012"
+Scallops$scallop_fishing_year<-"None"
+Scallops$Date <- as.character.Date(Scallops$Date)
 
-Scallops$Scallop_fishing_year[Scallops$Date >= "2012-03-01" & Scallops$Date <= "2013-02-28",] <- "FY2013"
-Scallops$Scallop_fishing_year[Scallops$Date >= "2013-03-01" & Scallops$Date <= "2014-02-29",] <- "FY2014"
-Scallops$Scallop_fishing_year[Scallops$Date >= "2014-03-01" & Scallops$Date <= "2015-02-29",] <- "FY2015"
-Scallops$Scallop_fishing_year[Scallops$Date >= "2015-03-01" & Scallops$Date <= "2016-02-29",] <- "FY2016"
+# The Scallop fishing years from the year 2016 and all prior are from March 1st to February 28th or 29th
+Scallops$scallop_fishing_year[Scallops$Date >= "2006-03-01" & Scallops$Date <= "2007-02-29"] <- "2007"
+Scallops$scallop_fishing_year[Scallops$Date >= "2007-03-01" & Scallops$Date <= "2008-02-29"] <- "2008"
+Scallops$scallop_fishing_year[Scallops$Date >= "2008-03-01" & Scallops$Date <= "2009-02-29"] <- "2009"
+Scallops$scallop_fishing_year[Scallops$Date >= "2009-03-01" & Scallops$Date <= "2010-02-29"] <- "2010"
+Scallops$scallop_fishing_year[Scallops$Date >= "2010-03-01" & Scallops$Date <= "2011-02-29"] <- "2011"
+Scallops$scallop_fishing_year[Scallops$Date >= "2011-03-01" & Scallops$Date <= "2012-02-29"] <- "2012"
+Scallops$scallop_fishing_year[Scallops$Date >= "2012-03-01" & Scallops$Date <= "2013-02-29"] <- "2013"
+Scallops$scallop_fishing_year[Scallops$Date >= "2013-03-01" & Scallops$Date <= "2014-02-29"] <- "2014"
+Scallops$scallop_fishing_year[Scallops$Date >= "2014-03-01" & Scallops$Date <= "2015-02-29"] <- "2015"
+Scallops$scallop_fishing_year[Scallops$Date >= "2015-03-01" & Scallops$Date <= "2016-02-29"] <- "2016"
 
-Scallops$Scallop_fishing_year[Scallops$Date >= "2016-03-01" & Scallops$Date <= "2017-03-01",] <- "FY2017"
+#The scallop fishing year in 2017 was from March 1st to March 31st
+Scallops$scallop_fishing_year[Scallops$Date >= "2016-03-01" & Scallops$Date <= "2017-03-31"] <- "2017"
 
-Scallops$Scallop_fishing_year[Scallops$Date >= "2016-03-01" & Scallops$Date <= "2017-02-29",] <- "FY2018"
+#The scallop fishing years from 2018 onward are from April 1st to March 31st
+Scallops$scallop_fishing_year[Scallops$Date >= "2017-04-01" & Scallops$Date <= "2018-03-31"] <- "2018"
+Scallops$scallop_fishing_year[Scallops$Date >= "2018-04-01" & Scallops$Date <= "2019-03-31"] <- "2019"
+Scallops$scallop_fishing_year[Scallops$Date >= "2019-04-01" & Scallops$Date <= "2020-03-31"] <- "2020"
 
 ```
-
 
 
 
@@ -474,7 +477,87 @@ VTR_DMIS_AC$Area <- NULL
 ```
 
 
+
+
+
+```{r Spatial Joins - Lease Areas and Ten Minute Squares,echo=TRUE, eval=TRUE}
+# Spatial join with ten minute squares 
+
+## Read in your shapefile
+### Note: Viewing the table after this is done is helpful to ensure that the shapefile looks how you expected. You can double-check this by comparing your table in R to your shapefile's attribute table in ArcGIS Pro.
+
+## Import the data set you want to combine with your imported shape file 
+
+
+TMSQ_sp <- st_read(TMSQ_path)
+## Run the below chunk to see your shapefile plotted out
+#qtm(TMSQ_sp) + tm_legend(show = FALSE)
+
+# Preserve the DDLAT and DDLON fields
+VTR_DMIS_AC$DDLAT_bak<-VTR_DMIS_AC$DDLAT
+VTR_DMIS_AC$DDLON_bak<-VTR_DMIS_AC$DDLON
+
+
+
+point_geo <- st_as_sf(VTR_DMIS_AC, 
+                      coords = c(x  = "DDLON", y = "DDLAT"), crs = crs )
+
+final_product <- st_join(point_geo, TMSQ_sp, join = st_within)
+
+
+#This chunk uses a "within" join, but other options are available using the sf package 1.0-6. 
+## st_intersects,st_disjoint,st_touches,st_crosses,st_within,st_contains,st_contains_properly,st_overlaps,st_equals,st_covers,st_covered_by,st_equals_exact,st_is_within_distance
+
+#Delete unnecessary variables from join: keep the geometry, MN30SQID, and MN10SQID columns 
+final_product[,c('MN10SQROW','MN10SQCOL','POINT_Y','POINT_X','XTXT','YTXT','DG1SQLAT','DG1SQLON','DG1SQID','MN30QUAD','Shape_Leng','Shape_Area', 'MN10SQ')] <- list(NULL)
+
+#final_product$geometry_old<-final_product$geometry
+#Lease Area Joins
+
+lease_sp <- st_read(All_Lease_Areas_Shapefile_path)
+## Run the below chunk to see your shapefile plotted out
+#qtm(lease_sp) + tm_legend(show = FALSE)
+
+## This chunk uses the current data set, converts it into a sf geospatial object, and bins it into the assigned coordinate system (crs).
+
+point_geo_lease <- st_as_sf(final_product, 
+                      coords = c(x  = "DDLON", y = "DDLAT"), crs = crs )
+
+final_product_lease <- st_join(point_geo_lease, lease_sp, join = st_within)
+
+#geometry carries over all the way from the initial read in.
+identical(final_product_lease$geometry, point_geo$geometry)
+
+#This chunk uses a "within" join, but other options are available using the sf package 1.0-6. 
+## st_intersects,st_disjoint,st_touches,st_crosses,st_within,st_contains,st_contains_properly,st_overlaps,st_equals,st_covers,st_covered_by,st_equals_exact,st_is_within_distance
+
+
+#Recover the DDLAT and DDLON fields.
+colnames(final_product_lease)[colnames(final_product_lease) == "DDLON_bak"] <- "DDLON"
+colnames(final_product_lease)[colnames(final_product_lease) == "DDLAT_bak"] <- "DDLAT"
+
+stopifnot(is.numeric(final_product_lease$MN10SQID))
+
+stopifnot(is.numeric(final_product_lease$MN30SQID))
+
+
+# If you are planning on turning off the next chunk which integrates the FishSET method of zone assignment you will need to remove hashtags under "save to RDS" below. 
+
+#save to RDS
+# rds_savename<-paste0("final_product_lease",vintage_string,".Rds")
+# csv_savename<-paste0("final_product_lease",vintage_string,".csv")
+
+# saveRDS(final_product_lease, file=here("data","main",rds_savename))
+# write.csv(final_product_lease,file=here("data","main",csv_savename), row.names = FALSE)
+
+```
+
+
+
+
 # Zone and Lease Assignments 
+
+Using the FishSET spatial join method the chunk below will create two new variables, ZoneID and lease_FS. ZoneID will reflect what zone an observation will be binned into after the spatial join. lease_FS contains the name of the wind lease area an observation takes place in using the same join method. Note if an observation is not within a wind lease area the lease_FS value will be NA. 
 
 ```{r Zone Assignment - Lease Areas and Ten Minute Squares,echo=TRUE, eval=TRUE, results=FALSE}
 
@@ -513,25 +596,25 @@ lease <-
 ## Lease Areas 
 
 crs <- 4326
-final_product_lease <- 
-  st_as_sf(x = VTR_DMIS_merge, coords = c("DDLON", "DDLAT"), 
+final_product_lease_FS <- 
+  st_as_sf(x = final_product_lease, coords = c("DDLON", "DDLAT"), 
            crs = crs)
 # convert Squares to WGS84 
-lease <- st_transform(lease, crs = st_crs(final_product_lease))
+lease <- st_transform(lease, crs = st_crs(final_product_lease_FS))
 # same results as st_within
-inter <- sf::st_intersects(final_product_lease, lease)
+inter <- sf::st_intersects(final_product_lease_FS, lease)
 inter_save <- inter 
  
  if (any(lengths(inter) > 1)) { # if more than one zone intersects, assign to closest zone
   
   dub <- which(lengths(inter) > 1)
-  inter[dub] <- st_nearest_feature(final_product_lease[dub,], lease)
+  inter[dub] <- st_nearest_feature(final_product_lease_FS[dub,], lease_FS)
  }
 # Add ZoneID column to data
 pts <- as.data.frame(as.numeric(inter))
 colnames(pts) <- "col.id"
-final_product_lease$lease <- lease$NAME[pts$col.id]
-final_product_lease$lease <- lease$NAME[as.numeric(inter)]
+final_product_lease_FS$lease_FS <- lease$NAME[pts$col.id]
+final_product_lease_FS$lease_FS <- lease$NAME[as.numeric(inter)]
 
 
 
@@ -539,26 +622,37 @@ final_product_lease$lease <- lease$NAME[as.numeric(inter)]
 
 
 # Zone Assignments 
-tenMinSqr_new <- st_transform(tenMinSqr_new, crs = st_crs(final_product_lease))
+tenMinSqr_new <- st_transform(tenMinSqr_new, crs = st_crs(final_product_lease_FS))
 
 # same results as st_within
-inter <- sf::st_intersects(final_product_lease, tenMinSqr_new)
+inter <- sf::st_intersects(final_product_lease_FS, tenMinSqr_new)
 
 inter_save <- inter 
  
  if (any(lengths(inter) > 1)) { # if more than one zone intersects, assign to closest zone
   
   dub <- which(lengths(inter) > 1)
-  inter[dub] <- st_nearest_feature(final_product_lease[dub,], tenMinSqr_new)
+  inter[dub] <- st_nearest_feature(final_product_lease_FS[dub,], tenMinSqr_new)
  }
 
 # Add ZoneID column to data
 pts <- as.data.frame(as.numeric(inter))
 colnames(pts) <- "col.id"
 pts$ID <- tenMinSqr_new$MN10SQID[pts$col.id]
-final_product_lease$ZoneID <- pts$ID
+final_product_lease_FS$ZoneID <- pts$ID
+
+#Delete geometry column & duplicates
+final_product_lease_FS$geometry <- NULL
+final_product_lease_FS <- final_product_lease_FS %>% distinct(TRIPID,DOLLAR,TRIP_LENGTH,LANDED, .keep_all = TRUE)
+final_product_lease <- final_product_lease_FS %>% distinct(TRIPID,DOLLAR,TRIP_LENGTH,LANDED, .keep_all = TRUE)
 
 
+#save to RDS
+rds_savename<-paste0("final_product_lease_",vintage_string,".Rds")
+csv_savename<-paste0("final_product_lease_",vintage_string,".csv")
+
+saveRDS(final_product_lease, file=here("data","main",rds_savename))
+write.csv(final_product_lease,file=here("data","main",csv_savename), row.names = FALSE)
 
 ```
 
@@ -616,6 +710,8 @@ qtm(lease) + tm_legend(show = FALSE)
 # R Session Information
 ```{r session_info, include=TRUE, echo=TRUE, results=TRUE, eval=TRUE}
 sessionInfo()
+Sys.Date()
+
 ```
 This may be useful for diagnosing and troubleshooting one day.
 
@@ -644,6 +740,3 @@ LA_Estimate <- VTR_DMIS_AC_Agg %>% filter(Agg_LANDED >= 850 & CREW <= 8)
 ```
 
 
-# to read this in, you will want to do the here::i_am dance and then read in
-# final_product_savename <-paste0("final_product_lease_",vintage_string,".Rds")
-# final_product_lease <-readRDS(here("data","main",final_product_savename))
