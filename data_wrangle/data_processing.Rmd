@@ -231,14 +231,43 @@ Scallops$Date <- as.Date(Scallops$DATE_TRIP)
 Scallops$Time <- format(Scallops$DATE_TRIP,"%H:%M:%S")
 
 #Drop columns that are not needed
-Scallops$DATE_TRIP<- NULL
 Scallops$NESPP3<- NULL
 Scallops$SOURCE<- NULL
 
 ```
 
 
+#Construct scallop fishing year variable
 
+```{r scallop_fishing_years, echo=TRUE}
+
+Scallops$scallop_fishing_year<-"None"
+Scallops$Date <- as.character.Date(Scallops$Date)
+
+# The Scallop fishing years from the year 2016 and all prior are from March 1st to February 28th or 29th
+Scallops$scallop_fishing_year[Scallops$Date >= "2006-03-01" & Scallops$Date <= "2007-02-29"] <- "2007"
+Scallops$scallop_fishing_year[Scallops$Date >= "2007-03-01" & Scallops$Date <= "2008-02-29"] <- "2008"
+Scallops$scallop_fishing_year[Scallops$Date >= "2008-03-01" & Scallops$Date <= "2009-02-29"] <- "2009"
+Scallops$scallop_fishing_year[Scallops$Date >= "2009-03-01" & Scallops$Date <= "2010-02-29"] <- "2010"
+Scallops$scallop_fishing_year[Scallops$Date >= "2010-03-01" & Scallops$Date <= "2011-02-29"] <- "2011"
+Scallops$scallop_fishing_year[Scallops$Date >= "2011-03-01" & Scallops$Date <= "2012-02-29"] <- "2012"
+Scallops$scallop_fishing_year[Scallops$Date >= "2012-03-01" & Scallops$Date <= "2013-02-29"] <- "2013"
+Scallops$scallop_fishing_year[Scallops$Date >= "2013-03-01" & Scallops$Date <= "2014-02-29"] <- "2014"
+Scallops$scallop_fishing_year[Scallops$Date >= "2014-03-01" & Scallops$Date <= "2015-02-29"] <- "2015"
+Scallops$scallop_fishing_year[Scallops$Date >= "2015-03-01" & Scallops$Date <= "2016-02-29"] <- "2016"
+
+#The scallop fishing year in 2017 was from March 1st to March 31st
+Scallops$scallop_fishing_year[Scallops$Date >= "2016-03-01" & Scallops$Date <= "2017-03-31"] <- "2017"
+
+#The scallop fishing years from 2018 onward are from April 1st to March 31st
+Scallops$scallop_fishing_year[Scallops$Date >= "2017-04-01" & Scallops$Date <= "2018-03-31"] <- "2018"
+Scallops$scallop_fishing_year[Scallops$Date >= "2018-04-01" & Scallops$Date <= "2019-03-31"] <- "2019"
+Scallops$scallop_fishing_year[Scallops$Date >= "2019-04-01" & Scallops$Date <= "2020-03-31"] <- "2020"
+Scallops$scallop_fishing_year[Scallops$Date >= "2020-04-01" & Scallops$Date <= "2021-03-31"] <- "2021"
+Scallops$scallop_fishing_year[Scallops$Date >= "2021-04-01" & Scallops$Date <= "2022-03-31"] <- "2022"
+Scallops$scallop_fishing_year[Scallops$Date >= "2022-04-01" & Scallops$Date <= "2023-03-31"] <- "2023"
+
+```
 
 
 
@@ -615,6 +644,7 @@ colnames(pts) <- "col.id"
 pts$ID <- tenMinSqr_new$MN10SQID[pts$col.id]
 final_product_lease_FS$ZoneID <- pts$ID
 
+
 #Delete geometry column & duplicates
 final_product_lease_FS$geometry <- NULL
 final_product_lease_FS <- final_product_lease_FS %>% distinct(TRIPID,DOLLAR,TRIP_LENGTH,LANDED, .keep_all = TRUE)
@@ -625,8 +655,11 @@ final_product_lease <- final_product_lease_FS %>% distinct(TRIPID,DOLLAR,TRIP_LE
 rds_savename<-paste0("final_product_lease_",vintage_string,".Rds")
 csv_savename<-paste0("final_product_lease_",vintage_string,".csv")
 
+
 saveRDS(final_product_lease, file=here("data","main",rds_savename))
 write.csv(final_product_lease,file=here("data","main",csv_savename), row.names = FALSE)
+
+
 
 ```
 
@@ -712,6 +745,5 @@ FY2015-2019: 8
 ```{r filter_LA1, echo=TRUE, eval=FALSE}
 LA_Estimate <- VTR_DMIS_AC_Agg %>% filter(Agg_LANDED >= 850 & CREW <= 8)
 ```
-
 
 
