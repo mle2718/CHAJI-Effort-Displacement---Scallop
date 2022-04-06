@@ -25,7 +25,7 @@ vintage_string<-Sys.Date()
 vintage_string<-gsub("-","_",vintage_string)
 
 # You might want to run this code, but not extract and save any data. Set this switch to FALSE to do so.
-extract_switch=FALSE
+extract_switch=TRUE
 ```
 
 # Organization
@@ -377,8 +377,8 @@ X2007_2012 <- read_excel(file.path(cost_directory,"2007_2012.xlsx"))
 X2013_2020 <- read_excel(file.path(cost_directory,"2013_2020.xlsx"))
 
 #Merge 2007-2012 costs with 2013-2020 costs
-all_yrs_costs<-rbind(X2007_2012,X2013_2020)
-
+#all_yrs_costs<-rbind(X2007_2012,X2013_2020)
+all_yrs_costs <- merge(X2007_2012,X2013_2020, all = TRUE)
 
 #save to RDS
 all_yrs_costs_name <-paste0("all_yrs_costs_",vintage_string,".Rds")
@@ -389,6 +389,8 @@ saveRDS(all_yrs_costs, file=here("data","intermediate",all_yrs_costs_name))
 # R Session Information
 ```{r session_info, include=TRUE, echo=TRUE, results=TRUE, eval=TRUE}
 sessionInfo()
+Sys.Date()
+
 ```
 This may be useful for diagnosing and troubleshooting one day.
 
