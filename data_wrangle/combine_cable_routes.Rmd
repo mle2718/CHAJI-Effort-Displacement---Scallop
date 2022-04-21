@@ -1,0 +1,260 @@
+---
+title: "Combining Cable Route"
+author: "Bryce McManus"
+date: "4/19/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Library
+```{r}
+library(tidyverse)
+library(sf)
+library(here)
+library(leaflet)
+
+here::i_am("data_wrangle/combine_cable_routes.Rmd")
+```
+
+
+### Helper Functions
+
+```{r}
+# detects whether spatial table should be shifted to Pacific view
+shift_long <- function(spat) {
+  
+  bbox <- sf::st_bbox(spat)
+  
+  bbox$xmin < -179 | bbox$xmax > 179
+}
+
+# detects empty values (used mainly for missing names)
+is_value_empty <- function(x) {
+  
+  if (inherits(x, "try-error")) return(TRUE)
+  if (is.null(x))  return(TRUE)
+  if (length(x) == 0) return(TRUE)
+  if (all(is.na(x))) return(TRUE)
+  if (is.character(x) && !any(nzchar(stats::na.omit(x)))) return(TRUE)
+  if (is.logical(x) && !any(stats::na.omit(x))) return(TRUE)
+  
+  return(FALSE)
+}
+
+# clean and prep spatial tables
+prep_spat <- function(spat, crs = 4326, dist = 10) {
+  
+  # convert crs and remove z/m dimensions
+  spat <-  sf::st_zm(sf::st_transform(spat, crs = crs))
+  
+  # possible that spatial table will be GEOMETRYCOLLECTION, in which case
+  # a more thorough approach will be needed using sf::st_collection_extract()
+  
+  # convert Linestrings to polygons
+  is_line <- sf::st_is(spat, c("LINESTRING", "MULTILINESTRING"))
+  
+  if (any(is_line)) {
+    # this can be adjusted in the future
+    spat[is_line, ] <- sf::st_buffer(spat[is_line, ], dist = dist) # dist in meters
+  }
+  
+  spat
+}
+
+# creates a single spatial object
+valid_union <- function(spat) {
+  # this part can be tricky, FishSET has helper funs to address several potential issues
+  spat <- sf::st_union(spat) 
+  sf::st_make_valid(spat)
+}
+
+# Adds polygon to spatial data
+add_polygon <- function(poly, spat, spat.id, new.id = NULL) {
+
+  check_and_prep <- function(poly, spat, spat.id, new.id) {
+    
+    if (!inherits(poly, c("sf", "sfc"))) {
+      
+      stop("'poly' must be a sf or sfc object.")
+    }
+    
+    # this can be removed if other feature types need to be included
+    if (!any(sf::st_is(poly, c("POLYGON", "MULTIPOLYGON")))) {
+      
+      stop("Object 'poly' must be a polygon.")
+    }
+    
+    if (is_value_empty(new.id)) {
+      
+      stop("'new.id' required.")
+    }
+    
+    if (!is_value_empty(new.id)) {
+      
+      if (any(new.id %in% spat[[spat.id]])) {
+        
+        stop("'new.id' is not unique. Enter a new ID.")
+      }
+    }
+    
+    # check for mis-matched ID classes (coerce to character if no match?)
+    if (class(new.id) != class(spat[[spat.id]])) {
+      
+      stop("'new.id' does not match 'spat.id' class (", class(spat[[spat.id]]), ").")
+    }
+    
+    if (inherits(poly, "sfc")) {
+      
+      # convert to sfc (simple feature geometry list column)
+      poly <- sf::st_sfc(poly, crs = sf::st_crs(spat))
+      
+    } else {
+      
+      poly <- sf::st_transform(poly, crs = sf::st_crs(spat))
+    }
+      
+    # covert to sf, add new id 
+    # note: geometry column may be named something else, like "geom" and
+    # new spat will have two geometry cols and lead to errors
+    
+    poly <- tibble::tibble(!!spat.id := new.id, geometry = sf::st_geometry(poly))
+    poly <- sf::st_sf(poly)
+      
+    # check if spat has shifted longitude and updated coord if necessary
+    if (shift_long(spat)) {
+      
+      poly <- sf::st_shift_longitude(poly)
+      warning("Shifted longitude detected in spatial table, adjusting coordinates.")
+    }
+    
+    poly
+  }
+  
+  if (purrr::is_bare_list(poly)) {
+    
+    is_sf <- vapply(poly, function(x) inherits(x, c("sf", "sfc")), logical(1))
+    
+    if (!all(is_sf)) {
+      
+      stop("Non-sf object detected.")
+    }
+    
+    poly <- lapply(seq_along(poly), function(i) {
+      
+      check_and_prep(poly[[i]], spat = spat, spat.id = spat.id, new.id = new.id[i])
+    })
+
+  } else {
+    
+    poly <- check_and_prep(poly, spat = spat, spat.id = spat.id, new.id = new.id)
+  }
+  
+  spat_out <- dplyr::bind_rows(spat, poly)
+
+  spat_out
+}
+
+# for ploting spatial tables
+plot_spat <- function(spat) {
+  
+  if (!inherits(spat, c("sf", "sfc"))) {
+    
+    stop("'spat' must be a sf object.")
+  }
+  
+  ggplot2::ggplot(data = spat) + ggplot2::geom_sf()
+}
+
+# interactive map 
+view_spat <- function(spat, id = NULL) {
+  
+  if (!inherits(spat, c("sf", "sfc"))) {
+    
+    stop("'spat' must be a sf object.")
+  }
+  
+  if (!is.null(id)) {
+    
+    spat_ids <- spat[[id]]
+    
+  } else spat_ids <- NULL
+  
+  spat <- sf::st_transform(spat, crs = 4326)
+  
+  leaflet::leaflet() %>%
+    leaflet::addTiles() %>%
+    leaflet::addPolygons(data = spat,
+                         fillColor = "white",
+                         fillOpacity = 0.5,
+                         color = "black",
+                         stroke = TRUE,
+                         weight = 1,
+                         layerId = spat_ids,
+                         label = spat_ids)
+}
+```
+
+
+
+### Shapefiles
+```{r}
+cable_folders <- 
+  list.dirs(here::here("data", "external", "shapefiles", "cable_routes"), 
+            full.names = TRUE, recursive = FALSE)
+
+cable_list <- lapply(cable_folders, function(x) sf::st_read(dsn = x))
+
+# wind lease areas
+wind_sf <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "All_lease_Areas_Shapefile"))
+
+```
+
+
+### Data Prep
+```{r}
+# Can also set CRS and buffer distance if needed (defaults to WGS 84 and 10 meters)
+cable_list <- lapply(cable_list, prep_spat) 
+
+wind_sf <- prep_spat(wind_sf)
+```
+
+
+```{r}
+# Reduce each cable route to a single polygon.
+# I chose to do this for simplicity, but can be
+# skipped it if all polygons from each cable route need to 
+# be included.
+cable_list <- lapply(cable_list, valid_union)
+```
+
+### Combine cable routes
+```{r}
+cable_names <- 
+  list.dirs(here::here("data", "external", "shapefiles", "cable_routes"), 
+            full.names = FALSE, recursive = FALSE) 
+
+wind_sf_final <- add_polygon(cable_list, spat = wind_sf, spat.id = "NAME", 
+                             new.id = cable_names)
+```
+
+
+### Check final spatial table
+
+```{r}
+print(wind_sf_final, n = nrow(wind_sf_final))
+```
+
+
+```{r}
+view_spat(wind_sf_final, id = "NAME")
+```
+
+
+### Save 
+```{r}
+
+```
+
