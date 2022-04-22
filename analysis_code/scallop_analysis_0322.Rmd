@@ -8,6 +8,8 @@ output:
     toc: true
     toc_float: true
     code_folding: show
+params:
+    AA_DAS_only: false
 ---
 
 ## Introduction
@@ -42,32 +44,17 @@ library(FishSET)
 library(tidyverse) # data wrangling
 library(kableExtra) # table formatting 
 library(sf) # converting geometry points to separate cols
+library(here)
 ```
 
 
 ```{r}
+
+here::i_am("analysis_code/scallop_analysis_0322.Rmd")
+
+AA_DAS_only <- FALSE
 # helper functions
-# these haven't been included in FishSET yet
-source("~/FishSET_work/scripts/agg_helper2.R")
-source("~/FishSET_work/scripts/zone_summary_fun.R")
-source("~/scallop summary 0322/format_helpers.R")
-
-sfc_as_cols <- function(x, names = c("x","y")) {
-  
-  stopifnot(inherits(x,"sf") && inherits(sf::st_geometry(x),"sfc_POINT"))
-  ret <- sf::st_coordinates(x)
-  ret <- tibble::as_tibble(ret)
-  stopifnot(length(names) == ncol(ret))
-  x <- x[ , !names(x) %in% names]
-  ret <- setNames(ret,names)
-  dplyr::bind_cols(x,ret)
-}
-# tilt x-axis text
-angled_theme <- function() {
-  
-  ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1, size = 8))
-}
-
+source(here("analysis_code", "format_helpers.R"))
 ```
 
 
@@ -92,8 +79,6 @@ if (project_exists(project)) {
 
 This code chunk should work in the scallop repo. 
 ```{r eval=FALSE}
-here::i_am("/analysis_code/scallop_analysis_0322.Rmd")
-
 # This code looks into /data/main and sets the vintage_string according to 
 # the most recent data
 datasets_list <- list.files(path = here("data", "main"), pattern = "final_product_lease")
@@ -112,19 +97,14 @@ load_maindata(dat = final_product_lease, project = project, over_write = TRUE)
 
 <br><br>
 
-I needed to convert the geometry list column to separate lat/lon columns to be able
-to save the data to the FishSET Database. The FishSET Databases are sqlite files, 
-which can't handle spatial data.
+This code works on my local computer. 
 ```{r}
-dat_filepath <- paste0("~/NE Scallops/data/updated/Final Product Lease - March ",
-                       "2022/final_product_lease2022_03_08.Rds")
+dat_filepath <- paste0("~/NE Scallops/data/updated/final_product_lease_2022_04_01.Rds")
 
 final_product_lease <- readRDS(dat_filepath)
-
-# convert geometry column to lon lat 
-final_product_lease <- 
-  sfc_as_cols(final_product_lease, names = c("DDLON", "DDLAT")) %>% 
-  sf::st_drop_geometry()
+# needed to rename this for now since it matches the name outputted from the
+# zone assignment function we use. 
+final_product_lease <- final_product_lease %>% rename(Zone_ID = "ZoneID")
 
 load_maindata(dat = final_product_lease, project = project, over_write = TRUE)
 ```
@@ -137,10 +117,14 @@ data folder.
 ```{r}
  ten_filepath <- here("data", "external", "shapefiles", 
                       "Ten Minute Squares Cut North and Greater Atlantic")
- lease_filepath <- here("data", "external", "shapefiles", "All_Lease_Areas_Shapefile")
+ # lease_filepath <- here("data", "external", "shapefiles", "All_Lease_Areas_Shapefile")
+
+# loads lease area combined w/ cable routes (saved locally) created from
+# data_wrangle/combine_cable_routes.Rmd
+lease_filepath <- "~/NE Scallops/data/spatial/wind_sf_final.RDS"
 
 load_spatial(lease_filepath, name = "WindClose", over_write = TRUE, project,
-             data.type = "shape")
+             data.type = "RDS")
 
 load_spatial(ten_filepath, name = "TenMNSQR", over_write = TRUE, project,
              data.type = "shape")
@@ -245,15 +229,6 @@ empty_vars_filter(scallop0322MainDataTable, project = project, remove = FALSE)
 
 <br><br>
 
-This check isn't perfect. For example, it doesn't tell us whether a column is 
-mostly "empty", like the previous_port_lat/lon columns. 
-```{r}
-# previous_port_lat/lon contain nearly all NAs so I'll remove them
-scallop0322MainDataTable <-
-  scallop0322MainDataTable %>% 
-  select(-previous_port_lat, -previous_port_lon)
-```
-<br><br>
 
 ### Lon/Lat format
 
@@ -274,7 +249,7 @@ spatial_qaqc(scallop0322MainDataTable, project = project,
 
 spat_qaqc_out$dataset <- NULL # drop dataset
 spat_qaqc_out$spatial_summary %>% 
-  pretty_lab(cols = "N") %>% 
+  pretty_lab(cols = "n") %>% 
    pretty_tab() 
 spat_qaqc_out[2:4]
 ```
@@ -352,8 +327,8 @@ scallop0322MainDataTable <-
   fleet_assign(scallop0322MainDataTable, project = project, 
                fleet_tab = fleet_tab_name)
 ```
-By setting this code chunk to include=TRUE, all of the statistics from this point forward are just for the Limited Access Fleet, which takes Access Area and Days-at-Sea trips. 
-```{r retain_AA_DAS, include=TRUE}
+By setting this code chunk to eval=TRUE, all of the statistics from this point forward are just for the Limited Access Fleet, which takes Access Area and Days-at-Sea trips. Currently set to `r AA_DAS_only`.
+```{r retain_AA_DAS, eval=AA_DAS_only}
 
 scallop0322MainDataTable <- 
   scallop0322MainDataTable %>% 
@@ -378,7 +353,7 @@ scallop0322MainDataTable %>%
 ```{r}
 scallop0322MainDataTable <- 
   assignment_column(scallop0322MainDataTable, project = project,
-                    gridfile = scallop0322TenMNSQRSpatTable, 
+                    spat = scallop0322TenMNSQRSpatTable, 
                     lon.dat = "DDLON",
                     lat.dat = "DDLAT", 
                     cat = "MN10SQID",
@@ -406,7 +381,7 @@ scallop0322MainDataTable %>%
 ```{r}
 scallop0322MainDataTable <- 
   assignment_column(scallop0322MainDataTable, project = project,
-                    gridfile = scallop0322WindCloseSpatTable, 
+                    spat = scallop0322WindCloseSpatTable, 
                     lon.dat = "DDLON",
                     lat.dat = "DDLAT", 
                     cat = "NAME",
@@ -438,7 +413,7 @@ scallop0322MainDataTable %>%
 observations (`r round(sum(scallop0322MainDataTable$in_closure)/nrow(scallop0322MainDataTable) * 100, 2)`%)
 occurred inside a closure area. 
 ```{r}
-agg_helper2(scallop0322MainDataTable, value = "in_closure", count = TRUE) %>% 
+agg_helper(scallop0322MainDataTable, value = "in_closure", count = TRUE) %>% 
   pivot_wider(names_from = "in_closure", values_from = "n") %>% 
   rename("Outside Closure(s)" = "FALSE", "Inside Closure(s)" = "TRUE") %>% 
   pretty_lab() %>% 
@@ -448,7 +423,7 @@ agg_helper2(scallop0322MainDataTable, value = "in_closure", count = TRUE) %>%
 <br><br><br>
 Observations inside/outside closures by fleet. 
 ```{r}
-agg_helper2(scallop0322MainDataTable, group = "fleet", 
+agg_helper(scallop0322MainDataTable, group = "fleet", 
             value = "in_closure", count = TRUE) %>% 
   pivot_wider(names_from = "in_closure", values_from = "n") %>% 
   rename("Outside Closure(s)" = "FALSE", "Inside Closure(s)" = "TRUE") %>% 
@@ -475,7 +450,7 @@ scallop0322MainDataTable %>%
 
 Observations inside/outside closures by year. 
 ```{r}
-agg_helper2(scallop0322MainDataTable, value = "in_closure", 
+agg_helper(scallop0322MainDataTable, value = "in_closure", 
             group = "DB_LANDING_YEAR", 
             count = TRUE) %>% 
   pivot_wider(names_from = "in_closure", values_from = "n",
@@ -489,7 +464,7 @@ agg_helper2(scallop0322MainDataTable, value = "in_closure",
 <br><br><br>
 Observations inside/outside closures by year and fleet. 
 ```{r}
-agg_helper2(scallop0322MainDataTable, value = "in_closure", 
+agg_helper(scallop0322MainDataTable, value = "in_closure", 
             group = c("DB_LANDING_YEAR", "fleet"), 
             count = TRUE) %>% 
   pivot_wider(names_from = "in_closure", values_from = "n",
@@ -557,7 +532,7 @@ zone_out <-
                lat.dat = "DDLAT", 
                zone.dat = "ZoneID",
                zone.spat = "MN10SQID",
-               count = TRUE, var = "fleet",
+               count = TRUE, group = "fleet",
                output = "tab_plot",
                breaks = NULL, n.breaks = 10, na.rm = TRUE)
 zone_out$plot
@@ -583,7 +558,7 @@ zone_out <-
                lat.dat = "DDLAT", 
                zone.dat = "ZoneID",
                zone.spat = "MN10SQID",
-               count = TRUE, var = "fleet", fun = "percent",
+               count = TRUE, group = "fleet", fun = "percent",
                output = "tab_plot",
                breaks = NULL, n.breaks = 10, na.rm = TRUE)
 zone_out$plot
@@ -660,7 +635,7 @@ zone_out$table %>%
 <br><br><br>
 
 Median live catch (General Category fleet).
-```{r}
+```{r eval=!AA_DAS_only, echo=!AA_DAS_only}
 zone_out <- 
   scallop0322MainDataTable %>% 
   filter(fleet == "General Cat") %>% 
@@ -931,7 +906,7 @@ Duplicate trips by closure area. This shows whether observations that occurred
 in a closure area came from duplicate trip IDs. 
 
 ```{r}
-agg_helper2(scallop0322MainDataTable, 
+agg_helper(scallop0322MainDataTable, 
             value = "closeID",
             group = "dup_trip",
             count = TRUE) %>% 
@@ -986,7 +961,7 @@ zone_summary(scallop0322MainDataTable, project = project,
 
 zone_out$table %>% 
   pretty_lab() %>% 
-  pretty_tab_sb(width = "40%")
+  pretty_tab_sb(width = "60%")
 
 zone_out$plot
 ```
@@ -1012,7 +987,7 @@ zone_summary(scallop0322MainDataTable, project = project,
 
 zone_out$table %>% 
   pretty_lab() %>% 
-  pretty_tab_sb(width = "50%")
+  pretty_tab_sb(width = "60%")
 
 zone_out$plot
 ```
@@ -1117,7 +1092,7 @@ zone_out$plot
 
 Total live catch by year. 
 ```{r}
-agg_helper2(scallop0322MainDataTable, "POUNDS", 
+agg_helper(scallop0322MainDataTable, "POUNDS", 
             group = c("DB_LANDING_YEAR", "closeID"), 
             fun = "sum") %>% 
   pivot_wider(names_from = DB_LANDING_YEAR, 
@@ -1131,7 +1106,7 @@ agg_helper2(scallop0322MainDataTable, "POUNDS",
 
 Average live catch by year. 
 ```{r}
-agg_helper2(scallop0322MainDataTable, "POUNDS", 
+agg_helper(scallop0322MainDataTable, "POUNDS", 
             group = c("DB_LANDING_YEAR", "closeID"), 
             fun = "mean") %>% 
   pivot_wider(names_from = DB_LANDING_YEAR, 
@@ -1145,7 +1120,7 @@ agg_helper2(scallop0322MainDataTable, "POUNDS",
 
 Percent of total trip length by year. 
 ```{r}
-agg_helper2(scallop0322MainDataTable, "TRIP_LENGTH", 
+agg_helper(scallop0322MainDataTable, "TRIP_LENGTH", 
             group = c("DB_LANDING_YEAR", "closeID"), 
             fun = "sum") %>% 
   mutate(TRIP_LENGTH = TRIP_LENGTH/sum(TRIP_LENGTH) * 100) %>% 
@@ -1208,7 +1183,7 @@ zone_out$plot
 
 Average CPUE by year. 
 ```{r}
-agg_helper2(scallop0322MainDataTable, "CPUE", 
+agg_helper(scallop0322MainDataTable, "CPUE", 
             group = c("DB_LANDING_YEAR", "closeID"), 
             fun = "mean") %>% 
   pivot_wider(names_from = DB_LANDING_YEAR, 
@@ -1271,7 +1246,7 @@ zone_out$plot
 
 Average VPUE by year. 
 ```{r}
-agg_helper2(scallop0322MainDataTable, "VPUE", 
+agg_helper(scallop0322MainDataTable, "VPUE", 
             group = c("DB_LANDING_YEAR", "closeID"), 
             fun = "mean") %>% 
   pivot_wider(names_from = DB_LANDING_YEAR, 
@@ -1284,7 +1259,7 @@ agg_helper2(scallop0322MainDataTable, "VPUE",
 <br><br>
 
 ```{r}
-agg_helper2(scallop0322MainDataTable, "NSUBTRIP", 
+agg_helper(scallop0322MainDataTable, "NSUBTRIP", 
             group = c("DB_LANDING_YEAR", "closeID"), 
             count = TRUE) %>% 
   arrange(DB_LANDING_YEAR) %>% 
