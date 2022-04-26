@@ -78,7 +78,7 @@ if (project_exists(project)) {
 ## Data Import
 
 This code chunk should work in the scallop repo. 
-```{r eval=FALSE}
+```{r filename_automagic, eval=FALSE}
 # This code looks into /data/main and sets the vintage_string according to 
 # the most recent data
 datasets_list <- list.files(path = here("data", "main"), pattern = "final_product_lease")
@@ -89,18 +89,16 @@ vintage_string <- max(datasets_list)
 rm(datasets_list)
 
 dat_filepath <- here("data", "main", paste0("final_product_lease", vintage_string, ".Rds"))
-
-final_product_lease <- readRDS(dat_filepath)
-# load data into FishSET DB
-load_maindata(dat = final_product_lease, project = project, over_write = TRUE)
 ```
 
 <br><br>
 
 This code works on my local computer. 
-```{r}
+```{r filename_by_hand, eval=TRUE}
 dat_filepath <- paste0("~/NE Scallops/data/updated/final_product_lease_2022_04_01.Rds")
+```
 
+```{r readin_data, eval=TRUE}
 final_product_lease <- readRDS(dat_filepath)
 # needed to rename this for now since it matches the name outputted from the
 # zone assignment function we use. 
