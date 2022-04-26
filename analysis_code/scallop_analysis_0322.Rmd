@@ -52,7 +52,7 @@ library(here)
 
 here::i_am("analysis_code/scallop_analysis_0322.Rmd")
 
-AA_DAS_only <- FALSE
+AA_DAS_only <- TRUE
 # helper functions
 source(here("analysis_code", "format_helpers.R"))
 ```
