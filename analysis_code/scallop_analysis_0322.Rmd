@@ -142,6 +142,47 @@ This data contains `r nrow(scallop0322MainDataTable)` rows and
 
 <br><br>
 
+## Assign Fleets and Subset
+We will want to do this before the rest of the QA/QC. There are always lots of broken bits, but many of them are going to be in the "other" fleet.
+
+### Fleet assignment
+
+```{r}
+# create fleet table
+fleet_tab <- data.frame(
+  
+  condition = c('`Plan Code` == "SES" & `Program Code` == "SAA"',
+                '`Plan Code` == "SES" & `Program Code` == "SCA"',
+                '`Plan Code` == "SES" & `Program Code` == "SCG"'),
+  fleet = c("Access Area", "Days at Sea", "General Cat")
+)
+# save fleet table to FishSET DB
+fleet_table(scallop0322MainDataTable, 
+            project = project,
+            table = fleet_tab, save = TRUE)
+
+# Create fleet column 
+fleet_tab_name <- list_tables(project, type = "fleet") # grab tab name
+
+scallop0322MainDataTable <- 
+  fleet_assign(scallop0322MainDataTable, project = project, 
+               fleet_tab = fleet_tab_name)
+```
+
+### Subset
+
+By setting this code chunk to eval=TRUE, all of the statistics from this point forward are just for the Limited Access Fleet, which takes Access Area and Days-at-Sea trips. Currently set to `r AA_DAS_only`.
+```{r retain_AA_DAS, eval=AA_DAS_only}
+
+scallop0322MainDataTable <- 
+  scallop0322MainDataTable %>% 
+  filter(fleet == "Access Area" | fleet == "Days at Sea")
+
+```
+<br><br><br>
+
+
+
 ### summary table
 ```{r}
 summary_stats(scallop0322MainDataTable, project) %>% 
@@ -304,38 +345,7 @@ scallop0322MainDataTable <-
 
 <br><br>
 
-### Fleet assignment
-
-```{r}
-# create fleet table
-fleet_tab <- data.frame(
-  
-  condition = c('`Plan Code` == "SES" & `Program Code` == "SAA"',
-                '`Plan Code` == "SES" & `Program Code` == "SCA"',
-                '`Plan Code` == "SES" & `Program Code` == "SCG"'),
-  fleet = c("Access Area", "Days at Sea", "General Cat")
-)
-# save fleet table to FishSET DB
-fleet_table(scallop0322MainDataTable, 
-            project = project,
-            table = fleet_tab, save = TRUE)
-
-# Create fleet column 
-fleet_tab_name <- list_tables(project, type = "fleet") # grab tab name
-
-scallop0322MainDataTable <- 
-  fleet_assign(scallop0322MainDataTable, project = project, 
-               fleet_tab = fleet_tab_name)
-```
-By setting this code chunk to eval=TRUE, all of the statistics from this point forward are just for the Limited Access Fleet, which takes Access Area and Days-at-Sea trips. Currently set to `r AA_DAS_only`.
-```{r retain_AA_DAS, eval=AA_DAS_only}
-
-scallop0322MainDataTable <- 
-  scallop0322MainDataTable %>% 
-  filter(fleet == "Access Area" | fleet == "Days at Sea")
-
-```
-<br><br><br>
+### Fleet Tabulation
 
 ```{r}
 scallop0322MainDataTable %>% 
