@@ -68,7 +68,8 @@ The roles/responsibilties doesn't quite belong in this spot, and yet here we are
 We have added various shapefiles to the repository. 
 1.  `East_Cst_crop_2020_extended` shapefile was taken from `/net/work5/socialsci/Geret_Rasters/data/offshore_wind_package_data/shapefiles`
 2.  `All_Lease_Areas_Shapefile` shapefile was taken from `/net/home4/mchaji/All_Lease_Areas_Shapefile`
-3.  `Ten Minute Squares Cut North and Greater Atlantic` shapefile was taken from `/net/home4/mchaji/All_Lease_Areas_Shapefile/Ten Minute Squares Smaller`
+3.  `VMS_Demarcation_Line` shapefile was taken from https://www.fisheries.noaa.gov/resource/map/vms-demarcation-line
+4.  `Scallop_DAS_Change_to_DOF_Transit_w_Product_On_Board_Area` shapefile was taken from https://www.fisheries.noaa.gov/resource/map/scallop-days-sea-change-declare-out-fishery-transit-product-board-area
 
 There are also some data that we get internally from the network, this can be figured out just by looking through the data processsing code.
 
