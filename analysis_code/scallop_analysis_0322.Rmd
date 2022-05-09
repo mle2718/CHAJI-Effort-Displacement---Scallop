@@ -151,8 +151,9 @@ fleet_tab <- data.frame(
   
   condition = c('`Plan Code` == "SES" & `Program Code` == "SAA"',
                 '`Plan Code` == "SES" & `Program Code` == "SCA"',
-                '`Plan Code` == "SES" & `Program Code` == "SCG"'),
-  fleet = c("Access Area", "Days at Sea", "General Cat")
+                '`Plan Code` == "SES" & `Program Code` == "SCG" &substr(`Area Identifier`,1,2)!="NG")',
+                '`Plan Code` == "SES" & `Program Code` == "SCG" &substr(`Area Identifier`,1,2)="NG")',
+  fleet = c("Access Area", "Days at Sea", "GCIFQ", "GCNGOM")
 )
 # save fleet table to FishSET DB
 fleet_table(scallop0322MainDataTable, 
@@ -642,11 +643,11 @@ zone_out$table %>%
 
 <br><br><br>
 
-Median live catch (General Category fleet).
+Median live catch (General Category IFQ fleet).
 ```{r eval=!AA_DAS_only, echo=!AA_DAS_only}
 zone_out <- 
   scallop0322MainDataTable %>% 
-  filter(fleet == "General Cat") %>% 
+  filter(fleet == "GCIFQ") %>% 
   zone_summary(project = project,
            spat = scallop0322TenMNSQRSpatTable, 
            lon.dat = "DDLON",
