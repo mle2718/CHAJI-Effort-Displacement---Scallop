@@ -146,13 +146,19 @@ We will want to do this before the rest of the QA/QC. There are always lots of b
 ### Fleet assignment
 
 ```{r}
+#Parse the first 2 digits of Area Identifier
+scallop0322MainDataTable <-
+  scallop0322MainDataTable %>% 
+  mutate(`Area_ID2` = substr(`Area Identifier`, 1, 2))
+
+
 # create fleet table
 fleet_tab <- data.frame(
   
   condition = c('`Plan Code` == "SES" & `Program Code` == "SAA"',
                 '`Plan Code` == "SES" & `Program Code` == "SCA"',
-               '`Plan Code` == "SES" & `Program Code` == "SCG" & `Area Identifier` != "NG"',
-                '`Plan Code` == "SES" & `Program Code` == "SCG" & `Area Identifier` == "NG"'),
+               '`Plan Code` == "SES" & `Program Code` == "SCG" & `Area_ID2` != "NG"',
+                '`Plan Code` == "SES" & `Program Code` == "SCG" & `Area_ID2` == "NG"'),
   fleet = c("Access Area", "Days at Sea", "GCIFQ", "GCNGOM")
 )
 # save fleet table to FishSET DB
@@ -162,6 +168,7 @@ fleet_table(scallop0322MainDataTable,
 
 # Create fleet column 
 fleet_tab_name <- list_tables(project, type = "fleet") # grab tab name
+
 
 scallop0322MainDataTable <- 
   fleet_assign(scallop0322MainDataTable, project = project, 
