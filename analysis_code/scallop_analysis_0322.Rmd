@@ -151,8 +151,8 @@ fleet_tab <- data.frame(
   
   condition = c('`Plan Code` == "SES" & `Program Code` == "SAA"',
                 '`Plan Code` == "SES" & `Program Code` == "SCA"',
-                '`Plan Code` == "SES" & `Program Code` == "SCG" &substr(`Area Identifier`,1,2)!="NG")',
-                '`Plan Code` == "SES" & `Program Code` == "SCG" &substr(`Area Identifier`,1,2)="NG")',
+               '`Plan Code` == "SES" & `Program Code` == "SCG" & `Area Identifier` != "NG"',
+                '`Plan Code` == "SES" & `Program Code` == "SCG" & `Area Identifier` == "NG"'),
   fleet = c("Access Area", "Days at Sea", "GCIFQ", "GCNGOM")
 )
 # save fleet table to FishSET DB
