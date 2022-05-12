@@ -52,7 +52,6 @@ library(here)
 
 here::i_am("analysis_code/scallop_analysis_0322.Rmd")
 
-AA_DAS_only <- TRUE
 # helper functions
 source(here("analysis_code", "format_helpers.R"))
 ```
@@ -177,8 +176,8 @@ scallop0322MainDataTable <-
 
 ### Subset
 
-By setting this code chunk to eval=TRUE, all of the statistics from this point forward are just for the Limited Access Fleet, which takes Access Area and Days-at-Sea trips. Currently set to `r AA_DAS_only`.
-```{r retain_AA_DAS, eval=AA_DAS_only}
+By setting this code chunk to eval=TRUE, all of the statistics from this point forward are just for the Limited Access Fleet, which takes Access Area and Days-at-Sea trips. Currently set to `r params$AA_DAS_only`.
+```{r retain_AA_DAS, eval=params$AA_DAS_only}
 
 scallop0322MainDataTable <- 
   scallop0322MainDataTable %>% 
