@@ -194,10 +194,10 @@ summary_stats(scallop0322MainDataTable, project) %>%
   pretty_tab_sb()
 ```
 
-Here is DOLLAR, MEAT_POUNDS, and TRIP_LENGTH separately. 
+Here is DOLLAR, POUNDS, and TRIP_LENGTH separately. 
 ```{r}
 scallop0322MainDataTable %>% 
-  summarize(across(.cols = c("DOLLAR", "MEAT_POUNDS", "TRIP_LENGTH"), 
+  summarize(across(.cols = c("DOLLAR", "POUNDS", "TRIP_LENGTH"), 
                    .fns = list(min = min, median = median, mean = mean, max = max, 
                                NAs = ~sum(is.na(.x)), UniqueObs = n_distinct, 
                                "No. 0's" = ~sum(.x == 0)), 
