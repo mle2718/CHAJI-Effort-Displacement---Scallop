@@ -207,7 +207,7 @@ scallop0322MainDataTable$POUNDS<-NULL
 scallop0322MainDataTable$LANDED<-NULL
 
 #### all = FALSE is used to keep only rows that match from the data frames
-scallop0322MainDataTable <- merge(scallop0322MainDataTable,Agg_DOL_POUN_LAND, by.x = "TRIPID", by.y = "TRIPID", all.x = TRUE, all.y = FALSE)
+scallop0322MainDataTable <- left_join(scallop0322MainDataTable, Agg_DOL_POUN_LAND, by = "TRIPID")
 
 ### 3.Parse out Maximum Dollar amounts in order to drop lesser subtrips
 scallop0322MainDataTable <- scallop0322MainDataTable %>% 
