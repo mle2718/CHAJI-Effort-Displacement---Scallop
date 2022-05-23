@@ -9,7 +9,8 @@ output:
     toc_float: true
     code_folding: show
 params:
-    AA_DAS_only: TRUE
+    AA_DAS_only: FALSE
+    LA_GCIFQ_only: TRUE
 ---
 
 ## Introduction
@@ -149,17 +150,36 @@ We will want to do this before the rest of the QA/QC. There are always lots of b
 scallop0322MainDataTable <-
   scallop0322MainDataTable %>% 
   mutate(`Area_ID2` = substr(`Area Identifier`, 1, 2))
+```
 
 
+```{r eval=params$AA_DAS_only}
 # create fleet table
 fleet_tab <- data.frame(
   
   condition = c('`Plan Code` == "SES" & `Program Code` == "SAA"',
                 '`Plan Code` == "SES" & `Program Code` == "SCA"',
-               '`Plan Code` == "SES" & `Program Code` == "SCG" & `Area_ID2` != "NG"',
+                '`Plan Code` == "SES" & `Program Code` == "SCG" & `Area_ID2` != "NG"',
                 '`Plan Code` == "SES" & `Program Code` == "SCG" & `Area_ID2` == "NG"'),
   fleet = c("Access Area", "Days at Sea", "GCIFQ", "GCNGOM")
 )
+```
+
+
+```{r eval=params$LA_GCIFQ_only}
+fleet_tab <- data.frame(
+  
+  condition = c('`Plan Code` == "SES" & `Program Code` == "SAA" | 
+                `Plan Code` == "SES" & `Program Code` == "SCA"',
+                '`Plan Code` == "SES" & `Program Code` == "SCG" & `Area_ID2` != "NG"',
+                '`Plan Code` == "SES" & `Program Code` == "SCG" & `Area_ID2` == "NG"'),
+  fleet = c("Limited Access", "GCIFQ", "GCNGOM")
+)
+```
+
+
+
+```{r}
 # save fleet table to FishSET DB
 fleet_table(scallop0322MainDataTable, 
             project = project,
@@ -174,14 +194,31 @@ scallop0322MainDataTable <-
                fleet_tab = fleet_tab_name)
 ```
 
+<br><br>
+
 ### Subset
 
-By setting this code chunk to eval=TRUE, all of the statistics from this point forward are just for the Limited Access Fleet, which takes Access Area and Days-at-Sea trips. Currently set to `r params$AA_DAS_only`.
+By setting this code chunk to eval=TRUE, all of the statistics from this point forward 
+are just for the Limited Access Fleet, which takes Access Area and Days-at-Sea trips. 
+Currently set to `r params$AA_DAS_only`.
 ```{r retain_AA_DAS, eval=params$AA_DAS_only}
 
 scallop0322MainDataTable <- 
   scallop0322MainDataTable %>% 
   filter(fleet == "Access Area" | fleet == "Days at Sea")
+
+```
+
+<br><br>
+
+By setting this code chunk to eval=TRUE, all of the statistics from this point forward 
+are for the Limited Access and General Category IFQ fleets. Currently set to 
+`r params$LA_GCIFQ_only`.
+```{r retain_LA_GCIFQ, eval=params$LA_GCIFQ_only}
+
+scallop0322MainDataTable <- 
+  scallop0322MainDataTable %>% 
+  filter(fleet == "Limited Access" | fleet == "GCIFQ")
 
 ```
 <br><br><br>
@@ -329,6 +366,18 @@ scallop0322MainDataTable <-
 ```
 <br><br>
 
+#### CPUE Percent Rank
+Add a percent rank column to filter outliers.
+```{r}
+outlier_table(scallop0322MainDataTable, project, x = "CPUE")
+
+scallop0322MainDataTable <- 
+  scallop0322MainDataTable %>% 
+  mutate(CPUE_p = percent_rank(CPUE))
+```
+
+<br><br>
+
 ### VPUE
 Same as above but with revenue instead of meat pounds. 
 ```{r}
@@ -342,6 +391,19 @@ scallop0322MainDataTable <-
   scallop0322MainDataTable %>% 
   filter(!is.infinite(VPUE))
 ```
+<br><br>
+
+#### VPUE Percent Rank
+
+Add a percent rank column to filter outliers.
+```{r}
+outlier_table(scallop0322MainDataTable, project, x = "VPUE")
+
+scallop0322MainDataTable <- 
+  scallop0322MainDataTable %>% 
+  mutate(VPUE_p = percent_rank(VPUE))
+```
+
 <br><br>
 
 ### Top 10 Ports
@@ -382,6 +444,7 @@ scallop0322MainDataTable <-
                     lon.dat = "DDLON",
                     lat.dat = "DDLAT", 
                     cat = "MN10SQID",
+                    name = "ZoneID",
                     closest.pt = FALSE,
                     hull.polygon = FALSE)
 ```
@@ -410,10 +473,11 @@ scallop0322MainDataTable <-
                     lon.dat = "DDLON",
                     lat.dat = "DDLAT", 
                     cat = "NAME",
+                    name = "closeID",
                     closest.pt = FALSE,
                     hull.polygon = FALSE) 
 
-names(scallop0322MainDataTable)[ncol(scallop0322MainDataTable)] <- "closeID"
+# names(scallop0322MainDataTable)[ncol(scallop0322MainDataTable)] <- "closeID"
 
 scallop0322MainDataTable <- 
   scallop0322MainDataTable %>% 
@@ -659,8 +723,9 @@ zone_out$table %>%
 
 <br><br><br>
 
+
 Median catch (meats General Category IFQ fleet).
-```{r eval=!AA_DAS_only, echo=!AA_DAS_only}
+```{r eval=params$LA_GCIFQ_only, echo=params$LA_GCIFQ_only}
 zone_out <- 
   scallop0322MainDataTable %>% 
   filter(fleet == "GCIFQ") %>% 
@@ -705,7 +770,7 @@ zone_out$table %>%
 
 Percent of total catch (meats) within Access Area fleet. 
 
-```{r}
+```{r eval=params$AA_DAS_only}
 zone_out <- 
   scallop0322MainDataTable %>% 
   filter(fleet == "Access Area") %>% 
@@ -819,7 +884,9 @@ zone_out$table %>%
 Average CPUE for all observations.
 ```{r}
 zone_out <- 
-  zone_summary(scallop0322MainDataTable, project = project,
+  scallop0322MainDataTable %>% 
+  filter(CPUE_p >= .025 & CPUE_p <= .975) %>% 
+  zone_summary(project = project,
            spat = scallop0322TenMNSQRSpatTable, 
            lon.dat = "DDLON",
            lat.dat = "DDLAT", 
@@ -827,7 +894,8 @@ zone_out <-
            zone.spat = "MN10SQID",
            count = FALSE,
            var = "CPUE", fun = "mean",
-           breaks = c(seq(0, 2e4, 2e3), seq(3e4, 9e4, 3e4)), 
+           # breaks = c(seq(0, 2e4, 2e3), seq(3e4, 9e4, 3e4)), 
+           breaks = c(1e3, 2.5e3, seq(5e3, 3e4, 5e3)),
            na.rm = TRUE, output = "tab_plot")
 zone_out$plot
 zone_out$table %>% 
@@ -840,7 +908,9 @@ zone_out$table %>%
 Average CPUE by fleet.
 ```{r}
 zone_out <- 
-  zone_summary(scallop0322MainDataTable, project = project,
+  scallop0322MainDataTable %>% 
+  filter(CPUE_p >= .025 & CPUE_p <= .975) %>% 
+  zone_summary(project = project,
            spat = scallop0322TenMNSQRSpatTable, 
            lon.dat = "DDLON",
            lat.dat = "DDLAT", 
@@ -849,6 +919,7 @@ zone_out <-
            count = FALSE,
            var = "CPUE", fun = "mean", group = "fleet",
            # breaks = c(seq(0, 2e4, 2e3), seq(3e4, 9e4, 3e4)), 
+            breaks = c(1e3, 2.5e3, seq(5e3, 3e4, 5e3)),
            na.rm = TRUE, output = "tab_plot")
 zone_out$plot
 zone_out$table %>% 
@@ -862,7 +933,9 @@ zone_out$table %>%
 Average VPUE for all observations.
 ```{r}
 zone_out <- 
-  zone_summary(scallop0322MainDataTable, project = project,
+  scallop0322MainDataTable %>% 
+  filter(VPUE_p >= .025 & VPUE_p <= .975) %>% 
+  zone_summary(project = project,
            spat = scallop0322TenMNSQRSpatTable, 
            lon.dat = "DDLON",
            lat.dat = "DDLAT", 
@@ -870,7 +943,8 @@ zone_out <-
            zone.spat = "MN10SQID",
            count = FALSE,
            var = "VPUE", fun = "mean",
-           breaks = c(seq(0, 2e4, 2e3), seq(3e4, 9e4, 3e4)),
+           # breaks = c(seq(0, 2e4, 2e3), seq(3e4, 9e4, 3e4)),
+            breaks = c(1e3, 2.5e3, seq(5e3, 3.5e4, 5e3)),
            na.rm = TRUE, output = "tab_plot")
 zone_out$plot
 zone_out$table %>% 
@@ -884,7 +958,9 @@ zone_out$table %>%
 Average VPUE by fleet.
 ```{r}
 zone_out <- 
-  zone_summary(scallop0322MainDataTable, project = project,
+    scallop0322MainDataTable %>% 
+  filter(VPUE_p >= .025 & VPUE_p <= .975) %>% 
+  zone_summary(project = project,
            spat = scallop0322TenMNSQRSpatTable, 
            lon.dat = "DDLON",
            lat.dat = "DDLAT", 
@@ -893,6 +969,7 @@ zone_out <-
            count = FALSE,
            var = "VPUE", fun = "mean", group = "fleet",
            # breaks = c(seq(0, 2e4, 2e3), seq(3e4, 9e4, 3e4)),
+           breaks = c(1e3, 2.5e3, seq(5e3, 3.5e4, 5e3)),
            na.rm = TRUE, output = "tab_plot")
 zone_out$plot
 zone_out$table %>% 
@@ -1161,7 +1238,9 @@ agg_helper(scallop0322MainDataTable, "TRIP_LENGTH",
 Average CPUE per closure area.
 ```{r}
 zone_out <- 
-zone_summary(scallop0322MainDataTable, project = project,
+    scallop0322MainDataTable %>% 
+  filter(CPUE_p >= .025 & CPUE_p <= .975) %>% 
+zone_summary(project = project,
          spat = scallop0322WindCloseSpatTable, 
          lon.dat = "DDLON",
          lat.dat = "DDLAT", 
@@ -1170,6 +1249,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          var = "CPUE",
          fun = "mean",
          count = FALSE,
+         breaks = seq(2e3, 2.2e4, 2e3),
          na.rm = TRUE, dat.center = FALSE, 
          output = "tab_plot")
 
@@ -1184,8 +1264,10 @@ zone_out$plot
 
 Average CPUE by fleet.
 ```{r}
-zone_out <- 
-zone_summary(scallop0322MainDataTable, project = project,
+zone_out <-
+    scallop0322MainDataTable %>% 
+  filter(CPUE_p >= .025 & CPUE_p <= .975) %>% 
+zone_summary(project = project,
          spat = scallop0322WindCloseSpatTable, 
          lon.dat = "DDLON",
          lat.dat = "DDLAT", 
@@ -1208,7 +1290,9 @@ zone_out$plot
 
 Average CPUE by year. 
 ```{r}
-agg_helper(scallop0322MainDataTable, "CPUE", 
+  scallop0322MainDataTable %>% 
+  filter(CPUE_p >= .025 & CPUE_p <= .975) %>% 
+agg_helper(value = "CPUE", 
             group = c("DB_LANDING_YEAR", "closeID"), 
             fun = "mean") %>% 
   pivot_wider(names_from = DB_LANDING_YEAR, 
@@ -1224,7 +1308,9 @@ agg_helper(scallop0322MainDataTable, "CPUE",
 Average VPUE per closure area.
 ```{r}
 zone_out <- 
-zone_summary(scallop0322MainDataTable, project = project,
+    scallop0322MainDataTable %>% 
+  filter(VPUE_p >= .025 & VPUE_p <= .975) %>% 
+zone_summary(project = project,
          spat = scallop0322WindCloseSpatTable, 
          lon.dat = "DDLON",
          lat.dat = "DDLAT", 
@@ -1248,7 +1334,9 @@ zone_out$plot
 Average VPUE per closure area. 
 ```{r}
 zone_out <- 
-zone_summary(scallop0322MainDataTable, project = project,
+    scallop0322MainDataTable %>% 
+  filter(VPUE_p >= .025 & VPUE_p <= .975) %>% 
+zone_summary(project = project,
          spat = scallop0322WindCloseSpatTable, 
          lon.dat = "DDLON",
          lat.dat = "DDLAT", 
@@ -1271,7 +1359,9 @@ zone_out$plot
 
 Average VPUE by year. 
 ```{r}
-agg_helper(scallop0322MainDataTable, "VPUE", 
+  scallop0322MainDataTable %>% 
+  filter(VPUE_p >= .025 & VPUE_p <= .975) %>% 
+agg_helper(value = "VPUE", 
             group = c("DB_LANDING_YEAR", "closeID"), 
             fun = "mean") %>% 
   pivot_wider(names_from = DB_LANDING_YEAR, 
@@ -1446,6 +1536,57 @@ outlier_plot(scallop0322MainDataTable, project,
 outlier_plot(scallop0322MainDataTable, project,
              x = "TRIP_COST_WINSOR_2020_DOL", 
              dat.remove = "mean_3SD",
+             x.dist = "normal",
+             output.screen = TRUE)
+```
+
+<br><br>
+
+
+### CPUE
+
+```{r}
+outlier_table(scallop0322MainDataTable, project, x = "CPUE") %>% 
+  pretty_lab() %>% 
+  pretty_tab()
+```
+
+```{r}
+outlier_plot(scallop0322MainDataTable, project,
+             x = "CPUE", 
+             dat.remove = "none",
+             x.dist = "normal",
+             output.screen = TRUE)
+```
+
+```{r}
+outlier_plot(scallop0322MainDataTable, project,
+             x = "CPUE", 
+             dat.remove = "5_95_quant",
+             x.dist = "normal",
+             output.screen = TRUE)
+```
+
+### VPUE
+
+```{r}
+outlier_table(scallop0322MainDataTable, project, x = "VPUE") %>% 
+  pretty_lab() %>% 
+  pretty_tab()
+```
+
+```{r}
+outlier_plot(scallop0322MainDataTable, project,
+             x = "VPUE", 
+             dat.remove = "none",
+             x.dist = "normal",
+             output.screen = TRUE)
+```
+
+```{r}
+outlier_plot(scallop0322MainDataTable, project,
+             x = "VPUE", 
+             dat.remove = "5_95_quant",
              x.dist = "normal",
              output.screen = TRUE)
 ```
