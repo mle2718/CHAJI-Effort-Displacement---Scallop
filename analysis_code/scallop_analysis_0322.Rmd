@@ -186,6 +186,42 @@ scallop0322MainDataTable <-
 ```
 <br><br><br>
 
+## Aggregate subtrips to trips
+
+We are now pulling subtrips along to the end instead of aggregating.  If you want to contract multi-area or multi-gear trips down to a single observation, this is how you would do it.
+
+```{r construct_trip_aggregates, echo=TRUE, eval=TRUE}
+### 1. Aggregate DOLLAR, POUNDS, LANDED variables of the same name,which is totally sketchy.
+Agg_DOL_POUN_LAND <- scallop0322MainDataTable %>%
+  group_by(TRIPID) %>%
+  summarise(DOLLAR = sum(DOLLAR), POUNDS = sum(POUNDS), LANDED = sum(LANDED))
+ 
+#### Testing to make sure there are no duplicates in TRIPID groups; this should equal 0
+sum(duplicated(Agg_DOL_POUN_LAND$TRIPID))
+stopifnot(sum(duplicated(Agg_DOL_POUN_LAND$TRIPID))==0)
+
+###  2. Add back into original data set 
+#Force drop the DOLLAR, POUNDS, and LANDED columns
+scallop0322MainDataTable$DOLLAR<-NULL
+scallop0322MainDataTable$POUNDS<-NULL
+scallop0322MainDataTable$LANDED<-NULL
+
+#### all = FALSE is used to keep only rows that match from the data frames
+scallop0322MainDataTable <- merge(scallop0322MainDataTable,Agg_DOL_POUN_LAND, by.x = "TRIPID", by.y = "TRIPID", all.x = TRUE, all.y = FALSE)
+
+### 3.Parse out Maximum Dollar amounts in order to drop lesser subtrips
+scallop0322MainDataTable <- scallop0322MainDataTable %>% 
+  group_by(TRIPID) %>% 
+  filter(DOLLAR == max(DOLLAR))
+
+## Test out 
+sum(duplicated(scallop0322MainDataTable$TRIPID))
+stopifnot(sum(duplicated(scallop0322MainDataTable$TRIPID))==0)
+rm(Agg_DOL_POUN_LAND)
+```
+
+
+
 
 
 ### summary table
