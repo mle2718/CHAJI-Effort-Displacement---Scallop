@@ -188,7 +188,7 @@ scallop0322MainDataTable <-
 
 ## Aggregate subtrips to trips
 
-We are now pulling subtrips along to the end instead of aggregating.  If you want to contract multi-area or multi-gear trips down to a single observation, this is how you would do it.
+The input data ``final_product_lease`` contains subtrips, not trips. This code chunk contracts trips to a single row, applying subtrip attributes for the most valuable subtrip (``max(DOLLAR)``)to the entire trip.
 
 ```{r construct_trip_aggregates, echo=TRUE, eval=TRUE}
 ### 1. Aggregate DOLLAR, POUNDS, LANDED variables of the same name,which is totally sketchy.
