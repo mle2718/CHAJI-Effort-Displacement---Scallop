@@ -246,8 +246,8 @@ We are currently not using the VMS data directly.
 tabl <- "
 | Column  | Description           |
 |------------|:-----------------------------------------------|
-|Place|holder|
-|Place|holder|
+|TRIP_COST_2020_DOL|Trip costs, in 2020 (US GDP Implicit price deflator) dollars|
+|TRIP_COST_WINSOR_2020_DOL|Trip costs, in 2020 (US GDP Implicit price deflator) dollars|
 "
 cat(tabl) 
 ```
