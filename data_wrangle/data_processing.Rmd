@@ -396,7 +396,7 @@ VTR_DMIS_AC_Agg <- merge(VTR_DMIS_AC,Agg_DOL_POUN_LAND, by.x = "TRIPID", by.y = 
 
 
 
-### 3.Parse out Maximum Dollar amounts in order to drop lesser subtrips
+### 3.Parse out Maximum Scallop Dollar amounts in order to drop lesser subtrips
 VTR_DMIS_AC_Agg <- VTR_DMIS_AC_Agg %>% 
   group_by(TRIPID) %>%
   filter(DOLLAR == max(DOLLAR))
