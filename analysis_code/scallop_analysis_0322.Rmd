@@ -87,7 +87,7 @@ datasets_list <- gsub(".csv" ,"", datasets_list)
 vintage_string <- max(datasets_list)
 rm(datasets_list)
 
-dat_filepath <- here("data", "main", paste0("final_product_lease", vintage_string, ".Rds"))
+dat_filepath <- here("data", "main", paste0("final_product_lease_", vintage_string, ".Rds"))
 ```
 
 <br><br>
