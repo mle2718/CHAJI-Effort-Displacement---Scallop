@@ -10,6 +10,8 @@ output:
     code_folding: show
 params:
     AA_DAS_only: TRUE
+    BIN_GEARS: TRUE
+
 ---
 
 ## Introduction
@@ -187,7 +189,7 @@ scallop0322MainDataTable <-
 <br><br><br>
 
 ### Bin Gears
-```{r bin_gears}
+```{r bin_gears, eval=params$BIN_GEARS}
 
 scallop0322MainDataTable$GEARCODE_OLD<-scallop0322MainDataTable$GEARCODE
 
@@ -195,7 +197,6 @@ scallop0322MainDataTable$GEARCODE_OLD<-scallop0322MainDataTable$GEARCODE
 pat_match<-"*DREDGE*"
 reg_pat<-glob2rx(pat_match)
 scallop0322MainDataTable$GEARCODE[grep(reg_pat,scallop0322MainDataTable$GEARCODE)]<-'DREDGE'
-
 
 #Look at the GEARCODE NOW, there should be 'DREDGE', 'TRAWL-BOTTOM', and some funky stuff
 table(scallop0322MainDataTable$GEARCODE)
