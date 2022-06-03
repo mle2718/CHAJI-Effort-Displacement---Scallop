@@ -9,8 +9,8 @@ output:
     toc_float: true
     code_folding: show
 params:
-    AA_DAS_only: FALSE
-    LA_GCIFQ_only: TRUE
+    AA_DAS_only: TRUE
+    BIN_GEARS: TRUE
 ---
 
 ## Introduction
@@ -95,7 +95,9 @@ dat_filepath <- here("data", "main", paste0("final_product_lease", vintage_strin
 
 This code works on my local computer. 
 ```{r filename_by_hand, eval=TRUE}
-dat_filepath <- paste0("~/NE Scallops/data/updated/final_product_lease_2022_04_01.Rds")
+dat_filepath <- paste0("~/NE Scallops/data/updated/", 
+                       "June 22/NE NW Collab/",
+                       "final_product_lease_2022_05_25.Rds")
 ```
 
 ```{r readin_data, eval=TRUE}
@@ -166,7 +168,8 @@ fleet_tab <- data.frame(
 ```
 
 
-```{r eval=params$LA_GCIFQ_only}
+#```{r eval=!params$AA_DAS_only}
+```{r eval=FALSE}
 fleet_tab <- data.frame(
   
   condition = c('`Plan Code` == "SES" & `Program Code` == "SAA" | 
@@ -202,7 +205,6 @@ By setting this code chunk to eval=TRUE, all of the statistics from this point f
 are just for the Limited Access Fleet, which takes Access Area and Days-at-Sea trips. 
 Currently set to `r params$AA_DAS_only`.
 ```{r retain_AA_DAS, eval=params$AA_DAS_only}
-
 scallop0322MainDataTable <- 
   scallop0322MainDataTable %>% 
   filter(fleet == "Access Area" | fleet == "Days at Sea")
@@ -213,48 +215,45 @@ scallop0322MainDataTable <-
 
 By setting this code chunk to eval=TRUE, all of the statistics from this point forward 
 are for the Limited Access and General Category IFQ fleets. Currently set to 
-`r params$LA_GCIFQ_only`.
-```{r retain_LA_GCIFQ, eval=params$LA_GCIFQ_only}
-
+`r !params$AA_DAS_only`.
+#```{r retain_LA_GCIFQ, eval=!params$AA_DAS_only}
+```{r retain_LA_GCIFQ, eval=FALSE}
 scallop0322MainDataTable <- 
   scallop0322MainDataTable %>% 
-  filter(fleet == "Limited Access" | fleet == "GCIFQ")
-
+  filter(fleet == "GCIFQ")
 ```
 <br><br><br>
+
+### Bin Gears
+```{r bin_gears, eval=params$BIN_GEARS}
+scallop0322MainDataTable$GEARCODE_OLD<-scallop0322MainDataTable$GEARCODE
+#Anything with "DREDGE" in the GEARCODE will be rebinned to "DREDGE" 
+pat_match<-"*DREDGE*"
+reg_pat<-glob2rx(pat_match)
+scallop0322MainDataTable$GEARCODE[grep(reg_pat,scallop0322MainDataTable$GEARCODE)]<-'DREDGE'
+#Look at the GEARCODE NOW, there should be 'DREDGE', 'TRAWL-BOTTOM', and some funky stuff
+table(scallop0322MainDataTable$GEARCODE)
+scallop0322MainDataTable$GEARCODE[!(scallop0322MainDataTable$GEARCODE %in%c('DREDGE','TRAWL-BOTTOM'))]<-'OTHER'
+```
 
 ## Aggregate subtrips to trips
 
 The input data ``final_product_lease`` contains subtrips, not trips. This code chunk contracts trips to a single row, applying subtrip attributes for the most valuable subtrip (``max(DOLLAR)``)to the entire trip.
 
 ```{r construct_trip_aggregates, echo=TRUE, eval=TRUE}
-### 1. Aggregate DOLLAR, POUNDS, LANDED variables of the same name,which is totally sketchy.
-Agg_DOL_POUN_LAND <- scallop0322MainDataTable %>%
+# aggregate DOLLAR, POUNDS, LANDED by TRIPID and filter by max(DOLLAR)
+scallop0322MainDataTable <- 
+  scallop0322MainDataTable %>%
   group_by(TRIPID) %>%
-  summarise(DOLLAR = sum(DOLLAR), POUNDS = sum(POUNDS), LANDED = sum(LANDED))
- 
-#### Testing to make sure there are no duplicates in TRIPID groups; this should equal 0
-sum(duplicated(Agg_DOL_POUN_LAND$TRIPID))
-stopifnot(sum(duplicated(Agg_DOL_POUN_LAND$TRIPID))==0)
-
-###  2. Add back into original data set 
-#Force drop the DOLLAR, POUNDS, and LANDED columns
-scallop0322MainDataTable$DOLLAR<-NULL
-scallop0322MainDataTable$POUNDS<-NULL
-scallop0322MainDataTable$LANDED<-NULL
-
-#### all = FALSE is used to keep only rows that match from the data frames
-scallop0322MainDataTable <- left_join(scallop0322MainDataTable, Agg_DOL_POUN_LAND, by = "TRIPID")
-
-### 3.Parse out Maximum Dollar amounts in order to drop lesser subtrips
-scallop0322MainDataTable <- scallop0322MainDataTable %>% 
-  group_by(TRIPID) %>% 
-  filter(DOLLAR == max(DOLLAR))
+  mutate(Agg_DOLLAR = sum(DOLLAR), Agg_POUNDS = sum(POUNDS), Agg_LANDED = sum(LANDED)) %>% 
+  filter(DOLLAR == max(DOLLAR)) %>% 
+  select(-DOLLAR, -POUNDS, -LANDED) %>% 
+  rename(DOLLAR = "Agg_DOLLAR", POUNDS = "Agg_POUNDS", LANDED = "Agg_LANDED") %>% 
+  ungroup()
 
 ## Test out 
 sum(duplicated(scallop0322MainDataTable$TRIPID))
 stopifnot(sum(duplicated(scallop0322MainDataTable$TRIPID))==0)
-rm(Agg_DOL_POUN_LAND)
 ```
 
 
@@ -379,8 +378,8 @@ spat_qaqc_out[2:4]
 ### Finagle Live pounds to meat weights
 ```{r}
 # rename POUNDS to LIVE_POUNDS for clarity.  Convert live pounds to meat pounds.
-scallop0322MainDataTable$LIVE_POUNDS <-POUNDS
-scallop0322MainDataTable$MEAT_POUNDS <-POUNDS/8.33
+scallop0322MainDataTable$LIVE_POUNDS <- scallop0322MainDataTable$POUNDS
+scallop0322MainDataTable$MEAT_POUNDS <- scallop0322MainDataTable$POUNDS/8.33
 scallop0322MainDataTable$POUNDS <-NULL
 
 ```
@@ -513,8 +512,6 @@ scallop0322MainDataTable <-
                     closest.pt = FALSE,
                     hull.polygon = FALSE) 
 
-# names(scallop0322MainDataTable)[ncol(scallop0322MainDataTable)] <- "closeID"
-
 scallop0322MainDataTable <- 
   scallop0322MainDataTable %>% 
   mutate(in_closure = !is.na(closeID))
@@ -604,8 +601,8 @@ agg_helper(scallop0322MainDataTable, value = "in_closure",
 
 ### Frequency
 
-Zone frequency (all observations).
-```{r}
+Zone frequency (Access Area and Days at Sea fleets).
+```{r eval=params$AA_DAS_only, echo=params$AA_DAS_only}
 zone_out <- 
   zone_summary(scallop0322MainDataTable, project = project,
            spat = scallop0322TenMNSQRSpatTable, 
@@ -615,7 +612,8 @@ zone_out <-
            zone.spat = "MN10SQID",
            output = "tab_plot",
            count = TRUE,
-           breaks = NULL, n.breaks = 10, na.rm = TRUE)
+           breaks = NULL, n.breaks = 10, 
+           na.rm = TRUE)
 
 zone_out$plot
 zone_out$table %>% 
@@ -625,19 +623,97 @@ zone_out$table %>%
 
 <br><br><br>
 
-Zone Percentage.
-```{r}
+Zone frequency (Access Area fleet).
+```{r eval=params$AA_DAS_only, echo=params$AA_DAS_only}
+# TODO: check breaks
 zone_out <- 
-  zone_summary(scallop0322MainDataTable, project = project,
+  scallop0322MainDataTable %>% 
+  filter(fleet == "Access Area") %>% 
+  zone_summary(project = project,
            spat = scallop0322TenMNSQRSpatTable, 
            lon.dat = "DDLON",
            lat.dat = "DDLAT", 
            zone.dat = "ZoneID",
            zone.spat = "MN10SQID",
            output = "tab_plot",
+           count = TRUE,
+           breaks = NULL, n.breaks = 10, 
+           na.rm = TRUE)
+
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(cols = "n") %>% 
+  pretty_tab_sb(width = "40%")
+```
+
+
+<br><br><br>
+
+Zone frequency (Days at Sea fleet).
+```{r eval=params$AA_DAS_only, echo=params$AA_DAS_only}
+# TODO: check breaks
+zone_out <- 
+  scallop0322MainDataTable %>% 
+  filter(fleet == "Days at Sea") %>% 
+  zone_summary(project = project,
+           spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           output = "tab_plot",
+           count = TRUE,
+           breaks = NULL, n.breaks = 10, 
+           na.rm = TRUE)
+
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(cols = "n") %>% 
+  pretty_tab_sb(width = "40%")
+```
+
+<br><br><br>
+
+Zone frequency (GCIFQ fleet).
+```{r eval=!params$AA_DAS_only, echo=!params$AA_DAS_only}
+# TODO: check breaks
+zone_out <- 
+  scallop0322MainDataTable %>% 
+  filter(fleet == "GCIFQ") %>% 
+  zone_summary(project = project,
+           spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           output = "tab_plot",
+           count = TRUE,
+           breaks = NULL, n.breaks = 10, 
+           na.rm = TRUE)
+
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(cols = "n") %>% 
+  pretty_tab_sb(width = "40%")
+```
+
+<br><br><br>
+
+Percent of observations (Access Area and Day at Sea fleet).
+```{r eval=params$AA_DAS_only, echo=params$AA_DAS_only}
+
+zone_out <- 
+  zone_summary(scallop0322MainDataTable,
+           project = project,
+           spat = scallop0322TenMNSQRSpatTable,
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           output = "tab_plot",
            count = TRUE, fun = "percent",
-           breaks = c(seq(.1, .5, .1), seq(1, 2.5, .5)), 
-           n.breaks = 10, na.rm = TRUE)
+           breaks = c(seq(.2, .5, .1), seq(1, 2, .5)), 
+           na.rm = TRUE)
 
 zone_out$plot
 zone_out$table %>% 
@@ -645,39 +721,70 @@ zone_out$table %>%
   pretty_tab_sb(width = "40%")
 ```
 
+
 <br><br><br>
 
-Zone frequency by fleet. 
-```{r}
-zone_out <-
-  zone_summary(scallop0322MainDataTable,
-               project = project,
-               spat = scallop0322TenMNSQRSpatTable, 
-               lon.dat = "DDLON",
-               lat.dat = "DDLAT", 
-               zone.dat = "ZoneID",
-               zone.spat = "MN10SQID",
-               count = TRUE, group = "fleet",
-               output = "tab_plot",
-               breaks = NULL, n.breaks = 10, na.rm = TRUE)
+Percent of observations (Access Area fleet).
+```{r eval=params$AA_DAS_only, echo=params$AA_DAS_only}
+# TODO: check breaks
+zone_out <- 
+  scallop0322MainDataTable %>% 
+  filter(fleet == "Access Area") %>% 
+  zone_summary(project = project,
+           spat = scallop0322TenMNSQRSpatTable,
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           output = "tab_plot",
+           count = TRUE, fun = "percent",
+           # breaks = c(seq(.2, .5, .1), seq(1, 2, .5)), 
+           breaks = c(.2, 1:4),
+           na.rm = TRUE)
+
 zone_out$plot
 zone_out$table %>% 
-  pivot_wider(names_from = "fleet", 
-              values_from = "n", values_fill = 0) %>% 
   pretty_lab(ignore = "ZoneID") %>% 
-  pretty_tab_sb(width = "50%")
-
+  pretty_tab_sb(width = "40%")
 ```
 
 
 <br><br><br>
 
-Fleet share of total observations. 
+Percent of observations (Day at Sea fleet).
+```{r eval=params$AA_DAS_only, echo=params$AA_DAS_only}
+# TODO: check breaks
+zone_out <- 
+  scallop0322MainDataTable %>% 
+  filter(fleet == "Days at Sea") %>% 
+  zone_summary(project = project,
+           spat = scallop0322TenMNSQRSpatTable,
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           output = "tab_plot",
+           count = TRUE, fun = "percent",
+           breaks = c(seq(.2, .5, .1), seq(1, 2, .5)), 
+           na.rm = TRUE)
 
-```{r}
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(ignore = "ZoneID") %>% 
+  pretty_tab_sb(width = "40%")
+```
+
+
+<br><br><br>
+
+
+Percent of observations (GCIFQ fleet). 
+```{r eval=!params$AA_DAS_only, echo=!params$AA_DAS_only}
+
 zone_out <-
-  zone_summary(scallop0322MainDataTable,
-               project = project,
+  scallop0322MainDataTable %>% 
+  filter(fleet == "GCIFQ") %>% 
+  zone_summary(project = project,
                spat = scallop0322TenMNSQRSpatTable, 
                lon.dat = "DDLON",
                lat.dat = "DDLAT", 
@@ -685,7 +792,8 @@ zone_out <-
                zone.spat = "MN10SQID",
                count = TRUE, group = "fleet", fun = "percent",
                output = "tab_plot",
-               breaks = NULL, n.breaks = 10, na.rm = TRUE)
+               breaks = c(seq(.2, .5, .1), seq(1, 4, 1)), 
+               na.rm = TRUE)
 zone_out$plot
 zone_out$table %>% 
   pivot_wider(names_from = "fleet", 
@@ -694,14 +802,117 @@ zone_out$table %>%
   pretty_tab_sb()
 ```
 
+
 <br><br>
+
 
 ### Catch
 
-Average catch (meats, all observations). 
-```{r}
+Total catch for Access Area and Days at Sea fleets (meats). 
+```{r eval=params$AA_DAS_only, echo=params$AA_DAS_only}
+
 zone_out <- 
-  zone_summary(scallop0322MainDataTable, project = project,
+  zone_summary(scallop0322MainDataTable, 
+           project = project,
+           spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           count = FALSE,
+           var = "MEAT_POUNDS", fun = "sum",
+           breaks = c(1e3, 1e4, 5e4, 1e5, seq(1e6, 1.3e7, 2e6)),
+           output = "tab_plot", na.rm = TRUE)
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(cols = "MEAT_POUNDS") %>% 
+  pretty_tab_sb(width = "40%")
+```
+
+<br><br>
+
+Total catch for Access Area (meats). 
+```{r eval=params$AA_DAS_only, echo=params$AA_DAS_only}
+# TODO: edit breaks 
+zone_out <- 
+  scallop0322MainDataTable %>% 
+  filter(fleet == "Access Area") %>% 
+  zone_summary(project = project,
+           spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           count = FALSE,
+           var = "MEAT_POUNDS", fun = "sum",
+           breaks = c(500, 1000, 1e4, seq(1e5, 1e6, 2e5)),
+           output = "tab_plot", na.rm = TRUE)
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(cols = "MEAT_POUNDS") %>% 
+  pretty_tab_sb(width = "40%")
+```
+
+<br><br>
+
+Total catch for Days at Sea (meats). 
+```{r eval=params$AA_DAS_only, echo=params$AA_DAS_only}
+# TODO: edit breaks 
+zone_out <- 
+  scallop0322MainDataTable %>% 
+  filter(fleet == "Days at Sea") %>% 
+  zone_summary(project = project,
+           spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           count = FALSE,
+           var = "MEAT_POUNDS", fun = "sum",
+           breaks = c(500, 1000, 1e4, seq(1e5, 1e6, 2e5)),
+           output = "tab_plot", na.rm = TRUE)
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(cols = "MEAT_POUNDS") %>% 
+  pretty_tab_sb(width = "40%")
+```
+
+<br><br>
+
+Total catch for GCIFQ (meats, all observations). 
+```{r eval=!params$AA_DAS_only, echo=!params$AA_DAS_only}
+zone_out <- 
+  scallop0322MainDataTable %>% 
+  filter(fleet == "GCIFQ") %>% 
+  zone_summary(project = project,
+           spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           count = FALSE,
+           var = "MEAT_POUNDS", fun = "sum",
+           breaks = c(500, 1000, 1e4, seq(1e5, 1e6, 2e5)),
+           output = "tab_plot", na.rm = TRUE)
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(cols = "MEAT_POUNDS") %>% 
+  pretty_tab_sb(width = "40%")
+```
+
+
+<br><br>
+
+Average catch for Access Area and Days at Sea fleets (meats). 
+```{r eval=params$AA_DAS_only, echo=params$AA_DAS_only}
+brks <- ifelse(!params$AA_DAS_only,
+               c(100, 500, seq(1e3, 1e4, 3e3), seq(1.5e4, 4.5e4, 5e3)),
+               c(100, 500, seq(1e3, 1e4, 2e3))) # TODO: update for AA_DAS
+
+zone_out <- 
+  scallop0322MainDataTable %>% 
+  zone_summary(scallop0322MainDataTable,
+            project = project,
            spat = scallop0322TenMNSQRSpatTable, 
            lon.dat = "DDLON",
            lat.dat = "DDLAT", 
@@ -709,7 +920,7 @@ zone_out <-
            zone.spat = "MN10SQID",
            count = FALSE,
            var = "MEAT_POUNDS", fun = "mean",
-           breaks = c(100, 500, 1000, 1e4, seq(1e5, 4e5, 5e4)), 
+           # breaks = c(100, 500, seq(1e3, 1e4, 3e3), seq(1.5e4, 4.5e4, 5e3)),
            output = "tab_plot", na.rm = TRUE)
 zone_out$plot
 zone_out$table %>% 
@@ -719,8 +930,86 @@ zone_out$table %>%
 
 <br><br><br>
 
-Median catch (meats, all observations).
-```{r}
+
+Average catch for Access Area fleet (meats). 
+```{r eval=params$AA_DAS_only, echo=params$AA_DAS_only}
+# TODO: update breaks
+
+zone_out <- 
+  scallop0322MainDataTable %>% 
+  filter(fleet == "Access Area") %>% 
+  zone_summary(project = project,
+           spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           count = FALSE,
+           var = "MEAT_POUNDS", fun = "mean",
+           # breaks = c(100, 500, seq(1e3, 1e4, 3e3), seq(1.5e4, 4.5e4, 5e3)),
+           output = "tab_plot", na.rm = TRUE)
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(cols = "MEAT_POUNDS") %>% 
+  pretty_tab_sb(width = "40%")
+```
+
+
+<br><br><br>
+
+
+Average catch for Days at Sea fleet (meats). 
+```{r eval=params$AA_DAS_only, echo=params$AA_DAS_only}
+# TODO: update breaks
+
+zone_out <- 
+  scallop0322MainDataTable %>% 
+  filter(fleet == "Days at Sea") %>% 
+  zone_summary(project = project,
+           spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           count = FALSE,
+           var = "MEAT_POUNDS", fun = "mean",
+           # breaks = c(100, 500, seq(1e3, 1e4, 3e3), seq(1.5e4, 4.5e4, 5e3)),
+           output = "tab_plot", na.rm = TRUE)
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(cols = "MEAT_POUNDS") %>% 
+  pretty_tab_sb(width = "40%")
+```
+
+
+<br><br><br>
+
+
+Average catch for GCIFQ fleet (meats). 
+```{r eval=!params$AA_DAS_only, echo=!params$AA_DAS_only}
+zone_out <- 
+  scallop0322MainDataTable %>% 
+  filter(fleet == "GCIFQ") %>% 
+  zone_summary(project = project,
+           spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           count = FALSE,
+           var = "MEAT_POUNDS", fun = "mean",
+           breaks = c(100, seq(200, 1e3, 200), seq(5e3, 2.5e4, 1e4)),
+           output = "tab_plot", na.rm = TRUE)
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(cols = "MEAT_POUNDS") %>% 
+  pretty_tab_sb(width = "40%")
+```
+
+<br><br><br>
+
+Median catch (meats, Access Area and Days at Sea fleets).
+```{r eval=params$AA_DAS_only, echo=params$AA_DAS_only}
 zone_out <- 
   zone_summary(scallop0322MainDataTable, project = project,
            spat = scallop0322TenMNSQRSpatTable, 
@@ -730,41 +1019,24 @@ zone_out <-
            zone.spat = "MN10SQID",
            count = FALSE,
            var = "MEAT_POUNDS", fun = "median",
-           breaks = c(100, 500, 1000, 1e4, seq(1e5, 4e5, 5e4)),
+           # breaks = brks, 
+           # breaks = c(100, 500, seq(1e3, 1e4, 3e3), seq(1.5e4, 4.5e4, 5e3)),
+           breaks = c(100, 1e3, 2e3, 4e3, 6e3, 1e4, 1.5e4, 2e4, 1e5, 1.5e5, 2e5),
            output = "tab_plot", na.rm = TRUE)
 zone_out$plot
 zone_out$table %>% 
    pretty_lab(cols = "MEAT_POUNDS") %>% 
   pretty_tab_sb(width = "40%")
 ```
-<br><br><br>
-
-Median catch (meats) by fleet.
-```{r}
-zone_out <- 
-  zone_summary(scallop0322MainDataTable, project = project,
-           spat = scallop0322TenMNSQRSpatTable, 
-           lon.dat = "DDLON",
-           lat.dat = "DDLAT", 
-           zone.dat = "ZoneID",
-           zone.spat = "MN10SQID",
-           count = FALSE,
-           var = "MEAT_POUNDS", fun = "median", group = "fleet",
-           output = "tab_plot", na.rm = TRUE)
-zone_out$plot
-zone_out$table %>% 
-  pretty_lab(cols = "MEAT_POUNDS") %>% 
-  pretty_tab_sb(width = "40%")
-```
 
 <br><br><br>
 
-
-Median catch (meats General Category IFQ fleet).
-```{r eval=params$LA_GCIFQ_only, echo=params$LA_GCIFQ_only}
+Median catch (meats Access Area fleet).
+```{r eval=params$AA_DAS_only, echo=params$AA_DAS_only}
+# TODO: check breaks
 zone_out <- 
   scallop0322MainDataTable %>% 
-  filter(fleet == "GCIFQ") %>% 
+  filter(fleet == "Access Area") %>% 
   zone_summary(project = project,
            spat = scallop0322TenMNSQRSpatTable, 
            lon.dat = "DDLON",
@@ -783,8 +1055,59 @@ zone_out$table %>%
 
 <br><br><br>
 
-Percent of total  catch (meat) all observations. 
-```{r}
+Median catch (meats, Days at Sea fleet).
+```{r eval=params$AA_DAS_only, echo=params$AA_DAS_only}
+# TODO: check breaks
+zone_out <- 
+  scallop0322MainDataTable %>% 
+  filter(fleet == "Days at Sea") %>% 
+  zone_summary(project = project,
+           spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           count = FALSE,
+           var = "MEAT_POUNDS", fun = "median",
+           breaks = c(100, 1e3, 2e3, 4e3, 6e3, 1e4, 1.5e4, 2e4, 1e5, 1.5e5, 2e5),
+           output = "tab_plot", na.rm = TRUE)
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(cols = "MEAT_POUNDS") %>% 
+  pretty_tab_sb(width = "40%")
+```
+
+
+<br><br><br>
+
+
+Median catch (meats General Category IFQ fleet).
+```{r eval=!params$AA_DAS_only, echo=!params$AA_DAS_only}
+zone_out <- 
+  scallop0322MainDataTable %>% 
+  filter(fleet == "GCIFQ") %>% 
+  zone_summary(project = project,
+           spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           count = FALSE,
+           var = "MEAT_POUNDS", fun = "median",
+           breaks = c(100, seq(200, 1e3, 200), seq(5e3, 2.5e4, 1e4)),
+           output = "tab_plot", na.rm = TRUE)
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(cols = "MEAT_POUNDS") %>% 
+  pretty_tab_sb(width = "40%")
+```
+
+
+<br><br><br>
+
+Percent of total catch (meat) for Access Area and Days at Sea fleets. 
+```{r eval=params$AA_DAS_only, echo=params$AA_DAS_only}
+# TODO: updates breaks
 zone_out <- 
   zone_summary(scallop0322MainDataTable, project = project,
            spat = scallop0322TenMNSQRSpatTable, 
@@ -794,7 +1117,9 @@ zone_out <-
            zone.spat = "MN10SQID",
            count = FALSE,
            var = "MEAT_POUNDS", fun = "percent",
-           # breaks = seq(0, 2.4, .2),
+           # breaks = brks, 
+           breaks = seq(0, 2, .2),
+           bin_colors = c("white", viridis::viridis(10)),
            output = "tab_plot", na.rm = TRUE)
 zone_out$plot
 zone_out$table %>% 
@@ -806,10 +1131,38 @@ zone_out$table %>%
 
 Percent of total catch (meats) within Access Area fleet. 
 
-```{r eval=params$AA_DAS_only}
+```{r eval=params$AA_DAS_only, echo=params$AA_DAS_only}
+# TODO: update breaks
 zone_out <- 
   scallop0322MainDataTable %>% 
   filter(fleet == "Access Area") %>% 
+  zone_summary(project = project,
+               spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           count = FALSE,
+           var = "MEAT_POUNDS", fun = "percent",
+           # breaks = seq(0, 2.4, .2),
+           breaks = c(seq(0, .8, .2), seq(1, 2, .5)),
+           bin_colors = c("white", viridis::viridis(7)),
+           output = "tab_plot", na.rm = TRUE)
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(cols = c("MEAT_POUNDS", "MEAT_POUNDS_perc"), type = "scientific") %>%
+  pretty_tab_sb(width = "40%")
+```
+
+<br><br><br>
+
+Percent of total catch (meats) within Days at Sea fleet. 
+
+```{r eval=params$AA_DAS_only, echo=params$AA_DAS_only}
+# TODO: update breaks
+zone_out <- 
+  scallop0322MainDataTable %>% 
+  filter(fleet == "Days at Sea") %>% 
   zone_summary(project = project,
                spat = scallop0322TenMNSQRSpatTable, 
            lon.dat = "DDLON",
@@ -828,10 +1181,37 @@ zone_out$table %>%
 
 <br><br><br>
 
+Percent of total catch (meats) within GCIFQ fleet. 
+
+```{r eval=!params$AA_DAS_only, echo=!params$AA_DAS_only}
+zone_out <- 
+  scallop0322MainDataTable %>% 
+  filter(fleet == "GCIFQ") %>% 
+  zone_summary(project = project,
+               spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           count = FALSE,
+           var = "MEAT_POUNDS", fun = "percent",
+           breaks = c(seq(0, 1, .2), 2:4),
+           bin_colors = c("white", viridis::viridis(8)),
+           output = "tab_plot", na.rm = TRUE)
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(cols = c("MEAT_POUNDS", "MEAT_POUNDS_perc"), type = "scientific") %>%
+  pretty_tab_sb(width = "40%")
+```
+
+<br><br><br>
+
+
 ### Trip Length
 
-Average trip length.
-```{r}
+Average trip length for Access Area and Days at Sea fleet.
+```{r eval=params$AA_DAS_only, echo=params$AA_DAS_only}
+# TODO: update breaks 
 zone_out <- 
   zone_summary(scallop0322MainDataTable, project = project,
            spat = scallop0322TenMNSQRSpatTable, 
@@ -841,7 +1221,8 @@ zone_out <-
            zone.spat = "MN10SQID",
            count = FALSE,
            var = "TRIP_LENGTH", fun = "mean",
-           breaks = c(1, seq(2, 16, 2)),
+           breaks = c(2, 4, seq(6, 12, 1)),
+           # breaks = c(1, seq(2, 14, 2)),
            output = "tab_plot", na.rm = TRUE)
 zone_out$plot
 zone_out$table %>% 
@@ -849,12 +1230,16 @@ zone_out$table %>%
   pretty_tab_sb(width = "40%")
 ```
 
+
 <br><br><br>
 
-Average trip length by fleet.
-```{r}
+
+Average trip length for Access Area fleet.
+```{r eval=params$AA_DAS_only, echo=params$AA_DAS_only}
 zone_out <- 
-  zone_summary(scallop0322MainDataTable, project = project,
+  scallop0322MainDataTable %>% 
+  filter(fleet == "Access Area") %>% 
+  zone_summary(project = project,
            spat = scallop0322TenMNSQRSpatTable, 
            lon.dat = "DDLON",
            lat.dat = "DDLAT", 
@@ -862,7 +1247,7 @@ zone_out <-
            zone.spat = "MN10SQID",
            count = FALSE,
            var = "TRIP_LENGTH", fun = "mean", group = "fleet",
-           # breaks = c(1, seq(2, 16, 2)),
+           breaks = c(1, seq(2, 14, 2)),
            output = "tab_plot", na.rm = TRUE)
 zone_out$plot
 zone_out$table %>% 
@@ -872,9 +1257,63 @@ zone_out$table %>%
 
 <br><br><br>
 
-Percent of total trip length. This is summing  trip lengths by zone and dividing 
+
+Average trip length for Days at Sea fleet.
+```{r eval=params$AA_DAS_only, echo=params$AA_DAS_only}
+zone_out <- 
+  scallop0322MainDataTable %>% 
+  filter(fleet == "Days at Sea") %>% 
+  zone_summary(project = project,
+           spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           count = FALSE,
+           var = "TRIP_LENGTH", fun = "mean", group = "fleet",
+           breaks = c(1, seq(2, 14, 2)),
+           output = "tab_plot", na.rm = TRUE)
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(cols = "TRIP_LENGTH", type = "decimal") %>% 
+  pretty_tab_sb(width = "40%")
+```
+
+
+
+<br><br><br>
+
+
+Average trip length for GCIFQ fleet.
+```{r eval=!params$AA_DAS_only, echo=!params$AA_DAS_only}
+zone_out <- 
+  scallop0322MainDataTable %>% 
+  filter(fleet == "GCIFQ") %>% 
+  zone_summary(project = project,
+           spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           count = FALSE,
+           var = "TRIP_LENGTH", fun = "mean", group = "fleet",
+           breaks = c(seq(.5, 3, .5), 5, 10),
+           output = "tab_plot", na.rm = TRUE)
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(cols = "TRIP_LENGTH", type = "decimal") %>% 
+  pretty_tab_sb(width = "40%")
+```
+
+
+
+
+<br><br><br>
+
+Percent of total trip length for Access Area and Days at Sea fleets. This is summing  trip lengths by zone and dividing 
 by total trip length. Working on fixing the legend labels. 
-```{r}
+```{r eval=params$AA_DAS_only, echo=params$$AA_DAS_only}
+# TODO: check breaks for AA_DAS 
 zone_out <- 
   zone_summary(scallop0322MainDataTable, project = project,
            spat = scallop0322TenMNSQRSpatTable, 
@@ -884,20 +1323,27 @@ zone_out <-
            zone.spat = "MN10SQID",
            count = FALSE,
            var = "TRIP_LENGTH", fun = "percent",
+           breaks = c(seq(0 , 1, .2), 2:4), 
+           bin_colors = c("white", viridis::viridis(8, option = "H")),
            na.rm = TRUE, output = "tab_plot")
 zone_out$plot
 zone_out$table %>% 
   pretty_lab(cols = "TRIP_LENGTH") %>% 
-  pretty_lab(cols = "TRIP_LENGTH_perc", type = "scientific") %>% 
+  pretty_lab(cols = "TRIP_LENGTH_perc", type = "decimal") %>% 
   pretty_tab_sb(width = "50%")
 ```
 
+
 <br><br><br>
 
-Share of trip length by fleet.
-```{r}
+
+Share of trip length (Access Area fleet).
+```{r eval=params$AA_DAS_only, echo=params$AA_DAS_only}
+# TODO: check breaks
 zone_out <- 
-  zone_summary(scallop0322MainDataTable, project = project,
+  scallop0322MainDataTable %>% 
+  filter(fleet == "Access Area") %>% 
+  zone_summary(project = project,
            spat = scallop0322TenMNSQRSpatTable, 
            lon.dat = "DDLON",
            lat.dat = "DDLAT", 
@@ -909,19 +1355,73 @@ zone_out <-
 zone_out$plot
 zone_out$table %>% 
   pretty_lab(cols = "TRIP_LENGTH") %>% 
-  pretty_lab(cols = "TRIP_LENGTH_perc", type = "scientific") %>% 
+  pretty_lab(cols = "TRIP_LENGTH_perc", type = "decimal") %>% 
   pretty_tab_sb(width = "50%")
 ```
+
+
+<br><br><br>
+
+Share of trip length (Days at Sea fleet).
+```{r eval=params$AA_DAS_only, echo=params$AA_DAS_only}
+# TODO: check breaks
+zone_out <- 
+  scallop0322MainDataTable %>% 
+  filter(fleet == "Days at Sea") %>% 
+  zone_summary(project = project,
+           spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           count = FALSE,
+           var = "TRIP_LENGTH", fun = "percent", group = "fleet",
+           na.rm = TRUE, output = "tab_plot")
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(cols = "TRIP_LENGTH") %>% 
+  pretty_lab(cols = "TRIP_LENGTH_perc", type = "decimal") %>% 
+  pretty_tab_sb(width = "50%")
+```
+
+
+<br><br><br>
+
+
+Share of trip length (GCIFQ fleet).
+```{r eval=!params$AA_DAS_only, echo=!params$AA_DAS_only}
+zone_out <- 
+  scallop0322MainDataTable %>% 
+  filter(fleet == "GCIFQ") %>% 
+  zone_summary(project = project,
+           spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           count = FALSE,
+           var = "TRIP_LENGTH", fun = "percent", group = "fleet",
+           breaks = c(seq(0 , 1, .2), 2:4), 
+           bin_colors = c("white", viridis::viridis(8, option = "H")),
+           na.rm = TRUE, output = "tab_plot")
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(cols = "TRIP_LENGTH") %>% 
+  pretty_lab(cols = "TRIP_LENGTH_perc", type = "decimal") %>% 
+  pretty_tab_sb(width = "50%")
+```
+
 
 <br><br>
 
 ### CPUE
 
-Average CPUE for all observations.
-```{r}
+Average CPUE for Access Area and Days at Sea fleets.
+```{r eval = params$AA_DAS_only, echo=params$AA_DAS_only}
+
 zone_out <- 
   scallop0322MainDataTable %>% 
-  filter(CPUE_p >= .025 & CPUE_p <= .975) %>% 
+  filter(CPUE_p >= .025 & CPUE_p <= .975) %>%
   zone_summary(project = project,
            spat = scallop0322TenMNSQRSpatTable, 
            lon.dat = "DDLON",
@@ -930,8 +1430,59 @@ zone_out <-
            zone.spat = "MN10SQID",
            count = FALSE,
            var = "CPUE", fun = "mean",
-           # breaks = c(seq(0, 2e4, 2e3), seq(3e4, 9e4, 3e4)), 
-           breaks = c(1e3, 2.5e3, seq(5e3, 3e4, 5e3)),
+           breaks = c(seq(1e3, 3e3, 250)),
+           na.rm = TRUE, output = "tab_plot")
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(cols = "CPUE") %>%
+  pretty_tab_sb(width = "50%")
+```
+
+
+<br><br><br>
+
+Average CPUE for Access Area fleet.
+```{r eval = params$AA_DAS_only, echo=params$AA_DAS_only}
+# TODO: check breaks
+zone_out <- 
+  scallop0322MainDataTable %>% 
+  filter(CPUE_p >= .025 & CPUE_p <= .975) %>%
+  filter(fleet == "Access Area") %>% 
+  zone_summary(project = project,
+           spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           count = FALSE,
+           var = "CPUE", fun = "mean",
+           # breaks = c(seq(250, 1e3, 250), seq(1.5e3, 3e3, 500)),
+           na.rm = TRUE, output = "tab_plot")
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(cols = "CPUE") %>%
+  pretty_tab_sb(width = "50%")
+```
+
+
+<br><br><br>
+
+Average CPUE for Days at Sea fleet.
+```{r eval = params$AA_DAS_only, echo=params$AA_DAS_only}
+# TODO: check breaks
+zone_out <- 
+  scallop0322MainDataTable %>% 
+  filter(CPUE_p >= .025 & CPUE_p <= .975) %>%
+  filter(fleet == "Days at Sea") %>% 
+  zone_summary(project = project,
+           spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           count = FALSE,
+           var = "CPUE", fun = "mean",
+           # breaks = c(seq(250, 1e3, 250), seq(1.5e3, 3e3, 500)),
            na.rm = TRUE, output = "tab_plot")
 zone_out$plot
 zone_out$table %>% 
@@ -941,11 +1492,13 @@ zone_out$table %>%
 
 <br><br><br>
 
-Average CPUE by fleet.
-```{r}
+Average CPUE for GCIFQ fleet.
+```{r eval=!params$AA_DAS_only, echo=!params$AA_DAS_only}
+
 zone_out <- 
   scallop0322MainDataTable %>% 
-  filter(CPUE_p >= .025 & CPUE_p <= .975) %>% 
+  filter(CPUE_p >= .025 & CPUE_p <= .975) %>%
+  filter(fleet == "GCIFQ") %>% 
   zone_summary(project = project,
            spat = scallop0322TenMNSQRSpatTable, 
            lon.dat = "DDLON",
@@ -953,9 +1506,8 @@ zone_out <-
            zone.dat = "ZoneID",
            zone.spat = "MN10SQID",
            count = FALSE,
-           var = "CPUE", fun = "mean", group = "fleet",
-           # breaks = c(seq(0, 2e4, 2e3), seq(3e4, 9e4, 3e4)), 
-            breaks = c(1e3, 2.5e3, seq(5e3, 3e4, 5e3)),
+           var = "CPUE", fun = "mean",
+           breaks = c(seq(250, 1e3, 250), seq(1.5e3, 3e3, 500)),
            na.rm = TRUE, output = "tab_plot")
 zone_out$plot
 zone_out$table %>% 
@@ -966,8 +1518,9 @@ zone_out$table %>%
 ### VPUE
 
 
-Average VPUE for all observations.
-```{r}
+Average VPUE for Access Area and Days at Sea fleets.
+```{r eval = params$AA_DAS_only, echo=params$AA_DAS_only}
+
 zone_out <- 
   scallop0322MainDataTable %>% 
   filter(VPUE_p >= .025 & VPUE_p <= .975) %>% 
@@ -980,7 +1533,7 @@ zone_out <-
            count = FALSE,
            var = "VPUE", fun = "mean",
            # breaks = c(seq(0, 2e4, 2e3), seq(3e4, 9e4, 3e4)),
-            breaks = c(1e3, 2.5e3, seq(5e3, 3.5e4, 5e3)),
+           breaks = c(1e3, 2.5e3, seq(5e3, 3.5e4, 5e3)),
            na.rm = TRUE, output = "tab_plot")
 zone_out$plot
 zone_out$table %>% 
@@ -991,11 +1544,13 @@ zone_out$table %>%
 
 <br><br><br>
 
-Average VPUE by fleet.
-```{r}
+Average VPUE for Access Area fleet. 
+```{r eval = params$AA_DAS_only, echo=params$AA_DAS_only}
+# TODO: update breaks
 zone_out <- 
-    scallop0322MainDataTable %>% 
+  scallop0322MainDataTable %>% 
   filter(VPUE_p >= .025 & VPUE_p <= .975) %>% 
+  filter(fleet == "Access Area") %>% 
   zone_summary(project = project,
            spat = scallop0322TenMNSQRSpatTable, 
            lon.dat = "DDLON",
@@ -1003,7 +1558,7 @@ zone_out <-
            zone.dat = "ZoneID",
            zone.spat = "MN10SQID",
            count = FALSE,
-           var = "VPUE", fun = "mean", group = "fleet",
+           var = "VPUE", fun = "mean",
            # breaks = c(seq(0, 2e4, 2e3), seq(3e4, 9e4, 3e4)),
            breaks = c(1e3, 2.5e3, seq(5e3, 3.5e4, 5e3)),
            na.rm = TRUE, output = "tab_plot")
@@ -1012,6 +1567,60 @@ zone_out$table %>%
   pretty_lab(cols = "VPUE") %>%
   pretty_tab_sb(width = "50%")
 ```
+
+<br><br><br>
+
+Average VPUE for Days at Sea fleet. 
+```{r eval = params$AA_DAS_only, echo=params$AA_DAS_only}
+# TODO: update breaks
+zone_out <- 
+  scallop0322MainDataTable %>% 
+  filter(VPUE_p >= .025 & VPUE_p <= .975) %>% 
+  filter(fleet == "Days at Sea") %>% 
+  zone_summary(project = project,
+           spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           count = FALSE,
+           var = "VPUE", fun = "mean",
+           # breaks = c(seq(0, 2e4, 2e3), seq(3e4, 9e4, 3e4)),
+           breaks = c(1e3, 2.5e3, seq(5e3, 3.5e4, 5e3)),
+           na.rm = TRUE, output = "tab_plot")
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(cols = "VPUE") %>%
+  pretty_tab_sb(width = "50%")
+```
+
+<br><br><br>
+
+Average VPUE for GCIFQ fleet. 
+```{r eval = !params$AA_DAS_only, echo=!params$AA_DAS_only}
+
+zone_out <- 
+  scallop0322MainDataTable %>% 
+  filter(VPUE_p >= .025 & VPUE_p <= .975) %>% 
+  filter(fleet == "GCIFQ") %>% 
+  zone_summary(project = project,
+           spat = scallop0322TenMNSQRSpatTable, 
+           lon.dat = "DDLON",
+           lat.dat = "DDLAT", 
+           zone.dat = "ZoneID",
+           zone.spat = "MN10SQID",
+           count = FALSE,
+           var = "VPUE", fun = "mean",
+           # breaks = c(seq(0, 2e4, 2e3), seq(3e4, 9e4, 3e4)),
+           breaks = c(1e3, 2.5e3, seq(5e3, 3.5e4, 5e3)),
+           na.rm = TRUE, output = "tab_plot")
+zone_out$plot
+zone_out$table %>% 
+  pretty_lab(cols = "VPUE") %>%
+  pretty_tab_sb(width = "50%")
+```
+
+<br><br><br>
 
 ## Closure summary
 
