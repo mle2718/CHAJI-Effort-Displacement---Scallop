@@ -13,7 +13,7 @@ params:
     BIN_GEARS: TRUE
 ---
 
-## Introduction
+## Introduction 
 
 This summary was done using a combination of FishSET console functions, the tidyverse
 (mainly dplyr and tidyr), and a few formatting functions. There is an option to hide 
