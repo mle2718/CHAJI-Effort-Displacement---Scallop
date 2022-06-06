@@ -1,0 +1,47 @@
+---
+title: "Ten Minute Squares"
+output:
+  html_document:
+    df_print: paged
+---
+
+
+```{r}
+library(here)
+library(sf)
+library(leaflet)
+library(magrittr)
+```
+
+
+
+
+```{r}
+here::i_am("analysis_code/MN10SQ_map.Rmd")
+
+ ten_filepath <- here("data", "external", "shapefiles", 
+                      "Ten Minute Squares Cut North and Greater Atlantic")
+
+ten_min_sqr <- sf::st_read(ten_filepath)
+
+ten_min_sqr <- sf::st_transform(ten_min_sqr, crs = 4326)
+
+ten_min_sqr <- sf::st_zm(ten_min_sqr, drop = TRUE, what = "ZM")
+```
+
+
+
+
+```{r}
+leaflet::leaflet() %>% 
+  leaflet::addTiles() %>% 
+  leaflet::addPolygons(data = ten_min_sqr,
+                       fillColor = "white",
+                       fillOpacity = 0.5,
+                       color = "black",
+                       stroke = TRUE,
+                       weight = 1,
+                       layerId = ~MN10SQID,
+                       label = ~MN10SQID)
+```
+
