@@ -12,9 +12,9 @@ While the empirical setting that we have chosen is the Limited Access Scallop fi
 # A Few Guidelines For Contributing
 
 1.  [Our Code of Conduct](code_of_conduct.md)
-2. The *main* branch should always work.  So, commit directly to main if the change cannot break any existing code.    
-3. If you're in doubt, create a branch and develop your code there.  Then, issue a [pull request](https://github.com/NEFSC/READ-SSB-CHAJI-Effort-Displacement---Scallop/compare) and please make sure to request review(s) from the appropriate person(s).
-4. Once a pull request is approved, the originator should merge and delete the now-unnecessary branch.
+2. The *main* branch should always work.  Committing directly to main should *only* be done for writing text or comments.    
+3. For all other changes, please create a branch and develop your code there.  Then, issue a [pull request](https://github.com/NEFSC/READ-SSB-CHAJI-Effort-Displacement---Scallop/compare) and please make sure to request review(s) from the appropriate person(s).
+4. Once a pull request is approved, the originator should merge and delete the branch if warranted.
 
 
 # Testing and Functionality
