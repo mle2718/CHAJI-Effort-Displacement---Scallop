@@ -209,22 +209,34 @@ We don't want to create a single plan column, because a vessel could have multip
 
 ```{r DMIS_FT_filter, eval=FALSE}
 
-Limited_Access <-Scallop_Linkingorg %>%filter(LA=="TRUE")
-Limited_Access_ft<-Limited_Access %>%filter(ftpt=="FullTime")
+Limited_Access <-Scallop_Linkingorg %>%
+    filter(LA=="TRUE")
+Limited_Access_ft<-Limited_Access %>%
+    filter(ftpt=="FullTime")
 
 
 ```
 
 # Data Cleaning 
 
-1. Filter down to only Scallop Species 
-2. Seperate Dates & Times and Delete Old Dates Column 
-3. Delete Columns that are not need 
-4. NESPP3 & SOURCE Values do not vary across the observations, so these two columns can be  deleted 
+1. Construct total revenue at the subtrip level.
+2. Filter down to only Scallop Species 
+3. Seperate Dates & Times and Delete Old Dates Column 
+4. Delete Columns that are not need 
+5. NESPP3 & SOURCE Values do not vary across the observations, so these two columns can be  deleted 
+
+```{r subtrip_revenue, echo=TRUE}
+APSD_DMIS_2<-APSD_DMIS_2 %>% 
+  group_by(IMGID) %>%
+  mutate(DOLLAR_ALL_SP=sum(DOLLAR)) %>%
+  relocate(DOLLAR_ALL_SP, .after=DOLLAR)
+```
+
 
 ```{r datacleaning_step1, echo=TRUE}
 
-Scallops <- APSD_DMIS_2 %>% filter (SPPNAME == "SCALLOPS/BUSHEL")
+Scallops <- APSD_DMIS_2 %>% 
+  filter (SPPNAME == "SCALLOPS/BUSHEL")
 
 #Separate Dates & Times
 Scallops$Date <- as.Date(Scallops$DATE_TRIP)
@@ -290,7 +302,8 @@ Scallops$scallop_fishing_year[Scallops$Date >= "2022-04-01" & Scallops$Date <= "
 VTR_DMIS_merge <- merge(RESULT_COMPILED,Scallops, by.x = "TRIPID", by.y = "DOCID", all.x = FALSE, all.y = TRUE)
 
 ## Filter out 2020 values 
-VTR_DMIS_merge <- VTR_DMIS_merge %>% filter(YEAR <= "2019")
+VTR_DMIS_merge <- VTR_DMIS_merge %>%
+  filter(YEAR <= "2019")
 
 # Delete Extra PERMIT Column
 ## Note: X was deleted because PERMIT.y had zero NAs and PERMIT.x had 25 
@@ -299,7 +312,8 @@ VTR_DMIS_merge$PERMIT.x <- NULL
 # Delete all TRIPCATG that are not 1. This isolates all commercial trips
 ## Type of trip: 1=Commercial; 2=Party; 3=Charter; 4=RSA/EFP. Note: RSA/EFP landings represent a small amount of all commercial landings; landings vary by gear type and species.
 
-VTR_DMIS_merge <- VTR_DMIS_merge %>% filter(TRIPCATG == "1")
+VTR_DMIS_merge <- VTR_DMIS_merge %>% 
+  filter(TRIPCATG == "1")
 VTR_DMIS_merge$TRIPCATG <- NULL
 
 # Delete all NOT_FISHED that are not 0. This indicates whether the 'Did not fish' box was checked on the Vessel Trip Report. 0=Fishing activity; 1=No fishing activity/Negative report.
@@ -313,7 +327,8 @@ VTR_DMIS_merge$NOT_FISHED <- NULL
 # Delete duplicate rows; These are rows that share the same TRIPID, DOLLAR,LANDED, & TRIP_LENGTH 
 ## Note: VTRs are self-reported and there is a potential for records to be submitted to regional office multiple times; on rare occasions this can result in duplicate records being logged.
 VTR_DMIS_AC <- merge(VTR_DMIS_merge,Scallop_Linkingorg, by.x = "TRIPID", by.y = "DOCID", all.x = TRUE, all.y = FALSE)
-VTR_DMIS_AC <- VTR_DMIS_AC %>% distinct(TRIPID,DOLLAR,TRIP_LENGTH,LANDED, .keep_all = TRUE)  
+VTR_DMIS_AC <- VTR_DMIS_AC %>% 
+  distinct(TRIPID,DOLLAR,TRIP_LENGTH,LANDED, .keep_all = TRUE)  
 
 ## Created two sets of cost joins.
 ### 1. Before LA Estimation
@@ -332,7 +347,8 @@ VTR_DMIS_AC$`-` <- NULL
 #### Note: The variable used in this command can be substituted for whatever needs to be tested. In this case I am testing OPERNUM, because that will be used to determine decisions in the model 
 
 testing <- VTR_DMIS_AC %>%
-group_by("YEAR") %>% filter(is.na(OPERNUM))
+group_by("YEAR") %>% 
+  filter(is.na(OPERNUM))
 
 
 ```
@@ -383,7 +399,9 @@ VTR_DMIS_AC_Agg <- merge(VTR_DMIS_AC,Agg_DOL_POUN_LAND, by.x = "TRIPID", by.y = 
 
 
 ### 3.Parse out Maximum Dollar amounts in order to drop lesser subtrips
-VTR_DMIS_AC_Agg <- VTR_DMIS_AC_Agg %>% group_by(TRIPID) %>% filter(DOLLAR == max(DOLLAR))
+VTR_DMIS_AC_Agg <- VTR_DMIS_AC_Agg %>% 
+  group_by(TRIPID) %>% 
+  filter(DOLLAR == max(DOLLAR))
 ### Another way to check this is by running the following code: VTR_DMIS_AC_Agg %>% group_by(TRIPID) %>% arrange(desc(DOLLAR)) %>% slice(1)
 
 ## Test out 
@@ -397,12 +415,49 @@ stopifnot(sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))==0)
 
 
 
+# Construct operating profits 
+
+In order to construct operating profits we need to ensure that DOLLAR and TRIP_COST_WINSOR_2020_DOL match. The original data set has DOLLAR in nominal dollars and TRIP_COST_WINSOR_2020_DOL is in 2020 Real Dollars. 
+
+```{r constructing operating profits, echo=TRUE, eval=TRUE }
+
+#install.packages("fredr")
+library(fredr)
 
 
 
 
 
+#set fredr API key 
+fredr_set_key("") 
+# api_key string must be retrieved 
+# To use fredr and the FRED API in general, you must first obtain a FRED API key. You can get this from https://research.stlouisfed.org/useraccount/apikey. After you obtain your API key you should then save it in your .Renviron file. Once you have your file open you can save it as the following: 
+              # FRED_API_KEY=abcdefghijklmnopqrstuvwxyz123456
 
+
+#https://api.stlouisfed.org/fred/category?category_id=125&api_key=abcdefghijklmnopqrstuvwxyz123456
+
+
+
+
+
+# Pull in data 
+# GDP Implicit Price Deflator in United States (USAGDPDEFAISMEI); Units:  Index 2015=100, Not Seasonally Adjusted; Frequency:  Annual
+
+
+
+
+testing <- fredr(
+  series_id = "USAGDPDEFAISMEI",
+  observation_start = as.Date("2007-01-01"),
+  observation_end = as.Date("2020-01-01")
+)
+
+
+
+
+
+```
 
 
 
