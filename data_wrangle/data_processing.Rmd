@@ -35,8 +35,6 @@ library("dplyr")
 library("RODBC")
 library("RODM")
 library("epiDisplay")
-library("tmap")
-library("tidyverse")
 vintage_string<-Sys.Date()
 vintage_string<-gsub("-","_",vintage_string)
 
@@ -218,12 +216,13 @@ Limited_Access_ft<-Limited_Access %>%
 ```
 
 # Data Cleaning 
-
 1. Construct total revenue at the subtrip level.
 2. Filter down to only Scallop Species 
 3. Seperate Dates & Times and Delete Old Dates Column 
 4. Delete Columns that are not need 
 5. NESPP3 & SOURCE Values do not vary across the observations, so these two columns can be  deleted 
+
+
 
 ```{r subtrip_revenue, echo=TRUE}
 APSD_DMIS_2<-APSD_DMIS_2 %>% 
@@ -317,7 +316,8 @@ VTR_DMIS_merge <- VTR_DMIS_merge %>%
 VTR_DMIS_merge$TRIPCATG <- NULL
 
 # Delete all NOT_FISHED that are not 0. This indicates whether the 'Did not fish' box was checked on the Vessel Trip Report. 0=Fishing activity; 1=No fishing activity/Negative report.
-VTR_DMIS_merge <- VTR_DMIS_merge %>% filter(NOT_FISHED == "0")
+VTR_DMIS_merge <- VTR_DMIS_merge %>%
+  filter(NOT_FISHED == "0")
 VTR_DMIS_merge$NOT_FISHED <- NULL
 
 
@@ -349,6 +349,7 @@ VTR_DMIS_AC$`-` <- NULL
 testing <- VTR_DMIS_AC %>%
 group_by("YEAR") %>% 
   filter(is.na(OPERNUM))
+
 
 
 ```
@@ -398,10 +399,13 @@ VTR_DMIS_AC_Agg <- merge(VTR_DMIS_AC,Agg_DOL_POUN_LAND, by.x = "TRIPID", by.y = 
 
 
 
-### 3.Parse out Maximum Dollar amounts in order to drop lesser subtrips
+
+### 3.Parse out Maximum Scallop Dollar amounts in order to drop lesser subtrips
 VTR_DMIS_AC_Agg <- VTR_DMIS_AC_Agg %>% 
-  group_by(TRIPID) %>% 
+  group_by(TRIPID) %>%
   filter(DOLLAR == max(DOLLAR))
+
+
 ### Another way to check this is by running the following code: VTR_DMIS_AC_Agg %>% group_by(TRIPID) %>% arrange(desc(DOLLAR)) %>% slice(1)
 
 ## Test out 
