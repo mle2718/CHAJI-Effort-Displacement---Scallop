@@ -168,8 +168,8 @@ fleet_tab <- data.frame(
 ```
 
 
-#```{r eval=!params$AA_DAS_only}
-```{r eval=FALSE}
+```{r eval=!params$AA_DAS_only}
+#```{r eval=FALSE}
 fleet_tab <- data.frame(
   
   condition = c('`Plan Code` == "SES" & `Program Code` == "SAA" | 
@@ -216,8 +216,8 @@ scallop0322MainDataTable <-
 By setting this code chunk to eval=TRUE, all of the statistics from this point forward 
 By setting this code chunk to eval=TRUE, all of the statistics from this point forward are for the Limited Access General Category IFQ (LAGC-IFQ) fleet. Currently set to
 `r !params$AA_DAS_only`.
-#```{r retain_LA_GCIFQ, eval=!params$AA_DAS_only}
-```{r retain_LA_GCIFQ, eval=FALSE}
+```{r retain_LA_GCIFQ, eval=!params$AA_DAS_only}
+#```{r retain_LA_GCIFQ, eval=FALSE}
 scallop0322MainDataTable <- 
   scallop0322MainDataTable %>% 
   filter(fleet == "GCIFQ")
@@ -625,7 +625,6 @@ zone_out$table %>%
 
 Zone frequency (Access Area fleet).
 ```{r eval=params$AA_DAS_only, echo=params$AA_DAS_only}
-# TODO: check breaks
 zone_out <- 
   scallop0322MainDataTable %>% 
   filter(fleet == "Access Area") %>% 
@@ -651,7 +650,6 @@ zone_out$table %>%
 
 Zone frequency (Days at Sea fleet).
 ```{r eval=params$AA_DAS_only, echo=params$AA_DAS_only}
-# TODO: check breaks
 zone_out <- 
   scallop0322MainDataTable %>% 
   filter(fleet == "Days at Sea") %>% 
@@ -676,10 +674,8 @@ zone_out$table %>%
 
 Zone frequency (GCIFQ fleet).
 ```{r eval=!params$AA_DAS_only, echo=!params$AA_DAS_only}
-# TODO: check breaks
 zone_out <- 
   scallop0322MainDataTable %>% 
-  filter(fleet == "GCIFQ") %>% 
   zone_summary(project = project,
            spat = scallop0322TenMNSQRSpatTable, 
            lon.dat = "DDLON",
@@ -701,7 +697,6 @@ zone_out$table %>%
 
 Percent of observations (Access Area and Day at Sea fleet).
 ```{r eval=params$AA_DAS_only, echo=params$AA_DAS_only}
-
 zone_out <- 
   zone_summary(scallop0322MainDataTable,
            project = project,
@@ -726,7 +721,6 @@ zone_out$table %>%
 
 Percent of observations (Access Area fleet).
 ```{r eval=params$AA_DAS_only, echo=params$AA_DAS_only}
-# TODO: check breaks
 zone_out <- 
   scallop0322MainDataTable %>% 
   filter(fleet == "Access Area") %>% 
@@ -753,7 +747,6 @@ zone_out$table %>%
 
 Percent of observations (Day at Sea fleet).
 ```{r eval=params$AA_DAS_only, echo=params$AA_DAS_only}
-# TODO: check breaks
 zone_out <- 
   scallop0322MainDataTable %>% 
   filter(fleet == "Days at Sea") %>% 
@@ -780,10 +773,8 @@ zone_out$table %>%
 
 Percent of observations (GCIFQ fleet). 
 ```{r eval=!params$AA_DAS_only, echo=!params$AA_DAS_only}
-
 zone_out <-
   scallop0322MainDataTable %>% 
-  filter(fleet == "GCIFQ") %>% 
   zone_summary(project = project,
                spat = scallop0322TenMNSQRSpatTable, 
                lon.dat = "DDLON",
@@ -810,7 +801,6 @@ zone_out$table %>%
 
 Total catch for Access Area and Days at Sea fleets (meats). 
 ```{r eval=params$AA_DAS_only, echo=params$AA_DAS_only}
-
 zone_out <- 
   zone_summary(scallop0322MainDataTable, 
            project = project,
@@ -833,7 +823,6 @@ zone_out$table %>%
 
 Total catch for Access Area (meats). 
 ```{r eval=params$AA_DAS_only, echo=params$AA_DAS_only}
-# TODO: edit breaks 
 zone_out <- 
   scallop0322MainDataTable %>% 
   filter(fleet == "Access Area") %>% 
@@ -857,7 +846,6 @@ zone_out$table %>%
 
 Total catch for Days at Sea (meats). 
 ```{r eval=params$AA_DAS_only, echo=params$AA_DAS_only}
-# TODO: edit breaks 
 zone_out <- 
   scallop0322MainDataTable %>% 
   filter(fleet == "Days at Sea") %>% 
@@ -883,7 +871,6 @@ Total catch for GCIFQ (meats, all observations).
 ```{r eval=!params$AA_DAS_only, echo=!params$AA_DAS_only}
 zone_out <- 
   scallop0322MainDataTable %>% 
-  filter(fleet == "GCIFQ") %>% 
   zone_summary(project = project,
            spat = scallop0322TenMNSQRSpatTable, 
            lon.dat = "DDLON",
@@ -928,8 +915,6 @@ zone_out$table %>%
 
 Average catch for Access Area fleet (meats). 
 ```{r eval=params$AA_DAS_only, echo=params$AA_DAS_only}
-# TODO: update breaks
-
 zone_out <- 
   scallop0322MainDataTable %>% 
   filter(fleet == "Access Area") %>% 
@@ -983,7 +968,6 @@ Average catch for GCIFQ fleet (meats).
 ```{r eval=!params$AA_DAS_only, echo=!params$AA_DAS_only}
 zone_out <- 
   scallop0322MainDataTable %>% 
-  filter(fleet == "GCIFQ") %>% 
   zone_summary(project = project,
            spat = scallop0322TenMNSQRSpatTable, 
            lon.dat = "DDLON",
@@ -1075,7 +1059,6 @@ Median catch (meats General Category IFQ fleet).
 ```{r eval=!params$AA_DAS_only, echo=!params$AA_DAS_only}
 zone_out <- 
   scallop0322MainDataTable %>% 
-  filter(fleet == "GCIFQ") %>% 
   zone_summary(project = project,
            spat = scallop0322TenMNSQRSpatTable, 
            lon.dat = "DDLON",
@@ -1097,7 +1080,6 @@ zone_out$table %>%
 
 Percent of total catch (meat) for Access Area and Days at Sea fleets. 
 ```{r eval=params$AA_DAS_only, echo=params$AA_DAS_only}
-# TODO: updates breaks
 zone_out <- 
   zone_summary(scallop0322MainDataTable, project = project,
            spat = scallop0322TenMNSQRSpatTable, 
@@ -1134,7 +1116,6 @@ zone_out <-
            var = "MEAT_POUNDS", fun = "percent",
            breaks = c(0, .2, seq(.5, 4, .5)),
            bin_colors = c("white", viridis::viridis(9, option = "H")),
-           bin_colors = c("white", viridis::viridis(7)),
            output = "tab_plot", na.rm = TRUE)
 zone_out$plot
 zone_out$table %>% 
@@ -1174,7 +1155,6 @@ Percent of total catch (meats) within GCIFQ fleet.
 ```{r eval=!params$AA_DAS_only, echo=!params$AA_DAS_only}
 zone_out <- 
   scallop0322MainDataTable %>% 
-  filter(fleet == "GCIFQ") %>% 
   zone_summary(project = project,
                spat = scallop0322TenMNSQRSpatTable, 
            lon.dat = "DDLON",
@@ -1274,7 +1254,6 @@ Average trip length for GCIFQ fleet.
 ```{r eval=!params$AA_DAS_only, echo=!params$AA_DAS_only}
 zone_out <- 
   scallop0322MainDataTable %>% 
-  filter(fleet == "GCIFQ") %>% 
   zone_summary(project = project,
            spat = scallop0322TenMNSQRSpatTable, 
            lon.dat = "DDLON",
@@ -1379,7 +1358,6 @@ Share of trip length (GCIFQ fleet).
 ```{r eval=!params$AA_DAS_only, echo=!params$AA_DAS_only}
 zone_out <- 
   scallop0322MainDataTable %>% 
-  filter(fleet == "GCIFQ") %>% 
   zone_summary(project = project,
            spat = scallop0322TenMNSQRSpatTable, 
            lon.dat = "DDLON",
@@ -1480,11 +1458,9 @@ zone_out$table %>%
 
 Average CPUE for GCIFQ fleet.
 ```{r eval=!params$AA_DAS_only, echo=!params$AA_DAS_only}
-
 zone_out <- 
   scallop0322MainDataTable %>% 
   filter(CPUE_p >= .025 & CPUE_p <= .975) %>%
-  filter(fleet == "GCIFQ") %>% 
   zone_summary(project = project,
            spat = scallop0322TenMNSQRSpatTable, 
            lon.dat = "DDLON",
@@ -1493,7 +1469,6 @@ zone_out <-
            zone.spat = "MN10SQID",
            count = FALSE,
            var = "CPUE", fun = "mean",
-           breaks = c(seq(250, 1e3, 250), seq(1.5e3, 3e3, 500)),
            na.rm = TRUE, output = "tab_plot")
 zone_out$plot
 zone_out$table %>% 
@@ -1582,7 +1557,6 @@ Average VPUE for GCIFQ fleet.
 zone_out <- 
   scallop0322MainDataTable %>% 
   filter(VPUE_p >= .025 & VPUE_p <= .975) %>% 
-  filter(fleet == "GCIFQ") %>% 
   zone_summary(project = project,
            spat = scallop0322TenMNSQRSpatTable, 
            lon.dat = "DDLON",
@@ -1591,8 +1565,6 @@ zone_out <-
            zone.spat = "MN10SQID",
            count = FALSE,
            var = "VPUE", fun = "mean",
-           # breaks = c(seq(0, 2e4, 2e3), seq(3e4, 9e4, 3e4)),
-           breaks = c(1e3, 2.5e3, seq(5e3, 3.5e4, 5e3)),
            na.rm = TRUE, output = "tab_plot")
 zone_out$plot
 zone_out$table %>% 
@@ -2409,20 +2381,13 @@ vessel count by gearcode.
 ves_out <-
   vessel_count(scallop0322MainDataTable, project,
                v_id = "PERMIT.y",
-               group = "GEARCODE")
-
-gears <- ves_out$table %>% 
-  arrange(desc(PERMIT.y)) %>% 
-  pull(GEARCODE)
-
-gear1 <- gears[1:4]
-gear2 <- gears[5:10]
+               group = "GEARCODE", tran = "log")
 
 ves_out$table %>% 
   pretty_lab() %>% 
   pretty_tab()
 
-ves_out$plot + angled_theme()
+ves_out$plot
 ```
 <br><br><br>
 
@@ -2433,29 +2398,14 @@ ves_out <-
   vessel_count(scallop0322MainDataTable, project,
                v_id = "PERMIT.y",
                date = "Date",
-               group = "GEARCODE", output = "table",
+               group = "GEARCODE",
                period = "year", type = "line")
 
-ves_out %>% 
+ves_out$table %>% 
   pivot_wider(names_from = "GEARCODE", values_from = "PERMIT.y") %>% 
   pretty_tab_sb()
 
-  vessel_count(scallop0322MainDataTable, project,
-               v_id = "PERMIT.y",
-               date = "Date",
-               filter_by = "GEARCODE",
-               filter_value = gear1, 
-               group = "GEARCODE", output = "plot",
-               period = "year", type = "line", tran = "log")
-  
-   vessel_count(scallop0322MainDataTable, project,
-               v_id = "PERMIT.y",
-               date = "Date",
-               filter_by = "GEARCODE",
-               filter_value = gear2, 
-               group = "GEARCODE", output = "plot",
-               period = "year", type = "line")
-
+ves_out$plot
 ```
 
 <br><br><br>
@@ -2620,29 +2570,13 @@ catch_out <-
   species_catch(scallop0322MainDataTable, project,
                 species = "MEAT_POUNDS",
                 group = "GEARCODE",
-                fun = "sum", 
-                output = "table")
+                fun = "sum", tran = "log")
 
-catch_out %>% 
+catch_out$table %>% 
   pretty_lab(cols = "MEAT_POUNDS") %>%
   pretty_tab()
 
-species_catch(scallop0322MainDataTable, project,
-              species = "MEAT_POUNDS",
-              group = "GEARCODE",
-              filter_by = "GEARCODE",
-              filter_value = gear1, 
-              fun = "sum",
-              tran = "log",
-              output = "plot") + angled_theme()
-
-species_catch(scallop0322MainDataTable, project,
-              species = "MEAT_POUNDS",
-              group = "GEARCODE", 
-              filter_by = "GEARCODE",
-              filter_value = gear2, 
-              fun = "sum",
-              tran = "log", output = "plot") + angled_theme()
+catch_out$plot
 ```
 
 <br><br><br>
@@ -2653,29 +2587,13 @@ catch_out <-
   species_catch(scallop0322MainDataTable, project,
                 species = "MEAT_POUNDS",
                 group = "GEARCODE",
-                fun = "mean", 
-                output = "table")
+                fun = "mean")
 
-catch_out %>% 
+catch_out$table %>% 
   pretty_lab(cols = "MEAT_POUNDS") %>%
   pretty_tab()
 
-species_catch(scallop0322MainDataTable, project,
-              species = "MEAT_POUNDS",
-              group = "GEARCODE",
-              filter_by = "GEARCODE",
-              filter_value = gear1, 
-              fun = "mean",
-              tran = "log",
-              output = "plot") + angled_theme()
-
-species_catch(scallop0322MainDataTable, project,
-              species = "MEAT_POUNDS",
-              group = "GEARCODE", 
-              filter_by = "GEARCODE",
-              filter_value = gear2, 
-              fun = "mean",
-              tran = "log", output = "plot") + angled_theme()
+catch_out$plot 
 ```
 
 <br><br><br>
@@ -2733,6 +2651,7 @@ cpue_out <-
 cpue_out$table %>% 
   pretty_lab(cols = "CPUE") %>%
   pretty_tab_sb(width = "40%")
+
 cpue_out$plot
 ```
 
@@ -2745,28 +2664,13 @@ cpue_out <-
   species_catch(scallop0322MainDataTable, project,
                 species = "CPUE",
                 group = "GEARCODE",
-                fun = "mean", 
-                output = "table")
+                fun = "mean")
 
-cpue_out %>% 
+cpue_out$table %>% 
   pretty_lab(cols = "CPUE") %>%
   pretty_tab()
 
-species_catch(scallop0322MainDataTable, project,
-              species = "CPUE",
-              group = "GEARCODE",
-              filter_by = "GEARCODE",
-              filter_value = gear1, 
-              fun = "mean",
-              output = "plot") + angled_theme()
-
-species_catch(scallop0322MainDataTable, project,
-              species = "CPUE",
-              group = "GEARCODE", 
-              filter_by = "GEARCODE",
-              filter_value = gear2, 
-              fun = "mean",
-              tran = "log", output = "plot") + angled_theme()
+cpue_out$plot + angled_theme()
 ```
 
 <br><br><br>
@@ -2779,30 +2683,14 @@ cpue_out <-
                 group = "GEARCODE",
                 date = "Date", 
                 period = "year",
-                fun = "mean", type = "line", output = "table")
+                fun = "mean", type = "line")
 
-cpue_out %>% 
+cpue_out$table %>% 
   pivot_wider(names_from = GEARCODE, values_from = CPUE) %>% 
   pretty_lab(ignore = "year") %>%
   pretty_tab_sb()
 
-species_catch(scallop0322MainDataTable, project,
-              species = "CPUE",
-              group = "GEARCODE",
-              filter_by = "GEARCODE",
-              filter_value = gear1,
-              date = "Date", 
-              period = "year",
-              fun = "mean", type = "line", output = "plot")
-
-species_catch(scallop0322MainDataTable, project,
-              species = "CPUE",
-              group = "GEARCODE",
-              filter_by = "GEARCODE",
-              filter_value = gear2,
-              date = "Date", 
-              period = "year", #tran = "log",
-              fun = "mean", type = "line", output = "plot")
+cpue_out$plot 
 ```
 
 <br><br><br>
@@ -2911,31 +2799,15 @@ vpue_out <-
                 group = "GEARCODE",
                 date = "Date", 
                 period = "year",
-                fun = "mean", type = "line", output = "table")
+                fun = "mean", type = "line")
 
-vpue_out %>% 
+vpue_out$table %>% 
   pivot_wider(names_from = GEARCODE, values_from = VPUE) %>% 
   pretty_lab(ignore = "year") %>%
   pretty_tab_sb()
 
-species_catch(scallop0322MainDataTable, project,
-              species = "VPUE",
-              group = "GEARCODE",
-              filter_by = "GEARCODE",
-              filter_value = gear1,
-              date = "Date", 
-              period = "year",
-              fun = "mean", type = "line", output = "plot") + 
-  scale_y_continuous(breaks = c(0, 2.5e3, 5e3, 7.5e3, 1e4, 1.25e4))
+vpue_out$plot # + scale_y_continuous(breaks = c(0, 2.5e3, 5e3, 7.5e3, 1e4, 1.25e4))
 
-species_catch(scallop0322MainDataTable, project,
-              species = "VPUE",
-              group = "GEARCODE",
-              filter_by = "GEARCODE",
-              filter_value = gear2,
-              date = "Date", 
-              period = "year",
-              fun = "mean", type = "line", output = "plot")
 ```
 
 <br><br><br>
@@ -3031,14 +2903,6 @@ KDE of meat catch by gearcode.
 ```{r}
 density_plot(scallop0322MainDataTable, project,
              var = "MEAT_POUNDS", 
-             filter_by = "GEARCODE",
-             filter_value = gear1,
-             group = "GEARCODE", position = "stack",
-             type = "kde", tran = "log", bw = 1.5)
-density_plot(scallop0322MainDataTable, project,
-             var = "MEAT_POUNDS", 
-             filter_by = "GEARCODE",
-             filter_value = gear2,
              group = "GEARCODE", position = "stack",
              type = "kde", tran = "log", bw = 1.5)
 ```
@@ -3049,15 +2913,6 @@ ECDF of meat catch by gear.
 ```{r}
 density_plot(scallop0322MainDataTable, project,
              var = "MEAT_POUNDS", 
-             filter_by = "GEARCODE",
-             filter_value = gear1,
-             group = "GEARCODE", position = "stack",
-             type = "ecdf", tran = "log")
-
-density_plot(scallop0322MainDataTable, project,
-             var = "MEAT_POUNDS", 
-             filter_by = "GEARCODE",
-             filter_value = gear2,
              group = "GEARCODE", position = "stack",
              type = "ecdf", tran = "log")
 ```
@@ -3129,16 +2984,6 @@ KDE of trip length by gearcode.
 density_plot(scallop0322MainDataTable, project,
              var = "TRIP_LENGTH", 
              group = "GEARCODE",
-             filter_by = "GEARCODE",
-             filter_value = gear1,
-             type = c("kde", "ecdf"), pages = "multi",
-             position = "stack", bw = 1.5, tran = "log")
-
-density_plot(scallop0322MainDataTable, project,
-             var = "TRIP_LENGTH", 
-             group = "GEARCODE",
-              filter_by = "GEARCODE",
-             filter_value = gear2,
              type = c("kde", "ecdf"), pages = "multi",
              position = "stack", bw = 1.5, tran = "log")
 ```
@@ -3213,16 +3058,6 @@ KDE and ECDF of CPUE by gear.
 density_plot(scallop0322MainDataTable, project,
              var = "CPUE", 
              group = "GEARCODE",
-             filter_by = "GEARCODE",
-             filter_value = gear1,
-             type = c("kde", "ecdf"), tran = "log", 
-             position = "stack",  pages = "multi")
-
-density_plot(scallop0322MainDataTable, project,
-             var = "CPUE", 
-             group = "GEARCODE",
-             filter_by = "GEARCODE",
-             filter_value = gear2,
              type = c("kde", "ecdf"), tran = "log", 
              position = "stack",  pages = "multi")
 ```
@@ -3309,16 +3144,6 @@ KDE and ECDF of VPUE by gear.
 density_plot(scallop0322MainDataTable, project,
              var = "VPUE", 
              group = "GEARCODE",
-             filter_by = "GEARCODE",
-             filter_value = gear1,
-             type = c("kde", "ecdf"), tran = "log", 
-             position = "stack",  pages = "multi")
-
-density_plot(scallop0322MainDataTable, project,
-             var = "VPUE", 
-             group = "GEARCODE",
-             filter_by = "GEARCODE",
-             filter_value = gear2,
              type = c("kde", "ecdf"), tran = "log", 
              position = "stack",  pages = "multi")
 ```
@@ -3385,16 +3210,6 @@ KDE and ECDF of trip cost by gear.
 density_plot(scallop0322MainDataTable, project,
              var = "TRIP_COST_2020_DOL", 
              group = "GEARCODE",
-             filter_by = "GEARCODE",
-             filter_value = gear1,
-             type = c("kde", "ecdf"), tran = "log", 
-             position = "stack",  pages = "multi")
-
-density_plot(scallop0322MainDataTable, project,
-             var = "TRIP_COST_2020_DOL", 
-             group = "GEARCODE",
-             filter_by = "GEARCODE",
-             filter_value = gear2,
              type = c("kde", "ecdf"), tran = "log", 
              position = "stack",  pages = "multi")
 ```
@@ -3440,16 +3255,6 @@ KDE and ECDF of trip cost by gear (Winsor).
 density_plot(scallop0322MainDataTable, project,
              var = "TRIP_COST_WINSOR_2020_DOL", 
              group = "GEARCODE",
-             filter_by = "GEARCODE",
-             filter_value = gear1, 
-             type = c("kde", "ecdf"), tran = "log", 
-             position = "stack",  pages = "multi")
-
-density_plot(scallop0322MainDataTable, project,
-             var = "TRIP_COST_WINSOR_2020_DOL", 
-             group = "GEARCODE",
-             filter_by = "GEARCODE",
-             filter_value = gear2, 
              type = c("kde", "ecdf"), tran = "log", 
              position = "stack",  pages = "multi")
 ```
