@@ -434,7 +434,7 @@ library(fredr)
 
 
 # api_key string must be retrieved 
-# To use fredr and the FRED API in general, you must first obtain a FRED API key. You can get this from https://research.stlouisfed.org/useraccount/apikey. After you obtain your API key you should then save it in your .Renviron file. Once you have your file open you can save it as the following: FRED_API_KEY="your_key_here"
+# To use fredr and the FRED API in general, you must first obtain a FRED API key. You can get this from https://research.stlouisfed.org/useraccount/apikey. After you obtain your API key you should then save it in your .Renviron file. Once you have your file open you can save it as the following with no spaces: FRED _ API _ KEY="your_key_here"
 
 
 # Pull in data 
