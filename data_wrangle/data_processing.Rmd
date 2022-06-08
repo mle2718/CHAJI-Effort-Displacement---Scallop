@@ -429,20 +429,12 @@ In order to construct operating profits we need to ensure that DOLLAR and TRIP_C
 library(fredr)
 
 
-
-
-
 #set fredr API key 
-fredr_set_key("") 
+#fredr_set_key("FRED_API_KEY") 
+
+
 # api_key string must be retrieved 
-# To use fredr and the FRED API in general, you must first obtain a FRED API key. You can get this from https://research.stlouisfed.org/useraccount/apikey. After you obtain your API key you should then save it in your .Renviron file. Once you have your file open you can save it as the following: 
-              # FRED_API_KEY=abcdefghijklmnopqrstuvwxyz123456
-
-
-#https://api.stlouisfed.org/fred/category?category_id=125&api_key=abcdefghijklmnopqrstuvwxyz123456
-
-
-
+# To use fredr and the FRED API in general, you must first obtain a FRED API key. You can get this from https://research.stlouisfed.org/useraccount/apikey. After you obtain your API key you should then save it in your .Renviron file. Once you have your file open you can save it as the following: FRED_API_KEY="abcdefghijklmnopqrstuvwxyz123456"
 
 
 # Pull in data 
@@ -450,15 +442,34 @@ fredr_set_key("")
 
 
 
-
 testing <- fredr(
   series_id = "USAGDPDEFAISMEI",
   observation_start = as.Date("2007-01-01"),
-  observation_end = as.Date("2020-01-01")
+  observation_end = as.Date("2021-01-01"),
+  index = 
 )
 
+testing_1 <- testing %>% separate(date, into = c('year','month','day', sep = '-'))
+testing_1 <- testing_1[,c("year","value")]
 
 
+
+
+#Test out formula here- just for marina 
+# Take Subset of Final Lease Data Set 
+
+test_set <- final_product_lease[,c("TRIPID","DOLLAR_ALL_SP","DOLLAR","TRIP_COST_WINSOR_2020_DOL", "YEAR")]
+
+# Merge Lease Data and Deflator Values 
+test_set <- merge(test_set,testing_1, by.x = "YEAR", by.y = "year", all.x = TRUE, all.y = FALSE)
+
+# Use GDP Implicit Price Deflator to convert Nominal Revenue Dollars to 2020 Real Dollars 
+test_set$DOLLAR_ALL_SP_2020 <-((test_set$DOLLAR_ALL_SP/test_set$value)*100)   
+
+
+# Calculate operating profit by subtracting winsor 2020 costs from 2020 all species revenue dollars 
+## Note: TRIP_COST_WINSOR_2020_DOL is the cost of a trip and DOLLAR_ALL_SP_2020 will be revenue for the subtrip
+test_set$OPERATING_PROFIT_2020 <-(test_set$DOLLAR_ALL_SP_2020-test_set$TRIP_COST_WINSOR_2020_DOL)
 
 
 ```
