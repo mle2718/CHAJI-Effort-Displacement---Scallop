@@ -434,7 +434,7 @@ library(fredr)
 
 
 # api_key string must be retrieved 
-# To use fredr and the FRED API in general, you must first obtain a FRED API key. You can get this from https://research.stlouisfed.org/useraccount/apikey. After you obtain your API key you should then save it in your .Renviron file. Once you have your file open you can save it as the following: FRED_API_KEY="abcdefghijklmnopqrstuvwxyz123456"
+# To use fredr and the FRED API in general, you must first obtain a FRED API key. You can get this from https://research.stlouisfed.org/useraccount/apikey. After you obtain your API key you should then save it in your .Renviron file. Once you have your file open you can save it as the following: FRED_API_KEY="your_key_here"
 
 
 # Pull in data 
@@ -445,9 +445,8 @@ library(fredr)
 testing <- fredr(
   series_id = "USAGDPDEFAISMEI",
   observation_start = as.Date("2007-01-01"),
-  observation_end = as.Date("2021-01-01"),
-  index = 
-)
+  observation_end = as.Date("2021-01-01")
+  )
 
 testing_1 <- testing %>% separate(date, into = c('year','month','day', sep = '-'))
 testing_1 <- testing_1[,c("year","value")]
