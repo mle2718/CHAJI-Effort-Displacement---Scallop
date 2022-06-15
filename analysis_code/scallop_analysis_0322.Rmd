@@ -245,10 +245,10 @@ The input data ``final_product_lease`` contains subtrips, not trips. This code c
 scallop0322MainDataTable <- 
   scallop0322MainDataTable %>%
   group_by(TRIPID) %>%
-  mutate(Agg_DOLLAR = sum(DOLLAR), Agg_POUNDS = sum(POUNDS), Agg_LANDED = sum(LANDED)) %>% 
+  mutate(Agg_DOLLAR = sum(DOLLAR), Agg_POUNDS = sum(POUNDS), Agg_LANDED = sum(LANDED), Agg_DOLLAR_ALL_SP_2020) %>% 
   filter(DOLLAR == max(DOLLAR)) %>% 
   select(-DOLLAR, -POUNDS, -LANDED) %>% 
-  rename(DOLLAR = "Agg_DOLLAR", POUNDS = "Agg_POUNDS", LANDED = "Agg_LANDED") %>% 
+  rename(DOLLAR = "Agg_DOLLAR", POUNDS = "Agg_POUNDS", LANDED = "Agg_LANDED", DOLLAR_ALL_SP_2020 = "Agg_DOLLAR_ALL_SP_2020") %>% 
   ungroup()
 
 ## Test out 
@@ -257,7 +257,14 @@ stopifnot(sum(duplicated(scallop0322MainDataTable$TRIPID))==0)
 ```
 
 
+```{r calculate operating profit, echo=TRUE, eval=TRUE}
 
+#Calculate operating profit by subtracting 2020 trip costs from aggregated revenues in 2020 dollars.  
+scallop0322MainDataTable$OPERATING_PROFIT_2020 <- 
+  (scallop0322MainDataTable$Agg_DOLLAR_ALL_SP_2020 - scallop0322MainDataTable$TRIP_COST_WINSOR_2020_DOL)
+
+
+```
 
 
 ### summary table
@@ -2126,6 +2133,37 @@ outlier_plot(scallop0322MainDataTable, project,
 
 <br><br>
 
+### OPERATING_PROFIT_2020
+
+```{r}
+outlier_table(scallop0322MainDataTable, project,
+              x = "OPERATING_PROFIT_2020") %>% 
+  pretty_lab() %>% 
+  pretty_tab()
+```
+
+
+```{r}
+outlier_plot(scallop0322MainDataTable, project,
+             x = "OPERATING_PROFIT_2020", 
+             dat.remove = "none",
+             x.dist = "normal",
+             output.screen = TRUE)
+```
+
+
+```{r}
+outlier_plot(scallop0322MainDataTable, project,
+             x = "OPERATING_PROFIT_2020", 
+             dat.remove = "mean_3SD",
+             x.dist = "normal",
+             output.screen = TRUE)
+```
+
+
+
+
+<br><br>
 ### TRIP_COST_2020_DOL
 
 ```{r}
@@ -2288,6 +2326,19 @@ temp_plot(scallop0322MainDataTable, project,
           agg.fun = "sum",
           date.var = "Date")
 ```
+
+
+<br><br><br>
+
+```{r}
+temp_plot(scallop0322MainDataTable, project,
+          var.select = "OPERATING_PROFIT_2020",
+          len.fun = "percent",
+          agg.fun = "sum",
+          date.var = "Date")
+```
+
+
 
 <br><br>
 
