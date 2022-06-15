@@ -356,6 +356,120 @@ group_by("YEAR") %>%
 
 
 
+
+# Converting Revenues to Real Dollars 
+
+In order to construct operating profits later on we need to ensure that DOLLAR and TRIP_COST_WINSOR_2020_DOL match. The original data set has DOLLAR in nominal dollars and TRIP_COST_WINSOR_2020_DOL is in 2020 Real Dollars. GDP Implicit Price Deflator is collected from the Federal Reserve Bank, https://fred.stlouisfed.org/series/GDPDEF#0, after adjusting index to Q2 2020 in order to match calculation methods of the TRIP_COST_WINSOR_2020_DOL variable. 
+
+```{r converting nominal to real dollars, echo=TRUE, eval=TRUE }
+
+# Assign price deflator to corresponding years/quarters
+
+VTR_DMIS_AC$DEFLATOR<-"None"
+
+#2007 
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2007-01-01" & VTR_DMIS_AC$Date <= "2007-03-31"] <- 81.37499
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2007-04-01" & VTR_DMIS_AC$Date <= "2007-06-30"] <- 81.91903
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2007-07-01" & VTR_DMIS_AC$Date <= "2007-09-30"] <- 82.34434
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2007-10-01" & VTR_DMIS_AC$Date <= "2007-12-31"] <- 82.69345
+
+#2008
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2008-01-01" & VTR_DMIS_AC$Date <= "2008-03-31"] <- 82.98408
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2008-04-01" & VTR_DMIS_AC$Date <= "2008-06-30"] <- 83.40496
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2008-07-01" & VTR_DMIS_AC$Date <= "2008-09-30"] <- 84.03406
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2008-10-01" & VTR_DMIS_AC$Date <= "2008-12-31"] <- 84.23342
+
+#2009
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2009-01-01" & VTR_DMIS_AC$Date <= "2009-03-31"] <- 84.19178
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2009-04-01" & VTR_DMIS_AC$Date <= "2009-06-30"] <- 84.04469
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2009-07-01" & VTR_DMIS_AC$Date <= "2009-09-30"] <- 84.13507
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2009-10-01" & VTR_DMIS_AC$Date <= "2009-12-31"] <- 84.41241
+
+#2010
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2010-01-01" & VTR_DMIS_AC$Date <= "2010-03-31"] <- 84.6419
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2010-04-01" & VTR_DMIS_AC$Date <= "2010-06-30"] <- 85.0548
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2010-07-01" & VTR_DMIS_AC$Date <= "2010-09-30"] <- 85.3117
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2010-10-01" & VTR_DMIS_AC$Date <= "2010-12-31"] <- 85.8115
+
+#2011
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2011-01-01" & VTR_DMIS_AC$Date <= "2011-03-31"] <- 86.25453
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2011-04-01" & VTR_DMIS_AC$Date <= "2011-06-30"] <- 86.82427
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2011-07-01" & VTR_DMIS_AC$Date <= "2011-09-30"] <- 87.36122
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2011-10-01" & VTR_DMIS_AC$Date <= "2011-12-31"] <- 87.46666
+
+#2012
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2012-01-01" & VTR_DMIS_AC$Date <= "2012-03-31"] <- 87.99741
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2012-04-01" & VTR_DMIS_AC$Date <= "2012-06-30"] <- 88.35184
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2012-07-01" & VTR_DMIS_AC$Date <= "2012-09-30"] <- 88.80993
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2012-10-01" & VTR_DMIS_AC$Date <= "2012-12-31"] <- 89.26005
+
+
+#2013
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2013-01-01" & VTR_DMIS_AC$Date <= "2013-03-31"] <- 89.61713
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2013-04-01" & VTR_DMIS_AC$Date <= "2013-06-30"] <- 89.87143
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2013-07-01" & VTR_DMIS_AC$Date <= "2013-09-30"] <- 90.29497
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2013-10-01" & VTR_DMIS_AC$Date <= "2013-12-31"] <- 90.83458
+
+#2014
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2014-01-01" & VTR_DMIS_AC$Date <= "2014-03-31"] <- 91.21293
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2014-04-01" & VTR_DMIS_AC$Date <= "2014-06-30"] <- 91.7295
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2014-07-01" & VTR_DMIS_AC$Date <= "2014-09-30"] <- 92.1300
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2014-10-01" & VTR_DMIS_AC$Date <= "2014-12-31"] <- 92.28329
+
+#2015
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2015-01-01" & VTR_DMIS_AC$Date <= "2015-03-31"] <- 92.25051
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2015-04-01" & VTR_DMIS_AC$Date <= "2015-06-30"] <- 92.75025
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2015-07-01" & VTR_DMIS_AC$Date <= "2015-09-30"] <- 93.02670
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2015-10-01" & VTR_DMIS_AC$Date <= "2015-12-31"] <- 93.01784
+
+#2016
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2016-01-01" & VTR_DMIS_AC$Date <= "2016-03-31"] <- 92.94341
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2016-04-01" & VTR_DMIS_AC$Date <= "2016-06-30"] <- 93.59998
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2016-07-01" & VTR_DMIS_AC$Date <= "2016-09-30"] <- 93.85959
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2016-10-01" & VTR_DMIS_AC$Date <= "2016-12-31"] <- 94.35402
+
+#2017
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2017-01-01" & VTR_DMIS_AC$Date <= "2017-03-31"] <- 94.83072
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2017-04-01" & VTR_DMIS_AC$Date <= "2017-06-30"] <- 95.13552
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2017-07-01" & VTR_DMIS_AC$Date <= "2017-09-30"] <- 95.60868
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2017-10-01" & VTR_DMIS_AC$Date <= "2017-12-31"] <- 96.28829
+
+#2018
+
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2018-01-01" & VTR_DMIS_AC$Date <= "2018-03-31"] <- 96.81195
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2018-04-01" & VTR_DMIS_AC$Date <= "2018-06-30"] <- 97.67409
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2018-07-01" & VTR_DMIS_AC$Date <= "2018-09-30"] <- 97.99573
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2018-10-01" & VTR_DMIS_AC$Date <= "2018-12-31"] <- 98.50787
+
+#2019
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2019-01-01" & VTR_DMIS_AC$Date <= "2019-03-31"] <- 98.80825
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2019-04-01" & VTR_DMIS_AC$Date <= "2019-06-30"] <- 99.37355
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2019-07-01" & VTR_DMIS_AC$Date <= "2019-09-30"] <- 99.69697
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2019-10-01" & VTR_DMIS_AC$Date <= "2019-12-31"] <- 100.10544
+
+#2020
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2020-01-01" & VTR_DMIS_AC$Date <= "2020-03-31"] <- 100.43151
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2020-04-01" & VTR_DMIS_AC$Date <= "2020-06-30"] <- 100
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2020-07-01" & VTR_DMIS_AC$Date <= "2020-09-30"] <- 100.91176
+VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2020-10-01" & VTR_DMIS_AC$Date <= "2020-12-31"] <- 101.39998
+
+# Convert nominal to real dollars 
+VTR_DMIS_AC$DOLLAR_ALL_SP_2020 <- ((VTR_DMIS_AC$DOLLAR_ALL_SP/VTR_DMIS_AC$DEFLATOR)*100)
+
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
 # Data Aggregating Trip Revenues & Delete duplicate TRIPIDs
 
 Subtrips are generated when a vessel switches gear or statistical areas. Subtrips have identical TRIPID/DOCID.  A trip may have many (8+) subtrips, but the majority of trips observed only have one subtrip (95.7% using original VTR & DMIS merged data set). If a trip has just 1 subtrip, the trip took place in a single statistical area.  If a trip crosses four different statistical areas, the NSUBTRIP is then equal to 4, and the landings, value, latitude, and longitude are reported separately for each area. 
@@ -418,113 +532,30 @@ stopifnot(sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))==0)
 
 
 
+# Constructing Operating Profits
 
-# Construct operating profits 
+```{r constructing operating profits, echo=TRUE, eval=TRUE} 
 
-In order to construct operating profits we need to ensure that DOLLAR and TRIP_COST_WINSOR_2020_DOL match. The original data set has DOLLAR in nominal dollars and TRIP_COST_WINSOR_2020_DOL is in 2020 Real Dollars. 
+# Aggregate Dollar_ALL_SP_2020
 
-```{r constructing operating profits, echo=TRUE, eval=TRUE }
+Agg_Dollar_ALL_SP_2020 <- final_product_lease %>%
+  group_by(TRIPID) %>%
+ summarise(Agg_Dollar_ALL_SP_2020 = sum(DOLLAR_ALL_SP_2020))
 
+# Next step is to make sure there are no duplicates in TRIPID groups; this should equal 0
+sum(duplicated(Agg_Dollar_ALL_SP_2020$TRIPID))
+stopifnot(sum(duplicated(Agg_Dollar_ALL_SP_2020$TRIPID))==0)
 
-final_product_lease$DEFLATOR<-"None"
-
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2007-01-01" & final_product_lease$Date <= "2007-03-31"] <- 81.37499
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2007-04-01" & final_product_lease$Date <= "2007-06-30"] <- 81.91903
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2007-07-01" & final_product_lease$Date <= "2007-09-30"] <- 82.34434
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2007-10-01" & final_product_lease$Date <= "2007-12-31"] <- 82.69345
-
-#2008
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2008-01-01" & final_product_lease$Date <= "2008-03-31"] <- 82.98408
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2008-04-01" & final_product_lease$Date <= "2008-06-30"] <- 83.40496
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2008-07-01" & final_product_lease$Date <= "2008-09-30"] <- 84.03406
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2008-10-01" & final_product_lease$Date <= "2008-12-31"] <- 84.23342
-
-#2009
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2009-01-01" & final_product_lease$Date <= "2009-03-31"] <- 84.19178
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2009-04-01" & final_product_lease$Date <= "2009-06-30"] <- 84.04469
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2009-07-01" & final_product_lease$Date <= "2009-09-30"] <- 84.13507
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2009-10-01" & final_product_lease$Date <= "2009-12-31"] <- 84.41241
-
-
-#2010
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2010-01-01" & final_product_lease$Date <= "2010-03-31"] <- 84.6419
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2010-04-01" & final_product_lease$Date <= "2010-06-30"] <- 85.0548
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2010-07-01" & final_product_lease$Date <= "2010-09-30"] <- 85.3117
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2010-10-01" & final_product_lease$Date <= "2010-12-31"] <- 85.8115
-
-#2011
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2011-01-01" & final_product_lease$Date <= "2011-03-31"] <- 86.25453
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2011-04-01" & final_product_lease$Date <= "2011-06-30"] <- 86.82427
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2011-07-01" & final_product_lease$Date <= "2011-09-30"] <- 87.36122
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2011-10-01" & final_product_lease$Date <= "2011-12-31"] <- 87.46666
-
-#2012
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2012-01-01" & final_product_lease$Date <= "2012-03-31"] <- 87.99741
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2012-04-01" & final_product_lease$Date <= "2012-06-30"] <- 88.35184
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2012-07-01" & final_product_lease$Date <= "2012-09-30"] <- 88.80993
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2012-10-01" & final_product_lease$Date <= "2012-12-31"] <- 89.26005
-
-
-#2013
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2013-01-01" & final_product_lease$Date <= "2013-03-31"] <- 89.61713
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2013-04-01" & final_product_lease$Date <= "2013-06-30"] <- 89.87143
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2013-07-01" & final_product_lease$Date <= "2013-09-30"] <- 90.29497
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2013-10-01" & final_product_lease$Date <= "2013-12-31"] <- 90.83458
-
-#2014
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2014-01-01" & final_product_lease$Date <= "2014-03-31"] <- 91.21293
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2014-04-01" & final_product_lease$Date <= "2014-06-30"] <- 91.7295
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2014-07-01" & final_product_lease$Date <= "2014-09-30"] <- 92.1300
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2014-10-01" & final_product_lease$Date <= "2014-12-31"] <- 92.28329
-
-#2015
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2015-01-01" & final_product_lease$Date <= "2015-03-31"] <- 92.25051
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2015-04-01" & final_product_lease$Date <= "2015-06-30"] <- 92.75025
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2015-07-01" & final_product_lease$Date <= "2015-09-30"] <- 93.02670
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2015-10-01" & final_product_lease$Date <= "2015-12-31"] <- 93.01784
-
-#2016
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2016-01-01" & final_product_lease$Date <= "2016-03-31"] <- 92.94341
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2016-04-01" & final_product_lease$Date <= "2016-06-30"] <- 93.59998
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2016-07-01" & final_product_lease$Date <= "2016-09-30"] <- 93.85959
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2016-10-01" & final_product_lease$Date <= "2016-12-31"] <- 94.35402
-
-#2017
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2017-01-01" & final_product_lease$Date <= "2017-03-31"] <- 94.83072
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2017-04-01" & final_product_lease$Date <= "2017-06-30"] <- 95.13552
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2017-07-01" & final_product_lease$Date <= "2017-09-30"] <- 95.60868
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2017-10-01" & final_product_lease$Date <= "2017-12-31"] <- 96.28829
-
-#2018
-
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2018-01-01" & final_product_lease$Date <= "2018-03-31"] <- 96.81195
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2018-04-01" & final_product_lease$Date <= "2018-06-30"] <- 97.67409
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2018-07-01" & final_product_lease$Date <= "2018-09-30"] <- 97.99573
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2018-10-01" & final_product_lease$Date <= "2018-12-31"] <- 98.50787
-
-#2019
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2019-01-01" & final_product_lease$Date <= "2019-03-31"] <- 98.80825
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2019-04-01" & final_product_lease$Date <= "2019-06-30"] <- 99.37355
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2019-07-01" & final_product_lease$Date <= "2019-09-30"] <- 99.69697
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2019-10-01" & final_product_lease$Date <= "2019-12-31"] <- 100.10544
-
-#2020
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2020-01-01" & final_product_lease$Date <= "2020-03-31"] <- 100.43151
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2020-04-01" & final_product_lease$Date <= "2020-06-30"] <- 100
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2020-07-01" & final_product_lease$Date <= "2020-09-30"] <- 100.91176
-final_product_lease$DEFLATOR[final_product_lease$Date >= "2020-10-01" & final_product_lease$Date <= "2020-12-31"] <- 101.39998
+# Add back into original data set 
+# all = FALSE is used to keep only rows that match from the data frames
+final_product_lease <- merge(final_product_lease,Agg_Dollar_ALL_SP_2020, by.x = "TRIPID", by.y = "TRIPID", all.x = TRUE, all.y = FALSE)
 
 
 
 
-final_product_lease$DOLLAR_ALL_SP_2020 <- ((final_product_lease$DOLLAR_ALL_SP/final_product_lease$DEFLATOR)*100)
+#Calculate operating profit by subtracting real costs from what are now real dollar revenues.  
 final_product_lease$OPERATING_PROFIT_2020 <- (final_product_lease$DOLLAR_ALL_SP_2020 - final_product_lease$TRIP_COST_WINSOR_2020_DOL)
-
-
-
 ```
-
-
 
 
 
