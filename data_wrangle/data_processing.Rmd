@@ -456,15 +456,7 @@ VTR_DMIS_AC$DEFLATOR[VTR_DMIS_AC$Date >= "2020-10-01" & VTR_DMIS_AC$Date <= "202
 # Convert nominal to real dollars 
 VTR_DMIS_AC$DOLLAR_ALL_SP_2020 <- ((VTR_DMIS_AC$DOLLAR_ALL_SP/VTR_DMIS_AC$DEFLATOR)*100)
 
-
-
-
 ```
-
-
-
-
-
 
 
 
@@ -511,9 +503,6 @@ stopifnot(sum(duplicated(Agg_DOL_POUN_LAND$TRIPID))==0)
 VTR_DMIS_AC_Agg <- merge(VTR_DMIS_AC,Agg_DOL_POUN_LAND, by.x = "TRIPID", by.y = "TRIPID", all.x = TRUE, all.y = FALSE)
 
 
-
-
-
 ### 3.Parse out Maximum Scallop Dollar amounts in order to drop lesser subtrips
 VTR_DMIS_AC_Agg <- VTR_DMIS_AC_Agg %>% 
   group_by(TRIPID) %>%
@@ -528,33 +517,6 @@ sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))
 stopifnot(sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))==0)
 
 
-```
-
-
-
-# Constructing Operating Profits
-
-```{r constructing operating profits, echo=TRUE, eval=TRUE} 
-
-# Aggregate Dollar_ALL_SP_2020
-
-Agg_Dollar_ALL_SP_2020 <- final_product_lease %>%
-  group_by(TRIPID) %>%
- summarise(Agg_Dollar_ALL_SP_2020 = sum(DOLLAR_ALL_SP_2020))
-
-# Next step is to make sure there are no duplicates in TRIPID groups; this should equal 0
-sum(duplicated(Agg_Dollar_ALL_SP_2020$TRIPID))
-stopifnot(sum(duplicated(Agg_Dollar_ALL_SP_2020$TRIPID))==0)
-
-# Add back into original data set 
-# all = FALSE is used to keep only rows that match from the data frames
-final_product_lease <- merge(final_product_lease,Agg_Dollar_ALL_SP_2020, by.x = "TRIPID", by.y = "TRIPID", all.x = TRUE, all.y = FALSE)
-
-
-
-
-#Calculate operating profit by subtracting real costs from what are now real dollar revenues.  
-final_product_lease$OPERATING_PROFIT_2020 <- (final_product_lease$DOLLAR_ALL_SP_2020 - final_product_lease$TRIP_COST_WINSOR_2020_DOL)
 ```
 
 
