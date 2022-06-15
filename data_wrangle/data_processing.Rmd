@@ -425,50 +425,101 @@ In order to construct operating profits we need to ensure that DOLLAR and TRIP_C
 
 ```{r constructing operating profits, echo=TRUE, eval=TRUE }
 
-#install.packages("fredr")
-library(fredr)
+
+final_product_lease$DEFLATOR<-"None"
+
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2007-01-01" & final_product_lease$Date <= "2007-03-31"] <- 81.37499
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2007-04-01" & final_product_lease$Date <= "2007-06-30"] <- 81.91903
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2007-07-01" & final_product_lease$Date <= "2007-09-30"] <- 82.34434
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2007-10-01" & final_product_lease$Date <= "2007-12-31"] <- 82.69345
+
+#2008
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2008-01-01" & final_product_lease$Date <= "2008-03-31"] <- 82.98408
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2008-04-01" & final_product_lease$Date <= "2008-06-30"] <- 83.40496
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2008-07-01" & final_product_lease$Date <= "2008-09-30"] <- 84.03406
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2008-10-01" & final_product_lease$Date <= "2008-12-31"] <- 84.23342
+
+#2009
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2009-01-01" & final_product_lease$Date <= "2009-03-31"] <- 84.19178
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2009-04-01" & final_product_lease$Date <= "2009-06-30"] <- 84.04469
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2009-07-01" & final_product_lease$Date <= "2009-09-30"] <- 84.13507
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2009-10-01" & final_product_lease$Date <= "2009-12-31"] <- 84.41241
 
 
-#set fredr API key 
-#fredr_set_key("FRED_API_KEY") 
+#2010
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2010-01-01" & final_product_lease$Date <= "2010-03-31"] <- 84.6419
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2010-04-01" & final_product_lease$Date <= "2010-06-30"] <- 85.0548
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2010-07-01" & final_product_lease$Date <= "2010-09-30"] <- 85.3117
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2010-10-01" & final_product_lease$Date <= "2010-12-31"] <- 85.8115
+
+#2011
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2011-01-01" & final_product_lease$Date <= "2011-03-31"] <- 86.25453
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2011-04-01" & final_product_lease$Date <= "2011-06-30"] <- 86.82427
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2011-07-01" & final_product_lease$Date <= "2011-09-30"] <- 87.36122
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2011-10-01" & final_product_lease$Date <= "2011-12-31"] <- 87.46666
+
+#2012
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2012-01-01" & final_product_lease$Date <= "2012-03-31"] <- 87.99741
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2012-04-01" & final_product_lease$Date <= "2012-06-30"] <- 88.35184
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2012-07-01" & final_product_lease$Date <= "2012-09-30"] <- 88.80993
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2012-10-01" & final_product_lease$Date <= "2012-12-31"] <- 89.26005
 
 
-# api_key string must be retrieved 
-# To use fredr and the FRED API in general, you must first obtain a FRED API key. You can get this from https://research.stlouisfed.org/useraccount/apikey. After you obtain your API key you should then save it in your .Renviron file. Once you have your file open you can save it as the following with no spaces: FRED _ API _ KEY="your_key_here"
+#2013
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2013-01-01" & final_product_lease$Date <= "2013-03-31"] <- 89.61713
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2013-04-01" & final_product_lease$Date <= "2013-06-30"] <- 89.87143
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2013-07-01" & final_product_lease$Date <= "2013-09-30"] <- 90.29497
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2013-10-01" & final_product_lease$Date <= "2013-12-31"] <- 90.83458
+
+#2014
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2014-01-01" & final_product_lease$Date <= "2014-03-31"] <- 91.21293
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2014-04-01" & final_product_lease$Date <= "2014-06-30"] <- 91.7295
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2014-07-01" & final_product_lease$Date <= "2014-09-30"] <- 92.1300
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2014-10-01" & final_product_lease$Date <= "2014-12-31"] <- 92.28329
+
+#2015
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2015-01-01" & final_product_lease$Date <= "2015-03-31"] <- 92.25051
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2015-04-01" & final_product_lease$Date <= "2015-06-30"] <- 92.75025
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2015-07-01" & final_product_lease$Date <= "2015-09-30"] <- 93.02670
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2015-10-01" & final_product_lease$Date <= "2015-12-31"] <- 93.01784
+
+#2016
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2016-01-01" & final_product_lease$Date <= "2016-03-31"] <- 92.94341
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2016-04-01" & final_product_lease$Date <= "2016-06-30"] <- 93.59998
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2016-07-01" & final_product_lease$Date <= "2016-09-30"] <- 93.85959
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2016-10-01" & final_product_lease$Date <= "2016-12-31"] <- 94.35402
+
+#2017
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2017-01-01" & final_product_lease$Date <= "2017-03-31"] <- 94.83072
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2017-04-01" & final_product_lease$Date <= "2017-06-30"] <- 95.13552
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2017-07-01" & final_product_lease$Date <= "2017-09-30"] <- 95.60868
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2017-10-01" & final_product_lease$Date <= "2017-12-31"] <- 96.28829
+
+#2018
+
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2018-01-01" & final_product_lease$Date <= "2018-03-31"] <- 96.81195
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2018-04-01" & final_product_lease$Date <= "2018-06-30"] <- 97.67409
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2018-07-01" & final_product_lease$Date <= "2018-09-30"] <- 97.99573
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2018-10-01" & final_product_lease$Date <= "2018-12-31"] <- 98.50787
+
+#2019
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2019-01-01" & final_product_lease$Date <= "2019-03-31"] <- 98.80825
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2019-04-01" & final_product_lease$Date <= "2019-06-30"] <- 99.37355
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2019-07-01" & final_product_lease$Date <= "2019-09-30"] <- 99.69697
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2019-10-01" & final_product_lease$Date <= "2019-12-31"] <- 100.10544
+
+#2020
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2020-01-01" & final_product_lease$Date <= "2020-03-31"] <- 100.43151
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2020-04-01" & final_product_lease$Date <= "2020-06-30"] <- 100
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2020-07-01" & final_product_lease$Date <= "2020-09-30"] <- 100.91176
+final_product_lease$DEFLATOR[final_product_lease$Date >= "2020-10-01" & final_product_lease$Date <= "2020-12-31"] <- 101.39998
 
 
-# Pull in data 
-# GDP Implicit Price Deflator in United States (USAGDPDEFAISMEI); Units:  Index 2015=100, Not Seasonally Adjusted; Frequency:  Annual
 
 
+final_product_lease$DOLLAR_ALL_SP_2020 <- ((final_product_lease$DOLLAR_ALL_SP/final_product_lease$DEFLATOR)*100)
+final_product_lease$OPERATING_PROFIT_2020 <- (final_product_lease$DOLLAR_ALL_SP_2020 - final_product_lease$TRIP_COST_WINSOR_2020_DOL)
 
-testing <- fredr(
-  series_id = "USAGDPDEFAISMEI",
-  observation_start = as.Date("2007-01-01"),
-  observation_end = as.Date("2021-01-01")
-  )
-
-testing_1 <- testing %>% separate(date, into = c('year','month','day', sep = '-'))
-testing_1 <- testing_1[,c("year","value")]
-
-
-
-
-#Test out formula here- just for marina 
-# Take Subset of Final Lease Data Set 
-
-test_set <- final_product_lease[,c("TRIPID","DOLLAR_ALL_SP","DOLLAR","TRIP_COST_WINSOR_2020_DOL", "YEAR")]
-
-# Merge Lease Data and Deflator Values 
-test_set <- merge(test_set,testing_1, by.x = "YEAR", by.y = "year", all.x = TRUE, all.y = FALSE)
-
-# Use GDP Implicit Price Deflator to convert Nominal Revenue Dollars to 2020 Real Dollars 
-test_set$DOLLAR_ALL_SP_2020 <-((test_set$DOLLAR_ALL_SP/test_set$value)*100)   
-
-
-# Calculate operating profit by subtracting winsor 2020 costs from 2020 all species revenue dollars 
-## Note: TRIP_COST_WINSOR_2020_DOL is the cost of a trip and DOLLAR_ALL_SP_2020 will be revenue for the subtrip
-test_set$OPERATING_PROFIT_2020 <-(test_set$DOLLAR_ALL_SP_2020-test_set$TRIP_COST_WINSOR_2020_DOL)
 
 
 ```
