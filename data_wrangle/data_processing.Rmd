@@ -386,7 +386,7 @@ stopifnot(fredr_has_key()==TRUE)
 
 
 deflators <- fredr(
-  series_id = "USAGDPDEFQISMEI",
+  series_id = "GDPDEF",
   observation_start = as.Date("2007-01-01"),
   observation_end = as.Date("2020-06-01"),
   realtime_start =NULL,
