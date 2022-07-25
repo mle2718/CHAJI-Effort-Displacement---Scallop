@@ -35,6 +35,8 @@ library("dplyr")
 library("RODBC")
 library("RODM")
 library("epiDisplay")
+library("fredr")
+library("lubridate")
 vintage_string<-Sys.Date()
 vintage_string<-gsub("-","_",vintage_string)
 
@@ -356,6 +358,85 @@ group_by("YEAR") %>%
 
 
 
+
+# Converting Revenues to Real Dollars 
+
+In order to construct operating profits later on we need to ensure that DOLLAR and TRIP_COST_WINSOR_2020_DOL match. The original data set has DOLLAR in nominal dollars and TRIP_COST_WINSOR_2020_DOL is in 2020 Real Dollars. To make the conversion we will use GDP Implicit Price Deflators collected from the Federal Reserve Bank and adjust the index to Q2 2020 to match calculation methods of the TRIP_COST_WINSOR_2020_DOL variable. 
+
+```{r obtain and set fred API key, echo=TRUE}
+
+# Instructions for using the fredr package, a R client for the 'FRED' API, to import Federal Reserve deflator data; obtain a unique API key and set up your unique API key for multiple uses.   
+
+## In order to obtain your API key you must create an account and submit a description of this application using the [Federal Reserve's website](https://research.stlouisfed.org/useraccount/apikey). Additional resources on API keys can be found [here](https://fred.stlouisfed.org/docs/api/api_key.html). After obtaining your API key you will need to open the .Renviron file located in your network drive. Once you have your .Renviron file open, you will then need to save your API using the following format: FRED_API_KEY=abcdefghijklmnopqrstuvwxyz123456
+
+## Alternatively, you can set a once per session key by using the following command 
+### fredr_set_key("Your_FRED_API_key_here") 
+
+
+# Test it out
+stopifnot(fredr_has_key()==TRUE)
+
+```
+
+
+
+```{r retriving Federal Reserve data using fredr, echo=TRUE}
+
+# In order to convert revenues to match costs which are reflected in Q2 2020 Dollars deflator, values are imported from the [GDP Implicit Price Deflator in United States USAGDPDEFAISMEI](https://fred.stlouisfed.org/series/USAGDPDEFAISMEI). Note: To update the imported data set's start date change date in observation_start and for end date change date in observation_end.
+
+
+deflators <- fredr(
+  series_id = "GDPDEF",
+  observation_start = as.Date("2007-01-01"),
+  observation_end = as.Date("2020-06-01"),
+  realtime_start =NULL,
+  realtime_end =NULL,
+  frequency = "q")
+         
+
+     
+# Assign Quarters 
+
+deflators <- deflators %>%
+          dplyr::select(date,value) %>%
+          mutate(date = quarter(deflators$date, 
+                         type = "quarter",
+                         fiscal_start = 1,
+                         with_year = TRUE))
+          
+```
+
+
+```{r calculate DOLLAR_ALL_SP in 2020 dollars, echo=TRUE}
+
+# The default index year for the GDP Implicit Price Deflator in United States data is 2015 which needs to be changed to match Q2 2020 cost dollars. 
+## Index quarter/year can be updated by changing "2020.2" to desired quarter and year combination
+
+assign("base_year_index",deflators[deflators$date == "2020.2","value"])
+base_year_index <- as.numeric(base_year_index)       
+
+deflators <- deflators %>%
+            mutate(value = value/(base_year_index))
+
+# Break down current dates into years and quarters
+VTR_DMIS_AC <- VTR_DMIS_AC %>%
+                  mutate(qdate = quarter(Date, 
+                         type = "quarter",
+                         fiscal_start = 1,
+                         with_year = TRUE)) %>%
+                         left_join(deflators, by =c("qdate"="date")) %>%
+               mutate(DOLLAR_ALL_SP_2020=DOLLAR_ALL_SP/value)
+
+
+# Delete unnecessary data frame and variable
+deflators <- NULL
+VTR_DMIS_AC$qdate <- NULL
+
+```
+
+
+
+
 # Data Aggregating Trip Revenues & Delete duplicate TRIPIDs
 
 Subtrips are generated when a vessel switches gear or statistical areas. Subtrips have identical TRIPID/DOCID.  A trip may have many (8+) subtrips, but the majority of trips observed only have one subtrip (95.7% using original VTR & DMIS merged data set). If a trip has just 1 subtrip, the trip took place in a single statistical area.  If a trip crosses four different statistical areas, the NSUBTRIP is then equal to 4, and the landings, value, latitude, and longitude are reported separately for each area. 
@@ -397,9 +478,6 @@ stopifnot(sum(duplicated(Agg_DOL_POUN_LAND$TRIPID))==0)
 VTR_DMIS_AC_Agg <- merge(VTR_DMIS_AC,Agg_DOL_POUN_LAND, by.x = "TRIPID", by.y = "TRIPID", all.x = TRUE, all.y = FALSE)
 
 
-
-
-
 ### 3.Parse out Maximum Scallop Dollar amounts in order to drop lesser subtrips
 VTR_DMIS_AC_Agg <- VTR_DMIS_AC_Agg %>% 
   group_by(TRIPID) %>%
@@ -415,55 +493,6 @@ stopifnot(sum(duplicated(VTR_DMIS_AC_Agg$TRIPID))==0)
 
 
 ```
-
-
-
-
-# Construct operating profits 
-
-In order to construct operating profits we need to ensure that DOLLAR and TRIP_COST_WINSOR_2020_DOL match. The original data set has DOLLAR in nominal dollars and TRIP_COST_WINSOR_2020_DOL is in 2020 Real Dollars. 
-
-```{r constructing operating profits, echo=TRUE, eval=TRUE }
-
-#install.packages("fredr")
-library(fredr)
-
-
-
-
-
-#set fredr API key 
-fredr_set_key("") 
-# api_key string must be retrieved 
-# To use fredr and the FRED API in general, you must first obtain a FRED API key. You can get this from https://research.stlouisfed.org/useraccount/apikey. After you obtain your API key you should then save it in your .Renviron file. Once you have your file open you can save it as the following: 
-              # FRED_API_KEY=abcdefghijklmnopqrstuvwxyz123456
-
-
-#https://api.stlouisfed.org/fred/category?category_id=125&api_key=abcdefghijklmnopqrstuvwxyz123456
-
-
-
-
-
-# Pull in data 
-# GDP Implicit Price Deflator in United States (USAGDPDEFAISMEI); Units:  Index 2015=100, Not Seasonally Adjusted; Frequency:  Annual
-
-
-
-
-testing <- fredr(
-  series_id = "USAGDPDEFAISMEI",
-  observation_start = as.Date("2007-01-01"),
-  observation_end = as.Date("2020-01-01")
-)
-
-
-
-
-
-```
-
-
 
 
 
