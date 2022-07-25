@@ -423,10 +423,10 @@ VTR_DMIS_AC <- VTR_DMIS_AC %>%
                   mutate(qdate = quarter(Date, 
                          type = "quarter",
                          fiscal_start = 1,
-                         with_year = TRUE))
+                         with_year = TRUE)) %>%
+                         left_join(deflators, by =c("qdate"="date")) %>%
+               mutate(DOLLAR_ALL_SP_2020=DOLLAR_ALL_SP/value)
 
-# Convert DOLLAR_ALL_SP to 2020 dollars
-VTR_DMIS_AC$DOLLAR_ALL_SP_2020 <- (VTR_DMIS_AC$DOLLAR_ALL_SP/deflators$value)
 
 # Delete unnecessary data frame and variable
 deflators <- NULL
