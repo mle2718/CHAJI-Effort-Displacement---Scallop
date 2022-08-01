@@ -33,7 +33,17 @@ Don't use mars because it's on an older version of R.
 1.  Rename and edit your local copy of [R_credentials_sample.R](/data_wrangle/R_credentials_sample.R) to `credentials.R`. Follow the instructions in comments at the top.
 1.  Edit your .Rprofile or .Renviron to be aware of *network_location_desktop* and *network_location_remote* variables.
 1.  Use Rstudio to knit the [code to extract and processes data](/data_wrangle/data_extraction_and_processing_code.Rmd) to html.
-    
+
+# Creating and Setting API Key for deflator data
+
+We use the fredr package to import Federal Reserve deflator data which needs a unique FRED API key for each user. Follow the instructions below to unique API key for multiple uses.   
+
+1. In order to obtain your API key you must create an account and submit a description of this application using the [Federal Reserve's website](https://research.stlouisfed.org/useraccount/apikey). 
+ *Additional resources on API keys can be found [here](https://fred.stlouisfed.org/docs/api/api_key.html). 
+2. After obtaining your API key you will need to open the .Renviron file located in your network drive. Once you have your .Renviron file open, you will then need to save your API using the following format: FRED_API_KEY=abcdefghijklmnopqrstuvwxyz123456
+
+
+
 # Dependencies
 
 The data processing code depends on:
