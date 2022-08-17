@@ -610,8 +610,10 @@ lease_sp <- st_read(All_Lease_Areas_Shapefile_path)
 
 ## This chunk uses the current data set, converts it into a sf geospatial object, and bins it into the assigned coordinate system (crs).
 
+
 point_geo_lease <- st_as_sf(final_product, 
                       coords = c(x  = "DDLON", y = "DDLAT"), crs = crs )
+sf_use_s2(FALSE)
 
 final_product_lease <- st_join(point_geo_lease, lease_sp, join = st_within)
 
