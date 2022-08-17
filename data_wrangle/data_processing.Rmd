@@ -22,21 +22,19 @@ here::i_am("data_wrangle/data_processing.Rmd")
 
 library("here")
 library("leaflet")
-library("tidyverse")
+#library("tidyverse")
+tidyverse_short<-c("broom","cli","crayon","dbplyr","dplyr","dtplyr","forcats","ggplot2","googledrive","googlesheets4","hms","httr","jsonlite","lubridate","magrittr","modelr","pillar","purrr","readr","readxl","reprex","rlang","rstudioapi","rvest","stringr","tibble","tidyr","xml2") 
+lapply(tidyverse_short, require, character.only = TRUE)
 library("sf")
-library("dbplyr")
 library("raster")
 library("rgdal")
-library("readxl")
 library("data.table")
 library("tmaptools")
 library("tmap")
-library("dplyr")
 library("RODBC")
-library("RODM")
+#library("RODM")
 library("epiDisplay")
 library("fredr")
-library("lubridate")
 vintage_string<-Sys.Date()
 vintage_string<-gsub("-","_",vintage_string)
 
@@ -393,13 +391,11 @@ deflators <- fredr(
   realtime_end =NULL,
   frequency = "q")
          
-
-     
 # Assign Quarters 
 
 deflators <- deflators %>%
           dplyr::select(date,value) %>%
-          mutate(date = quarter(deflators$date, 
+          mutate(date = lubridate::quarter(date, 
                          type = "quarter",
                          fiscal_start = 1,
                          with_year = TRUE))
@@ -420,7 +416,7 @@ deflators <- deflators %>%
 
 # Break down current dates into years and quarters
 VTR_DMIS_AC <- VTR_DMIS_AC %>%
-                  mutate(qdate = quarter(Date, 
+                  mutate(qdate = lubridate::quarter(Date, 
                          type = "quarter",
                          fiscal_start = 1,
                          with_year = TRUE)) %>%
