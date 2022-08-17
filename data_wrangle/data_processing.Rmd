@@ -609,7 +609,7 @@ lease_sp <- st_read(All_Lease_Areas_Shapefile_path)
 
 point_geo_lease <- st_as_sf(final_product, 
                       coords = c(x  = "DDLON", y = "DDLAT"), crs = crs )
-sf_use_s2(FALSE)
+
 
 final_product_lease <- st_join(point_geo_lease, lease_sp, join = st_within)
 
@@ -627,6 +627,12 @@ colnames(final_product_lease)[colnames(final_product_lease) == "DDLAT_bak"] <- "
 stopifnot(is.numeric(final_product_lease$MN10SQID))
 
 stopifnot(is.numeric(final_product_lease$MN30SQID))
+
+#Delete unnecessary lease number variable and update lease area variable name to match prior analysis
+final_product_lease$LEASE_NUMB <- NULL
+colnames(final_product_lease)[colnames(final_product_lease) == "LEASE_NU_1"] <- "NAME"
+
+
 
 
 # If you are planning on turning off the next chunk which integrates the FishSET method of zone assignment you will need to remove hashtags under "save to RDS" below. 
@@ -728,6 +734,10 @@ pts <- as.data.frame(as.numeric(inter))
 colnames(pts) <- "col.id"
 pts$ID <- tenMinSqr_new$MN10SQID[pts$col.id]
 final_product_lease_FS$ZoneID <- pts$ID
+
+#Delete unnecessary lease number variable and update lease area variable name to match prior analysis
+final_product_lease_FS$LEASE_NUMB <- NULL
+colnames(final_product_lease_FS)[colnames(final_product_lease_FS) == "LEASE_NU_1"] <- "NAME"
 
 
 #Delete geometry column & duplicates
