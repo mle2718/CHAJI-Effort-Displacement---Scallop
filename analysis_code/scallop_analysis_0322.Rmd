@@ -67,7 +67,7 @@ source(here("analysis_code", "format_helpers.R"))
 
 This chunk "resets" my project by erasing it. This is just to keep things tidy and
 avoid potential errors when kitting the doc. 
-```{r}
+```{r project_cleanup}
 project <- "scallop0322"
 
 if (project_exists(project)) {
