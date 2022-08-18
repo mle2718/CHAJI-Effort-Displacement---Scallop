@@ -43,7 +43,7 @@ underdeveloped, or any thoughts or suggestions you may have.
 ```{r setup, echo=FALSE}
 library(FishSET)
 #library("tidyverse")
-tidyverse_short<-c("broom","cli","crayon","dbplyr","dplyr","dtplyr","forcats","ggplot2","googledrive","googlesheets4","hms","httr","jsonlite","lubridate","magrittr","modelr","pillar","purrr","readr","readxl","reprex","rlang","rstudioapi","rvest","stringr","tibble","tidyr","xml2") 
+tidyverse_short <- c("dplyr",  "ggplot2", "magrittr", "tidyr") 
 lapply(tidyverse_short, require, character.only = TRUE)
 rm(tidyverse_short)
 library(kableExtra) # table formatting 
