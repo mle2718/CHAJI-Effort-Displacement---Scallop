@@ -19,8 +19,9 @@ here::i_am("data_wrangle/data_extracting.rmd")
 library("here")
 
 library("RODBC")
-library("RODM")
+library("readstata13")
 library("readxl")
+library("tibble")
 vintage_string<-Sys.Date()
 vintage_string<-gsub("-","_",vintage_string)
 
@@ -288,7 +289,7 @@ Load in the lats and lons of all ports from the spacepanels directory. Change th
 
 ```{r readin_spacepanels, echo=TRUE,eval=extract_switch}
 #Import Data
-tripid_geoids<- haven::read_dta(file.path(spacepanels_directory,"just_ports_2022_01_26.dta"))
+tripid_geoids<- read.dta13(file.path(spacepanels_directory,"just_ports_2022_01_26.dta"))
 #Could do all this in one step, but ...
 # Pick the cols that start with previous
 prev<-tripid_geoids[grepl("^previous_", colnames(tripid_geoids))]
