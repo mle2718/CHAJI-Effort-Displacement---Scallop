@@ -9,3 +9,4 @@ credentials.R
 *.csv
 *.Rds
 scallop_zone_assignment_files
+/FishSETFolder/*
