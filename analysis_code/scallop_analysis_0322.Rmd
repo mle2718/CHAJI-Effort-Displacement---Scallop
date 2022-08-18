@@ -40,9 +40,12 @@ underdeveloped, or any thoughts or suggestions you may have.
 
 ## Library
 
-```{r setup, echo=TRUE}
+```{r setup, echo=FALSE}
 library(FishSET)
-library(tidyverse) # data wrangling
+#library("tidyverse")
+tidyverse_short <- c("dplyr",  "ggplot2", "magrittr", "tidyr") 
+lapply(tidyverse_short, require, character.only = TRUE)
+rm(tidyverse_short)
 library(kableExtra) # table formatting 
 library(sf) # converting geometry points to separate cols
 library(here)
