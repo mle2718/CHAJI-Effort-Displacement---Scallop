@@ -11,7 +11,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### Library
 ```{r}
-library(tidyverse)
+#library("tidyverse")
+tidyverse_short <- c("dplyr", "ggplot2", "magrittr", "purrr", "tibble") 
+lapply(tidyverse_short, require, character.only = TRUE)
+rm(tidyverse_short)
 library(sf)
 library(here)
 library(leaflet)
@@ -208,7 +211,7 @@ cable_folders <-
 cable_list <- lapply(cable_folders, function(x) sf::st_read(dsn = x))
 
 # wind lease areas
-wind_sf <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "All_lease_Areas_Shapefile"))
+wind_sf <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "All_Lease_Areas_Shapefile"))
 
 ```
 
