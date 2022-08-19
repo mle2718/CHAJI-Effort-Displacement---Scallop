@@ -119,16 +119,18 @@ data folder.
 ```{r}
  ten_filepath <- here("data", "external", "shapefiles", 
                       "Ten Minute Squares Cut North and Greater Atlantic")
- # lease_filepath <- here("data", "external", "shapefiles", "All_Lease_Areas_Shapefile")
 
 # loads lease area combined w/ cable routes (saved locally) created from
 # data_wrangle/combine_cable_routes.Rmd
 lease_filepath <- here("data", "main", "spatial", "wind_sf_final.RDS")
-lease_filepath <- "~/NE Scallops/data/spatial/wind_sf_final.RDS"
+
+# Leave this behind for now, but delete soon.
+if (params$location=="Seattle"){
+  lease_filepath <- "~/NE Scallops/data/spatial/wind_sf_final.RDS"
+}
 
 load_spatial(lease_filepath, name = "WindClose", over_write = TRUE, project,
              data.type = "RDS")
-
 load_spatial(ten_filepath, name = "TenMNSQR", over_write = TRUE, project,
              data.type = "shape")
 
