@@ -14,7 +14,12 @@ params:
     location: Woods_Hole
     PreRelease: TRUE
 ---
+<!---
+YAML options: 
+location --- NEFSC folks should set location=Woods_Hole. AK folks should set it to Seattle. This just controls where the data is read in from.
 
+PreRelease -- controls the location of FishSET package. Set to FALSE to load without options. Set to TRUE to load from a particular lib.loc
+--->
 ## Introduction 
  
 This summary was done using a combination of FishSET console functions, the tidyverse
