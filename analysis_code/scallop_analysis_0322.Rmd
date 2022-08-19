@@ -11,7 +11,11 @@ output:
 params:
     AA_DAS_only: TRUE
     BIN_GEARS: TRUE
-    location: Woods_Hole
+    location: 
+      label: "Location:"
+      value: Woods_Hole
+      input: select
+      choices: [Woods_Hole, Seattle]
     PreRelease: TRUE
 ---
 <!---
