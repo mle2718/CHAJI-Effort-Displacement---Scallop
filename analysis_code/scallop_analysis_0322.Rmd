@@ -11,7 +11,7 @@ output:
 params:
     AA_DAS_only: TRUE
     BIN_GEARS: TRUE
-    Woods_Hole: TRUE
+    location: Woods_Hole
     PreRelease: TRUE
 ---
 
@@ -84,38 +84,33 @@ if (project_exists(project)) {
 
 ## Data Import
 
-This code chunk should work in the scallop repo. 
-```{r filename_automagic, eval=TRUE}
-# This code looks into /data/main and sets the vintage_string according to 
-# the most recent data
-datasets_list <- list.files(path = here("data", "main"), pattern = "final_product_lease")
-datasets_list <- gsub("final_product_lease", "", datasets_list )
-datasets_list <- gsub(".Rds", "", datasets_list)
-datasets_list <- gsub(".csv" ,"", datasets_list)
-vintage_string <- max(datasets_list)
-rm(datasets_list)
+```{r data_readin, eval=TRUE}
+#For Woods_Hole users, read in the most recent data in data/main
 
-dat_filepath <- here("data", "main", paste0("final_product_lease_", vintage_string, ".Rds"))
-```
+if (params$location=="Woods_Hole"){
+  # This code looks into /data/main and sets the vintage_string according to 
+  # the most recent data
+  datasets_list <- list.files(path = here("data", "main"), pattern = "final_product_lease")
+  datasets_list <- gsub("final_product_lease", "", datasets_list )
+  datasets_list <- gsub(".Rds", "", datasets_list)
+  datasets_list <- gsub(".csv" ,"", datasets_list)
+  vintage_string <- max(datasets_list)
+  rm(datasets_list)
+  dat_filepath <- here("data", "main", paste0("final_product_lease_", vintage_string, ".Rds"))
+} else if (params$location=="Seattle"){
+  dat_filepath <- paste0("~/NE Scallops/data/updated/", 
+                         "June 22/NE NW Collab/",
+                         "final_product_lease_2022_05_25.Rds")
+}
 
-<br><br>
-
-This code works on my local computer. 
-```{r filename_by_hand, eval=FALSE}
-dat_filepath <- paste0("~/NE Scallops/data/updated/", 
-                       "June 22/NE NW Collab/",
-                       "final_product_lease_2022_05_25.Rds")
-```
-
-```{r readin_data, eval=TRUE}
 final_product_lease <- readRDS(dat_filepath)
 # needed to rename this for now since it matches the name outputted from the
 # zone assignment function we use. 
 final_product_lease <- final_product_lease %>% rename(Zone_ID = "ZoneID")
 
 load_maindata(dat = final_product_lease, project = project, over_write = TRUE)
-```
 
+```
 <br><br>
 
 ### Spatial data
@@ -128,6 +123,7 @@ data folder.
 
 # loads lease area combined w/ cable routes (saved locally) created from
 # data_wrangle/combine_cable_routes.Rmd
+lease_filepath <- here("data", "main", "spatial", "wind_sf_final.RDS")
 lease_filepath <- "~/NE Scallops/data/spatial/wind_sf_final.RDS"
 
 load_spatial(lease_filepath, name = "WindClose", over_write = TRUE, project,
