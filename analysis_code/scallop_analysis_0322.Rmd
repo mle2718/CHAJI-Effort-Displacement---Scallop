@@ -77,7 +77,7 @@ project <- "scallop0322"
 
 This chunk "resets" my project by erasing it. This is just to keep things tidy and
 avoid potential errors when kitting the doc. 
-```{r project_cleanup,eval=FALSE}
+```{r project_cleanup,eval=TRUE}
 
 if (project_exists(project)) {
   
@@ -252,7 +252,7 @@ scallop0322MainDataTable <-
   group_by(TRIPID) %>%
   mutate(Agg_DOLLAR = sum(DOLLAR), Agg_POUNDS = sum(POUNDS), Agg_LANDED = sum(LANDED), Agg_DOLLAR_ALL_SP_2020 = sum(DOLLAR_ALL_SP_2020))%>% 
   filter(DOLLAR == max(DOLLAR)) %>% 
-  select(-DOLLAR, -POUNDS, -LANDED) %>% 
+  select(-DOLLAR, -POUNDS, -LANDED,-DOLLAR_ALL_SP_2020) %>% 
   rename(DOLLAR = "Agg_DOLLAR", POUNDS = "Agg_POUNDS", LANDED = "Agg_LANDED", DOLLAR_ALL_SP_2020 = "Agg_DOLLAR_ALL_SP_2020") %>% 
   ungroup()
 
@@ -266,7 +266,7 @@ stopifnot(sum(duplicated(scallop0322MainDataTable$TRIPID))==0)
 
 #Calculate operating profit by subtracting 2020 trip costs from aggregated revenues in 2020 dollars.  
 scallop0322MainDataTable$OPERATING_PROFIT_2020 <- 
-  (scallop0322MainDataTable$Agg_DOLLAR_ALL_SP_2020 - scallop0322MainDataTable$TRIP_COST_WINSOR_2020_DOL)
+  (scallop0322MainDataTable$DOLLAR_ALL_SP_2020 - scallop0322MainDataTable$TRIP_COST_WINSOR_2020_DOL)
 
 
 ```
