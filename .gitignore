@@ -7,5 +7,5 @@ credentials.R
 *.Rproj
 *.Rhistory
 *.csv
-*.Rds
+*.RDS
 scallop_zone_assignment_files

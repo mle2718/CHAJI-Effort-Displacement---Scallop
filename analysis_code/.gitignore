@@ -1,5 +1,7 @@
 *.csv
 *.Rds
+*.RDS
 *.rds
 *.dta
 scallop_analysis*.html
+/scallop_analysis*/*
