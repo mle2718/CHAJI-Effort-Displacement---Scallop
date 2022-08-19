@@ -11,6 +11,8 @@ output:
 params:
     AA_DAS_only: TRUE
     BIN_GEARS: TRUE
+    Woods_Hole: TRUE
+    PreRelease: TRUE
 ---
 
 ## Introduction 
@@ -41,7 +43,13 @@ underdeveloped, or any thoughts or suggestions you may have.
 ## Library
 
 ```{r setup, echo=FALSE}
-library(FishSET)
+# Load the PreRelease version of FishSET if PreRelease==TRUE. Otherwise, load the normal install.
+if (params$PreRelease==TRUE){
+  library(FishSET, lib.loc="/net/home2/mlee/R/x86_64_pc-linux-gnu-library")
+} else{
+  library(FishSET)
+}
+
 #library("tidyverse")
 tidyverse_short<-c("broom","cli","crayon","dbplyr","dplyr","dtplyr","forcats","ggplot2","googledrive","googlesheets4","hms","httr","jsonlite","lubridate","magrittr","modelr","pillar","purrr","readr","readxl","reprex","rlang","rstudioapi","rvest","stringr","tibble","tidyr","xml2") 
 lapply(tidyverse_short, require, character.only = TRUE)
@@ -49,15 +57,12 @@ rm(tidyverse_short)
 library(kableExtra) # table formatting 
 library(sf) # converting geometry points to separate cols
 library(here)
-```
-
-
-```{r}
-
 here::i_am("analysis_code/scallop_analysis_0322.Rmd")
-
 # helper functions
 source(here("analysis_code", "format_helpers.R"))
+
+project <- "scallop0322"
+
 ```
 
 
@@ -67,8 +72,7 @@ source(here("analysis_code", "format_helpers.R"))
 
 This chunk "resets" my project by erasing it. This is just to keep things tidy and
 avoid potential errors when kitting the doc. 
-```{r project_cleanup}
-project <- "scallop0322"
+```{r project_cleanup,eval=FALSE}
 
 if (project_exists(project)) {
   
@@ -81,7 +85,7 @@ if (project_exists(project)) {
 ## Data Import
 
 This code chunk should work in the scallop repo. 
-```{r filename_automagic, eval=FALSE}
+```{r filename_automagic, eval=TRUE}
 # This code looks into /data/main and sets the vintage_string according to 
 # the most recent data
 datasets_list <- list.files(path = here("data", "main"), pattern = "final_product_lease")
@@ -97,7 +101,7 @@ dat_filepath <- here("data", "main", paste0("final_product_lease_", vintage_stri
 <br><br>
 
 This code works on my local computer. 
-```{r filename_by_hand, eval=TRUE}
+```{r filename_by_hand, eval=FALSE}
 dat_filepath <- paste0("~/NE Scallops/data/updated/", 
                        "June 22/NE NW Collab/",
                        "final_product_lease_2022_05_25.Rds")
