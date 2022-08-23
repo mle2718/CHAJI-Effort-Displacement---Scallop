@@ -100,46 +100,111 @@ stopifnot(sum(duplicated(vignette_data$TRIPID))==0)
 <br><br>
 Keep just a few observations. A target is 10,000. A random sample is quick and easy for descriptive analysis. Something more sophisticated is warranted for more a choice model. 
 
-```{r obscure_permit}
+```{r obscure_permit_and_operator}
 #by each permit number, assign a new identification number.  Go in some sort of random order.
-
+vignette_data <- vignette_data %>%
+  group_by(PERMIT.y) %>%
+    dplyr::mutate(FAKE_VES_ID = cur_group_id()) %>%
+  relocate(FAKE_VES_ID ) %>%
+  arrange(FAKE_VES_ID) %>%
+  ungroup() %>%
+  group_by(OPERNUM) %>%
+  dplyr::mutate(FAKE_OPER_ID = cur_group_id()) %>%
+  ungroup() %>%
+  select(-c(PERMIT.y,OPERNUM))
 ```
 
-```{r subset}
-# keep a fraction of observations. Perhaps grouped.
 
+```{r obscure_tripid}
+# Assign a random trip id
+vignette_data <- vignette_data %>%
+  group_by(TRIPID) %>%
+    dplyr::mutate(FAKE_TRIPID = cur_group_id()) %>%
+  ungroup() %>%
+  select(-c(TRIPID))
+```
+
+Just keep data from a few years, to capture some of the flavor of cross-year variation.
+```{r subset_years, eval=TRUE}
+vignette_data<-vignette_data %>%
+  filter(YEAR %in% c(2008,2009,2010,2011,2012))
+```
+
+```{r subset_random, eval=FALSE}
+# keep 10,000 observations. 
+vignette_data<-vignette_data %>%
+  mutate(random = sample(1000,1)) %>%
+  relocate(random) %>%
+  arrange(random,FAKE_VES_ID) %>%
+  select(-random)
+vignette_data<-vignette_data[1:10000,]
+```
+
+
+
+```{r subset_group}
+# keep a fraction of observations. Perhaps grouped.
+vignette_data<-vignette_data %>%
+  group_by(FAKE_VES_ID)%>% 
+  mutate(random = sample(1000,1)) %>%
+  relocate(random) %>%
+  arrange(random,FAKE_VES_ID) %>%
+  select(-random)
+vignette_data<-vignette_data[1:10000,]
 ```
 
 
 ```{r obscure_locations}
 #Add some noise to the lats and lons
-
+vignette_data$shift1<-runif(nrow(vignette_data),.90,1.1)
+vignette_data$shift2<-runif(nrow(vignette_data),.90,1.1)
+vignette_data <- vignette_data %>%
+    mutate(DDLAT=DDLAT*shift1,
+           DDLON=DDLON*shift2) %>%
+  select(-c(shift1,shift2))
 ```
 
 
 ```{r obscure_values}
+# Add 20% noise to the LAT and LON data. This means that if you do a spatial join to the ten minute squares or to the wind areas, you will not match.  You may also match to land
 #Compute the price. Add 20% noise to the landings and then update value.
 
+vignette_data$shift3<-runif(nrow(vignette_data),.90,1.1)
+
+vignette_data <- vignette_data %>%
+    mutate(price=DOLLAR/LANDED,
+           LANDED=LANDED*shift3,
+           DOLLAR=LANDED*price,
+           DOLLAR_ALL_SP_2020=DOLLAR_ALL_SP_2020*shift3) %>%
+  select(-c(shift3))
 ```
 
 ```{r drop_extra_columns}
+drop.cols <- c('OPERATOR', 'IMGID','SECGEARFISH', 'TRIP_ID', 'DEALNUM', 'state_fips', 'ftpt', 'GC', 'LA', 'DB_LANDING_YEAR', 'OBSERVED_COST_DUMMY', 'TRIP_COST_2020_DOL', 'NSUBTRIP', 'CREW','value','VTR_PORTNUM', 'VTR_PORT','VTR_STATE', 'DOLLAR_ALL_SP','Area Identifier', 'price')
+vignette_data<- vignette_data %>%
+  dplyr::select(-one_of(drop.cols))
 
+```
+```{r data_renameing}
+vignette_data <- vignette_data %>%
+  rename(PERMIT= FAKE_VES_ID,
+         OPERNUM=FAKE_OPER_ID,
+        TRIPID=FAKE_TRIPID)
 
 ```
 
 
-
-```{data_saving, eval=TRUE}
+```{r data_saving, eval=TRUE}
 if (params$location=="Woods_Hole"){
   vignette_out <- here("data", "main", paste0("scallop_vignette_", vintage_string, ".Rds"))
 } else if (params$location=="Seattle"){
-  dat_filepath <- paste0("~/NE Scallops/data/updated/", 
+  vignette_out <- paste0("~/NE Scallops/data/updated/", 
                          "June 22/NE NW Collab/",
                          "scallop_vignette_", vintage_string,".Rds")
 }
 
 
-saveRDS(vignette_data, file=dat_filepath)
+saveRDS(vignette_data, file=vignette_out)
 
 ```
 
