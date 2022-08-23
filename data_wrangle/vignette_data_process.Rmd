@@ -1,0 +1,151 @@
+---
+title: "Data Processing to create Vignette Data"
+author: "Min-Yang Lee, Bryce McManus"
+date: "`r Sys.Date()`"
+output:
+  pdf_document:
+    toc: yes
+  html_document:
+    keep_md: yes
+    toc: yes
+    toc_float: yes
+    code_folding: show
+params:
+  location:
+    label: 'Location:'
+    value: Woods_Hole
+    input: select
+    choices:
+    - Woods_Hole
+    - Seattle
+  PreRelease: yes
+---
+<!---
+YAML options: 
+location --- NEFSC folks should set location=Woods_Hole. AK folks should set it to Seattle. This just controls where the data is read in from.
+
+PreRelease -- controls the location of FishSET package. Set to FALSE to load without options. Set to TRUE to load from a particular lib.loc
+--->
+## Introduction 
+ This is some data processing to set up a dataset for FishSET
+
+<br><br>
+
+## Library
+
+```{r setup, echo=FALSE}
+
+#library("tidyverse")
+tidyverse_short <- c("dplyr",  "ggplot2", "magrittr", "tidyr") 
+lapply(tidyverse_short, require, character.only = TRUE)
+rm(tidyverse_short)
+library(kableExtra) # table formatting 
+library(sf) # converting geometry points to separate cols
+library(here)
+here()
+set.seed(20220823)
+```
+<br><br>
+
+
+## Data Import
+
+```{r data_readin, eval=TRUE}
+#For Woods_Hole users, read in the most recent data in data/main
+
+if (params$location=="Woods_Hole"){
+  # This code looks into /data/main and sets the vintage_string according to 
+  # the most recent data
+  datasets_list <- list.files(path = here("data", "main"), pattern = "final_product_lease")
+  datasets_list <- gsub("final_product_lease", "", datasets_list )
+  datasets_list <- gsub(".Rds", "", datasets_list)
+  datasets_list <- gsub(".csv" ,"", datasets_list)
+  vintage_string <- max(datasets_list)
+  rm(datasets_list)
+  dat_filepath <- here("data", "main", paste0("final_product_lease_", vintage_string, ".Rds"))
+} else if (params$location=="Seattle"){
+  dat_filepath <- paste0("~/NE Scallops/data/updated/", 
+                         "June 22/NE NW Collab/",
+                         "final_product_lease_2022_05_25.Rds")
+}
+
+vignette_data <- readRDS(dat_filepath)
+
+
+```
+
+
+## Aggregate subtrips to trips
+
+The input data ``final_product_lease`` contains subtrips, not trips. This code chunk contracts trips to a single row, applying subtrip attributes for the most valuable subtrip (``max(DOLLAR)``)to the entire trip.
+
+```{r construct_trip_aggregates, echo=TRUE, eval=TRUE}
+# aggregate DOLLAR, POUNDS, LANDED by TRIPID and filter by max(DOLLAR)
+vignette_data <- 
+  vignette_data %>%
+  group_by(TRIPID) %>%
+  mutate(Agg_DOLLAR = sum(DOLLAR), Agg_POUNDS = sum(POUNDS), Agg_LANDED = sum(LANDED), Agg_DOLLAR_ALL_SP_2020 = sum(DOLLAR_ALL_SP_2020))%>% 
+  filter(DOLLAR == max(DOLLAR)) %>% 
+  select(-DOLLAR, -POUNDS, -LANDED,-DOLLAR_ALL_SP_2020) %>% 
+  rename(DOLLAR = "Agg_DOLLAR", POUNDS = "Agg_POUNDS", LANDED = "Agg_LANDED", DOLLAR_ALL_SP_2020 = "Agg_DOLLAR_ALL_SP_2020") %>% 
+  ungroup()
+
+## Test out 
+sum(duplicated(vignette_data$TRIPID))
+stopifnot(sum(duplicated(vignette_data$TRIPID))==0)
+```
+
+
+
+<br><br>
+Keep just a few observations. A target is 10,000. A random sample is quick and easy for descriptive analysis. Something more sophisticated is warranted for more a choice model. 
+
+```{r obscure_permit}
+#by each permit number, assign a new identification number.  Go in some sort of random order.
+
+```
+
+```{r subset}
+# keep a fraction of observations. Perhaps grouped.
+
+```
+
+
+```{r obscure_locations}
+#Add some noise to the lats and lons
+
+```
+
+
+```{r obscure_values}
+#Compute the price. Add 20% noise to the landings and then update value.
+
+```
+
+```{r drop_extra_columns}
+
+
+```
+
+
+
+```{data_saving, eval=TRUE}
+if (params$location=="Woods_Hole"){
+  vignette_out <- here("data", "main", paste0("scallop_vignette_", vintage_string, ".Rds"))
+} else if (params$location=="Seattle"){
+  dat_filepath <- paste0("~/NE Scallops/data/updated/", 
+                         "June 22/NE NW Collab/",
+                         "scallop_vignette_", vintage_string,".Rds")
+}
+
+
+saveRDS(vignette_data, file=dat_filepath)
+
+```
+
+
+
+
+
+
+
