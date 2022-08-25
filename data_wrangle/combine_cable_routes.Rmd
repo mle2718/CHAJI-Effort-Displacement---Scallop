@@ -239,7 +239,7 @@ cable_names <-
   list.dirs(here::here("data", "external", "shapefiles", "cable_routes"), 
             full.names = FALSE, recursive = FALSE) 
 
-wind_sf_final <- add_polygon(cable_list, spat = wind_sf, spat.id = "NAME", 
+wind_sf_final <- add_polygon(cable_list, spat = wind_sf, spat.id = "LEASE_NUMB", 
                              new.id = cable_names)
 ```
 
