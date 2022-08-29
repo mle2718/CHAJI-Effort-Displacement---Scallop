@@ -17,7 +17,6 @@ params:
       input: select
       choices: [Woods_Hole, Seattle]
     PreRelease: TRUE
-    subset: TRUE
 ---
 <!---
 YAML options: 
@@ -214,14 +213,13 @@ scallop0322MainDataTable <-
 
 ### Subset
 
-params$subset will govern whether the data are subset.  You can get 
-1. Limited Access Fleet only, when AA_DAS_only is TRUE.
-2. General Category IFQ fleet only, when AA_DAS_only is FALSE
+1. Subset to just the Limited Access Fleet when AA_DAS_only is TRUE.
+2. Subset to just the General Category IFQ fleet when AA_DAS_only is FALSE
 
 
 ```{r subset_fleet, eval=TRUE}
-if (params$subset==TRUE){
-  if (params$AA_DAS_only==TRUE){
+
+if (params$AA_DAS_only==TRUE){
    
   scallop0322MainDataTable <- 
     scallop0322MainDataTable %>% 
@@ -232,7 +230,7 @@ if (params$subset==TRUE){
     scallop0322MainDataTable %>% 
     filter(fleet == "GCIFQ")
   }
-}
+
 ```
 
 <br><br>
