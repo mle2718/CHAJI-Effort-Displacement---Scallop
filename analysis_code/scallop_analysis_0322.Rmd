@@ -9,11 +9,7 @@ output:
     toc_float: true
     code_folding: show
 params:
-    fleet_type:
-      label: "Fleet:"
-      value: GCIFQ
-      input: select
-      choices: [AA_DAS_only, GCIFQ]
+    AA_DAS_only: FALSE
     BIN_GEARS: TRUE
     location: 
       label: "Location:"
@@ -78,6 +74,8 @@ source(here("analysis_code", "format_helpers.R"))
 project <- "scallop0322"
 
 ```
+
+
 
 
 <br><br>
@@ -193,11 +191,11 @@ scallop0322MainDataTable <-
 # save fleet appropriate table to FishSET DB
 
 
-if (params$fleet_type=="AA_DAS_only"){
+if (params$AA_DAS_only==TRUE){
  fleet_table(scallop0322MainDataTable, 
             project = project,
             table = fleet_tab_AA_DAS, save = TRUE)
-} else if (params$fleet_type=="GCIFQ"){
+} else if (params$AA_DAS_only==FALSE){
   fleet_table(scallop0322MainDataTable, 
             project = project,
             table = fleet_tab_LA_GC_IFQ, save = TRUE)
@@ -217,19 +215,19 @@ scallop0322MainDataTable <-
 ### Subset
 
 params$subset will govern whether the data are subset.  You can get 
-1. Limited Access Fleet only, when fleet_type=AA_DAS_only.
-2. General Category IFQ fleet only, when fleet_type==GCIFQ
+1. Limited Access Fleet only, when AA_DAS_only is TRUE.
+2. General Category IFQ fleet only, when AA_DAS_only is FALSE
 
 
 ```{r subset_fleet, eval=TRUE}
 if (params$subset==TRUE){
-  if (params$fleet_type=="AA_DAS_only"){
+  if (params$AA_DAS_only==TRUE){
    
   scallop0322MainDataTable <- 
     scallop0322MainDataTable %>% 
     filter(fleet == "Access Area" | fleet == "Days at Sea")
   
-  } else if (params$fleet_type=="GCIFQ"){
+  } else if (params$AA_DAS_only==FALSE){
     scallop0322MainDataTable <- 
     scallop0322MainDataTable %>% 
     filter(fleet == "GCIFQ")
@@ -535,7 +533,7 @@ scallop0322MainDataTable <-
                     spat = scallop0322WindCloseSpatTable, 
                     lon.dat = "DDLON",
                     lat.dat = "DDLAT", 
-                    cat = "NAME",
+                    cat = "LEASE_NUMB",
                     name = "closeID",
                     closest.pt = FALSE,
                     hull.polygon = FALSE) 
@@ -1531,7 +1529,7 @@ zone_out <-
 zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable, 
          zone.dat = "closeID",
-         zone.spat = "NAME",
+         zone.spat = "LEASE_NUMB",
          count = TRUE,
          breaks = c(1, 10, 50, 100, 250, 500, 750, 1000, 1252),
          na.rm = TRUE, dat.center = FALSE, 
@@ -1571,7 +1569,7 @@ zone_out <-
 zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable, 
          zone.dat = "closeID",
-         zone.spat = "NAME",
+         zone.spat = "LEASE_NUMB",
          fun = "percent",
          count = TRUE,
          breaks = c(.001, .01, .1, .3, .5, .7),
@@ -1592,7 +1590,7 @@ zone_out <-
 zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable,
          zone.dat = "closeID",
-         zone.spat = "NAME",
+         zone.spat = "LEASE_NUMB",
          var = "DOLLAR",
          fun = "percent",
          count = FALSE, 
@@ -1616,7 +1614,7 @@ zone_out <-
 zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable,
          zone.dat = "closeID",
-         zone.spat = "NAME",
+         zone.spat = "LEASE_NUMB",
          var = "DOLLAR", group = "fleet",
          fun = "percent",
          count = FALSE, 
@@ -1639,7 +1637,7 @@ zone_out <-
 zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable, 
          zone.dat = "closeID",
-         zone.spat = "NAME",
+         zone.spat = "LEASE_NUMB",
          var = "MEAT_POUNDS",
          fun = "mean",
          count = FALSE,
@@ -1661,7 +1659,7 @@ zone_out <-
 zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable, 
          zone.dat = "closeID",
-         zone.spat = "NAME",
+         zone.spat = "LEASE_NUMB",
          var = "MEAT_POUNDS", group = "fleet",
          fun = "mean",
          count = FALSE,
@@ -1683,7 +1681,7 @@ zone_out <-
 zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable, 
          zone.dat = "closeID",
-         zone.spat = "NAME",
+         zone.spat = "LEASE_NUMB",
          var = "MEAT_POUNDS",
          fun = "percent",
          count = FALSE,
@@ -1705,7 +1703,7 @@ zone_out <-
 zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable, 
          zone.dat = "closeID",
-         zone.spat = "NAME",
+         zone.spat = "LEASE_NUMB",
          var = "MEAT_POUNDS", group = "fleet",
          fun = "percent",
          count = FALSE,
@@ -1772,7 +1770,7 @@ zone_out <-
 zone_summary(project = project,
          spat = scallop0322WindCloseSpatTable, 
          zone.dat = "closeID",
-         zone.spat = "NAME",
+         zone.spat = "LEASE_NUMB",
          var = "CPUE",
          fun = "mean",
          count = FALSE,
@@ -1797,7 +1795,7 @@ zone_out <-
 zone_summary(project = project,
          spat = scallop0322WindCloseSpatTable, 
          zone.dat = "closeID",
-         zone.spat = "NAME",
+         zone.spat = "LEASE_NUMB",
          var = "CPUE", group = "fleet",
          fun = "mean",
          count = FALSE,
@@ -1838,7 +1836,7 @@ zone_out <-
 zone_summary(project = project,
          spat = scallop0322WindCloseSpatTable,
          zone.dat = "closeID",
-         zone.spat = "NAME",
+         zone.spat = "LEASE_NUMB",
          var = "VPUE",
          fun = "mean",
          count = FALSE,
@@ -1862,7 +1860,7 @@ zone_out <-
 zone_summary(project = project,
          spat = scallop0322WindCloseSpatTable, 
          zone.dat = "closeID",
-         zone.spat = "NAME",
+         zone.spat = "LEASE_NUMB",
          var = "VPUE", group = "fleet",
          fun = "mean",
          count = FALSE,
