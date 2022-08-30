@@ -15,7 +15,7 @@ While the empirical setting that we have chosen is the Limited Access Scallop fi
 2. The *main* branch should always work.  Committing directly to main should *only* be done for writing text or comments.    
 3. For all other changes, please create a branch and develop your code there.  Then, issue a [pull request](https://github.com/NEFSC/READ-SSB-CHAJI-Effort-Displacement---Scallop/compare) and please make sure to request review(s) from the appropriate person(s).
 4. Once a pull request is approved, the originator should merge and delete the branch if warranted.
-
+5. Please try to keep a relatively clean repository with few branches and even fewer branches that just hang around.  Approximately monthly, we will try to delete stale branches that are not being developed.
 
 # Testing and Functionality
 

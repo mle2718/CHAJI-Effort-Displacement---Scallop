@@ -5,3 +5,4 @@
 *.dta
 scallop_analysis*.html
 /scallop_analysis*/*
+*.md
