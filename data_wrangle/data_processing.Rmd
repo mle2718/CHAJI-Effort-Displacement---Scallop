@@ -420,7 +420,8 @@ VTR_DMIS_AC <- VTR_DMIS_AC %>%
                          fiscal_start = 1,
                          with_year = TRUE)) %>%
                          left_join(deflators, by =c("qdate"="date")) %>%
-               mutate(DOLLAR_ALL_SP_2020=DOLLAR_ALL_SP/value)
+               mutate(DOLLAR_ALL_SP_2020=DOLLAR_ALL_SP/value,
+                      DOLLAR_2020=DOLLAR/value)
 
 
 # Delete unnecessary data frame and variable
@@ -462,7 +463,7 @@ We are now pulling subtrips along to the end instead of aggregating.  If you wan
 ### 1. Aggregate DOLLAR, POUNDS, LANDED
 Agg_DOL_POUN_LAND <- VTR_DMIS_AC %>%
   group_by(TRIPID) %>%
- summarise(Agg_DOLLAR = sum(DOLLAR), Agg_POUNDS = sum(POUNDS), Agg_LANDED = sum(LANDED))
+ summarise(Agg_DOLLAR = sum(DOLLAR), Agg_POUNDS = sum(POUNDS), Agg_LANDED = sum(LANDED), Agg_DOLLAR_2020=sum(DOLLAR_2020))
 
 #### Testing to make sure there are no duplicates in TRIPID groups; this should equal 0
 sum(duplicated(Agg_DOL_POUN_LAND$TRIPID))
