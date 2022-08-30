@@ -8,8 +8,6 @@ output:
     toc: yes
     toc_float: yes
     code_folding: show
-  pdf_document:
-    toc: yes
 params:
   location:
     label: 'Location:'
@@ -84,10 +82,10 @@ The input data ``final_product_lease`` contains subtrips, not trips. This code c
 vignette_data <- 
   vignette_data %>%
   group_by(TRIPID) %>%
-  mutate(Agg_DOLLAR = sum(DOLLAR), Agg_POUNDS = sum(POUNDS), Agg_LANDED = sum(LANDED), Agg_DOLLAR_ALL_SP_2020 = sum(DOLLAR_ALL_SP_2020))%>% 
+  mutate(Agg_DOLLAR = sum(DOLLAR), Agg_POUNDS = sum(POUNDS), Agg_LANDED = sum(LANDED), Agg_DOLLAR_ALL_SP_2020 = sum(DOLLAR_ALL_SP_2020), Agg_DOLLAR_2020=sum(DOLLAR_2020))%>% 
   filter(DOLLAR == max(DOLLAR)) %>% 
-  select(-DOLLAR, -POUNDS, -LANDED,-DOLLAR_ALL_SP_2020) %>% 
-  rename(DOLLAR = "Agg_DOLLAR", POUNDS = "Agg_POUNDS", LANDED = "Agg_LANDED", DOLLAR_ALL_SP_2020 = "Agg_DOLLAR_ALL_SP_2020") %>% 
+  select(-DOLLAR, -POUNDS, -LANDED,-DOLLAR_ALL_SP_2020, -DOLLAR_2020) %>% 
+  rename(DOLLAR = "Agg_DOLLAR", POUNDS = "Agg_POUNDS", LANDED = "Agg_LANDED", DOLLAR_ALL_SP_2020 = "Agg_DOLLAR_ALL_SP_2020", DOLLAR_2020 = "Agg_DOLLAR_2020") %>% 
   ungroup()
 
 ## Test out 
@@ -189,14 +187,16 @@ vignette_data$shift3<-runif(nrow(vignette_data),.90,1.1)
 
 vignette_data <- vignette_data %>%
     mutate(price=DOLLAR/LANDED,
+           price2020=DOLLAR_2020/LANDED,
            LANDED=LANDED*shift3,
            DOLLAR=LANDED*price,
+           DOLLAR_2020=LANDED*price2020,
            DOLLAR_ALL_SP_2020=DOLLAR_ALL_SP_2020*shift3) %>%
   select(-c(shift3))
 ```
 
 ```{r drop_extra_columns}
-drop.cols <- c('OPERATOR', 'IMGID','SECGEARFISH', 'TRIP_ID', 'DEALNUM', 'state_fips', 'ftpt', 'GC', 'LA', 'DB_LANDING_YEAR', 'OBSERVED_COST_DUMMY', 'TRIP_COST_2020_DOL', 'NSUBTRIP', 'CREW','value','VTR_PORTNUM', 'VTR_PORT','VTR_STATE', 'DOLLAR_ALL_SP','Area Identifier', 'price', 'Date', 'Time', 'n', 'hours', 'YEAR', )
+drop.cols <- c('OPERATOR', 'IMGID','SECGEARFISH', 'TRIP_ID', 'DEALNUM', 'state_fips', 'ftpt', 'GC', 'LA', 'DB_LANDING_YEAR', 'OBSERVED_COST_DUMMY', 'TRIP_COST_2020_DOL', 'NSUBTRIP', 'CREW','value','VTR_PORTNUM', 'VTR_PORT','VTR_STATE', 'DOLLAR_ALL_SP','Area Identifier', 'price', 'Date', 'Time', 'n', 'hours', 'YEAR','price2020')
 vignette_data<- vignette_data %>%
   dplyr::select(-one_of(drop.cols))
 
@@ -207,6 +207,9 @@ vignette_data <- vignette_data %>%
          OPERNUM=FAKE_OPER_ID,
         TRIPID=FAKE_TRIPID)
 
+
+vignette_data<-vignette_data %>%
+  relocate(any_of(c("PERMIT", "TRIPID","DATE_TRIP","scallop_fishing_year","OPERNUM") ))
 ```
 
 
