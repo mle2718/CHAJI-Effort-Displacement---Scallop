@@ -27,7 +27,7 @@ location --- NEFSC folks should set location=Woods_Hole. AK folks should set it 
 PreRelease -- controls the location of FishSET package. Set to FALSE to load without options. Set to TRUE to load from a particular lib.loc
 --->
 ## Introduction 
- This is some data processing to set up a dataset for FishSET
+ This is some data processing to set up an anonymized dataset for FishSET
 
 <br><br>
 
@@ -95,6 +95,13 @@ sum(duplicated(vignette_data$TRIPID))
 stopifnot(sum(duplicated(vignette_data$TRIPID))==0)
 ```
 
+## Keep  trips
+
+```{r subset_on_fleet, echo=TRUE, eval=TRUE}
+vignette_data <- 
+  vignette_data %>%
+filter(`Plan Code` == "SES" & (`Program Code`=="SAA" |`Program Code`=="SCA"))  
+```
 
 
 <br><br>
@@ -124,11 +131,20 @@ vignette_data <- vignette_data %>%
   select(-c(TRIPID))
 ```
 
-Just keep data from a few years, to capture some of the flavor of cross-year variation.
-```{r subset_years, eval=TRUE}
-vignette_data<-vignette_data %>%
-  filter(YEAR %in% c(2008,2009,2010,2011,2012))
+```{r pick_top_ports }
+vignette_data <- vignette_data %>%
+  add_count(geoid)%>%
+  filter(n>=1000)
 ```
+
+Just keep data from a few years, to capture some of the flavor of cross-year variation.
+```{r subset_years, eval=FALSE}
+vignette_data<-vignette_data %>%
+  filter(YEAR %in% c(2008,2009,2010,2011,2012,2013,2014,2015))
+```
+
+
+
 
 ```{r subset_random, eval=FALSE}
 # keep 10,000 observations. 
@@ -143,7 +159,7 @@ vignette_data<-vignette_data[1:10000,]
 
 
 ```{r subset_group}
-# keep a fraction of observations. Perhaps grouped.
+# keep a fraction of observations. But do it group-wise
 vignette_data<-vignette_data %>%
   group_by(FAKE_VES_ID)%>% 
   mutate(random = sample(1000,1)) %>%
@@ -154,7 +170,7 @@ vignette_data<-vignette_data[1:10000,]
 ```
 
 
-```{r obscure_locations}
+```{r obscure_locations, eval=FALSE}
 #Add some noise to the lats and lons
 vignette_data$shift1<-runif(nrow(vignette_data),.90,1.1)
 vignette_data$shift2<-runif(nrow(vignette_data),.90,1.1)
