@@ -3,13 +3,13 @@ title: "Data Processing to create Vignette Data"
 author: "Min-Yang Lee, Bryce McManus"
 date: "`r Sys.Date()`"
 output:
-  pdf_document:
-    toc: yes
   html_document:
     keep_md: yes
     toc: yes
     toc_float: yes
     code_folding: show
+  pdf_document:
+    toc: yes
 params:
   location:
     label: 'Location:'
@@ -196,7 +196,7 @@ vignette_data <- vignette_data %>%
 ```
 
 ```{r drop_extra_columns}
-drop.cols <- c('OPERATOR', 'IMGID','SECGEARFISH', 'TRIP_ID', 'DEALNUM', 'state_fips', 'ftpt', 'GC', 'LA', 'DB_LANDING_YEAR', 'OBSERVED_COST_DUMMY', 'TRIP_COST_2020_DOL', 'NSUBTRIP', 'CREW','value','VTR_PORTNUM', 'VTR_PORT','VTR_STATE', 'DOLLAR_ALL_SP','Area Identifier', 'price')
+drop.cols <- c('OPERATOR', 'IMGID','SECGEARFISH', 'TRIP_ID', 'DEALNUM', 'state_fips', 'ftpt', 'GC', 'LA', 'DB_LANDING_YEAR', 'OBSERVED_COST_DUMMY', 'TRIP_COST_2020_DOL', 'NSUBTRIP', 'CREW','value','VTR_PORTNUM', 'VTR_PORT','VTR_STATE', 'DOLLAR_ALL_SP','Area Identifier', 'price', 'Date', 'Time', 'n', 'hours', 'YEAR', )
 vignette_data<- vignette_data %>%
   dplyr::select(-one_of(drop.cols))
 
