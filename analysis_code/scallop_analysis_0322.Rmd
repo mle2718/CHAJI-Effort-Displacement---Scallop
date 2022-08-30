@@ -75,6 +75,8 @@ project <- "scallop0322"
 ```
 
 
+
+
 <br><br>
 
 ## Reset project
@@ -100,7 +102,7 @@ if (params$location=="Woods_Hole"){
   # This code looks into /data/main and sets the vintage_string according to 
   # the most recent data
   datasets_list <- list.files(path = here("data", "main"), pattern = "final_product_lease")
-  datasets_list <- gsub("final_product_lease", "", datasets_list )
+  datasets_list <- gsub("final_product_lease_", "", datasets_list )
   datasets_list <- gsub(".Rds", "", datasets_list)
   datasets_list <- gsub(".csv" ,"", datasets_list)
   vintage_string <- max(datasets_list)
@@ -163,10 +165,8 @@ scallop0322MainDataTable <-
   mutate(`Area_ID2` = substr(`Area Identifier`, 1, 2))
 ```
 
-
-```{r eval=params$AA_DAS_only}
-# create fleet table
-fleet_tab <- data.frame(
+```{r create_fleet_tabs}
+ fleet_tab_AA_DAS <- data.frame(
   
   condition = c('`Plan Code` == "SES" & `Program Code` == "SAA"',
                 '`Plan Code` == "SES" & `Program Code` == "SCA"',
@@ -174,32 +174,35 @@ fleet_tab <- data.frame(
                 '`Plan Code` == "SES" & `Program Code` == "SCG" & `Area_ID2` == "NG"'),
   fleet = c("Access Area", "Days at Sea", "GCIFQ", "GCNGOM")
 )
-```
-
-
-```{r eval=!params$AA_DAS_only}
-#```{r eval=FALSE}
-fleet_tab <- data.frame(
+  fleet_tab_LA_GC_IFQ <- data.frame(
   
   condition = c('`Plan Code` == "SES" & `Program Code` == "SAA" | 
                 `Plan Code` == "SES" & `Program Code` == "SCA"',
                 '`Plan Code` == "SES" & `Program Code` == "SCG" & `Area_ID2` != "NG"',
                 '`Plan Code` == "SES" & `Program Code` == "SCG" & `Area_ID2` == "NG"'),
   fleet = c("Limited Access", "GCIFQ", "GCNGOM")
-)
+  )
+
 ```
 
 
-
 ```{r}
-# save fleet table to FishSET DB
-fleet_table(scallop0322MainDataTable, 
+# save fleet appropriate table to FishSET DB
+
+
+if (params$AA_DAS_only==TRUE){
+ fleet_table(scallop0322MainDataTable, 
             project = project,
-            table = fleet_tab, save = TRUE)
+            table = fleet_tab_AA_DAS, save = TRUE)
+} else if (params$AA_DAS_only==FALSE){
+  fleet_table(scallop0322MainDataTable, 
+            project = project,
+            table = fleet_tab_LA_GC_IFQ, save = TRUE)
+}
+  
 
 # Create fleet column 
 fleet_tab_name <- list_tables(project, type = "fleet") # grab tab name
-
 
 scallop0322MainDataTable <- 
   fleet_assign(scallop0322MainDataTable, project = project, 
@@ -210,31 +213,35 @@ scallop0322MainDataTable <-
 
 ### Subset
 
-By setting this code chunk to eval=TRUE, all of the statistics from this point forward 
-are just for the Limited Access Fleet, which takes Access Area and Days-at-Sea trips. 
-Currently set to `r params$AA_DAS_only`.
-```{r retain_AA_DAS, eval=params$AA_DAS_only}
-scallop0322MainDataTable <- 
-  scallop0322MainDataTable %>% 
-  filter(fleet == "Access Area" | fleet == "Days at Sea")
+1. Subset to just the Limited Access Fleet when AA_DAS_only is TRUE.
+2. Subset to just the General Category IFQ fleet when AA_DAS_only is FALSE
+
+
+```{r subset_fleet, eval=TRUE}
+
+if (params$AA_DAS_only==TRUE){
+   
+  scallop0322MainDataTable <- 
+    scallop0322MainDataTable %>% 
+    filter(fleet == "Access Area" | fleet == "Days at Sea")
+  
+  } else if (params$AA_DAS_only==FALSE){
+    scallop0322MainDataTable <- 
+    scallop0322MainDataTable %>% 
+    filter(fleet == "GCIFQ")
+  }
 
 ```
 
 <br><br>
 
-By setting this code chunk to eval=TRUE, all of the statistics from this point forward 
-By setting this code chunk to eval=TRUE, all of the statistics from this point forward are for the Limited Access General Category IFQ (LAGC-IFQ) fleet. Currently set to
-`r !params$AA_DAS_only`.
-```{r retain_LA_GCIFQ, eval=!params$AA_DAS_only}
-#```{r retain_LA_GCIFQ, eval=FALSE}
-scallop0322MainDataTable <- 
-  scallop0322MainDataTable %>% 
-  filter(fleet == "GCIFQ")
-```
+
 <br><br><br>
 
 ### Bin Gears
-```{r bin_gears, eval=params$BIN_GEARS}
+```{r bin_gears}
+if (params$BIN_GEARS==TRUE){
+
 scallop0322MainDataTable$GEARCODE_OLD<-scallop0322MainDataTable$GEARCODE
 #Anything with "DREDGE" in the GEARCODE will be rebinned to "DREDGE" 
 pat_match<-"*DREDGE*"
@@ -243,6 +250,7 @@ scallop0322MainDataTable$GEARCODE[grep(reg_pat,scallop0322MainDataTable$GEARCODE
 #Look at the GEARCODE NOW, there should be 'DREDGE', 'TRAWL-BOTTOM', and some funky stuff
 table(scallop0322MainDataTable$GEARCODE)
 scallop0322MainDataTable$GEARCODE[!(scallop0322MainDataTable$GEARCODE %in%c('DREDGE','TRAWL-BOTTOM'))]<-'OTHER'
+}
 ```
 
 ## Aggregate subtrips to trips
@@ -523,7 +531,7 @@ scallop0322MainDataTable <-
                     spat = scallop0322WindCloseSpatTable, 
                     lon.dat = "DDLON",
                     lat.dat = "DDLAT", 
-                    cat = "NAME",
+                    cat = "LEASE_NUMB",
                     name = "closeID",
                     closest.pt = FALSE,
                     hull.polygon = FALSE) 
@@ -1519,7 +1527,7 @@ zone_out <-
 zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable, 
          zone.dat = "closeID",
-         zone.spat = "NAME",
+         zone.spat = "LEASE_NUMB",
          count = TRUE,
          breaks = c(1, 10, 50, 100, 250, 500, 750, 1000, 1252),
          na.rm = TRUE, dat.center = FALSE, 
@@ -1559,7 +1567,7 @@ zone_out <-
 zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable, 
          zone.dat = "closeID",
-         zone.spat = "NAME",
+         zone.spat = "LEASE_NUMB",
          fun = "percent",
          count = TRUE,
          breaks = c(.001, .01, .1, .3, .5, .7),
@@ -1580,7 +1588,7 @@ zone_out <-
 zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable,
          zone.dat = "closeID",
-         zone.spat = "NAME",
+         zone.spat = "LEASE_NUMB",
          var = "DOLLAR",
          fun = "percent",
          count = FALSE, 
@@ -1604,7 +1612,7 @@ zone_out <-
 zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable,
          zone.dat = "closeID",
-         zone.spat = "NAME",
+         zone.spat = "LEASE_NUMB",
          var = "DOLLAR", group = "fleet",
          fun = "percent",
          count = FALSE, 
@@ -1627,7 +1635,7 @@ zone_out <-
 zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable, 
          zone.dat = "closeID",
-         zone.spat = "NAME",
+         zone.spat = "LEASE_NUMB",
          var = "MEAT_POUNDS",
          fun = "mean",
          count = FALSE,
@@ -1649,7 +1657,7 @@ zone_out <-
 zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable, 
          zone.dat = "closeID",
-         zone.spat = "NAME",
+         zone.spat = "LEASE_NUMB",
          var = "MEAT_POUNDS", group = "fleet",
          fun = "mean",
          count = FALSE,
@@ -1671,7 +1679,7 @@ zone_out <-
 zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable, 
          zone.dat = "closeID",
-         zone.spat = "NAME",
+         zone.spat = "LEASE_NUMB",
          var = "MEAT_POUNDS",
          fun = "percent",
          count = FALSE,
@@ -1693,7 +1701,7 @@ zone_out <-
 zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable, 
          zone.dat = "closeID",
-         zone.spat = "NAME",
+         zone.spat = "LEASE_NUMB",
          var = "MEAT_POUNDS", group = "fleet",
          fun = "percent",
          count = FALSE,
@@ -1760,7 +1768,7 @@ zone_out <-
 zone_summary(project = project,
          spat = scallop0322WindCloseSpatTable, 
          zone.dat = "closeID",
-         zone.spat = "NAME",
+         zone.spat = "LEASE_NUMB",
          var = "CPUE",
          fun = "mean",
          count = FALSE,
@@ -1785,7 +1793,7 @@ zone_out <-
 zone_summary(project = project,
          spat = scallop0322WindCloseSpatTable, 
          zone.dat = "closeID",
-         zone.spat = "NAME",
+         zone.spat = "LEASE_NUMB",
          var = "CPUE", group = "fleet",
          fun = "mean",
          count = FALSE,
@@ -1826,7 +1834,7 @@ zone_out <-
 zone_summary(project = project,
          spat = scallop0322WindCloseSpatTable,
          zone.dat = "closeID",
-         zone.spat = "NAME",
+         zone.spat = "LEASE_NUMB",
          var = "VPUE",
          fun = "mean",
          count = FALSE,
@@ -1850,7 +1858,7 @@ zone_out <-
 zone_summary(project = project,
          spat = scallop0322WindCloseSpatTable, 
          zone.dat = "closeID",
-         zone.spat = "NAME",
+         zone.spat = "LEASE_NUMB",
          var = "VPUE", group = "fleet",
          fun = "mean",
          count = FALSE,
