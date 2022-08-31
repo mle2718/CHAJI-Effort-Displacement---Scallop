@@ -81,8 +81,12 @@ project <- "scallop0322"
 
 ## Reset project
 
+FishSET stores data in a directory called "FishSETFolder".  You can put this directory anywhere you want.
+
 This chunk "resets" my project by erasing it. This is just to keep things tidy and
 avoid potential errors when kitting the doc. 
+
+At the dialog box, select the directory that contains the "FishSETFolder" or the directory in which you want the "FishSETFolder" to be created.  But don't select the "FishSETFolder" directory itself. 
 ```{r project_cleanup,eval=TRUE}
 
 if (project_exists(project)) {
