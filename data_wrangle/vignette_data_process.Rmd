@@ -93,7 +93,9 @@ sum(duplicated(vignette_data$TRIPID))
 stopifnot(sum(duplicated(vignette_data$TRIPID))==0)
 ```
 
-## Keep  trips
+## Keep  the DAS and Access Area fleets
+
+Just keep the Limited Access Days-at-Sea (SCA) and Access Area (SAA) fleets. These are the same vessels, but they are fishing under different sets of rules depending on whether they are declared into a Access Area or DAS trip. For the most part, the places where the fleets can fish are spatially distinct.  The access area boundaries change somewhat over time.
 
 ```{r subset_on_fleet, echo=TRUE, eval=TRUE}
 vignette_data <- 
@@ -103,20 +105,30 @@ filter(`Plan Code` == "SES" & (`Program Code`=="SAA" |`Program Code`=="SCA"))
 
 
 <br><br>
-Keep just a few observations. A target is 10,000. A random sample is quick and easy for descriptive analysis. Something more sophisticated is warranted for more a choice model. 
 
 ```{r obscure_permit_and_operator}
-#by each permit number, assign a new identification number.  Go in some sort of random order.
+#by each permit number, randomly draw a number.  Sort on that number. Use that sort order to create a new ID number
 vignette_data <- vignette_data %>%
   group_by(PERMIT.y) %>%
+    dplyr::mutate(FAKE_VES_ID_rand = sample(1000,1)) %>%
+  ungroup() %>%
+  arrange(FAKE_VES_ID_rand, PERMIT.y) %>%
+  group_by(FAKE_VES_ID_rand,PERMIT.y) %>%
     dplyr::mutate(FAKE_VES_ID = cur_group_id()) %>%
-  relocate(FAKE_VES_ID ) %>%
-  arrange(FAKE_VES_ID) %>%
-  ungroup() %>%
+    arrange(FAKE_VES_ID, PERMIT.y) %>%
+  ungroup()
+
+# Repeat the above process for the OPERNUM
+
+vignette_data<-vignette_data %>%
   group_by(OPERNUM) %>%
-  dplyr::mutate(FAKE_OPER_ID = cur_group_id()) %>%
+    dplyr::mutate(FAKE_VES_ID_rand = sample(1000,1)) %>%
   ungroup() %>%
-  select(-c(PERMIT.y,OPERNUM))
+  group_by(FAKE_VES_ID_rand,OPERNUM) %>%
+    dplyr::mutate(FAKE_OPER_ID = cur_group_id()) %>%
+  ungroup() %>%
+relocate(FAKE_VES_ID, PERMIT.y, OPERNUM, FAKE_OPER_ID) %>%
+  select(-c(PERMIT.y,OPERNUM, FAKE_VES_ID_rand))
 ```
 
 
@@ -132,7 +144,8 @@ vignette_data <- vignette_data %>%
 ```{r pick_top_ports }
 vignette_data <- vignette_data %>%
   add_count(geoid)%>%
-  filter(n>=1000)
+  filter(n>=1000) %>%
+  select(-c(n))
 ```
 
 Just keep data from a few years, to capture some of the flavor of cross-year variation.
@@ -141,32 +154,21 @@ vignette_data<-vignette_data %>%
   filter(YEAR %in% c(2008,2009,2010,2011,2012,2013,2014,2015))
 ```
 
-
-
-
-```{r subset_random, eval=FALSE}
-# keep 10,000 observations. 
-vignette_data<-vignette_data %>%
-  mutate(random = sample(1000,1)) %>%
-  relocate(random) %>%
-  arrange(random,FAKE_VES_ID) %>%
-  select(-random)
-vignette_data<-vignette_data[1:10000,]
+```{r check_dealers}
+deal_count<-vignette_data %>%
+  group_by(geoid) %>%
+  mutate(count_dealnums=n_distinct(DEALNUM)) %>%
+  filter(count_dealnums<=2) %>%
+  relocate(geoid, count_dealnums, DEALNUM) %>%
+  arrange(geoid, DEALNUM)
+unique(deal_count[c("geoid")])
+```
+```{r drop port}
+vignette_data <- vignette_data %>%
+  filter(geoid!=5119991590)
 ```
 
-
-
-```{r subset_group}
-# keep a fraction of observations. But do it group-wise
-vignette_data<-vignette_data %>%
-  group_by(FAKE_VES_ID)%>% 
-  mutate(random = sample(1000,1)) %>%
-  relocate(random) %>%
-  arrange(random,FAKE_VES_ID) %>%
-  select(-random)
-vignette_data<-vignette_data[1:10000,]
-```
-
+Keep just a few observations? A target is 10,000. A random sample is quick and easy for descriptive analysis. Something more sophisticated is warranted for more a choice model. 
 
 ```{r obscure_locations, eval=FALSE}
 #Add some noise to the lats and lons
@@ -196,14 +198,14 @@ vignette_data <- vignette_data %>%
 ```
 
 ```{r drop_extra_columns}
-drop.cols <- c('OPERATOR', 'IMGID','SECGEARFISH', 'TRIP_ID', 'DEALNUM', 'state_fips', 'ftpt', 'GC', 'LA', 'DB_LANDING_YEAR', 'OBSERVED_COST_DUMMY', 'TRIP_COST_2020_DOL', 'NSUBTRIP', 'CREW','value','VTR_PORTNUM', 'VTR_PORT','VTR_STATE', 'DOLLAR_ALL_SP','Area Identifier', 'price', 'Date', 'Time', 'n', 'hours', 'YEAR','price2020')
+drop.cols <- c('OPERATOR', 'IMGID','SECGEARFISH', 'TRIP_ID', 'DEALNUM', 'state_fips', 'ftpt', 'GC', 'LA', 'DB_LANDING_YEAR', 'OBSERVED_COST_DUMMY', 'TRIP_COST_2020_DOL', 'NSUBTRIP', 'CREW','value','VTR_PORTNUM', 'VTR_PORT','VTR_STATE', 'DOLLAR_ALL_SP','Area Identifier', 'price', 'Date', 'Time', 'hours', 'YEAR','price2020')
 vignette_data<- vignette_data %>%
   dplyr::select(-one_of(drop.cols))
 
 ```
 ```{r data_renameing}
 vignette_data <- vignette_data %>%
-  rename(PERMIT= FAKE_VES_ID,
+  rename(PERMIT.y= FAKE_VES_ID,
          OPERNUM=FAKE_OPER_ID,
         TRIPID=FAKE_TRIPID)
 
@@ -214,12 +216,14 @@ vignette_data<-vignette_data %>%
 
 
 ```{r data_saving, eval=TRUE}
+filename_all<-paste0("scallop_vignetteF_", vintage_string, ".Rds")
+
 if (params$location=="Woods_Hole"){
-  vignette_out <- here("data", "main", paste0("scallop_vignette_", vintage_string, ".Rds"))
+  vignette_out <- here("data", "main", filename_all)
 } else if (params$location=="Seattle"){
   vignette_out <- paste0("~/NE Scallops/data/updated/", 
                          "June 22/NE NW Collab/",
-                         "scallop_vignette_", vintage_string,".Rds")
+                         filename_all)
 }
 
 
@@ -229,7 +233,59 @@ saveRDS(vignette_data, file=vignette_out)
 
 
 
+```{r subset_random, eval=FALSE}
+# keep 10,000 observations. 
+vignette_dataRS<-vignette_data %>%
+  mutate(random = sample(1000,1)) %>%
+  relocate(random) %>%
+  arrange(random,PERMIT.y) %>%
+  select(-random) %>%
+  ungroup() %>%
+  slice_head(n=10000)
+```
 
 
+
+```{r subset_group}
+# keep a fraction of observations. But do it group-wise
+vignette_dataRS<-vignette_data %>%
+  group_by(PERMIT.y)%>% 
+  mutate(random = sample(1000,1)) %>%
+  relocate(random) %>%
+  arrange(random,PERMIT.y) %>%
+  select(-random) %>%
+  ungroup()%>%
+  slice_head(n=10000)
+```
+
+
+
+```{r data_saving_RS, eval=TRUE}
+filename_RS<-paste0("scallop_vignetteRS_", vintage_string, ".Rds")
+
+if (params$location=="Woods_Hole"){
+  vignette_outRS <- here("data", "main", filename_all)
+} else if (params$location=="Seattle"){
+  vignette_outRS <- paste0("~/NE Scallops/data/updated/", 
+                         "June 22/NE NW Collab/",
+                         filename_all)
+}
+
+
+saveRDS(vignette_dataRS, file=vignette_outRS)
+
+```
+
+
+A few tables, just because
+```{r make_some_tables}
+table(vignette_dataRS$GEARCODE)
+
+table(vignette_dataRS$namelsad)
+
+summary(vignette_dataRS$DOLLAR_2020)
+
+
+```
 
 
