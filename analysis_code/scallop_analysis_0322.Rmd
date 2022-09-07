@@ -266,10 +266,10 @@ The input data ``final_product_lease`` contains subtrips, not trips. This code c
 scallop0322MainDataTable <- 
   scallop0322MainDataTable %>%
   group_by(TRIPID) %>%
-  mutate(Agg_DOLLAR = sum(DOLLAR), Agg_POUNDS = sum(POUNDS), Agg_LANDED = sum(LANDED), Agg_DOLLAR_ALL_SP_2020 = sum(DOLLAR_ALL_SP_2020))%>% 
+  mutate(Agg_DOLLAR = sum(DOLLAR),Agg_DOLLAR_2020 = sum(DOLLAR_2020),  Agg_POUNDS = sum(POUNDS), Agg_LANDED = sum(LANDED), Agg_DOLLAR_ALL_SP_2020 = sum(DOLLAR_ALL_SP_2020))%>% 
   filter(DOLLAR == max(DOLLAR)) %>% 
-  select(-DOLLAR, -POUNDS, -LANDED,-DOLLAR_ALL_SP_2020) %>% 
-  rename(DOLLAR = "Agg_DOLLAR", POUNDS = "Agg_POUNDS", LANDED = "Agg_LANDED", DOLLAR_ALL_SP_2020 = "Agg_DOLLAR_ALL_SP_2020") %>% 
+  select(-DOLLAR, -POUNDS, -LANDED,-DOLLAR_ALL_SP_2020, DOLLAR_2020) %>% 
+  rename(DOLLAR = "Agg_DOLLAR", POUNDS = "Agg_POUNDS", LANDED = "Agg_LANDED", DOLLAR_ALL_SP_2020 = "Agg_DOLLAR_ALL_SP_2020", DOLLAR_2020="Agg_DOLLAR_2020") %>% 
   ungroup()
 
 ## Test out 
