@@ -264,12 +264,12 @@ cat(tabl)
 The frozen DMIS table from the offshoreWind project (APSD_DMIS_2) is the base dataset for the analysis.  The DMIS data are formed by combining many datasets, including VTR and Dealer.  In brief, the APSD_DMIS_2 dataset contains a mix of trip attributes (port, date),  sub-trip attributes (gear, location) , and catch outcomes (species, pounds, landed, dollar).  You can read more about DMIS [here](https://github.com/NEFSC/READ-SSB-Lee-metadata/blob/master/DMIS.md).
 
 
-```{r Data Set Loading, echo=TRUE, results=FALSE,eval=extract_switch}
+```{r Data Set Loading, echo=TRUE, results=FALSE,eval=FALSE}
 load(file.path(offshoreWind_directory, "APSD_DMIS_2.rda"))
 ```
 
 To get a more up-to-date version of this data, we can do:
-```{r DMIS_live_query, echo=TRUE, eval=FALSE}
+```{r DMIS_live_query, echo=TRUE, eval=extract_switch}
 oracle_server = "sole"
 ODBC.CONNECTION <- RODBC::odbcConnect(dsn=oracle_server, uid=oracle_username, pwd=oracle_password, believeNRows=FALSE)
 CURRENT.QUERY = paste ("select * FROM APSD.DMIS_WIND_TEST@garfo_nefsc")
@@ -322,7 +322,7 @@ Some Trip-level data in the VTR schema is needed. See table at the top.  We extr
 oracle_server = "sole"
 ODBC.CONNECTION <- RODBC::odbcConnect(dsn=oracle_server, uid=oracle_username, pwd=oracle_password, believeNRows=FALSE)
 START.YEAR = 2007
-END.YEAR = 2019
+END.YEAR = 2022
 RESULT.COMPILED<-list()
 t<-1
 for(i in START.YEAR:END.YEAR) {
