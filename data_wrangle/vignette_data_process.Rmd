@@ -190,15 +190,27 @@ vignette_data$shift3<-runif(nrow(vignette_data),.90,1.1)
 vignette_data <- vignette_data %>%
     mutate(price=DOLLAR/LANDED,
            price2020=DOLLAR_2020/LANDED,
-           LANDED=LANDED*shift3,
-           DOLLAR=LANDED*price,
-           DOLLAR_2020=LANDED*price2020,
-           DOLLAR_ALL_SP_2020=DOLLAR_ALL_SP_2020*shift3) %>%
+           LANDED_OBSCURED=LANDED*shift3,
+           DOLLAR_OBSCURED=LANDED_OBSCURED*price,
+           DOLLAR_2020_OBSCURED=LANDED_OBSCURED*price2020,
+           DOLLAR_ALL_SP_2020_OBSCURED=DOLLAR_ALL_SP_2020*shift3 ) %>%
   select(-c(shift3))
 ```
 
+```{r compare_obscured_and_OG }
+orig.vars <- c("DOLLAR","DOLLAR_2020","DOLLAR_ALL_SP_2020")
+obscured.vars<-paste0(orig.vars,"_OBSCURED")
+both.vars<-c(orig.vars,obscured.vars)
+Summary_stats<-vignette_data %>% 
+       summarise_at(both.vars, list(mean=mean, sd=sd))
+
+```
+
+
+
 ```{r drop_extra_columns}
 drop.cols <- c('OPERATOR', 'IMGID','SECGEARFISH', 'TRIP_ID', 'DEALNUM', 'state_fips', 'ftpt', 'GC', 'LA', 'DB_LANDING_YEAR', 'OBSERVED_COST_DUMMY', 'TRIP_COST_2020_DOL', 'NSUBTRIP', 'CREW','value','VTR_PORTNUM', 'VTR_PORT','VTR_STATE', 'DOLLAR_ALL_SP','Area Identifier', 'price', 'Date', 'Time', 'hours', 'YEAR','price2020')
+drop.cols<-c(drop.cols, orig.vars)
 vignette_data<- vignette_data %>%
   dplyr::select(-one_of(drop.cols))
 
