@@ -194,8 +194,7 @@ vignette_data <- vignette_data %>%
            LANDED_OBSCURED=LANDED*shift3,
            DOLLAR_OBSCURED=LANDED_OBSCURED*price,
            DOLLAR_2020_OBSCURED=LANDED_OBSCURED*price2020,
-           DOLLAR_ALL_SP_2020_OBSCURED=DOLLAR_ALL_SP_2020*shift3 ) %>%
-  select(-c(shift3))
+           DOLLAR_ALL_SP_2020_OBSCURED=DOLLAR_ALL_SP_2020*shift3 ) 
 ```
 
 ```{r compare_obscured_and_OG }
@@ -204,13 +203,13 @@ obscured.vars<-paste0(orig.vars,"_OBSCURED")
 both.vars<-c(orig.vars,obscured.vars)
 Summary_stats<-vignette_data %>% 
        summarise_at(both.vars, list(mean=mean, sd=sd))
-
+Summary_stats
 ```
 
 
 
 ```{r drop_extra_columns}
-drop.cols <- c('OPERATOR', 'IMGID','SECGEARFISH', 'TRIP_ID', 'DEALNUM', 'state_fips', 'ftpt', 'GC', 'LA', 'DB_LANDING_YEAR', 'OBSERVED_COST_DUMMY', 'TRIP_COST_2020_DOL', 'NSUBTRIP', 'CREW','value','VTR_PORTNUM', 'VTR_PORT','VTR_STATE', 'DOLLAR_ALL_SP','Area Identifier', 'price', 'Date', 'Time', 'hours', 'YEAR','price2020')
+drop.cols <- c('OPERATOR', 'IMGID','SECGEARFISH', 'TRIP_ID', 'DEALNUM', 'state_fips', 'ftpt', 'GC', 'LA', 'DB_LANDING_YEAR', 'OBSERVED_COST_DUMMY', 'TRIP_COST_2020_DOL', 'NSUBTRIP', 'CREW','value','VTR_PORTNUM', 'VTR_PORT','VTR_STATE', 'DOLLAR_ALL_SP','Area Identifier', 'price', 'Date', 'Time', 'hours', 'YEAR','price2020', 'shift3')
 drop.cols<-c(drop.cols, orig.vars)
 vignette_data<- vignette_data %>%
   dplyr::select(-one_of(drop.cols))
