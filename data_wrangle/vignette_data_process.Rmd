@@ -276,11 +276,11 @@ vignette_dataRS<-vignette_data %>%
 filename_RS<-paste0("scallop_vignetteRS_", vintage_string, ".Rds")
 
 if (params$location=="Woods_Hole"){
-  vignette_outRS <- here("data", "main", filename_all)
+  vignette_outRS <- here("data", "main", filename_RS)
 } else if (params$location=="Seattle"){
   vignette_outRS <- paste0("~/NE Scallops/data/updated/", 
                          "June 22/NE NW Collab/",
-                         filename_all)
+                         filename_RS)
 }
 
 
