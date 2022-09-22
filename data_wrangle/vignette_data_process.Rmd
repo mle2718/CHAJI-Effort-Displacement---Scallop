@@ -1,0 +1,303 @@
+---
+title: "Data Processing to create Vignette Data"
+author: "Min-Yang Lee, Bryce McManus"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    keep_md: yes
+    toc: yes
+    toc_float: yes
+    code_folding: show
+params:
+  location:
+    label: 'Location:'
+    value: Woods_Hole
+    input: select
+    choices:
+    - Woods_Hole
+    - Seattle
+  PreRelease: yes
+---
+<!---
+YAML options: 
+location --- NEFSC folks should set location=Woods_Hole. AK folks should set it to Seattle. This just controls where the data is read in from.
+
+PreRelease -- controls the location of FishSET package. Set to FALSE to load without options. Set to TRUE to load from a particular lib.loc
+--->
+## Introduction 
+ This is some data processing to set up an anonymized dataset for FishSET
+
+<br><br>
+
+## Library
+
+```{r setup, echo=FALSE}
+
+#library("tidyverse")
+tidyverse_short <- c("dplyr",  "ggplot2", "magrittr", "tidyr") 
+lapply(tidyverse_short, require, character.only = TRUE)
+rm(tidyverse_short)
+library(kableExtra) # table formatting 
+library(sf) # converting geometry points to separate cols
+library(here)
+here()
+set.seed(20220823)
+```
+<br><br>
+
+
+## Data Import
+
+```{r data_readin, eval=TRUE}
+#For Woods_Hole users, read in the most recent data in data/main
+
+if (params$location=="Woods_Hole"){
+  # This code looks into /data/main and sets the vintage_string according to 
+  # the most recent data
+  datasets_list <- list.files(path = here("data", "main"), pattern = "final_product_lease")
+  datasets_list <- gsub("final_product_lease_", "", datasets_list )
+  datasets_list <- gsub(".Rds", "", datasets_list)
+  datasets_list <- gsub(".csv" ,"", datasets_list)
+  vintage_string <- max(datasets_list)
+  rm(datasets_list)
+  dat_filepath <- here("data", "main", paste0("final_product_lease_", vintage_string, ".Rds"))
+} else if (params$location=="Seattle"){
+  dat_filepath <- paste0("~/NE Scallops/data/updated/", 
+                         "June 22/NE NW Collab/",
+                         "final_product_lease_2022_09_22.Rds")
+}
+
+vignette_data <- readRDS(dat_filepath)
+
+
+```
+
+
+## Aggregate subtrips to trips
+
+The input data ``final_product_lease`` contains subtrips, not trips. This code chunk contracts trips to a single row, applying subtrip attributes for the most valuable subtrip (``max(DOLLAR)``)to the entire trip.
+
+```{r construct_trip_aggregates, echo=TRUE, eval=TRUE}
+# aggregate DOLLAR, POUNDS, LANDED by TRIPID and filter by max(DOLLAR)
+vignette_data <- 
+  vignette_data %>%
+  group_by(TRIPID) %>%
+  mutate(Agg_DOLLAR = sum(DOLLAR), Agg_POUNDS = sum(POUNDS), Agg_LANDED = sum(LANDED), Agg_DOLLAR_ALL_SP_2020 = sum(DOLLAR_ALL_SP_2020), Agg_DOLLAR_2020=sum(DOLLAR_2020))%>% 
+  arrange(desc(DOLLAR)) %>%
+  dplyr::filter(row_number()==1) %>% 
+  dplyr::select(-DOLLAR, -POUNDS, -LANDED,-DOLLAR_ALL_SP_2020, -DOLLAR_2020) %>% 
+  rename(DOLLAR = "Agg_DOLLAR", POUNDS = "Agg_POUNDS", LANDED = "Agg_LANDED", DOLLAR_ALL_SP_2020 = "Agg_DOLLAR_ALL_SP_2020", DOLLAR_2020 = "Agg_DOLLAR_2020") %>% 
+  ungroup()
+
+## Test out 
+sum(duplicated(vignette_data$TRIPID))
+stopifnot(sum(duplicated(vignette_data$TRIPID))==0)
+```
+
+## Keep  the DAS and Access Area fleets
+
+Just keep the Limited Access Days-at-Sea (SCA) and Access Area (SAA) fleets. These are the same vessels, but they are fishing under different sets of rules depending on whether they are declared into a Access Area or DAS trip. For the most part, the places where the fleets can fish are spatially distinct.  The access area boundaries change somewhat over time.
+
+```{r subset_on_fleet, echo=TRUE, eval=TRUE}
+vignette_data <- 
+  vignette_data %>%
+filter(`Plan Code` == "SES" & (`Program Code`=="SAA" |`Program Code`=="SCA"))  
+```
+
+
+<br><br>
+
+```{r obscure_permit_and_operator}
+#by each permit number, randomly draw a number.  Sort on that number. Use that sort order to create a new ID number
+vignette_data <- vignette_data %>%
+  group_by(PERMIT.y) %>%
+    dplyr::mutate(FAKE_VES_ID_rand = sample(1000,1)) %>%
+  ungroup() %>%
+  arrange(FAKE_VES_ID_rand, PERMIT.y) %>%
+  group_by(FAKE_VES_ID_rand,PERMIT.y) %>%
+    dplyr::mutate(FAKE_VES_ID = cur_group_id()) %>%
+    arrange(FAKE_VES_ID, PERMIT.y) %>%
+  ungroup()
+
+# Repeat the above process for the OPERNUM
+
+vignette_data<-vignette_data %>%
+  group_by(OPERNUM) %>%
+    dplyr::mutate(FAKE_VES_ID_rand = sample(1000,1)) %>%
+  ungroup() %>%
+  group_by(FAKE_VES_ID_rand,OPERNUM) %>%
+    dplyr::mutate(FAKE_OPER_ID = cur_group_id()) %>%
+  ungroup() %>%
+relocate(FAKE_VES_ID, PERMIT.y, OPERNUM, FAKE_OPER_ID) %>%
+  select(-c(PERMIT.y,OPERNUM, FAKE_VES_ID_rand))
+```
+
+
+```{r obscure_tripid}
+# Assign a random trip id
+vignette_data <- vignette_data %>%
+  group_by(TRIPID) %>%
+    dplyr::mutate(FAKE_TRIPID = cur_group_id()) %>%
+  ungroup() %>%
+  select(-c(TRIPID))
+```
+
+```{r pick_top_ports }
+vignette_data <- vignette_data %>%
+  add_count(geoid)%>%
+  filter(n>=1000) %>%
+  select(-c(n))
+```
+
+Just keep data from a few years, to capture some of the flavor of cross-year variation.
+```{r subset_years, eval=FALSE}
+vignette_data<-vignette_data %>%
+  filter(YEAR %in% c(2008,2009,2010,2011,2012,2013,2014,2015))
+```
+
+```{r check_dealers}
+deal_count<-vignette_data %>%
+  group_by(geoid) %>%
+  mutate(count_dealnums=n_distinct(DEALNUM)) %>%
+  filter(count_dealnums<=2) %>%
+  relocate(geoid, count_dealnums, DEALNUM) %>%
+  arrange(geoid, DEALNUM)
+unique(deal_count[c("geoid")])
+```
+```{r drop port}
+vignette_data <- vignette_data %>%
+  filter(geoid!=5119991590)
+```
+
+Keep just a few observations? A target is 10,000. A random sample is quick and easy for descriptive analysis. Something more sophisticated is warranted for more a choice model. 
+
+```{r obscure_locations, eval=FALSE}
+#Add some noise to the lats and lons
+vignette_data$shift1<-runif(nrow(vignette_data),.90,1.1)
+vignette_data$shift2<-runif(nrow(vignette_data),.90,1.1)
+vignette_data <- vignette_data %>%
+    mutate(DDLAT=DDLAT*shift1,
+           DDLON=DDLON*shift2) %>%
+  select(-c(shift1,shift2))
+```
+
+
+```{r obscure_values}
+# Add 20% noise to the LAT and LON data. This means that if you do a spatial join to the ten minute squares or to the wind areas, you will not match.  You may also match to land
+#Compute the price. Add 20% noise to the landings and then update value.
+
+vignette_data$shift3<-runif(nrow(vignette_data),.90,1.1)
+
+vignette_data <- vignette_data %>%
+    mutate(price=DOLLAR/LANDED,
+           price2020=DOLLAR_2020/LANDED,
+           LANDED_OBSCURED=LANDED*shift3,
+           DOLLAR_OBSCURED=LANDED_OBSCURED*price,
+           DOLLAR_2020_OBSCURED=LANDED_OBSCURED*price2020,
+           DOLLAR_ALL_SP_2020_OBSCURED=DOLLAR_ALL_SP_2020*shift3 ) 
+```
+
+```{r compare_obscured_and_OG }
+orig.vars <- c("DOLLAR","DOLLAR_2020","DOLLAR_ALL_SP_2020")
+obscured.vars<-paste0(orig.vars,"_OBSCURED")
+both.vars<-c(orig.vars,obscured.vars)
+Summary_stats<-vignette_data %>% 
+       summarise_at(both.vars, list(mean=mean, sd=sd))
+Summary_stats
+```
+
+
+
+```{r drop_extra_columns}
+drop.cols <- c('OPERATOR', 'IMGID','SECGEARFISH', 'TRIP_ID', 'DEALNUM', 'state_fips', 'ftpt', 'GC', 'LA', 'DB_LANDING_YEAR', 'OBSERVED_COST_DUMMY', 'TRIP_COST_2020_DOL', 'NSUBTRIP', 'CREW','value','VTR_PORTNUM', 'VTR_PORT','VTR_STATE', 'DOLLAR_ALL_SP','Area Identifier', 'price', 'Date', 'Time', 'hours', 'YEAR','price2020', 'shift3')
+drop.cols<-c(drop.cols, orig.vars)
+vignette_data<- vignette_data %>%
+  dplyr::select(-one_of(drop.cols))
+
+```
+```{r data_renameing}
+vignette_data <- vignette_data %>%
+  rename(PERMIT.y= FAKE_VES_ID,
+         OPERNUM=FAKE_OPER_ID,
+        TRIPID=FAKE_TRIPID)
+
+
+vignette_data<-vignette_data %>%
+  relocate(any_of(c("PERMIT", "TRIPID","DATE_TRIP","scallop_fishing_year","OPERNUM") ))
+```
+
+
+```{r data_saving, eval=TRUE}
+filename_all<-paste0("scallop_vignetteF_", vintage_string, ".Rds")
+
+if (params$location=="Woods_Hole"){
+  vignette_out <- here("data", "main", filename_all)
+} else if (params$location=="Seattle"){
+  vignette_out <- paste0("~/NE Scallops/data/updated/", 
+                         "June 22/NE NW Collab/",
+                         filename_all)
+}
+
+
+saveRDS(vignette_data, file=vignette_out)
+
+```
+
+
+
+```{r subset_random, eval=FALSE}
+# keep 10,000 observations. 
+vignette_dataRS<-vignette_data %>%
+  mutate(random = sample(1000,1)) %>%
+  relocate(random) %>%
+  arrange(random,PERMIT.y) %>%
+  select(-random) %>%
+  ungroup() %>%
+  slice_head(n=10000)
+```
+
+
+
+```{r subset_group}
+# keep a fraction of observations. But do it group-wise
+vignette_dataRS<-vignette_data %>%
+  group_by(PERMIT.y)%>% 
+  mutate(random = sample(1000,1)) %>%
+  relocate(random) %>%
+  arrange(random,PERMIT.y) %>%
+  select(-random) %>%
+  ungroup()%>%
+  slice_head(n=10000)
+```
+
+
+
+```{r data_saving_RS, eval=TRUE}
+filename_RS<-paste0("scallop_vignetteRS_", vintage_string, ".Rds")
+
+if (params$location=="Woods_Hole"){
+  vignette_outRS <- here("data", "main", filename_RS)
+} else if (params$location=="Seattle"){
+  vignette_outRS <- paste0("~/NE Scallops/data/updated/", 
+                         "June 22/NE NW Collab/",
+                         filename_RS)
+}
+
+
+saveRDS(vignette_dataRS, file=vignette_outRS)
+
+```
+
+
+A few tables, just because
+```{r make_some_tables}
+table(vignette_dataRS$GEARCODE)
+
+table(vignette_dataRS$namelsad)
+
+summary(vignette_dataRS$DOLLAR_2020)
+
+
+```
+
+
