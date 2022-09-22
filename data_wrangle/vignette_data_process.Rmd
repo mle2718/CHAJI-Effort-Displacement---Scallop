@@ -64,7 +64,7 @@ if (params$location=="Woods_Hole"){
 } else if (params$location=="Seattle"){
   dat_filepath <- paste0("~/NE Scallops/data/updated/", 
                          "June 22/NE NW Collab/",
-                         "final_product_lease_2022_05_25.Rds")
+                         "final_product_lease_2022_09_22.Rds")
 }
 
 vignette_data <- readRDS(dat_filepath)
