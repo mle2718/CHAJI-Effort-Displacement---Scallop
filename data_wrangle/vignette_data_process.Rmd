@@ -186,7 +186,7 @@ vignette_data <- vignette_data %>%
 # Add 20% noise to the LAT and LON data. This means that if you do a spatial join to the ten minute squares or to the wind areas, you will not match.  You may also match to land
 #Compute the price. Add 20% noise to the landings and then update value.
 
-vignette_data$shift3<-rlnorm(nrow(vignette_data),0,.1)
+vignette_data$shift3<-runif(nrow(vignette_data),.90,1.1)
 
 vignette_data <- vignette_data %>%
     mutate(price=DOLLAR/LANDED,
