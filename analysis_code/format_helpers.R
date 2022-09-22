@@ -18,7 +18,7 @@ pretty_tab_sb <- function(tab, width = "100%",
 pretty_lab <- function(tab, cols = "all", type = "pretty", ignore = NULL) {
 
   # check that all cols are numeric
-  if (cols == "all") {
+  if (length(cols) == 1 && cols == "all") {
     
     cols <- qaqc_helper(tab, is.numeric, output = "names")
   }
