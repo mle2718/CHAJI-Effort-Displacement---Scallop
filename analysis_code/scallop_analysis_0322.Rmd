@@ -124,10 +124,10 @@ final_product_lease <- readRDS(dat_filepath)
 # needed to rename this for now since it matches the name outputted from the
 # zone assignment function we use. 
 final_product_lease <- final_product_lease %>% rename(Zone_ID = "ZoneID") 
-
+final_product_lease$scallop_fishing_year<-as.numeric(final_product_lease$scallop_fishing_year)
 
 # convert the scallop_fishing_year variable into a "date" format that is amenable to the vessel_count() function
-final_product_lease$scallop_fishing_yearD <- lubridate::date_decimal(as.numeric(final_product_lease$scallop_fishing_year))
+final_product_lease$scallop_fishing_yearD <- lubridate::date_decimal(final_product_lease$scallop_fishing_year)
 
 
 load_maindata(dat = final_product_lease, project = project, over_write = TRUE)
