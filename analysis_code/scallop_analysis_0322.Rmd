@@ -60,7 +60,7 @@ if (params$PreRelease==TRUE){
 }
 
 #library("tidyverse")
-tidyverse_short <- c("dplyr",  "ggplot2", "magrittr", "tidyr") 
+tidyverse_short <- c("dplyr",  "ggplot2", "magrittr", "tidyr", "lubridate") 
 lapply(tidyverse_short, require, character.only = TRUE)
 rm(tidyverse_short)
 library(kableExtra) # table formatting 
@@ -123,7 +123,12 @@ if (params$location=="Woods_Hole"){
 final_product_lease <- readRDS(dat_filepath)
 # needed to rename this for now since it matches the name outputted from the
 # zone assignment function we use. 
-final_product_lease <- final_product_lease %>% rename(Zone_ID = "ZoneID")
+final_product_lease <- final_product_lease %>% rename(Zone_ID = "ZoneID") 
+final_product_lease$scallop_fishing_year<-as.numeric(final_product_lease$scallop_fishing_year)
+
+# convert the scallop_fishing_year variable into a "date" format that is amenable to the vessel_count() function
+final_product_lease$scallop_fishing_yearD <- lubridate::date_decimal(final_product_lease$scallop_fishing_year)
+
 
 final_product_lease <- final_product_lease %>%
   mutate(KILOGRAMS = POUNDS/pounds_to_kg,
@@ -622,13 +627,13 @@ scallop0322MainDataTable %>%
 Observations inside/outside closures by year. 
 ```{r}
 agg_helper(scallop0322MainDataTable, value = "in_closure", 
-            group = "DB_LANDING_YEAR", 
+            group = "scallop_fishing_year", 
             count = TRUE) %>% 
   pivot_wider(names_from = "in_closure", values_from = "n",
               values_fill = 0) %>% 
-  arrange(DB_LANDING_YEAR) %>% 
+  arrange(scallop_fishing_year) %>% 
   rename("Outside closure(s)" = "FALSE", "Inside closure(s)" = "TRUE") %>% 
-  pretty_lab(ignore = "DB_LANDING_YEAR") %>% 
+  pretty_lab(ignore = "scallop_fishing_year") %>% 
   pretty_tab()
 ```
 
@@ -636,13 +641,13 @@ agg_helper(scallop0322MainDataTable, value = "in_closure",
 Observations inside/outside closures by year and fleet. 
 ```{r}
 agg_helper(scallop0322MainDataTable, value = "in_closure", 
-            group = c("DB_LANDING_YEAR", "fleet"), 
+            group = c("scallop_fishing_year", "fleet"), 
             count = TRUE) %>% 
   pivot_wider(names_from = "in_closure", values_from = "n",
               values_fill = 0) %>% 
-  arrange(DB_LANDING_YEAR) %>% 
+  arrange(scallop_fishing_year) %>% 
   rename("Outside closure(s)" = "FALSE", "Inside closure(s)" = "TRUE") %>% 
-  pretty_lab(ignore = "DB_LANDING_YEAR") %>% 
+  pretty_lab(ignore = "scallop_fishing_year") %>% 
   pretty_tab_sb(width = "50%") 
 ```
 
@@ -1745,9 +1750,9 @@ zone_out$plot
 Total meat catch by year. 
 ```{r}
 agg_helper(scallop0322MainDataTable, "MEAT_KG", 
-            group = c("DB_LANDING_YEAR", "closeID"), 
+            group = c("scallop_fishing_year", "closeID"), 
             fun = "sum") %>% 
-  pivot_wider(names_from = DB_LANDING_YEAR, 
+  pivot_wider(names_from = scallop_fishing_year, 
               values_from = MEAT_KG,
               values_fill = 0) %>% 
   pretty_lab() %>% 
@@ -1759,9 +1764,9 @@ agg_helper(scallop0322MainDataTable, "MEAT_KG",
 Average meat catch by year. 
 ```{r}
 agg_helper(scallop0322MainDataTable, "MEAT_KG", 
-            group = c("DB_LANDING_YEAR", "closeID"), 
+            group = c("scallop_fishing_year", "closeID"), 
             fun = "mean") %>% 
-  pivot_wider(names_from = DB_LANDING_YEAR, 
+  pivot_wider(names_from = scallop_fishing_year, 
               values_from = MEAT_KG,
               values_fill = 0) %>% 
     pretty_lab() %>% 
@@ -1773,10 +1778,10 @@ agg_helper(scallop0322MainDataTable, "MEAT_KG",
 Percent of total trip length by year. 
 ```{r}
 agg_helper(scallop0322MainDataTable, "TRIP_LENGTH", 
-            group = c("DB_LANDING_YEAR", "closeID"), 
+            group = c("scallop_fishing_year", "closeID"), 
             fun = "sum") %>% 
   mutate(TRIP_LENGTH = TRIP_LENGTH/sum(TRIP_LENGTH) * 100) %>% 
-  pivot_wider(names_from = DB_LANDING_YEAR, 
+  pivot_wider(names_from = scallop_fishing_year, 
               values_from = TRIP_LENGTH,
               values_fill = 0) %>% 
   pretty_lab() %>% 
@@ -1839,9 +1844,9 @@ Average CPUE by year.
   scallop0322MainDataTable %>% 
   filter(CPUE_p >= .025 & CPUE_p <= .975) %>% 
 agg_helper(value = "CPUE", 
-            group = c("DB_LANDING_YEAR", "closeID"), 
+            group = c("scallop_fishing_year", "closeID"), 
             fun = "mean") %>% 
-  pivot_wider(names_from = DB_LANDING_YEAR, 
+  pivot_wider(names_from = scallop_fishing_year, 
               values_from = CPUE,
               values_fill = 0) %>% 
   pretty_lab() %>% 
@@ -1904,9 +1909,9 @@ Average VPUE by year.
   scallop0322MainDataTable %>% 
   filter(VPUE_p >= .025 & VPUE_p <= .975) %>% 
 agg_helper(value = "VPUE", 
-            group = c("DB_LANDING_YEAR", "closeID"), 
+            group = c("scallop_fishing_year", "closeID"), 
             fun = "mean") %>% 
-  pivot_wider(names_from = DB_LANDING_YEAR, 
+  pivot_wider(names_from = scallop_fishing_year, 
               values_from = VPUE,
               values_fill = 0) %>% 
   pretty_lab() %>% 
@@ -1917,10 +1922,10 @@ agg_helper(value = "VPUE",
 
 ```{r}
 agg_helper(scallop0322MainDataTable, "NSUBTRIP", 
-            group = c("DB_LANDING_YEAR", "closeID"), 
+            group = c("scallop_fishing_year", "closeID"), 
             count = TRUE) %>% 
-  arrange(DB_LANDING_YEAR) %>% 
-  pivot_wider(names_from = DB_LANDING_YEAR, 
+  arrange(scallop_fishing_year) %>% 
+  pivot_wider(names_from = scallop_fishing_year, 
               values_from = n,
               values_fill = 0) %>% 
   arrange(closeID, desc(NSUBTRIP)) %>% 
@@ -2174,7 +2179,7 @@ temp_plot(scallop0322MainDataTable, project,
           var.select = "MEAT_KG",
           len.fun = "percent",
           agg.fun = "sum",
-          date.var = "Date")
+          date.var = "scallop_fishing_yearD")
 ```
 
 <br><br><br>
@@ -2184,7 +2189,7 @@ temp_plot(scallop0322MainDataTable, project,
           var.select = "TRIP_LENGTH",
           len.fun = "percent",
           agg.fun = "sum",
-          date.var = "Date")
+          date.var = "scallop_fishing_yearD")
 ```
 
 <br><br><br>
@@ -2194,7 +2199,7 @@ temp_plot(scallop0322MainDataTable, project,
           var.select = "DOLLAR",
           len.fun = "percent",
           agg.fun = "sum",
-          date.var = "Date")
+          date.var = "scallop_fishing_yearD")
 ```
 
 <br><br><br>
@@ -2204,7 +2209,7 @@ temp_plot(scallop0322MainDataTable, project,
           var.select = "TRIP_COST_2020_DOL",
           len.fun = "percent",
           agg.fun = "sum",
-          date.var = "Date")
+          date.var = "scallop_fishing_yearD")
 ```
 
 <br><br><br>
@@ -2214,7 +2219,7 @@ temp_plot(scallop0322MainDataTable, project,
           var.select = "TRIP_COST_WINSOR_2020_DOL",
           len.fun = "percent",
           agg.fun = "sum",
-          date.var = "Date")
+          date.var = "scallop_fishing_yearD")
 ```
 
 
@@ -2225,7 +2230,7 @@ temp_plot(scallop0322MainDataTable, project,
           var.select = "OPERATING_PROFIT_2020",
           len.fun = "percent",
           agg.fun = "sum",
-          date.var = "Date")
+          date.var = "scallop_fishing_yearD")
 ```
 
 
@@ -2321,7 +2326,7 @@ vessel count by year.
 ves_out <- 
 vessel_count(scallop0322MainDataTable, project,
              v_id = "PERMIT.y",
-             date = "Date",
+             date = "scallop_fishing_yearD",
              period = "year", type = "line")
 
 ves_out$table %>% pretty_tab()
@@ -2352,7 +2357,7 @@ ves_out <-
 vessel_count(scallop0322MainDataTable, project,
              v_id = "PERMIT.y",
              group = "fleet",
-             date = "Date",
+             date = "scallop_fishing_yearD",
              period = "year", type = "line")
 
 ves_out$table %>% 
@@ -2386,7 +2391,7 @@ vessel count by year and gearcode.
 ves_out <-
   vessel_count(scallop0322MainDataTable, project,
                v_id = "PERMIT.y",
-               date = "Date",
+               date = "scallop_fishing_yearD",
                group = "GEARCODE",
                period = "year", type = "line")
 
@@ -2422,7 +2427,7 @@ ves_out <-
   vessel_count(scallop0322MainDataTable, project,
                v_id = "PERMIT.y",
                group = "VTR_PORT",
-               date = "Date",
+               date = "scallop_fishing_yearD",
                period = "year",
                filter_by = "TOP_10_PORT",
                filter_value = TRUE,
@@ -2464,7 +2469,7 @@ Total meat catch by year.
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
                 species = "MEAT_KG",
-                date = "Date", 
+                date = "scallop_fishing_yearD", 
                 period = "year",
                 fun = "sum",
                 type = "line", format_lab = "decimal")
@@ -2502,7 +2507,7 @@ Total meat catch by year and fleet.
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
                 species = "MEAT_KG",
-                date = "Date", 
+                date = "scallop_fishing_yearD", 
                 period = "year",
                 group = "fleet",
                 fun = "sum",
@@ -2522,7 +2527,7 @@ Average meat catch by year.
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
                 species = "MEAT_KG",
-                date = "Date", 
+                date = "scallop_fishing_yearD", 
                 period = "year",
                 fun = "mean", type = "line")
 
@@ -2540,7 +2545,7 @@ Average meat catch by year and fleet.
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
                 species = "MEAT_KG",
-                date = "Date", 
+                date = "scallop_fishing_yearD", 
                 period = "year",
                 group = "fleet",
                 fun = "mean", type = "line")
@@ -2615,7 +2620,7 @@ Average CPUE by year.
 cpue_out <- 
   species_catch(scallop0322MainDataTable, project,
                 species = "CPUE",
-                date = "Date", 
+                date = "scallop_fishing_yearD", 
                 period = "year",
                 fun = "mean", type = "line")
 
@@ -2632,7 +2637,7 @@ Average CPUE by year and fleet.
 cpue_out <- 
   species_catch(scallop0322MainDataTable, project,
                 species = "CPUE",
-                date = "Date", 
+                date = "scallop_fishing_yearD", 
                 period = "year",
                 group = "fleet",
                 fun = "mean", type = "line")
@@ -2670,7 +2675,7 @@ cpue_out <-
   species_catch(scallop0322MainDataTable, project,
                 species = "CPUE",
                 group = "GEARCODE",
-                date = "Date", 
+                date = "scallop_fishing_yearD", 
                 period = "year",
                 fun = "mean", type = "line")
 
@@ -2711,7 +2716,7 @@ cpue_out <-
                 group = "VTR_PORT",
                 filter_by = "TOP_10_PORT",
                 filter_value = TRUE,
-                date = "Date", 
+                date = "scallop_fishing_yearD", 
                 period = "year",
                 fun = "mean", type = "line")
 
@@ -2732,7 +2737,7 @@ Average VPUE by year.
 vpue_out <- 
   species_catch(scallop0322MainDataTable, project,
                 species = "VPUE",
-                date = "Date", 
+                date = "scallop_fishing_yearD", 
                 period = "year",
                 fun = "mean", type = "line")
 
@@ -2749,7 +2754,7 @@ Average VPUE by year and fleet.
 vpue_out <- 
   species_catch(scallop0322MainDataTable, project,
                 species = "VPUE",
-                date = "Date", 
+                date = "scallop_fishing_yearD", 
                 period = "year",
                 group = "fleet",
                 fun = "mean", type = "line")
@@ -2786,7 +2791,7 @@ vpue_out <-
   species_catch(scallop0322MainDataTable, project,
                 species = "VPUE",
                 group = "GEARCODE",
-                date = "Date", 
+                date = "scallop_fishing_yearD", 
                 period = "year",
                 fun = "mean", type = "line")
 
@@ -2828,7 +2833,7 @@ vpue_out <-
                 group = "VTR_PORT",
                 filter_by = "TOP_10_PORT",
                 filter_value = TRUE,
-                date = "Date", 
+                date = "scallop_fishing_yearD", 
                 period = "year",
                 fun = "mean", type = "line")
 
@@ -2869,8 +2874,8 @@ KDE of meat catch by year.
 ```{r}
 density_plot(scallop0322MainDataTable, project,
              var = "MEAT_KG", 
-             facet_by = "DB_LANDING_YEAR",
-             filter_by = "DB_LANDING_YEAR",
+             facet_by = "scallop_fishing_year",
+             filter_by = "scallop_fishing_year",
              filter_value = 2007:2013,
              type = "kde", bw = 1.5, 
              tran = "log", scale = "free_y")  + 
@@ -2878,8 +2883,8 @@ density_plot(scallop0322MainDataTable, project,
 
 density_plot(scallop0322MainDataTable, project,
              var = "MEAT_KG", 
-             facet_by = "DB_LANDING_YEAR",
-             filter_by = "DB_LANDING_YEAR",
+             facet_by = "scallop_fishing_year",
+             filter_by = "scallop_fishing_year",
              filter_value = 2014:2019,
              type = "kde", bw = 1.5, 
              tran = "log", scale = "free_y")  + 
@@ -2938,8 +2943,8 @@ KDE of trip length by year.
 ```{r}
 density_plot(scallop0322MainDataTable, project,
              var = "TRIP_LENGTH", 
-             facet_by = "DB_LANDING_YEAR",
-             filter_by = "DB_LANDING_YEAR",
+             facet_by = "scallop_fishing_year",
+             filter_by = "scallop_fishing_year",
              filter_value = 2007:2013,
              type = "kde", bw = 1.5, 
              tran = "log", scale = "free_y")  + 
@@ -2947,8 +2952,8 @@ density_plot(scallop0322MainDataTable, project,
 
 density_plot(scallop0322MainDataTable, project,
              var = "TRIP_LENGTH", 
-             facet_by = "DB_LANDING_YEAR",
-             filter_by = "DB_LANDING_YEAR",
+             facet_by = "scallop_fishing_year",
+             filter_by = "scallop_fishing_year",
              filter_value = 2014:2019,
              type = "kde", bw = 1.5, 
              tran = "log", scale = "free_y")  + 
@@ -3012,8 +3017,8 @@ KDE of CPUE by year.
 ```{r}
 density_plot(scallop0322MainDataTable, project,
              var = "CPUE", 
-             facet_by = "DB_LANDING_YEAR",
-             filter_by = "DB_LANDING_YEAR",
+             facet_by = "scallop_fishing_year",
+             filter_by = "scallop_fishing_year",
              filter_value = 2007:2013,
              type = "kde", bw = 1.5, 
              tran = "log", scale = "free_y")  + 
@@ -3021,8 +3026,8 @@ density_plot(scallop0322MainDataTable, project,
 
 density_plot(scallop0322MainDataTable, project,
              var = "CPUE", 
-             facet_by = "DB_LANDING_YEAR",
-             filter_by = "DB_LANDING_YEAR",
+             facet_by = "scallop_fishing_year",
+             filter_by = "scallop_fishing_year",
              filter_value = 2014:2019,
              type = "kde", bw = 1.5, 
              tran = "log", scale = "free_y")  + 
@@ -3098,8 +3103,8 @@ KDE of VPUE by year.
 ```{r}
 density_plot(scallop0322MainDataTable, project,
              var = "VPUE", 
-             facet_by = "DB_LANDING_YEAR",
-             filter_by = "DB_LANDING_YEAR",
+             facet_by = "scallop_fishing_year",
+             filter_by = "scallop_fishing_year",
              filter_value = 2007:2013,
              type = "kde", bw = 1.5, 
              tran = "log", scale = "free_y")  + 
@@ -3107,8 +3112,8 @@ density_plot(scallop0322MainDataTable, project,
 
 density_plot(scallop0322MainDataTable, project,
              var = "VPUE", 
-             facet_by = "DB_LANDING_YEAR",
-             filter_by = "DB_LANDING_YEAR",
+             facet_by = "scallop_fishing_year",
+             filter_by = "scallop_fishing_year",
              filter_value = 2014:2019,
              type = "kde", bw = 1.5, 
              tran = "log", scale = "free_y")  + 
@@ -3177,7 +3182,7 @@ KDE of trip cost by year.
 ```{r}
 density_plot(scallop0322MainDataTable, project,
              var = "TRIP_COST_2020_DOL", 
-             facet_by = "DB_LANDING_YEAR",
+             facet_by = "scallop_fishing_year",
              type = "kde", tran = "log") + angled_theme()
 ```
 
@@ -3222,7 +3227,7 @@ KDE of trip cost by year (Winsor).
 ```{r}
 density_plot(scallop0322MainDataTable, project,
              var = "TRIP_COST_WINSOR_2020_DOL", 
-             facet_by = "DB_LANDING_YEAR",
+             facet_by = "scallop_fishing_year",
              type = "kde", tran = "log") + angled_theme()
 ```
 
