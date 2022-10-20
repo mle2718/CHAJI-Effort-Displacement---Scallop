@@ -134,6 +134,7 @@ final_product_lease <- final_product_lease %>%
   mutate(KILOGRAMS = POUNDS/pounds_to_kg,
          LANDED_KG=LANDED/pounds_to_kg)
 
+#A column of ones. Useful for many things
 final_product_lease$ones<-1
 
 
@@ -1617,7 +1618,7 @@ zone_out$plot
 ```
 
 <br><br><br>
-Total revenue by closure area. 
+Aggregate Scallop revenue by closure area. 
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -1640,7 +1641,7 @@ zone_out$plot
 ```
 
 <br><br><br>
-Percent of total revenue by closure area. 
+Percent of Scallop revenue by closure area. 
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -1665,7 +1666,7 @@ zone_out$plot
 
 <br><br><br>
 
-Percent of total revenue by fleet. 
+Percent of Scallop revenue by fleet. 
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
