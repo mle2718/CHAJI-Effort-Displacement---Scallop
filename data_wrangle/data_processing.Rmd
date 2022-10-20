@@ -226,7 +226,7 @@ Limited_Access_ft<-Limited_Access %>%
 ```{r subtrip_revenue, echo=TRUE}
 APSD_DMIS_2<-APSD_DMIS_2 %>% 
   group_by(IMGID) %>%
-  mutate(DOLLAR_ALL_SP=sum(DOLLAR), na.rm=TRUE) %>%
+  mutate(DOLLAR_ALL_SP=sum(DOLLAR, na.rm=TRUE)) %>%
   relocate(DOLLAR_ALL_SP, .after=DOLLAR)
 ```
 
