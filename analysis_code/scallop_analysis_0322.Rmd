@@ -318,8 +318,8 @@ summary_stats(scallop0322MainDataTable, project) %>%
 Here is DOLLAR, KILOGRAMS, and TRIP_LENGTH separately. 
 ```{r}
 scallop0322MainDataTable %>% 
-  summarize(across(.cols = c("DOLLAR", "KILOGRAMS", "TRIP_LENGTH"), 
-                   .fns = list(min = min, median = median, mean = mean, max = max, 
+  summarize(across(.cols = c("DOLLAR_2020", "KILOGRAMS", "TRIP_LENGTH"), 
+                   .fns = list(min = min, median = median, mean = mean, max = max, sum=sum,
                                NAs = ~sum(is.na(.x)), UniqueObs = n_distinct, 
                                "No. 0's" = ~sum(.x == 0)), 
                    .names = "{.col}__{.fn}")) %>% 
@@ -472,7 +472,7 @@ Same as above but with revenue instead of meat KG
 ```{r}
 scallop0322MainDataTable <- 
   cpue(scallop0322MainDataTable, project,
-       xWeight = "DOLLAR",
+       xWeight = "DOLLAR_2020",
        xTime = "TRIP_LENGTH", 
        name = "VPUE")
 
@@ -1619,7 +1619,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable,
          zone.dat = "closeID",
          zone.spat = "LEASE_NUMB",
-         var = "DOLLAR",
+         var = "DOLLAR_2020",
          fun = "percent",
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
@@ -1643,7 +1643,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable,
          zone.dat = "closeID",
          zone.spat = "LEASE_NUMB",
-         var = "DOLLAR", group = "fleet",
+         var = "DOLLAR_2020", group = "fleet",
          fun = "percent",
          count = FALSE, 
          # breaks = c(.001, .01, .1, .3, .5, .7),
@@ -2003,7 +2003,7 @@ outlier_plot(scallop0322MainDataTable, project,
 
 ```{r}
 outlier_table(scallop0322MainDataTable, project,
-              x = "DOLLAR") %>% 
+              x = "DOLLAR_2020") %>% 
   pretty_lab() %>% 
   pretty_tab()
 ```
@@ -2011,7 +2011,7 @@ outlier_table(scallop0322MainDataTable, project,
 
 ```{r}
 outlier_plot(scallop0322MainDataTable, project,
-             x = "DOLLAR", 
+             x = "DOLLAR_2020", 
              dat.remove = "none",
              x.dist = "normal",
              output.screen = TRUE)
@@ -2020,7 +2020,7 @@ outlier_plot(scallop0322MainDataTable, project,
 
 ```{r}
 outlier_plot(scallop0322MainDataTable, project,
-             x = "DOLLAR", 
+             x = "DOLLAR_2020", 
              dat.remove = "mean_3SD",
              x.dist = "normal",
              output.screen = TRUE)
@@ -2196,7 +2196,7 @@ temp_plot(scallop0322MainDataTable, project,
 
 ```{r}
 temp_plot(scallop0322MainDataTable, project,
-          var.select = "DOLLAR",
+          var.select = "DOLLAR_2020",
           len.fun = "percent",
           agg.fun = "sum",
           date.var = "scallop_fishing_yearD")
@@ -2252,7 +2252,7 @@ xy_plot(scallop0322MainDataTable, project,
 Trip length by revenue. 
 ```{r}
 xy_plot(scallop0322MainDataTable, project,
-        var1 = "TRIP_LENGTH", var2 = "DOLLAR",
+        var1 = "TRIP_LENGTH", var2 = "DOLLAR_2020",
         regress = FALSE)
 ```
 
