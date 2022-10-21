@@ -2915,7 +2915,7 @@ catch_out <-
                 format_lab = "scientific", tran = "log")
 
 catch_out$table %>% 
-  pivot_wider(names_from = GEARCODE, values_from = MEAT_KG) %>% 
+  pivot_wider(names_from = GEARCODE, values_from = DOLLAR_2020) %>% 
   pretty_lab() %>%
   pretty_tab_sb() 
   
@@ -3027,7 +3027,7 @@ Total Revenue All Species by gearcode.
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "OPERATING_PROFIT_2020",
+                species = "DOLLAR_ALL_SP_2020",
                 group = "GEARCODE",
                 fun = "sum", tran = "log")
 
@@ -3069,7 +3069,7 @@ catch_out <-
                 format_lab = "scientific", tran = "log")
 
 catch_out$table %>% 
-  pivot_wider(names_from = GEARCODE, values_from = MEAT_KG) %>% 
+  pivot_wider(names_from = GEARCODE, values_from = DOLLAR_ALL_SP_2020) %>% 
   pretty_lab() %>%
   pretty_tab_sb() 
   
@@ -3236,7 +3236,7 @@ catch_out <-
                 format_lab = "scientific", tran = "log")
 
 catch_out$table %>% 
-  pivot_wider(names_from = GEARCODE, values_from = MEAT_KG) %>% 
+  pivot_wider(names_from = GEARCODE, values_from = OPERATING_PROFIT_2020) %>% 
   pretty_lab() %>%
   pretty_tab_sb() 
   
@@ -3244,22 +3244,6 @@ catch_out$plot + angled_theme()
 ```
 
 <br><br>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
