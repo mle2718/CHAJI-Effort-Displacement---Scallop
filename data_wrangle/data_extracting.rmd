@@ -383,7 +383,7 @@ Cost_Part2 <- read_excel(file.path(cost_directory2,"2010_2021_Commercial_Fishing
 all_yrs_costs <- merge(Cost_Part1,Cost_Part2, all = TRUE)
 
 
-keeps<-c("VTR_TRIPID","OBSERVED_COST_DUMMY", "TRIP_COST_NOMINALDOLS", "TRIP_COST_NOMINALDOLS_WINSOR")
+keeps<-c("VTR_TRIPID","DB_LANDING_YEAR", "OBSERVED_COST_DUMMY", "TRIP_COST_NOMINALDOLS", "TRIP_COST_NOMINALDOLS_WINSOR")
 
 all_yrs_costs<-subset(all_yrs_costs,select=keeps)
 #save to RDS
