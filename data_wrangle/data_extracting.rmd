@@ -248,8 +248,8 @@ We are currently not using the VMS data directly.
 tabl <- "
 | Column  | Description           |
 |------------|:-----------------------------------------------|
-|TRIP_COST_2020_DOL|Trip costs, in 2020 (US GDP Implicit price deflator) dollars|
-|TRIP_COST_WINSOR_2020_DOL|Trip costs, in 2020 (US GDP Implicit price deflator) dollars|
+|TRIP_COST_NOMINALDOLS|Trip costs, in nominal dollars|
+|TRIP_COST_NOMINALDOLS_WINSOR|Winsorized trip costs, in nominal dollars|
 "
 cat(tabl) 
 ```
@@ -382,6 +382,10 @@ Cost_Part2 <- read_excel(file.path(cost_directory2,"2010_2021_Commercial_Fishing
 #all_yrs_costs<-rbind(Cost_Part1,Cost_Part2)
 all_yrs_costs <- merge(Cost_Part1,Cost_Part2, all = TRUE)
 
+
+keeps<-c("VTR_TRIPID","OBSERVED_COST_DUMMY", "TRIP_COST_NOMINALDOLS", "TRIP_COST_NOMINALDOLS_WINSOR")
+
+all_yrs_costs<-subset(all_yrs_costs,select=keeps)
 #save to RDS
 all_yrs_costs_name <-paste0("all_yrs_costs_",vintage_string,".Rds")
 saveRDS(all_yrs_costs, file=here("data","intermediate",all_yrs_costs_name))
