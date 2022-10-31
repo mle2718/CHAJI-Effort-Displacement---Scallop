@@ -72,7 +72,8 @@ net<-network_location_remote
 # These are not part of the project path
 offshoreWind_directory<-file.path(net,"home5", "dcorvi","OffshoreWind","offshoreWind4","data")
 spacepanels_directory<-file.path(net,"home2", "mlee","dropoff","wind")
-cost_directory<-file.path(net,"work5","socialsci","Trip_Costs","2007-2020")
+cost_directory1<-file.path(net,"work5","socialsci","Trip_Costs","2000-2009")
+cost_directory2<-file.path(net,"work5","socialsci","Trip_Costs","2010-2021")
 
 # Set up paths.
 East_Cst_crop_2020_path<- here("data","external","shapefiles","East_Cst_crop_2020_extended")
@@ -374,12 +375,12 @@ saveRDS(Scallop_Linkingorg, file=here("data","intermediate",Scallop_Linkingorg_n
 These data should reference the  "Estimation of Commercial Fishing Trip Costs Using Sea Sampling Data" paper by Samantha Werner & Geret DePiper.  We will likely use the Winsorized trip cost estimates.
 ```{r merge_cost_data, echo=TRUE, eval=extract_switch}
 #Import Data
-X2007_2012 <- read_excel(file.path(cost_directory,"2007_2012.xlsx"))
-X2013_2020 <- read_excel(file.path(cost_directory,"2013_2020.xlsx"))
+Cost_Part1 <- read_excel(file.path(cost_directory1,"2000_2009_Commercial_Fishing_Trip_Costs.xlsx"))
+Cost_Part2 <- read_excel(file.path(cost_directory2,"2010_2021_Commercial_Fishing_Trip_Costs.xlsx"))
 
-#Merge 2007-2012 costs with 2013-2020 costs
-#all_yrs_costs<-rbind(X2007_2012,X2013_2020)
-all_yrs_costs <- merge(X2007_2012,X2013_2020, all = TRUE)
+#Merge Part1 of costs with Part 2 of costs 
+#all_yrs_costs<-rbind(Cost_Part1,Cost_Part2)
+all_yrs_costs <- merge(Cost_Part1,Cost_Part2, all = TRUE)
 
 #save to RDS
 all_yrs_costs_name <-paste0("all_yrs_costs_",vintage_string,".Rds")
