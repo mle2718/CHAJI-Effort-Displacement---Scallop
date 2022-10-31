@@ -359,7 +359,7 @@ group_by("YEAR") %>%
 
 # Converting Revenues to Real Dollars 
 
-In order to construct operating profits later on we need to ensure that DOLLAR and TRIP_COST_WINSOR_2020_DOL match. The original data set has DOLLAR in nominal dollars and TRIP_COST_WINSOR_2020_DOL is in 2020 Real Dollars. To make the conversion we will use GDP Implicit Price Deflators collected from the Federal Reserve Bank and adjust the index to Q2 2020 to match calculation methods of the TRIP_COST_WINSOR_2020_DOL variable. 
+Revenues (DOLLAR) are nominal.  Trip costs are now provided in nominal terms.  However, we need Real values to compare across time. This code pull deflators st. louis federal reserve.
 
 ```{r obtain and set fred API key, echo=TRUE}
 
@@ -422,7 +422,9 @@ VTR_DMIS_AC <- VTR_DMIS_AC %>%
                          with_year = TRUE)) %>%
                          left_join(deflators, by =c("qdate"="date")) %>%
                mutate(DOLLAR_ALL_SP_2020=DOLLAR_ALL_SP/value,
-                      DOLLAR_2020=DOLLAR/value)
+                      DOLLAR_2020=DOLLAR/value,
+                      TRIP_COST_2020DOLS_WINSOR=TRIP_COST_NOMINALDOLS_WINSOR/value,
+                      TRIP_COST_2020DOLS=TRIP_COST_NOMINALDOLS/value)
 
 
 # Delete unnecessary data frame and variable
