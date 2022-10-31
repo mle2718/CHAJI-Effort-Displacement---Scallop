@@ -102,7 +102,7 @@ net<-network_location_remote
 # These are not part of the project path
 offshoreWind_directory<-file.path(net,"home5", "dcorvi","OffshoreWind","offshoreWind4","data")
 spacepanels_directory<-file.path(net,"home2", "mlee","dropoff","wind")
-cost_directory<-file.path(net,"work5","socialsci","Trip_Costs","2007-2020")
+cost_directory<-file.path(net,"work5","socialsci","Trip_Costs","Archived","2007-2020")
 
 # Set up paths.
 East_Cst_crop_2020_path<- here("data","external","shapefiles","East_Cst_crop_2020_extended")
