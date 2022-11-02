@@ -227,15 +227,22 @@ Limited_Access_ft<-Limited_Access %>%
 ```{r subtrip_revenue, echo=TRUE}
 APSD_DMIS_2<-APSD_DMIS_2 %>% 
   group_by(IMGID) %>%
-  mutate(DOLLAR_ALL_SP=sum(DOLLAR)) %>%
+  mutate(DOLLAR_ALL_SP=sum(DOLLAR, na.rm=TRUE)) %>%
   relocate(DOLLAR_ALL_SP, .after=DOLLAR)
 ```
 
 
 ```{r datacleaning_step1, echo=TRUE}
+# FROZEN DMIS table has SPPNAME, but live DMIS table does not. USE NESPP3=800 to filter instead
+type<-strsplit(APSD_DMIS_2$dbsource[1],"_")[[1]][1]
 
-Scallops <- APSD_DMIS_2 %>% 
-  filter (SPPNAME == "SCALLOPS/BUSHEL")
+if(type=="frozen"){
+  Scallops <- APSD_DMIS_2 %>% 
+    filter (SPPNAME == "SCALLOPS/BUSHEL")
+}else if(type=="live"){
+    Scallops <- APSD_DMIS_2 %>% 
+    filter (NESPP3 == 800)
+}
 
 #Separate Dates & Times
 Scallops$Date <- as.Date(Scallops$DATE_TRIP)
