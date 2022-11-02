@@ -24,6 +24,14 @@ location --- NEFSC folks should set location=Woods_Hole. AK folks should set it 
 
 PreRelease -- controls the location of FishSET package. Set to FALSE to load without options. Set to TRUE to load from a particular lib.loc
 --->
+## Warning
+Please be careful with interpretation. Some outputs are uninterpretable when certain options are done. For example when we *do not* aggregate subtrips to trips:
+
+1. the "per-unit-effort" outputs are not meaningful. 
+2. Any statistics that are averaged are now averaged over subtrips, so this may not have a meaning either.
+
+There may be other, so think carefully.
+
 ## Introduction 
  
 This summary was done using a combination of FishSET console functions, the tidyverse
@@ -60,7 +68,7 @@ if (params$PreRelease==TRUE){
 }
 
 #library("tidyverse")
-tidyverse_short <- c("dplyr",  "ggplot2", "magrittr", "tidyr") 
+tidyverse_short <- c("dplyr",  "ggplot2", "magrittr", "tidyr", "lubridate") 
 lapply(tidyverse_short, require, character.only = TRUE)
 rm(tidyverse_short)
 library(kableExtra) # table formatting 
@@ -71,7 +79,7 @@ here::i_am("analysis_code/scallop_analysis_0322.Rmd")
 source(here("analysis_code", "format_helpers.R"))
 
 project <- "scallop0322"
-
+pounds_to_kg<-2.20462
 # disable scientific notation
 options(scipen=999)
 ```
@@ -123,7 +131,21 @@ if (params$location=="Woods_Hole"){
 final_product_lease <- readRDS(dat_filepath)
 # needed to rename this for now since it matches the name outputted from the
 # zone assignment function we use. 
-final_product_lease <- final_product_lease %>% rename(Zone_ID = "ZoneID")
+final_product_lease <- final_product_lease %>% rename(Zone_ID = "ZoneID") 
+final_product_lease$scallop_fishing_year<-as.numeric(final_product_lease$scallop_fishing_year)
+
+# convert the scallop_fishing_year variable into a "date" format that is amenable to the vessel_count() function
+final_product_lease$scallop_fishing_yearD <- lubridate::date_decimal(final_product_lease$scallop_fishing_year)
+
+
+final_product_lease <- final_product_lease %>%
+  mutate(KILOGRAMS = POUNDS/pounds_to_kg,
+         LANDED_KG=LANDED/pounds_to_kg)
+
+#A column of ones. Useful for many things
+final_product_lease$ones<-1
+
+
 
 load_maindata(dat = final_product_lease, project = project, over_write = TRUE)
 
@@ -275,6 +297,12 @@ scallop0322MainDataTable <-
   rename(DOLLAR = "Agg_DOLLAR", POUNDS = "Agg_POUNDS", LANDED = "Agg_LANDED", DOLLAR_ALL_SP_2020 = "Agg_DOLLAR_ALL_SP_2020", DOLLAR_2020="Agg_DOLLAR_2020") %>% 
   ungroup()
 
+scallop0322MainDataTable <- scallop0322MainDataTable %>%
+  mutate(KILOGRAMS = POUNDS/pounds_to_kg,
+         LANDED_KG=LANDED/pounds_to_kg)
+
+
+
 ## Test out 
 sum(duplicated(scallop0322MainDataTable$TRIPID))
 stopifnot(sum(duplicated(scallop0322MainDataTable$TRIPID))==0)
@@ -301,11 +329,11 @@ summary_stats(scallop0322MainDataTable, project) %>%
   pretty_tab_sb()
 ```
 
-Here is DOLLAR, POUNDS, and TRIP_LENGTH separately. 
+Here is DOLLAR, KILOGRAMS, and TRIP_LENGTH separately. 
 ```{r}
 scallop0322MainDataTable %>% 
-  summarize(across(.cols = c("DOLLAR", "POUNDS", "TRIP_LENGTH"), 
-                   .fns = list(min = min, median = median, mean = mean, max = max, 
+  summarize(across(.cols = c("DOLLAR_2020", "KILOGRAMS", "TRIP_LENGTH"), 
+                   .fns = list(min = min, median = median, mean = mean, max = max, sum=sum,
                                NAs = ~sum(is.na(.x)), UniqueObs = n_distinct, 
                                "No. 0's" = ~sum(.x == 0)), 
                    .names = "{.col}__{.fn}")) %>% 
@@ -417,16 +445,24 @@ scallop0322MainDataTable$LIVE_POUNDS <- scallop0322MainDataTable$POUNDS
 scallop0322MainDataTable$MEAT_POUNDS <- scallop0322MainDataTable$POUNDS/8.33
 scallop0322MainDataTable$POUNDS <-NULL
 
+scallop0322MainDataTable$LIVE_KG <- scallop0322MainDataTable$LIVE_POUNDS/pounds_to_kg
+scallop0322MainDataTable$MEAT_KG <- scallop0322MainDataTable$MEAT_POUNDS/pounds_to_kg
+
+
+
 ```
 
 
+
+
+
 ### CPUE
-Here I creating a CPUE variable using TRIP_LENGTH and MEAT_POUNDS. I'm also filtering
+Here I creating a CPUE variable using TRIP_LENGTH and MEAT_KG. I'm also filtering
 out any infinite values. 
 ```{r}
 scallop0322MainDataTable <- 
   cpue(scallop0322MainDataTable, project,
-       xWeight = "MEAT_POUNDS",
+       xWeight = "MEAT_KG",
        xTime = "TRIP_LENGTH", 
        name = "CPUE")
 
@@ -449,11 +485,11 @@ scallop0322MainDataTable <-
 <br><br>
 
 ### VPUE
-Same as above but with revenue instead of meat pounds. 
+Same as above but with revenue instead of meat KG 
 ```{r}
 scallop0322MainDataTable <- 
   cpue(scallop0322MainDataTable, project,
-       xWeight = "DOLLAR",
+       xWeight = "DOLLAR_2020",
        xTime = "TRIP_LENGTH", 
        name = "VPUE")
 
@@ -608,13 +644,13 @@ scallop0322MainDataTable %>%
 Observations inside/outside closures by year. 
 ```{r}
 agg_helper(scallop0322MainDataTable, value = "in_closure", 
-            group = "DB_LANDING_YEAR", 
+            group = "scallop_fishing_year", 
             count = TRUE) %>% 
   pivot_wider(names_from = "in_closure", values_from = "n",
               values_fill = 0) %>% 
-  arrange(DB_LANDING_YEAR) %>% 
+  arrange(scallop_fishing_year) %>% 
   rename("Outside closure(s)" = "FALSE", "Inside closure(s)" = "TRUE") %>% 
-  pretty_lab(ignore = "DB_LANDING_YEAR") %>% 
+  pretty_lab(ignore = "scallop_fishing_year") %>% 
   pretty_tab()
 ```
 
@@ -622,13 +658,13 @@ agg_helper(scallop0322MainDataTable, value = "in_closure",
 Observations inside/outside closures by year and fleet. 
 ```{r}
 agg_helper(scallop0322MainDataTable, value = "in_closure", 
-            group = c("DB_LANDING_YEAR", "fleet"), 
+            group = c("scallop_fishing_year", "fleet"), 
             count = TRUE) %>% 
   pivot_wider(names_from = "in_closure", values_from = "n",
               values_fill = 0) %>% 
-  arrange(DB_LANDING_YEAR) %>% 
+  arrange(scallop_fishing_year) %>% 
   rename("Outside closure(s)" = "FALSE", "Inside closure(s)" = "TRUE") %>% 
-  pretty_lab(ignore = "DB_LANDING_YEAR") %>% 
+  pretty_lab(ignore = "scallop_fishing_year") %>% 
   pretty_tab_sb(width = "50%") 
 ```
 
@@ -827,12 +863,12 @@ zone_out <-
            zone.dat = "ZoneID",
            zone.spat = "MN10SQID",
            count = FALSE,
-           var = "MEAT_POUNDS", fun = "sum",
+           var = "MEAT_KG", fun = "sum",
            breaks = c(1e3, 1e4, 5e4, 1e5, seq(1e6, 1.3e7, 2e6)),
            output = "tab_plot", na.rm = TRUE)
 zone_out$plot
 zone_out$table %>% 
-  pretty_lab(cols = "MEAT_POUNDS") %>% 
+  pretty_lab(cols = "MEAT_KG") %>% 
   pretty_tab_sb(width = "40%")
 ```
 
@@ -848,12 +884,12 @@ zone_out <-
            zone.dat = "ZoneID",
            zone.spat = "MN10SQID",
            count = FALSE,
-           var = "MEAT_POUNDS", fun = "sum",
+           var = "MEAT_KG", fun = "sum",
            breaks = c(1000, 1e4, 5e4, 1e5, 5e5, seq(1e6, 1.3e7, 3e6)),
            output = "tab_plot", na.rm = TRUE)
 zone_out$plot
 zone_out$table %>% 
-  pretty_lab(cols = "MEAT_POUNDS") %>% 
+  pretty_lab(cols = "MEAT_KG") %>% 
   pretty_tab_sb(width = "40%")
 ```
 
@@ -869,12 +905,12 @@ zone_out <-
            zone.dat = "ZoneID",
            zone.spat = "MN10SQID",
            count = FALSE,
-           var = "MEAT_POUNDS", fun = "sum",
+           var = "MEAT_KG", fun = "sum",
            breaks = c(1000, 1e4, 5e4, 1e5, 5e5, seq(1e6, 1.3e7, 3e6)),
            output = "tab_plot", na.rm = TRUE)
 zone_out$plot
 zone_out$table %>% 
-  pretty_lab(cols = "MEAT_POUNDS") %>% 
+  pretty_lab(cols = "MEAT_KG") %>% 
   pretty_tab_sb(width = "40%")
 ```
 
@@ -889,12 +925,12 @@ zone_out <-
            zone.dat = "ZoneID",
            zone.spat = "MN10SQID",
            count = FALSE,
-           var = "MEAT_POUNDS", fun = "sum",
+           var = "MEAT_KG", fun = "sum",
            breaks = c(500, 1000, 1e4, seq(1e5, 1e6, 2e5)),
            output = "tab_plot", na.rm = TRUE)
 zone_out$plot
 zone_out$table %>% 
-  pretty_lab(cols = "MEAT_POUNDS") %>% 
+  pretty_lab(cols = "MEAT_KG") %>% 
   pretty_tab_sb(width = "40%")
 ```
 
@@ -910,12 +946,12 @@ zone_out <-
            zone.dat = "ZoneID",
            zone.spat = "MN10SQID",
            count = FALSE,
-           var = "MEAT_POUNDS", fun = "mean",
+           var = "MEAT_KG", fun = "mean",
            breaks = c(1e3, 5e3, seq(1e4, 4e4, 5e3)),
            output = "tab_plot", na.rm = TRUE)
 zone_out$plot
 zone_out$table %>% 
-  pretty_lab(cols = "MEAT_POUNDS") %>% 
+  pretty_lab(cols = "MEAT_KG") %>% 
   pretty_tab_sb(width = "40%")
 ```
 
@@ -932,13 +968,13 @@ zone_out <-
            zone.dat = "ZoneID",
            zone.spat = "MN10SQID",
            count = FALSE,
-           var = "MEAT_POUNDS", fun = "mean",
+           var = "MEAT_KG", fun = "mean",
            # breaks = c(1e3, 5e3, seq(1e4, 2e4, 5e3)),
            breaks = c(seq(2e3, 2e4, 2e3)),
            output = "tab_plot", na.rm = TRUE)
 zone_out$plot
 zone_out$table %>% 
-  pretty_lab(cols = "MEAT_POUNDS") %>% 
+  pretty_lab(cols = "MEAT_KG") %>% 
   pretty_tab_sb(width = "40%")
 ```
 
@@ -956,12 +992,12 @@ zone_out <-
            zone.dat = "ZoneID",
            zone.spat = "MN10SQID",
            count = FALSE,
-           var = "MEAT_POUNDS", fun = "mean",
+           var = "MEAT_KG", fun = "mean",
            breaks = c(1e3, 5e3, seq(1e4, 4e4, 5e3)),
            output = "tab_plot", na.rm = TRUE)
 zone_out$plot
 zone_out$table %>% 
-  pretty_lab(cols = "MEAT_POUNDS") %>% 
+  pretty_lab(cols = "MEAT_KG") %>% 
   pretty_tab_sb(width = "40%")
 ```
 
@@ -978,12 +1014,12 @@ zone_out <-
            zone.dat = "ZoneID",
            zone.spat = "MN10SQID",
            count = FALSE,
-           var = "MEAT_POUNDS", fun = "mean",
+           var = "MEAT_KG", fun = "mean",
            breaks = c(100, seq(200, 1e3, 200), seq(5e3, 2.5e4, 1e4)),
            output = "tab_plot", na.rm = TRUE)
 zone_out$plot
 zone_out$table %>% 
-  pretty_lab(cols = "MEAT_POUNDS") %>% 
+  pretty_lab(cols = "MEAT_KG") %>% 
   pretty_tab_sb(width = "40%")
 ```
 
@@ -997,12 +1033,12 @@ zone_out <-
            zone.dat = "ZoneID",
            zone.spat = "MN10SQID",
            count = FALSE,
-           var = "MEAT_POUNDS", fun = "median",
+           var = "MEAT_KG", fun = "median",
            breaks = c(1e3, 5e3, seq(1e4, 4e4, 5e3)),
            output = "tab_plot", na.rm = TRUE)
 zone_out$plot
 zone_out$table %>% 
-   pretty_lab(cols = "MEAT_POUNDS") %>% 
+   pretty_lab(cols = "MEAT_KG") %>% 
   pretty_tab_sb(width = "40%")
 ```
 
@@ -1018,12 +1054,12 @@ zone_out <-
            zone.dat = "ZoneID",
            zone.spat = "MN10SQID",
            count = FALSE,
-           var = "MEAT_POUNDS", fun = "median",
+           var = "MEAT_KG", fun = "median",
            breaks = seq(2e3, 2.4e4, 2e3),
            output = "tab_plot", na.rm = TRUE)
 zone_out$plot
 zone_out$table %>% 
-  pretty_lab(cols = "MEAT_POUNDS") %>% 
+  pretty_lab(cols = "MEAT_KG") %>% 
   pretty_tab_sb(width = "40%")
 ```
 
@@ -1039,12 +1075,12 @@ zone_out <-
            zone.dat = "ZoneID",
            zone.spat = "MN10SQID",
            count = FALSE,
-           var = "MEAT_POUNDS", fun = "median",
+           var = "MEAT_KG", fun = "median",
            breaks = c(1e3, 5e3, seq(1e4, 4e4, 5e3)),
            output = "tab_plot", na.rm = TRUE)
 zone_out$plot
 zone_out$table %>% 
-  pretty_lab(cols = "MEAT_POUNDS") %>% 
+  pretty_lab(cols = "MEAT_KG") %>% 
   pretty_tab_sb(width = "40%")
 ```
 
@@ -1061,12 +1097,12 @@ zone_out <-
            zone.dat = "ZoneID",
            zone.spat = "MN10SQID",
            count = FALSE,
-           var = "MEAT_POUNDS", fun = "median",
+           var = "MEAT_KG", fun = "median",
            breaks = c(100, seq(200, 1e3, 200), seq(5e3, 2.5e4, 1e4)),
            output = "tab_plot", na.rm = TRUE)
 zone_out$plot
 zone_out$table %>% 
-  pretty_lab(cols = "MEAT_POUNDS") %>% 
+  pretty_lab(cols = "MEAT_KG") %>% 
   pretty_tab_sb(width = "40%")
 ```
 
@@ -1081,13 +1117,13 @@ zone_out <-
            zone.dat = "ZoneID",
            zone.spat = "MN10SQID",
            count = FALSE,
-           var = "MEAT_POUNDS", fun = "percent",
+           var = "MEAT_KG", fun = "percent",
            breaks = seq(0, 2, .2),
            bin_colors = c("white", viridis::viridis(10, option = "H")),
            output = "tab_plot", na.rm = TRUE)
 zone_out$plot
 zone_out$table %>% 
-  pretty_lab(cols = c("MEAT_POUNDS", "MEAT_POUNDS_perc"), type = "scientific") %>%
+  pretty_lab(cols = c("MEAT_KG", "MEAT_KG_perc"), type = "scientific") %>%
   pretty_tab_sb(width = "40%")
 ```
 
@@ -1104,13 +1140,13 @@ zone_out <-
            zone.dat = "ZoneID",
            zone.spat = "MN10SQID",
            count = FALSE,
-           var = "MEAT_POUNDS", fun = "percent",
+           var = "MEAT_KG", fun = "percent",
            breaks = c(0, .2, seq(.5, 4, .5)),
            bin_colors = c("white", viridis::viridis(9, option = "H")),
            output = "tab_plot", na.rm = TRUE)
 zone_out$plot
 zone_out$table %>% 
-  pretty_lab(cols = c("MEAT_POUNDS", "MEAT_POUNDS_perc"), type = "scientific") %>%
+  pretty_lab(cols = c("MEAT_KG", "MEAT_KG_perc"), type = "scientific") %>%
   pretty_tab_sb(width = "40%")
 ```
 
@@ -1127,13 +1163,13 @@ zone_out <-
            zone.dat = "ZoneID",
            zone.spat = "MN10SQID",
            count = FALSE,
-           var = "MEAT_POUNDS", fun = "percent",
+           var = "MEAT_KG", fun = "percent",
            breaks = c(0, .2, seq(.5, 4, .5)),
            bin_colors = c("white", viridis::viridis(9, option = "H")),
            output = "tab_plot", na.rm = TRUE)
 zone_out$plot
 zone_out$table %>% 
-  pretty_lab(cols = c("MEAT_POUNDS", "MEAT_POUNDS_perc"), type = "scientific") %>%
+  pretty_lab(cols = c("MEAT_KG", "MEAT_KG_perc"), type = "scientific") %>%
   pretty_tab_sb(width = "40%")
 ```
 
@@ -1149,13 +1185,13 @@ zone_out <-
            zone.dat = "ZoneID",
            zone.spat = "MN10SQID",
            count = FALSE,
-           var = "MEAT_POUNDS", fun = "percent",
+           var = "MEAT_KG", fun = "percent",
            breaks = c(seq(0, 1, .2), 2:4),
            bin_colors = c("white", viridis::viridis(8)),
            output = "tab_plot", na.rm = TRUE)
 zone_out$plot
 zone_out$table %>% 
-  pretty_lab(cols = c("MEAT_POUNDS", "MEAT_POUNDS_perc"), type = "scientific") %>%
+  pretty_lab(cols = c("MEAT_KG", "MEAT_KG_perc"), type = "scientific") %>%
   pretty_tab_sb(width = "40%")
 ```
 
@@ -1585,7 +1621,8 @@ zone_summary(scallop0322MainDataTable, project = project,
          na.rm = TRUE, dat.center = FALSE, 
          output = "tab_plot")
 
-zone_out$table %>% 
+zone_out$table %>%
+  arrange(-n) %>%
   pretty_lab() %>% 
   pretty_tab_sb(width = "40%")
 
@@ -1593,14 +1630,37 @@ zone_out$plot
 ```
 
 <br><br><br>
-Percent of total revenue by closure area. 
+Aggregate Scallop revenue by closure area. 
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable,
          zone.dat = "closeID",
          zone.spat = "LEASE_NUMB",
-         var = "DOLLAR",
+         var = "DOLLAR_2020",
+         fun = "sum",
+         count = FALSE, 
+         #breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "tab_plot")
+
+zone_out$table %>%
+  arrange(-DOLLAR_2020) %>%
+  pretty_lab() %>% 
+  pretty_tab_sb(width = "60%")
+
+zone_out$plot
+```
+
+<br><br><br>
+Percent of Scallop revenue by closure area. 
+```{r}
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2020",
          fun = "percent",
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
@@ -1608,6 +1668,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          output = "tab_plot")
 
 zone_out$table %>% 
+  arrange(-DOLLAR_2020) %>%
   pretty_lab() %>% 
   pretty_tab_sb(width = "60%")
 
@@ -1617,14 +1678,14 @@ zone_out$plot
 
 <br><br><br>
 
-Percent of total revenue by fleet. 
+Percent of Scallop revenue by fleet. 
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable,
          zone.dat = "closeID",
          zone.spat = "LEASE_NUMB",
-         var = "DOLLAR", group = "fleet",
+         var = "DOLLAR_2020", group = "fleet",
          fun = "percent",
          count = FALSE, 
          # breaks = c(.001, .01, .1, .3, .5, .7),
@@ -1632,6 +1693,81 @@ zone_summary(scallop0322MainDataTable, project = project,
          output = "tab_plot")
 
 zone_out$table %>% 
+  arrange(fleet,-DOLLAR_2020) %>%
+  pretty_lab() %>% 
+  pretty_tab_sb(width = "60%")
+
+zone_out$plot
+```
+
+
+
+
+<br><br><br>
+Total Operating Profit by closure area. 
+```{r}
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "OPERATING_PROFIT_2020",
+         fun = "sum",
+         count = FALSE, 
+         #breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "tab_plot")
+
+zone_out$table %>% 
+  arrange(-OPERATING_PROFIT_2020) %>%
+ pretty_lab() %>% 
+  pretty_tab_sb(width = "60%")
+
+zone_out$plot
+```
+
+<br><br><br>
+Percent of operating profit by closure area. 
+```{r}
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "OPERATING_PROFIT_2020",
+         fun = "percent",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "tab_plot")
+
+zone_out$table %>% 
+  arrange(-OPERATING_PROFIT_2020) %>%
+  pretty_lab() %>% 
+  pretty_tab_sb(width = "60%")
+
+zone_out$plot
+```
+
+
+<br><br><br>
+
+Percent of Operating Profit by fleet. 
+```{r}
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "OPERATING_PROFIT_2020", group = "fleet",
+         fun = "percent",
+         count = FALSE, 
+         # breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "tab_plot")
+
+zone_out$table %>% 
+  arrange(fleet,-OPERATING_PROFIT_2020) %>%
   pretty_lab() %>% 
   pretty_tab_sb(width = "60%")
 
@@ -1647,7 +1783,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable, 
          zone.dat = "closeID",
          zone.spat = "LEASE_NUMB",
-         var = "MEAT_POUNDS",
+         var = "MEAT_KG",
          fun = "mean",
          count = FALSE,
          na.rm = TRUE, dat.center = FALSE, 
@@ -1660,16 +1796,38 @@ zone_out$table %>%
 zone_out$plot
 ```
 
-<br><br><br>
 
-Average meat  catch by fleet.
+Total meat catch per closure area.
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable, 
          zone.dat = "closeID",
          zone.spat = "LEASE_NUMB",
-         var = "MEAT_POUNDS", group = "fleet",
+         var = "MEAT_KG",
+         fun = "sum",
+         count = FALSE,
+         na.rm = TRUE, dat.center = FALSE, 
+         output = "tab_plot")
+
+zone_out$table %>% 
+  pretty_lab() %>% 
+  pretty_tab_sb(width = "40%")
+
+zone_out$plot
+```
+
+
+<br><br><br>
+
+Average meat catch per closure area, by fleet.
+```{r}
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable, 
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "MEAT_KG", group = "fleet",
          fun = "mean",
          count = FALSE,
          na.rm = TRUE, dat.center = FALSE, 
@@ -1682,6 +1840,28 @@ zone_out$table %>%
 zone_out$plot
 ```
 
+
+Total meat catch per closure area,  by fleet.
+```{r}
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable, 
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "MEAT_KG", group = "fleet",
+         fun = "sum",
+         count = FALSE,
+         na.rm = TRUE, dat.center = FALSE, 
+         output = "tab_plot")
+
+zone_out$table %>% 
+  pretty_lab() %>% 
+  pretty_tab_sb(width = "50%")
+
+zone_out$plot
+```
+
+
 <br><br><br>
 
 Percent of total meat catch. 
@@ -1691,14 +1871,14 @@ zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable, 
          zone.dat = "closeID",
          zone.spat = "LEASE_NUMB",
-         var = "MEAT_POUNDS",
+         var = "MEAT_KG",
          fun = "percent",
          count = FALSE,
          na.rm = TRUE, dat.center = FALSE, 
          output = "tab_plot")
 
 zone_out$table %>% 
-  pretty_lab(type = "scientific") %>% 
+#  pretty_lab(type = "scientific") %>% 
   pretty_tab_sb(width = "50%")
 
 zone_out$plot
@@ -1713,14 +1893,14 @@ zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable, 
          zone.dat = "closeID",
          zone.spat = "LEASE_NUMB",
-         var = "MEAT_POUNDS", group = "fleet",
+         var = "MEAT_KG", group = "fleet",
          fun = "percent",
          count = FALSE,
          na.rm = TRUE, dat.center = FALSE, 
          output = "tab_plot")
 
 zone_out$table %>% 
-  pretty_lab(type = "scientific") %>% 
+#  pretty_lab(type = "scientific") %>% 
   pretty_tab_sb(width = "50%")
 
 zone_out$plot
@@ -1730,11 +1910,11 @@ zone_out$plot
 
 Total meat catch by year. 
 ```{r}
-agg_helper(scallop0322MainDataTable, "MEAT_POUNDS", 
-            group = c("DB_LANDING_YEAR", "closeID"), 
+agg_helper(scallop0322MainDataTable, "MEAT_KG", 
+            group = c("scallop_fishing_year", "closeID"), 
             fun = "sum") %>% 
-  pivot_wider(names_from = DB_LANDING_YEAR, 
-              values_from = MEAT_POUNDS,
+  pivot_wider(names_from = scallop_fishing_year, 
+              values_from = MEAT_KG,
               values_fill = 0) %>% 
   pretty_lab() %>% 
   pretty_tab_sb()
@@ -1744,11 +1924,11 @@ agg_helper(scallop0322MainDataTable, "MEAT_POUNDS",
 
 Average meat catch by year. 
 ```{r}
-agg_helper(scallop0322MainDataTable, "MEAT_POUNDS", 
-            group = c("DB_LANDING_YEAR", "closeID"), 
+agg_helper(scallop0322MainDataTable, "MEAT_KG", 
+            group = c("scallop_fishing_year", "closeID"), 
             fun = "mean") %>% 
-  pivot_wider(names_from = DB_LANDING_YEAR, 
-              values_from = MEAT_POUNDS,
+  pivot_wider(names_from = scallop_fishing_year, 
+              values_from = MEAT_KG,
               values_fill = 0) %>% 
     pretty_lab() %>% 
   pretty_tab_sb()
@@ -1759,10 +1939,10 @@ agg_helper(scallop0322MainDataTable, "MEAT_POUNDS",
 Percent of total trip length by year. 
 ```{r}
 agg_helper(scallop0322MainDataTable, "TRIP_LENGTH", 
-            group = c("DB_LANDING_YEAR", "closeID"), 
+            group = c("scallop_fishing_year", "closeID"), 
             fun = "sum") %>% 
   mutate(TRIP_LENGTH = TRIP_LENGTH/sum(TRIP_LENGTH) * 100) %>% 
-  pivot_wider(names_from = DB_LANDING_YEAR, 
+  pivot_wider(names_from = scallop_fishing_year, 
               values_from = TRIP_LENGTH,
               values_fill = 0) %>% 
   pretty_lab() %>% 
@@ -1825,9 +2005,9 @@ Average CPUE by year.
   scallop0322MainDataTable %>% 
   filter(CPUE_p >= .025 & CPUE_p <= .975) %>% 
 agg_helper(value = "CPUE", 
-            group = c("DB_LANDING_YEAR", "closeID"), 
+            group = c("scallop_fishing_year", "closeID"), 
             fun = "mean") %>% 
-  pivot_wider(names_from = DB_LANDING_YEAR, 
+  pivot_wider(names_from = scallop_fishing_year, 
               values_from = CPUE,
               values_fill = 0) %>% 
   pretty_lab() %>% 
@@ -1890,9 +2070,9 @@ Average VPUE by year.
   scallop0322MainDataTable %>% 
   filter(VPUE_p >= .025 & VPUE_p <= .975) %>% 
 agg_helper(value = "VPUE", 
-            group = c("DB_LANDING_YEAR", "closeID"), 
+            group = c("scallop_fishing_year", "closeID"), 
             fun = "mean") %>% 
-  pivot_wider(names_from = DB_LANDING_YEAR, 
+  pivot_wider(names_from = scallop_fishing_year, 
               values_from = VPUE,
               values_fill = 0) %>% 
   pretty_lab() %>% 
@@ -1903,10 +2083,10 @@ agg_helper(value = "VPUE",
 
 ```{r}
 agg_helper(scallop0322MainDataTable, "NSUBTRIP", 
-            group = c("DB_LANDING_YEAR", "closeID"), 
+            group = c("scallop_fishing_year", "closeID"), 
             count = TRUE) %>% 
-  arrange(DB_LANDING_YEAR) %>% 
-  pivot_wider(names_from = DB_LANDING_YEAR, 
+  arrange(scallop_fishing_year) %>% 
+  pivot_wider(names_from = scallop_fishing_year, 
               values_from = n,
               values_fill = 0) %>% 
   arrange(closeID, desc(NSUBTRIP)) %>% 
@@ -1923,17 +2103,17 @@ The rest of the columns are summary statistics of the variable post filter.
 You could run the "outlier_remove" function if you wanted to apply an outlier filter 
 to variable.
 
-### POUNDS
+### Weights
 ```{r}
 outlier_table(scallop0322MainDataTable, project,
-              x = "MEAT_POUNDS") %>% 
+              x = "MEAT_KG") %>% 
   pretty_lab() %>% 
   pretty_tab()
 ```
 
 ```{r}
 outlier_plot(scallop0322MainDataTable, project,
-             x = "MEAT_POUNDS", 
+             x = "MEAT_KG", 
              dat.remove = "none",
              x.dist = "normal",
              output.screen = TRUE)
@@ -1941,7 +2121,7 @@ outlier_plot(scallop0322MainDataTable, project,
 
 ```{r}
 outlier_plot(scallop0322MainDataTable, project,
-             x = "MEAT_POUNDS", 
+             x = "MEAT_KG", 
              dat.remove = "mean_3SD",
              x.dist = "normal",
              output.screen = TRUE)
@@ -1984,7 +2164,7 @@ outlier_plot(scallop0322MainDataTable, project,
 
 ```{r}
 outlier_table(scallop0322MainDataTable, project,
-              x = "DOLLAR") %>% 
+              x = "DOLLAR_2020") %>% 
   pretty_lab() %>% 
   pretty_tab()
 ```
@@ -1992,7 +2172,7 @@ outlier_table(scallop0322MainDataTable, project,
 
 ```{r}
 outlier_plot(scallop0322MainDataTable, project,
-             x = "DOLLAR", 
+             x = "DOLLAR_2020", 
              dat.remove = "none",
              x.dist = "normal",
              output.screen = TRUE)
@@ -2001,7 +2181,7 @@ outlier_plot(scallop0322MainDataTable, project,
 
 ```{r}
 outlier_plot(scallop0322MainDataTable, project,
-             x = "DOLLAR", 
+             x = "DOLLAR_2020", 
              dat.remove = "mean_3SD",
              x.dist = "normal",
              output.screen = TRUE)
@@ -2157,10 +2337,10 @@ outlier_plot(scallop0322MainDataTable, project,
 
 ```{r}
 temp_plot(scallop0322MainDataTable, project,
-          var.select = "MEAT_POUNDS",
+          var.select = "MEAT_KG",
           len.fun = "percent",
           agg.fun = "sum",
-          date.var = "Date")
+          date.var = "scallop_fishing_yearD")
 ```
 
 <br><br><br>
@@ -2170,17 +2350,17 @@ temp_plot(scallop0322MainDataTable, project,
           var.select = "TRIP_LENGTH",
           len.fun = "percent",
           agg.fun = "sum",
-          date.var = "Date")
+          date.var = "scallop_fishing_yearD")
 ```
 
 <br><br><br>
 
 ```{r}
 temp_plot(scallop0322MainDataTable, project,
-          var.select = "DOLLAR",
+          var.select = "DOLLAR_2020",
           len.fun = "percent",
           agg.fun = "sum",
-          date.var = "Date")
+          date.var = "scallop_fishing_yearD")
 ```
 
 <br><br><br>
@@ -2190,7 +2370,7 @@ temp_plot(scallop0322MainDataTable, project,
           var.select = "TRIP_COST_2020DOLS",
           len.fun = "percent",
           agg.fun = "sum",
-          date.var = "Date")
+          date.var = "scallop_fishing_yearD")
 ```
 
 <br><br><br>
@@ -2200,7 +2380,7 @@ temp_plot(scallop0322MainDataTable, project,
           var.select = "TRIP_COST_2020DOLS_WINSOR",
           len.fun = "percent",
           agg.fun = "sum",
-          date.var = "Date")
+          date.var = "scallop_fishing_yearD")
 ```
 
 
@@ -2211,7 +2391,7 @@ temp_plot(scallop0322MainDataTable, project,
           var.select = "OPERATING_PROFIT_2020",
           len.fun = "percent",
           agg.fun = "sum",
-          date.var = "Date")
+          date.var = "scallop_fishing_yearD")
 ```
 
 
@@ -2223,7 +2403,7 @@ temp_plot(scallop0322MainDataTable, project,
 Trip length by meat catch. 
 ```{r}
 xy_plot(scallop0322MainDataTable, project,
-        var1 = "TRIP_LENGTH", var2 = "MEAT_POUNDS",
+        var1 = "TRIP_LENGTH", var2 = "MEAT_KG",
         regress = FALSE)
 ```
 
@@ -2233,7 +2413,7 @@ xy_plot(scallop0322MainDataTable, project,
 Trip length by revenue. 
 ```{r}
 xy_plot(scallop0322MainDataTable, project,
-        var1 = "TRIP_LENGTH", var2 = "DOLLAR",
+        var1 = "TRIP_LENGTH", var2 = "DOLLAR_2020",
         regress = FALSE)
 ```
 
@@ -2307,7 +2487,7 @@ vessel count by year.
 ves_out <- 
 vessel_count(scallop0322MainDataTable, project,
              v_id = "PERMIT.y",
-             date = "Date",
+             date = "scallop_fishing_yearD",
              period = "year", type = "line")
 
 ves_out$table %>% pretty_tab()
@@ -2338,7 +2518,7 @@ ves_out <-
 vessel_count(scallop0322MainDataTable, project,
              v_id = "PERMIT.y",
              group = "fleet",
-             date = "Date",
+             date = "scallop_fishing_yearD",
              period = "year", type = "line")
 
 ves_out$table %>% 
@@ -2372,7 +2552,7 @@ vessel count by year and gearcode.
 ves_out <-
   vessel_count(scallop0322MainDataTable, project,
                v_id = "PERMIT.y",
-               date = "Date",
+               date = "scallop_fishing_yearD",
                group = "GEARCODE",
                period = "year", type = "line")
 
@@ -2408,7 +2588,7 @@ ves_out <-
   vessel_count(scallop0322MainDataTable, project,
                v_id = "PERMIT.y",
                group = "VTR_PORT",
-               date = "Date",
+               date = "scallop_fishing_yearD",
                period = "year",
                filter_by = "TOP_10_PORT",
                filter_value = TRUE,
@@ -2449,14 +2629,14 @@ Total meat catch by year.
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "MEAT_POUNDS",
-                date = "Date", 
+                species = "MEAT_KG",
+                date = "scallop_fishing_yearD", 
                 period = "year",
                 fun = "sum",
                 type = "line", format_lab = "decimal")
 
 catch_out$table %>% 
-  pretty_lab(cols = "MEAT_POUNDS") %>%
+  pretty_lab(cols = "MEAT_KG") %>%
   pretty_tab()
 
 catch_out$plot
@@ -2469,13 +2649,13 @@ Total meat catch by fleet.
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "MEAT_POUNDS",
+                species = "MEAT_KG",
                 group = "fleet",
                 fun = "sum",
                 type = "bar", format_lab = "decimal")
 
 catch_out$table %>% 
-  pretty_lab(cols = "MEAT_POUNDS") %>%
+  pretty_lab(cols = "MEAT_KG") %>%
   pretty_tab()
 
 catch_out$plot
@@ -2487,15 +2667,15 @@ Total meat catch by year and fleet.
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "MEAT_POUNDS",
-                date = "Date", 
+                species = "MEAT_KG",
+                date = "scallop_fishing_yearD", 
                 period = "year",
                 group = "fleet",
                 fun = "sum",
                 type = "line", format_lab = "decimal")
 
 catch_out$table %>% 
-  pretty_lab(cols = "MEAT_POUNDS") %>%
+  pretty_lab(cols = "MEAT_KG") %>%
   pretty_tab_sb(width = "40%")
 
 catch_out$plot
@@ -2507,13 +2687,13 @@ Average meat catch by year.
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "MEAT_POUNDS",
-                date = "Date", 
+                species = "MEAT_KG",
+                date = "scallop_fishing_yearD", 
                 period = "year",
                 fun = "mean", type = "line")
 
 catch_out$table %>% 
-  pretty_lab(cols = "MEAT_POUNDS") %>%
+  pretty_lab(cols = "MEAT_KG") %>%
   pretty_tab()
 
 catch_out$plot
@@ -2525,14 +2705,14 @@ Average meat catch by year and fleet.
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "MEAT_POUNDS",
-                date = "Date", 
+                species = "MEAT_KG",
+                date = "scallop_fishing_yearD", 
                 period = "year",
                 group = "fleet",
                 fun = "mean", type = "line")
 
 catch_out$table %>% 
-  pretty_lab(cols = "MEAT_POUNDS") %>%
+  pretty_lab(cols = "MEAT_KG") %>%
   pretty_tab_sb(width = "40%")
 
 catch_out$plot
@@ -2543,12 +2723,12 @@ Total meat catch by gearcode.
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "MEAT_POUNDS",
+                species = "MEAT_KG",
                 group = "GEARCODE",
                 fun = "sum", tran = "log")
 
 catch_out$table %>% 
-  pretty_lab(cols = "MEAT_POUNDS") %>%
+  pretty_lab(cols = "MEAT_KG") %>%
   pretty_tab()
 
 catch_out$plot
@@ -2560,12 +2740,12 @@ Average meat catch by gearcode.
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "MEAT_POUNDS",
+                species = "MEAT_KG",
                 group = "GEARCODE",
                 fun = "mean")
 
 catch_out$table %>% 
-  pretty_lab(cols = "MEAT_POUNDS") %>%
+  pretty_lab(cols = "MEAT_KG") %>%
   pretty_tab()
 
 catch_out$plot 
@@ -2577,7 +2757,7 @@ Total meat catch by Top 10 port and gearcode.
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "MEAT_POUNDS",
+                species = "MEAT_KG",
                 group = c("VTR_PORT", "GEARCODE"),
                 filter_by = "TOP_10_PORT",
                 filter_value = TRUE,
@@ -2585,7 +2765,7 @@ catch_out <-
                 format_lab = "scientific", tran = "log")
 
 catch_out$table %>% 
-  pivot_wider(names_from = GEARCODE, values_from = MEAT_POUNDS) %>% 
+  pivot_wider(names_from = GEARCODE, values_from = MEAT_KG) %>% 
   pretty_lab() %>%
   pretty_tab_sb() 
   
@@ -2594,6 +2774,496 @@ catch_out$plot + angled_theme()
 
 <br><br>
 
+
+
+
+## Scallop Revenue
+
+Total Scallop Revenue  by year. 
+```{r}
+catch_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "DOLLAR_2020",
+                date = "scallop_fishing_yearD", 
+                period = "year",
+                fun = "sum",
+                type = "line", format_lab = "decimal")
+
+catch_out$table %>% 
+  pretty_lab(cols = "DOLLAR_2020") %>%
+  pretty_tab()
+
+catch_out$plot
+```
+
+
+<br><br><br>
+
+Total Scallop Revenue by fleet. 
+```{r}
+catch_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "DOLLAR_2020",
+                group = "fleet",
+                fun = "sum",
+                type = "bar", format_lab = "decimal")
+
+catch_out$table %>% 
+  pretty_lab(cols = "DOLLAR_2020") %>%
+  pretty_tab()
+
+catch_out$plot
+```
+
+<br><br><br>
+
+Total Scallop Revenue by year and fleet. 
+```{r}
+catch_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "DOLLAR_2020",
+                date = "scallop_fishing_yearD", 
+                period = "year",
+                group = "fleet",
+                fun = "sum",
+                type = "line", format_lab = "decimal")
+
+catch_out$table %>% 
+  pretty_lab(cols = "DOLLAR_2020") %>%
+  pretty_tab_sb(width = "40%")
+
+catch_out$plot
+```
+
+<br><br><br>
+
+Average Scallop Revenue by year. 
+```{r}
+catch_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "DOLLAR_2020",
+                date = "scallop_fishing_yearD", 
+                period = "year",
+                fun = "mean", type = "line")
+
+catch_out$table %>% 
+  pretty_lab(cols = "DOLLAR_2020") %>%
+  pretty_tab()
+
+catch_out$plot
+```
+
+<br><br><br>
+
+Average Scallop Revenue by year and fleet. 
+```{r}
+catch_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "DOLLAR_2020",
+                date = "scallop_fishing_yearD", 
+                period = "year",
+                group = "fleet",
+                fun = "mean", type = "line")
+
+catch_out$table %>% 
+  pretty_lab(cols = "DOLLAR_2020") %>%
+  pretty_tab_sb(width = "40%")
+
+catch_out$plot
+```
+<br><br><br>
+
+Total Scallop Revenue by gearcode. 
+```{r}
+catch_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "DOLLAR_2020",
+                group = "GEARCODE",
+                fun = "sum", tran = "log")
+
+catch_out$table %>% 
+  pretty_lab(cols = "DOLLAR_2020") %>%
+  pretty_tab()
+
+catch_out$plot
+```
+
+<br><br><br>
+
+Average Scallop Revenue by gearcode. 
+```{r}
+catch_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "DOLLAR_2020",
+                group = "GEARCODE",
+                fun = "mean")
+
+catch_out$table %>% 
+  pretty_lab(cols = "DOLLAR_2020") %>%
+  pretty_tab()
+
+catch_out$plot 
+```
+
+<br><br><br>
+
+Total Scallop Revenue by Top 10 port and gearcode. 
+```{r}
+catch_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "DOLLAR_2020",
+                group = c("VTR_PORT", "GEARCODE"),
+                filter_by = "TOP_10_PORT",
+                filter_value = TRUE,
+                fun = "sum", type = "line",
+                format_lab = "scientific", tran = "log")
+
+catch_out$table %>% 
+  pivot_wider(names_from = GEARCODE, values_from = DOLLAR_2020) %>% 
+  pretty_lab() %>%
+  pretty_tab_sb() 
+  
+catch_out$plot + angled_theme()
+```
+
+<br><br>
+
+
+
+
+## Total Revenue All Species
+
+Total Revenue All Species  by year. 
+```{r}
+catch_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "DOLLAR_ALL_SP_2020",
+                date = "scallop_fishing_yearD", 
+                period = "year",
+                fun = "sum",
+                type = "line", format_lab = "decimal")
+
+catch_out$table %>% 
+  pretty_lab(cols = "DOLLAR_ALL_SP_2020") %>%
+  pretty_tab()
+
+catch_out$plot
+```
+
+
+<br><br><br>
+
+Total Revenue All Species by fleet. 
+```{r}
+catch_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "DOLLAR_ALL_SP_2020",
+                group = "fleet",
+                fun = "sum",
+                type = "bar", format_lab = "decimal")
+
+catch_out$table %>% 
+  pretty_lab(cols = "DOLLAR_ALL_SP_2020") %>%
+  pretty_tab()
+
+catch_out$plot
+```
+
+<br><br><br>
+
+Total Revenue All Species by year and fleet. 
+```{r}
+catch_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "DOLLAR_ALL_SP_2020",
+                date = "scallop_fishing_yearD", 
+                period = "year",
+                group = "fleet",
+                fun = "sum",
+                type = "line", format_lab = "decimal")
+
+catch_out$table %>% 
+  pretty_lab(cols = "DOLLAR_ALL_SP_2020") %>%
+  pretty_tab_sb(width = "40%")
+
+catch_out$plot
+```
+
+<br><br><br>
+
+Total Revenue All Species by year. 
+```{r}
+catch_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "DOLLAR_ALL_SP_2020",
+                date = "scallop_fishing_yearD", 
+                period = "year",
+                fun = "mean", type = "line")
+
+catch_out$table %>% 
+  pretty_lab(cols = "DOLLAR_ALL_SP_2020") %>%
+  pretty_tab()
+
+catch_out$plot
+```
+
+<br><br><br>
+
+Total Revenue All Species by year and fleet. 
+```{r}
+catch_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "DOLLAR_ALL_SP_2020",
+                date = "scallop_fishing_yearD", 
+                period = "year",
+                group = "fleet",
+                fun = "mean", type = "line")
+
+catch_out$table %>% 
+  pretty_lab(cols = "DOLLAR_ALL_SP_2020") %>%
+  pretty_tab_sb(width = "40%")
+
+catch_out$plot
+```
+<br><br><br>
+
+Total Revenue All Species by gearcode. 
+```{r}
+catch_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "DOLLAR_ALL_SP_2020",
+                group = "GEARCODE",
+                fun = "sum", tran = "log")
+
+catch_out$table %>% 
+  pretty_lab(cols = "DOLLAR_ALL_SP_2020") %>%
+  pretty_tab()
+
+catch_out$plot
+```
+
+<br><br><br>
+
+Total Revenue All Species by gearcode. 
+```{r}
+catch_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "DOLLAR_ALL_SP_2020",
+                group = "GEARCODE",
+                fun = "mean")
+
+catch_out$table %>% 
+  pretty_lab(cols = "DOLLAR_ALL_SP_2020") %>%
+  pretty_tab()
+
+catch_out$plot 
+```
+
+<br><br><br>
+
+Total Revenue All Species by Top 10 port and gearcode. 
+```{r}
+catch_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "DOLLAR_ALL_SP_2020",
+                group = c("VTR_PORT", "GEARCODE"),
+                filter_by = "TOP_10_PORT",
+                filter_value = TRUE,
+                fun = "sum", type = "line",
+                format_lab = "scientific", tran = "log")
+
+catch_out$table %>% 
+  pivot_wider(names_from = GEARCODE, values_from = DOLLAR_ALL_SP_2020) %>% 
+  pretty_lab() %>%
+  pretty_tab_sb() 
+  
+catch_out$plot + angled_theme()
+```
+
+<br><br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Operating Profit
+
+Operating Profit  by year. 
+```{r}
+catch_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "OPERATING_PROFIT_2020",
+                date = "scallop_fishing_yearD", 
+                period = "year",
+                fun = "sum",
+                type = "line", format_lab = "decimal")
+
+catch_out$table %>% 
+  pretty_lab(cols = "OPERATING_PROFIT_2020") %>%
+  pretty_tab()
+
+catch_out$plot
+```
+
+
+<br><br><br>
+
+Total Operating Profit by fleet. 
+```{r}
+catch_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "OPERATING_PROFIT_2020",
+                group = "fleet",
+                fun = "sum",
+                type = "bar", format_lab = "decimal")
+
+catch_out$table %>% 
+  pretty_lab(cols = "OPERATING_PROFIT_2020") %>%
+  pretty_tab()
+
+catch_out$plot
+```
+
+<br><br><br>
+
+Total Operating Profit by year and fleet. 
+```{r}
+catch_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "OPERATING_PROFIT_2020",
+                date = "scallop_fishing_yearD", 
+                period = "year",
+                group = "fleet",
+                fun = "sum",
+                type = "line", format_lab = "decimal")
+
+catch_out$table %>% 
+  pretty_lab(cols = "OPERATING_PROFIT_2020") %>%
+  pretty_tab_sb(width = "40%")
+
+catch_out$plot
+```
+
+<br><br><br>
+
+Average Operating Profit by year. 
+```{r}
+catch_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "OPERATING_PROFIT_2020",
+                date = "scallop_fishing_yearD", 
+                period = "year",
+                fun = "mean", type = "line")
+
+catch_out$table %>% 
+  pretty_lab(cols = "OPERATING_PROFIT_2020") %>%
+  pretty_tab()
+
+catch_out$plot
+```
+
+<br><br><br>
+
+Average Operating Profit by year and fleet. 
+```{r}
+catch_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "OPERATING_PROFIT_2020",
+                date = "scallop_fishing_yearD", 
+                period = "year",
+                group = "fleet",
+                fun = "mean", type = "line")
+
+catch_out$table %>% 
+  pretty_lab(cols = "OPERATING_PROFIT_2020") %>%
+  pretty_tab_sb(width = "40%")
+
+catch_out$plot
+```
+<br><br><br>
+
+Total Operating Profit by gearcode. 
+```{r}
+catch_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "OPERATING_PROFIT_2020",
+                group = "GEARCODE",
+                fun = "sum", tran = "log")
+
+catch_out$table %>% 
+  pretty_lab(cols = "OPERATING_PROFIT_2020") %>%
+  pretty_tab()
+
+catch_out$plot
+```
+
+<br><br><br>
+
+Average Operating Profit by gearcode. 
+```{r}
+catch_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "OPERATING_PROFIT_2020",
+                group = "GEARCODE",
+                fun = "mean")
+
+catch_out$table %>% 
+  pretty_lab(cols = "OPERATING_PROFIT_2020") %>%
+  pretty_tab()
+
+catch_out$plot 
+```
+
+<br><br><br>
+
+Total Operating Profit by Top 10 port and gearcode. 
+```{r}
+catch_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "OPERATING_PROFIT_2020",
+                group = c("VTR_PORT", "GEARCODE"),
+                filter_by = "TOP_10_PORT",
+                filter_value = TRUE,
+                fun = "sum", type = "line",
+                format_lab = "scientific", tran = "log")
+
+catch_out$table %>% 
+  pivot_wider(names_from = GEARCODE, values_from = OPERATING_PROFIT_2020) %>% 
+  pretty_lab() %>%
+  pretty_tab_sb() 
+  
+catch_out$plot + angled_theme()
+```
+
+<br><br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## CPUE 
 
 Average CPUE by year.
@@ -2601,7 +3271,7 @@ Average CPUE by year.
 cpue_out <- 
   species_catch(scallop0322MainDataTable, project,
                 species = "CPUE",
-                date = "Date", 
+                date = "scallop_fishing_yearD", 
                 period = "year",
                 fun = "mean", type = "line")
 
@@ -2618,7 +3288,7 @@ Average CPUE by year and fleet.
 cpue_out <- 
   species_catch(scallop0322MainDataTable, project,
                 species = "CPUE",
-                date = "Date", 
+                date = "scallop_fishing_yearD", 
                 period = "year",
                 group = "fleet",
                 fun = "mean", type = "line")
@@ -2656,7 +3326,7 @@ cpue_out <-
   species_catch(scallop0322MainDataTable, project,
                 species = "CPUE",
                 group = "GEARCODE",
-                date = "Date", 
+                date = "scallop_fishing_yearD", 
                 period = "year",
                 fun = "mean", type = "line")
 
@@ -2697,7 +3367,7 @@ cpue_out <-
                 group = "VTR_PORT",
                 filter_by = "TOP_10_PORT",
                 filter_value = TRUE,
-                date = "Date", 
+                date = "scallop_fishing_yearD", 
                 period = "year",
                 fun = "mean", type = "line")
 
@@ -2718,7 +3388,7 @@ Average VPUE by year.
 vpue_out <- 
   species_catch(scallop0322MainDataTable, project,
                 species = "VPUE",
-                date = "Date", 
+                date = "scallop_fishing_yearD", 
                 period = "year",
                 fun = "mean", type = "line")
 
@@ -2735,7 +3405,7 @@ Average VPUE by year and fleet.
 vpue_out <- 
   species_catch(scallop0322MainDataTable, project,
                 species = "VPUE",
-                date = "Date", 
+                date = "scallop_fishing_yearD", 
                 period = "year",
                 group = "fleet",
                 fun = "mean", type = "line")
@@ -2772,7 +3442,7 @@ vpue_out <-
   species_catch(scallop0322MainDataTable, project,
                 species = "VPUE",
                 group = "GEARCODE",
-                date = "Date", 
+                date = "scallop_fishing_yearD", 
                 period = "year",
                 fun = "mean", type = "line")
 
@@ -2814,7 +3484,7 @@ vpue_out <-
                 group = "VTR_PORT",
                 filter_by = "TOP_10_PORT",
                 filter_value = TRUE,
-                date = "Date", 
+                date = "scallop_fishing_yearD", 
                 period = "year",
                 fun = "mean", type = "line")
 
@@ -2831,11 +3501,11 @@ vpue_out$plot
 ## Distributions
 
 
-### MEAT_POUNDS
+### MEAT_KG
 KDE, ECDF, and CDF of meat catch. 
 ```{r}
 density_plot(scallop0322MainDataTable, project,
-             var = "MEAT_POUNDS", 
+             var = "MEAT_KG", 
              type = "all", tran = "log")
 ```
 
@@ -2844,7 +3514,7 @@ density_plot(scallop0322MainDataTable, project,
 KDE, ECDF, and CDF of meat catch by fleet. 
 ```{r}
 density_plot(scallop0322MainDataTable, project,
-             var = "MEAT_POUNDS",
+             var = "MEAT_KG",
              group = "fleet", position = "stack", 
              type = "all", tran = "log", pages = "multi")
 ```
@@ -2854,18 +3524,18 @@ density_plot(scallop0322MainDataTable, project,
 KDE of meat catch by year.
 ```{r}
 density_plot(scallop0322MainDataTable, project,
-             var = "MEAT_POUNDS", 
-             facet_by = "DB_LANDING_YEAR",
-             filter_by = "DB_LANDING_YEAR",
+             var = "MEAT_KG", 
+             facet_by = "scallop_fishing_year",
+             filter_by = "scallop_fishing_year",
              filter_value = 2007:2013,
              type = "kde", bw = 1.5, 
              tran = "log", scale = "free_y")  + 
   angled_theme()
 
 density_plot(scallop0322MainDataTable, project,
-             var = "MEAT_POUNDS", 
-             facet_by = "DB_LANDING_YEAR",
-             filter_by = "DB_LANDING_YEAR",
+             var = "MEAT_KG", 
+             facet_by = "scallop_fishing_year",
+             filter_by = "scallop_fishing_year",
              filter_value = 2014:2019,
              type = "kde", bw = 1.5, 
              tran = "log", scale = "free_y")  + 
@@ -2877,7 +3547,7 @@ density_plot(scallop0322MainDataTable, project,
 KDE of meat catch by gearcode. 
 ```{r}
 density_plot(scallop0322MainDataTable, project,
-             var = "MEAT_POUNDS", 
+             var = "MEAT_KG", 
              group = "GEARCODE", position = "stack",
              type = "kde", tran = "log", bw = 1.5)
 ```
@@ -2887,7 +3557,7 @@ density_plot(scallop0322MainDataTable, project,
 ECDF of meat catch by gear. 
 ```{r}
 density_plot(scallop0322MainDataTable, project,
-             var = "MEAT_POUNDS", 
+             var = "MEAT_KG", 
              group = "GEARCODE", position = "stack",
              type = "ecdf", tran = "log")
 ```
@@ -2898,7 +3568,7 @@ KDE of meat catch by top 10 port.
 
 ```{r}
 density_plot(scallop0322MainDataTable, project,
-             var = "MEAT_POUNDS", 
+             var = "MEAT_KG", 
              facet_by = "VTR_PORT",
              filter_by = "TOP_10_PORT",
              filter_value = TRUE,
@@ -2924,8 +3594,8 @@ KDE of trip length by year.
 ```{r}
 density_plot(scallop0322MainDataTable, project,
              var = "TRIP_LENGTH", 
-             facet_by = "DB_LANDING_YEAR",
-             filter_by = "DB_LANDING_YEAR",
+             facet_by = "scallop_fishing_year",
+             filter_by = "scallop_fishing_year",
              filter_value = 2007:2013,
              type = "kde", bw = 1.5, 
              tran = "log", scale = "free_y")  + 
@@ -2933,8 +3603,8 @@ density_plot(scallop0322MainDataTable, project,
 
 density_plot(scallop0322MainDataTable, project,
              var = "TRIP_LENGTH", 
-             facet_by = "DB_LANDING_YEAR",
-             filter_by = "DB_LANDING_YEAR",
+             facet_by = "scallop_fishing_year",
+             filter_by = "scallop_fishing_year",
              filter_value = 2014:2019,
              type = "kde", bw = 1.5, 
              tran = "log", scale = "free_y")  + 
@@ -2998,8 +3668,8 @@ KDE of CPUE by year.
 ```{r}
 density_plot(scallop0322MainDataTable, project,
              var = "CPUE", 
-             facet_by = "DB_LANDING_YEAR",
-             filter_by = "DB_LANDING_YEAR",
+             facet_by = "scallop_fishing_year",
+             filter_by = "scallop_fishing_year",
              filter_value = 2007:2013,
              type = "kde", bw = 1.5, 
              tran = "log", scale = "free_y")  + 
@@ -3007,8 +3677,8 @@ density_plot(scallop0322MainDataTable, project,
 
 density_plot(scallop0322MainDataTable, project,
              var = "CPUE", 
-             facet_by = "DB_LANDING_YEAR",
-             filter_by = "DB_LANDING_YEAR",
+             facet_by = "scallop_fishing_year",
+             filter_by = "scallop_fishing_year",
              filter_value = 2014:2019,
              type = "kde", bw = 1.5, 
              tran = "log", scale = "free_y")  + 
@@ -3084,8 +3754,8 @@ KDE of VPUE by year.
 ```{r}
 density_plot(scallop0322MainDataTable, project,
              var = "VPUE", 
-             facet_by = "DB_LANDING_YEAR",
-             filter_by = "DB_LANDING_YEAR",
+             facet_by = "scallop_fishing_year",
+             filter_by = "scallop_fishing_year",
              filter_value = 2007:2013,
              type = "kde", bw = 1.5, 
              tran = "log", scale = "free_y")  + 
@@ -3093,8 +3763,8 @@ density_plot(scallop0322MainDataTable, project,
 
 density_plot(scallop0322MainDataTable, project,
              var = "VPUE", 
-             facet_by = "DB_LANDING_YEAR",
-             filter_by = "DB_LANDING_YEAR",
+             facet_by = "scallop_fishing_year",
+             filter_by = "scallop_fishing_year",
              filter_value = 2014:2019,
              type = "kde", bw = 1.5, 
              tran = "log", scale = "free_y")  + 
