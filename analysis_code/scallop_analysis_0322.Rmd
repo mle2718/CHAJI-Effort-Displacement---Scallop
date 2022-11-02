@@ -317,7 +317,7 @@ scallop0322MainDataTable$OPERATING_PROFIT <-
 
 
 scallop0322MainDataTable$OPERATING_PROFIT_2020 <- 
-  (scallop0322MainDataTable$DOLLAR_ALL_SP_2020 - scallop0322MainDataTable$TRIP_COST_2020DOLS_WINSOR)
+  (scallop0322MainDataTable$DOLLAR_ALL_SP_2020 - scallop0322MainDataTable$TRIP_COST_WINSOR_2020_DOL)
 
 
 ```
@@ -2224,7 +2224,7 @@ outlier_plot(scallop0322MainDataTable, project,
 
 ```{r}
 outlier_table(scallop0322MainDataTable, project,
-              x = "TRIP_COST_2020DOLS") %>% 
+              x = "TRIP_COST_2020_DOL") %>% 
   pretty_lab() %>% 
   pretty_tab()
 ```
@@ -2233,7 +2233,7 @@ outlier_table(scallop0322MainDataTable, project,
 
 ```{r}
 outlier_plot(scallop0322MainDataTable, project,
-             x = "TRIP_COST_2020DOLS", 
+             x = "TRIP_COST_2020_DOL", 
              dat.remove = "none",
              x.dist = "normal",
              output.screen = TRUE)
@@ -2242,7 +2242,7 @@ outlier_plot(scallop0322MainDataTable, project,
 
 ```{r}
 outlier_plot(scallop0322MainDataTable, project,
-             x = "TRIP_COST_2020DOLS", 
+             x = "TRIP_COST_2020_DOL", 
              dat.remove = "mean_3SD",
              x.dist = "normal",
              output.screen = TRUE)
@@ -2250,12 +2250,12 @@ outlier_plot(scallop0322MainDataTable, project,
 
 <br><br>
 
-### TRIP_COST_2020DOLS_WINSOR
+### TRIP_COST_WINSOR_2020_DOL
 
 
 ```{r}
 outlier_table(scallop0322MainDataTable, project,
-              x = "TRIP_COST_2020DOLS_WINSOR") %>% 
+              x = "TRIP_COST_WINSOR_2020_DOL") %>% 
   pretty_lab() %>% 
   pretty_tab()
 ```
@@ -2264,7 +2264,7 @@ outlier_table(scallop0322MainDataTable, project,
 
 ```{r}
 outlier_plot(scallop0322MainDataTable, project,
-             x = "TRIP_COST_2020DOLS_WINSOR", 
+             x = "TRIP_COST_WINSOR_2020_DOL", 
              dat.remove = "none",
              x.dist = "normal",
              output.screen = TRUE)
@@ -2273,7 +2273,7 @@ outlier_plot(scallop0322MainDataTable, project,
 
 ```{r}
 outlier_plot(scallop0322MainDataTable, project,
-             x = "TRIP_COST_2020DOLS_WINSOR", 
+             x = "TRIP_COST_WINSOR_2020_DOL", 
              dat.remove = "mean_3SD",
              x.dist = "normal",
              output.screen = TRUE)
@@ -2367,7 +2367,7 @@ temp_plot(scallop0322MainDataTable, project,
 
 ```{r}
 temp_plot(scallop0322MainDataTable, project,
-          var.select = "TRIP_COST_2020DOLS",
+          var.select = "TRIP_COST_2020_DOL",
           len.fun = "percent",
           agg.fun = "sum",
           date.var = "scallop_fishing_yearD")
@@ -2377,7 +2377,7 @@ temp_plot(scallop0322MainDataTable, project,
 
 ```{r}
 temp_plot(scallop0322MainDataTable, project,
-          var.select = "TRIP_COST_2020DOLS_WINSOR",
+          var.select = "TRIP_COST_WINSOR_2020_DOL",
           len.fun = "percent",
           agg.fun = "sum",
           date.var = "scallop_fishing_yearD")
@@ -2422,7 +2422,7 @@ xy_plot(scallop0322MainDataTable, project,
 Trip length by trip cost.
 ```{r}
 xy_plot(scallop0322MainDataTable, project,
-        var1 = "TRIP_LENGTH", var2 = "TRIP_COST_2020DOLS",
+        var1 = "TRIP_LENGTH", var2 = "TRIP_COST_2020_DOL",
         regress = FALSE)
 ```
 
@@ -2432,7 +2432,7 @@ xy_plot(scallop0322MainDataTable, project,
 Trip length by trip cost (Winsor).
 ```{r}
 xy_plot(scallop0322MainDataTable, project,
-        var1 = "TRIP_LENGTH", var2 = "TRIP_COST_2020DOLS_WINSOR",
+        var1 = "TRIP_LENGTH", var2 = "TRIP_COST_WINSOR_2020_DOL",
         regress = FALSE)
 ```
 
@@ -3822,7 +3822,7 @@ density_plot(scallop0322MainDataTable, project,
 KDE and ECDF of trip cost. 
 ```{r}
 density_plot(scallop0322MainDataTable, project,
-             var = "TRIP_COST_2020DOLS", 
+             var = "TRIP_COST_2020_DOL", 
              type = c("kde", "ecdf"), tran = "log", 
              pages = "multi")
 ```
@@ -3832,7 +3832,7 @@ density_plot(scallop0322MainDataTable, project,
 KDE of trip cost by year. 
 ```{r}
 density_plot(scallop0322MainDataTable, project,
-             var = "TRIP_COST_2020DOLS", 
+             var = "TRIP_COST_2020_DOL", 
              facet_by = "DB_LANDING_YEAR",
              type = "kde", tran = "log") + angled_theme()
 ```
@@ -3842,7 +3842,7 @@ density_plot(scallop0322MainDataTable, project,
 KDE, ECDF, and CDF of trip cost by fleet. 
 ```{r}
 density_plot(scallop0322MainDataTable, project,
-             var = "TRIP_COST_2020DOLS", 
+             var = "TRIP_COST_2020_DOL", 
              group = "fleet",
              type = "all", tran = "log", 
              pages = "multi", position = "stack")
@@ -3853,7 +3853,7 @@ density_plot(scallop0322MainDataTable, project,
 KDE and ECDF of trip cost by gear. 
 ```{r}
 density_plot(scallop0322MainDataTable, project,
-             var = "TRIP_COST_2020DOLS", 
+             var = "TRIP_COST_2020_DOL", 
              group = "GEARCODE",
              type = c("kde", "ecdf"), tran = "log", 
              position = "stack",  pages = "multi")
@@ -3862,12 +3862,12 @@ density_plot(scallop0322MainDataTable, project,
 
 <br><br>
 
-### TRIP_COST_2020DOLS_WINSOR
+### TRIP_COST_WINSOR_2020_DOL
 
 KDE and ECDF of trip cost (Winsor). 
 ```{r}
 density_plot(scallop0322MainDataTable, project,
-             var = "TRIP_COST_2020DOLS_WINSOR", 
+             var = "TRIP_COST_WINSOR_2020_DOL", 
              type = c("kde", "ecdf"), tran = "log", 
              pages = "multi")
 ```
@@ -3877,7 +3877,7 @@ density_plot(scallop0322MainDataTable, project,
 KDE of trip cost by year (Winsor). 
 ```{r}
 density_plot(scallop0322MainDataTable, project,
-             var = "TRIP_COST_2020DOLS_WINSOR", 
+             var = "TRIP_COST_WINSOR_2020_DOL", 
              facet_by = "DB_LANDING_YEAR",
              type = "kde", tran = "log") + angled_theme()
 ```
@@ -3887,7 +3887,7 @@ density_plot(scallop0322MainDataTable, project,
 KDE, ECDF, and CDF of trip cost by fleet (Winsor). 
 ```{r}
 density_plot(scallop0322MainDataTable, project,
-             var = "TRIP_COST_2020DOLS_WINSOR", 
+             var = "TRIP_COST_WINSOR_2020_DOL", 
              group = "fleet",
              type = "all", tran = "log", 
              pages = "multi", position = "stack")
@@ -3898,7 +3898,7 @@ density_plot(scallop0322MainDataTable, project,
 KDE and ECDF of trip cost by gear (Winsor). 
 ```{r}
 density_plot(scallop0322MainDataTable, project,
-             var = "TRIP_COST_2020DOLS_WINSOR", 
+             var = "TRIP_COST_WINSOR_2020_DOL", 
              group = "GEARCODE",
              type = c("kde", "ecdf"), tran = "log", 
              position = "stack",  pages = "multi")
