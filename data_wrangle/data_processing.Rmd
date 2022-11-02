@@ -102,7 +102,8 @@ net<-network_location_remote
 # These are not part of the project path
 offshoreWind_directory<-file.path(net,"home5", "dcorvi","OffshoreWind","offshoreWind4","data")
 spacepanels_directory<-file.path(net,"home2", "mlee","dropoff","wind")
-cost_directory<-file.path(net,"work5","socialsci","Trip_Costs","2007-2020")
+cost_directory1<-file.path(net,"work5","socialsci","Trip_Costs","2000-2009")
+cost_directory2<-file.path(net,"work5","socialsci","Trip_Costs","2010-2021")
 
 # Set up paths.
 East_Cst_crop_2020_path<- here("data","external","shapefiles","East_Cst_crop_2020_extended")
@@ -365,7 +366,7 @@ group_by("YEAR") %>%
 
 # Converting Revenues to Real Dollars 
 
-In order to construct operating profits later on we need to ensure that DOLLAR and TRIP_COST_WINSOR_2020_DOL match. The original data set has DOLLAR in nominal dollars and TRIP_COST_WINSOR_2020_DOL is in 2020 Real Dollars. To make the conversion we will use GDP Implicit Price Deflators collected from the Federal Reserve Bank and adjust the index to Q2 2020 to match calculation methods of the TRIP_COST_WINSOR_2020_DOL variable. 
+Revenues (DOLLAR) are nominal.  Trip costs are now provided in nominal terms.  However, we need Real values to compare across time. This code pull deflators st. louis federal reserve.
 
 ```{r obtain and set fred API key, echo=TRUE}
 
@@ -428,7 +429,9 @@ VTR_DMIS_AC <- VTR_DMIS_AC %>%
                          with_year = TRUE)) %>%
                          left_join(deflators, by =c("qdate"="date")) %>%
                mutate(DOLLAR_ALL_SP_2020=DOLLAR_ALL_SP/value,
-                      DOLLAR_2020=DOLLAR/value)
+                      DOLLAR_2020=DOLLAR/value,
+                      TRIP_COST_WINSOR_2020_DOL=TRIP_COST_NOMINALDOLS_WINSOR/value,
+                      TRIP_COST_2020_DOL=TRIP_COST_NOMINALDOLS/value)
 
 
 # Delete unnecessary data frame and variable
