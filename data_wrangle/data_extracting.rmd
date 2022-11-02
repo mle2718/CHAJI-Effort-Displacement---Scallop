@@ -34,6 +34,8 @@ library("tibble")
 vintage_string<-Sys.Date()
 vintage_string<-gsub("-","_",vintage_string)
 
+
+extract_switch<-params$extract_switch
 ```
 
 # Organization
