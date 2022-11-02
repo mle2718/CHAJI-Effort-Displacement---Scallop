@@ -3833,7 +3833,7 @@ KDE of trip cost by year.
 ```{r}
 density_plot(scallop0322MainDataTable, project,
              var = "TRIP_COST_2020_DOL", 
-             facet_by = "DB_LANDING_YEAR",
+             facet_by = "scallop_fishing_year",
              type = "kde", tran = "log") + angled_theme()
 ```
 
@@ -3878,7 +3878,7 @@ KDE of trip cost by year (Winsor).
 ```{r}
 density_plot(scallop0322MainDataTable, project,
              var = "TRIP_COST_WINSOR_2020_DOL", 
-             facet_by = "DB_LANDING_YEAR",
+             facet_by = "scallop_fishing_year",
              type = "kde", tran = "log") + angled_theme()
 ```
 
