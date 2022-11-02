@@ -311,7 +311,11 @@ stopifnot(sum(duplicated(scallop0322MainDataTable$TRIPID))==0)
 
 ```{r calculate operating profit, echo=TRUE, eval=TRUE}
 
-#Calculate operating profit by subtracting 2020 trip costs from aggregated revenues in 2020 dollars.  
+#Calculate operating profit by subtracting nominal trip costs from nominal aggregated revenues. Then deal with real. 
+scallop0322MainDataTable$OPERATING_PROFIT <- 
+  (scallop0322MainDataTable$DOLLAR_ALL_SP - scallop0322MainDataTable$TRIP_COST_NOMINALDOLS_WINSOR)
+
+
 scallop0322MainDataTable$OPERATING_PROFIT_2020 <- 
   (scallop0322MainDataTable$DOLLAR_ALL_SP_2020 - scallop0322MainDataTable$TRIP_COST_WINSOR_2020_DOL)
 
@@ -3829,7 +3833,7 @@ KDE of trip cost by year.
 ```{r}
 density_plot(scallop0322MainDataTable, project,
              var = "TRIP_COST_2020_DOL", 
-             facet_by = "scallop_fishing_year",
+             facet_by = "DB_LANDING_YEAR",
              type = "kde", tran = "log") + angled_theme()
 ```
 
@@ -3874,7 +3878,7 @@ KDE of trip cost by year (Winsor).
 ```{r}
 density_plot(scallop0322MainDataTable, project,
              var = "TRIP_COST_WINSOR_2020_DOL", 
-             facet_by = "scallop_fishing_year",
+             facet_by = "DB_LANDING_YEAR",
              type = "kde", tran = "log") + angled_theme()
 ```
 
