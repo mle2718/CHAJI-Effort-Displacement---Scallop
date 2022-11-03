@@ -6,9 +6,6 @@ output:
   pdf_document: default
   html_document: default
 urlcolor: blue
-params:
-    extract_switch: TRUE
-    LIVE_DMIS: TRUE
 
 ---
 
@@ -34,8 +31,12 @@ library("tibble")
 vintage_string<-Sys.Date()
 vintage_string<-gsub("-","_",vintage_string)
 
+DMIS_STYLE <-"live"
+#DMIS_STYLE may be "live", "frozen_GARFO", or "none".  Running the code with DMIS_STYLE="frozen_GARFO" takes a very long time to pull data from the servers.
+VTR_extract_switch<-TRUE
+scallop_linking_extract_switch<-TRUE
 
-extract_switch<-params$extract_switch
+
 ```
 
 # Organization
@@ -266,33 +267,6 @@ cat(tabl)
 
 
 
-
-
-
-# Load Offshore Wind Tool Data sets 
-
-The frozen DMIS table from the offshoreWind project (APSD_DMIS_2) is the base dataset for the analysis.  The DMIS data are formed by combining many datasets, including VTR and Dealer.  In brief, the APSD_DMIS_2 dataset contains a mix of trip attributes (port, date),  sub-trip attributes (gear, location) , and catch outcomes (species, pounds, landed, dollar).  You can read more about DMIS [here](https://github.com/NEFSC/READ-SSB-Lee-metadata/blob/master/DMIS.md).
-
-
-```{r Data Set Loading, echo=TRUE, results=FALSE,eval=TRUE}
-
-if (params$LIVE_DMIS==FALSE){
-  load(file.path(offshoreWind_directory, "APSD_DMIS_2.rda"))
-  APSD_DMIS_2$dbsource="frozen"
-} else if(params$LIVE_DMIS==TRUE){
-oracle_server = "sole"
-ODBC.CONNECTION <- RODBC::odbcConnect(dsn=oracle_server, uid=oracle_username, pwd=oracle_password, believeNRows=FALSE)
-CURRENT.QUERY = paste ("select * FROM APSD.DMIS_WIND_TEST@garfo_nefsc")
-APSD_DMIS_2 = sqlQuery(ODBC.CONNECTION, CURRENT.QUERY)
-odbcCloseAll()
-
-APSD_DMIS_2$dbsource<-paste0("live_",vintage_string)
-}
-
-```
-
-
-
 # Read in Port lats and lons  
 
 Load in the lats and lons of all ports from the spacepanels directory. Change the column names to clarify that the lat-lons are the ports. Join this to the APSD_DMIS_2 dataset, keeping all rows of the APSD_DMIS_2 dataset and dropping any rows from tripids_geoids that do not match.
@@ -308,13 +282,69 @@ tripid_geoids<-tripid_geoids[c("tripid","geoid", "namelsad", "state_fips","port_
 #cbind the two together
 tripid_geoids<-cbind(tripid_geoids,prev)
 
-APSD_DMIS_2<-merge(APSD_DMIS_2,tripid_geoids, by.x="DOCID", by.y="tripid", all.x=TRUE, all.y=FALSE)
+```
 
+
+
+
+# Load Offshore Wind Tool Data sets 
+
+The frozen DMIS table from the offshoreWind project (APSD_DMIS_2) is the base dataset for the analysis.  The DMIS data are formed by combining many datasets, including VTR and Dealer.  In brief, the APSD_DMIS_2 dataset contains a mix of trip attributes (port, date),  sub-trip attributes (gear, location) , and catch outcomes (species, pounds, landed, dollar).  You can read more about DMIS [here](https://github.com/NEFSC/READ-SSB-Lee-metadata/blob/master/DMIS.md).
+
+
+```{r Data Set Loading, echo=TRUE, results=FALSE,eval=TRUE}
+
+if (DMIS_STYLE=="frozen_GARFO"){
+  load(file.path(offshoreWind_directory, "APSD_DMIS_2.rda"))
+  APSD_DMIS_2$dbsource="frozen_GARFO"
+} else if(DMIS_STYLE=="live"){
+oracle_server = "sole"
+ODBC.CONNECTION <- RODBC::odbcConnect(dsn=oracle_server, uid=oracle_username, pwd=oracle_password, believeNRows=FALSE)
+CURRENT.QUERY = paste ("select * FROM APSD.DMIS_WIND_TEST@garfo_nefsc")
+APSD_DMIS_2 = sqlQuery(ODBC.CONNECTION, CURRENT.QUERY)
+odbcCloseAll()
+
+APSD_DMIS_2$dbsource<-paste0("live_",vintage_string)
+} else if(DMIS_STYLE=="none"){
+# Do nothing
+}
+
+if (DMIS_STYLE=="frozen_GARFO" | DMIS_STYLE=="live"){
+APSD_DMIS_2<-merge(APSD_DMIS_2,tripid_geoids, by.x="DOCID", by.y="tripid", all.x=TRUE, all.y=FALSE)
 #save to RDS
 APSD_DMIS_2_name <-paste0("APSD_DMIS_2_",vintage_string,".Rds")
 saveRDS(APSD_DMIS_2, file=here("data","intermediate", APSD_DMIS_2_name))
+}else if(DMIS_STYLE=="none"){
+# Do nothing
+}
+
+
+if(DMIS_STYLE=="none"){
+# Do nothing
+} else {
+  if (DMIS_STYLE=="frozen_GARFO"){
+    load(file.path(offshoreWind_directory, "APSD_DMIS_2.rda"))
+    APSD_DMIS_2$dbsource="frozen_GARFO"
+  } else if(DMIS_STYLE=="live"){
+    oracle_server = "sole"
+    ODBC.CONNECTION <- RODBC::odbcConnect(dsn=oracle_server, uid=oracle_username, pwd=oracle_password, believeNRows=FALSE)
+    CURRENT.QUERY = paste ("select * FROM APSD.DMIS_WIND_TEST@garfo_nefsc")
+    APSD_DMIS_2 = sqlQuery(ODBC.CONNECTION, CURRENT.QUERY)
+    odbcCloseAll()
+    
+    APSD_DMIS_2$dbsource<-paste0("live_",vintage_string)
+}
+  
+  # Merge and save to RDS
+  APSD_DMIS_2<-merge(APSD_DMIS_2,tripid_geoids, by.x="DOCID", by.y="tripid", all.x=TRUE, all.y=FALSE)
+  #save to RDS
+  APSD_DMIS_2_name <-paste0("APSD_DMIS_2_",vintage_string,".Rds")
+  saveRDS(APSD_DMIS_2, file=here("data","intermediate", APSD_DMIS_2_name))
+}
 
 ```
+
+
 This match should be pretty good for source=DMIS. But it will not work for source=SFCLAM.
 
 # Loading Data fom Oracle 
@@ -325,7 +355,7 @@ The APSD_DMIS_2 table must be supplemented with additional data.  This section q
 
 Some Trip-level data in the VTR schema is needed. See table at the top.  We extract them here. 
 
-```{r VTR_Query, echo=TRUE, results=FALSE,eval=extract_switch}
+```{r VTR_Query, echo=TRUE, results=FALSE,eval=VTR_extract_switch}
 
 
 
@@ -359,7 +389,7 @@ saveRDS(RESULT.COMPILED, file=here("data","intermediate",RESULT.COMPILED_name))
 We also extract the activity code from DMIS.  This will describe the type of trip that the vessel has declared into.  The most important types of trips will be Scallop Trips; however, fishing vessels with the proper permits are allowed to retain scallops while declared into other fisheries.  When this happens, the volume of scallops will be much lower.
 
 We  also extract the T/F variables corresponding the the PLAN_CAT in DMIS.  
-```{r DMIS_Query, echo=TRUE,eval=extract_switch}
+```{r DMIS_Query, echo=TRUE,eval=scallop_linking_extract_switch}
  
 oracle_server = "sole"
 CURRENT.QUERY = paste ("SELECT TRIP_ID, DOCID, ACTIVITY_CODE, DAS_ID, LGC_A, LGC_B, LGC_C, SC_2, SC_3, SC_4, SC_5, SC_6, SC_7, SC_8, SC_9, SG_1A, SG_1B
@@ -382,7 +412,7 @@ saveRDS(Scallop_Linkingorg, file=here("data","intermediate",Scallop_Linkingorg_n
 # Add in cost data 
 
 These data should reference the  "Estimation of Commercial Fishing Trip Costs Using Sea Sampling Data" paper by Samantha Werner & Geret DePiper.  We will likely use the Winsorized trip cost estimates.
-```{r merge_cost_data, echo=TRUE, eval=extract_switch}
+```{r merge_cost_data, echo=TRUE, eval=TRUE}
 #Import Data
 Cost_Part1 <- read_excel(file.path(cost_directory1,"2000_2009_Commercial_Fishing_Trip_Costs.xlsx"))
 Cost_Part2 <- read_excel(file.path(cost_directory2,"2010_2021_Commercial_Fishing_Trip_Costs.xlsx"))
