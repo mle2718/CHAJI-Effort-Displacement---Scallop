@@ -36,7 +36,6 @@ library("epiDisplay")
 library("fredr")
 vintage_string<-Sys.Date()
 vintage_string<-gsub("-","_",vintage_string)
-
 ```
 
 ```{r reset_vintage_string, include=TRUE, echo=TRUE, results=FALSE}
@@ -48,6 +47,29 @@ datasets_list<-gsub(".csv","",datasets_list)
 vintage_string<-max(datasets_list)
 rm(datasets_list)
 ```
+
+
+```{r shortcut_dmis, include=TRUE, echo=TRUE, eval=FALSE}
+##### copy over a frozen DMIS table from a location on the network.
+
+# Pick the most recent APSD_DMIS2 file. 
+mlee_data_vintage<-list.files(path=file.path(net,"home2","mlee","Effort-Displacement---Scallop","data","intermediate"), pattern="APSD_DMIS_2_")
+mlee_data_vintage<-gsub("APSD_DMIS_2_","",mlee_data_vintage )
+mlee_data_vintage<-gsub(".Rds","",mlee_data_vintage)
+mlee_data_vintage<-gsub(".csv","",mlee_data_vintage)
+mlee_data_vintage<-max(mlee_data_vintage)
+
+APSD_static_nefsc<-file.path("net","home2","mlee","Effort-Displacement---Scallop","data","intermediate",paste0("APSD_DMIS_2_",mlee_data_vintage, ".Rds"))
+
+# Copy it over to the current directory. Note that the vintage string is rewritten here, which is a little sketchy.
+destination<-here("data","intermediate",paste0("APSD_DMIS_2_",vintage_string,".Rds")
+                  
+file.copy(APSD_static_nefsc,destination) , overwrite=FALSE)
+
+
+```
+
+
 
 We will:
 
@@ -118,6 +140,7 @@ All_Lease_Areas_Shapefile_path<-here("data","external","shapefiles","All_Lease_A
 
 Scallop_Linkingorg <- readRDS(here("data","intermediate",paste0("Scallop_Linkingorg_",vintage_string,".Rds")))
 RESULT_COMPILED <- readRDS(here("data","intermediate",paste0("RESULT_COMPILED_",vintage_string,".Rds")))
+
 APSD_DMIS_2 <- readRDS(here("data","intermediate",paste0("APSD_DMIS_2_",vintage_string,".Rds")))
 all_yrs_costs <- readRDS(here("data","intermediate",paste0("all_yrs_costs_",vintage_string,".Rds")))
 
@@ -236,7 +259,7 @@ APSD_DMIS_2<-APSD_DMIS_2 %>%
 # FROZEN DMIS table has SPPNAME, but live DMIS table does not. USE NESPP3=800 to filter instead
 type<-strsplit(APSD_DMIS_2$dbsource[1],"_")[[1]][1]
 
-if(type=="frozen"){
+if(type=="frozen_GARFO"){
   Scallops <- APSD_DMIS_2 %>% 
     filter (SPPNAME == "SCALLOPS/BUSHEL")
 }else if(type=="live"){
