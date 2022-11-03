@@ -161,7 +161,7 @@ data folder.
 
 # loads lease area combined w/ cable routes (saved locally) created from
 # data_wrangle/combine_cable_routes.Rmd
-lease_filepath <- here("data", "main", "spatial", "wind_sf_final.RDS")
+lease_filepath <- here("data", "main", "spatial", "wind_sf_nocable.RDS")
 
 load_spatial(lease_filepath, name = "WindClose", over_write = TRUE, project,
              data.type = "RDS")
