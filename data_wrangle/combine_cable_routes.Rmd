@@ -261,5 +261,9 @@ view_spat(wind_sf_final, id = "NAME")
 lease_dirpath <- here("data", "main", "spatial")
 dir.create(lease_dirpath, showWarnings=FALSE)
 saveRDS(wind_sf_final,file=file.path(lease_dirpath,"wind_sf_final.RDS"))
+
+saveRDS(wind_sf,file=file.path(lease_dirpath,"wind_sf_nocable.RDS"))
+
+
 ```
 
