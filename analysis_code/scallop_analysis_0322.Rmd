@@ -10,12 +10,17 @@ output:
     code_folding: show
 params:
     AA_DAS_only: TRUE
+    subtrip_aggregate: TRUE
     BIN_GEARS: TRUE
     location: 
       label: "Location:"
       value: Woods_Hole
       input: select
       choices: [Woods_Hole, Seattle]
+    input_shapefile:
+      value: "wind_sf_final.RDS"
+      choices: ["wind_sf_final.RDS","wind_sf_nocable.RDS"]
+
     PreRelease: TRUE
 ---
 <!---
@@ -24,13 +29,17 @@ location --- NEFSC folks should set location=Woods_Hole. AK folks should set it 
 
 PreRelease -- controls the location of FishSET package. Set to FALSE to load without options. Set to TRUE to load from a particular lib.loc
 --->
-## Warning
+## Warning and Options
 Please be careful with interpretation. Some outputs are uninterpretable when certain options are done. For example when we *do not* aggregate subtrips to trips:
 
 1. the "per-unit-effort" outputs are not meaningful. 
 2. Any statistics that are averaged are now averaged over subtrips, so this may not have a meaning either.
 
 There may be other, so think carefully.
+
+The value of AA_DAS is `r params$AA_DAS_only`.  The value of subtrip_aggregate is `r params$subtrip_aggregate`.  The value of  BIN_GEARS is `r params$BIN_GEARS`.  The input shapefile has been set to   `r params$input_shapefile`.
+
+
 
 ## Introduction 
  
@@ -161,7 +170,7 @@ data folder.
 
 # loads lease area combined w/ cable routes (saved locally) created from
 # data_wrangle/combine_cable_routes.Rmd
-lease_filepath <- here("data", "main", "spatial", "wind_sf_nocable.RDS")
+lease_filepath <- here("data", "main", "spatial", params$input_shapefile)
 
 load_spatial(lease_filepath, name = "WindClose", over_write = TRUE, project,
              data.type = "RDS")
@@ -286,6 +295,9 @@ scallop0322MainDataTable$GEARCODE[!(scallop0322MainDataTable$GEARCODE %in%c('DRE
 The input data ``final_product_lease`` contains subtrips, not trips. This code chunk contracts trips to a single row, applying subtrip attributes for the most valuable subtrip (``max(DOLLAR)``)to the entire trip.
 
 ```{r construct_trip_aggregates, echo=TRUE, eval=TRUE}
+
+if (params$subtrip_aggregate==TRUE){
+
 # aggregate DOLLAR, POUNDS, LANDED by TRIPID and filter by max(DOLLAR)
 scallop0322MainDataTable <- 
   scallop0322MainDataTable %>%
@@ -306,6 +318,7 @@ scallop0322MainDataTable <- scallop0322MainDataTable %>%
 ## Test out 
 sum(duplicated(scallop0322MainDataTable$TRIPID))
 stopifnot(sum(duplicated(scallop0322MainDataTable$TRIPID))==0)
+}
 ```
 
 
