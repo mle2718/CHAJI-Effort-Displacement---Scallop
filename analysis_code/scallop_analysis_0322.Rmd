@@ -19,7 +19,7 @@ params:
       choices: [Woods_Hole, Seattle]
     input_shapefile:
       value: "wind_sf_final.RDS"
-      choices: ["wind_sf_final.RDS","wind_sf_nocable.RDS"]
+      choices: ["wind_sf_final.RDS","wind_sf_nocable.RDS",,"wind_NY1.RDS",,"wind_NY2.RDS","wind_Central_Atlantic_1.RDS", "wind_Central_Atlantic_2.RDS"]
 
     PreRelease: TRUE
 ---
