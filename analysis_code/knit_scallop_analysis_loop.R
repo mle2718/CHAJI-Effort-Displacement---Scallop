@@ -1,3 +1,5 @@
+# Small R script to render lots of variations of the scallop_report_322.Rmd. This allows us to pass in different shapefiles or do different aggregations.  
+
 library("here")
 library("rmarkdown")
 
