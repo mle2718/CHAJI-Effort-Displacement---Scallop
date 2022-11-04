@@ -37,7 +37,7 @@ Please be careful with interpretation. Some outputs are uninterpretable when cer
 
 There may be other, so think carefully.
 
-The value of AA_DAS is `r params$AA_DAS_only`.  The value of subtrip_aggregate is `r params$subtrip_aggregate`.  The value of  BIN_GEARS is `r params$BIN_GEARS`.  The input shapefile has been set to   `r params$input_shapefile`.
+You are sitting in  `r params$AA_DAS_only`. The value of AA_DAS is `r params$AA_DAS_only`.  The value of subtrip_aggregate is `r params$subtrip_aggregate`.  The value of  BIN_GEARS is `r params$BIN_GEARS`.  The input shapefile has been set to   `r params$input_shapefile`.
 
 
 
