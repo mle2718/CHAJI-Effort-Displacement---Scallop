@@ -107,11 +107,21 @@ avoid potential errors when kitting the doc.
 
 At the dialog box, select the directory that contains the "FishSETFolder" or the directory in which you want the "FishSETFolder" to be created.  But don't select the "FishSETFolder" directory itself. 
 ```{r project_cleanup,eval=TRUE}
+if (params$location=="Seattle"){
 
-if (project_exists(project)) {
-  
-  erase_project(project)
+  if (project_exists(project)) {
+    erase_project(project)
+  }
+}else if (params$location=="Woods_Hole"){
+
+folderpath <- here("FishSETFolder")
+  if (project_exists(project)) {
+    erase_project(project)
+  }
 }
+
+
+
 ```
 
 <br><br>
