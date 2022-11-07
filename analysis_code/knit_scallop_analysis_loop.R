@@ -26,7 +26,8 @@ render_report = function(AA_DAS_only, subtrip_aggregate, input_shapefile) {
 #input_shapefile_val<-"wind_sf_final.RDS"
 #render_report(AA_DAS_only_val,subtrip_aggregate_val, input_shapefile_val)
 
-
+# input_shapefile_val in c("wind_NY1.RDS", "wind_NY2.RDS","wind_Central_Atlantic_1.RDS","wind_Central_Atlantic_2.RDS") 
+  
 # 
 # 
 # 
