@@ -31,10 +31,10 @@ library("tibble")
 vintage_string<-Sys.Date()
 vintage_string<-gsub("-","_",vintage_string)
 
-DMIS_STYLE <-"live"
+DMIS_STYLE <-"none"
 #DMIS_STYLE may be "live", "frozen_GARFO", or "none".  Running the code with DMIS_STYLE="live" takes a very long time to pull data from the servers.
-VTR_extract_switch<-TRUE
-scallop_linking_extract_switch<-TRUE
+VTR_extract_switch<-FALSE
+scallop_linking_extract_switch<-FALSE
 
 
 ```
@@ -414,17 +414,18 @@ saveRDS(Scallop_Linkingorg, file=here("data","intermediate",Scallop_Linkingorg_n
 These data should reference the  "Estimation of Commercial Fishing Trip Costs Using Sea Sampling Data" paper by Samantha Werner & Geret DePiper.  We will likely use the Winsorized trip cost estimates.
 ```{r merge_cost_data, echo=TRUE, eval=TRUE}
 #Import Data
-Cost_Part1 <- read_excel(file.path(cost_directory1,"2000_2009_Commercial_Fishing_Trip_Costs.xlsx"))
-Cost_Part2 <- read_excel(file.path(cost_directory2,"2010_2021_Commercial_Fishing_Trip_Costs.xlsx"))
+Cost_Part1 <- read_excel(file.path(cost_directory1,"2000_2009_Commercial_Fishing_Trip_Costs.xlsx"), sheet=1)
+Cost_Part2 <- read_excel(file.path(cost_directory1,"2000_2009_Commercial_Fishing_Trip_Costs.xlsx"), sheet=2)
+Cost_Part3 <- read_excel(file.path(cost_directory2,"2010_2021_Commercial_Fishing_Trip_Costs.xlsx"))
 
 #subset variables
 keeps<-c("VTR_TRIPID","DB_LANDING_YEAR", "OBSERVED_COST_DUMMY", "TRIP_COST_NOMINALDOLS", "TRIP_COST_NOMINALDOLS_WINSOR")
 Cost_Part1s<-subset(Cost_Part1, select=keeps)
 Cost_Part2s<-subset(Cost_Part2, select=keeps)
+Cost_Part3s<-subset(Cost_Part3, select=keeps)
 
-#Merge Part1 of costs with Part 2 of costs 
+all_yrs_costs<-rbind(Cost_Part1s,Cost_Part2s,Cost_Part3s)
 
-all_yrs_costs<-subset(all_yrs_costs,select=keeps)
 #save to RDS
 all_yrs_costs_name <-paste0("all_yrs_costs_",vintage_string,".Rds")
 saveRDS(all_yrs_costs, file=here("data","intermediate",all_yrs_costs_name))
