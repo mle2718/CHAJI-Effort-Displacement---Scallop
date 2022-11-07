@@ -15,7 +15,7 @@ You might want to use a LIVE version of DMIS. To do so, set LIVE_DMIS to TRUE
 
 --->
 # Project setup
-here(), load libraries, and set a data vintage.
+here(), load libraries, and set a data vintage.  
 
 ```{r setup, include=TRUE, echo=TRUE, results=FALSE}
 # Set Path
@@ -31,10 +31,10 @@ library("tibble")
 vintage_string<-Sys.Date()
 vintage_string<-gsub("-","_",vintage_string)
 
-DMIS_STYLE <-"none"
+DMIS_STYLE <-"live"
 #DMIS_STYLE may be "live", "frozen_GARFO", or "none".  Running the code with DMIS_STYLE="live" takes a very long time to pull data from the servers.
-VTR_extract_switch<-FALSE
-scallop_linking_extract_switch<-FALSE
+VTR_extract_switch<-TRUE
+scallop_linking_extract_switch<-TRUE
 
 
 ```
