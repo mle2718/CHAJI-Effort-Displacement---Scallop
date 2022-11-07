@@ -32,7 +32,7 @@ vintage_string<-Sys.Date()
 vintage_string<-gsub("-","_",vintage_string)
 
 DMIS_STYLE <-"live"
-#DMIS_STYLE may be "live", "frozen_GARFO", or "none".  Running the code with DMIS_STYLE="frozen_GARFO" takes a very long time to pull data from the servers.
+#DMIS_STYLE may be "live", "frozen_GARFO", or "none".  Running the code with DMIS_STYLE="live" takes a very long time to pull data from the servers.
 VTR_extract_switch<-TRUE
 scallop_linking_extract_switch<-TRUE
 
