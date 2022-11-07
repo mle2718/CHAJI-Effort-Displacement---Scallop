@@ -16,6 +16,10 @@ You might want to use a LIVE version of DMIS. To do so, set LIVE_DMIS to TRUE
 --->
 # Project setup
 here(), load libraries, and set a data vintage.  
+DMIS_STYLE= live pulls new data from the APSD.WIND_TEST table.  the DMIS_STYLE=Frozen pulls the APSD_DMIS_2.rda file. DMIS_STYLE= "copyover" grabs data from ml.intermediate.
+
+VTR_extract_switch and scallop_linking_extract_switch are true or false that determine whether or not those chunks of code are run.
+
 
 ```{r setup, include=TRUE, echo=TRUE, results=FALSE}
 # Set Path
@@ -31,8 +35,8 @@ library("tibble")
 vintage_string<-Sys.Date()
 vintage_string<-gsub("-","_",vintage_string)
 
-DMIS_STYLE <-"live"
-#DMIS_STYLE may be "live", "frozen_GARFO", or "none".  Running the code with DMIS_STYLE="live" takes a very long time to pull data from the servers.
+DMIS_STYLE <-"copyover"
+#DMIS_STYLE may be "live", "frozen_GARFO", or "copyover".  Running the code with DMIS_STYLE="live" takes a very long time to pull data from the servers.
 VTR_extract_switch<-TRUE
 scallop_linking_extract_switch<-TRUE
 
@@ -78,6 +82,9 @@ source(here("data_wrangle","credentials.R"))
 #Comment one of these out, depending on whether you are running this code on a server or locally (with VPN) 
 net<-network_location_desktop
 net<-network_location_remote
+
+
+ml.intermediate.path<-file.path(net,"home2","mlee","Effort-Displacement---Scallop","data","intermediate")
 
 # These are not part of the project path
 offshoreWind_directory<-file.path(net,"home5", "dcorvi","OffshoreWind","offshoreWind4","data")
@@ -293,19 +300,21 @@ The frozen DMIS table from the offshoreWind project (APSD_DMIS_2) is the base da
 
 
 ```{r Data Set Loading, echo=TRUE, results=FALSE,eval=TRUE}
-
+# Load a frozen DMIS table provided by GARFO OR
+# Do a live data query on DMIS OR 
+#
 if (DMIS_STYLE=="frozen_GARFO"){
   load(file.path(offshoreWind_directory, "APSD_DMIS_2.rda"))
   APSD_DMIS_2$dbsource="frozen_GARFO"
 } else if(DMIS_STYLE=="live"){
-oracle_server = "sole"
-ODBC.CONNECTION <- RODBC::odbcConnect(dsn=oracle_server, uid=oracle_username, pwd=oracle_password, believeNRows=FALSE)
-CURRENT.QUERY = paste ("select * FROM APSD.DMIS_WIND_TEST@garfo_nefsc")
-APSD_DMIS_2 = sqlQuery(ODBC.CONNECTION, CURRENT.QUERY)
-odbcCloseAll()
-
-APSD_DMIS_2$dbsource<-paste0("live_",vintage_string)
-} else if(DMIS_STYLE=="none"){
+  oracle_server = "sole"
+  ODBC.CONNECTION <- RODBC::odbcConnect(dsn=oracle_server, uid=oracle_username, pwd=oracle_password, believeNRows=FALSE)
+  CURRENT.QUERY = paste ("select * FROM APSD.DMIS_WIND_TEST@garfo_nefsc")
+  APSD_DMIS_2 = sqlQuery(ODBC.CONNECTION, CURRENT.QUERY)
+  odbcCloseAll()
+  
+  APSD_DMIS_2$dbsource<-paste0("live_",vintage_string)
+} else if(DMIS_STYLE=="copyover"){
 # Do nothing
 }
 
@@ -314,33 +323,47 @@ APSD_DMIS_2<-merge(APSD_DMIS_2,tripid_geoids, by.x="DOCID", by.y="tripid", all.x
 #save to RDS
 APSD_DMIS_2_name <-paste0("APSD_DMIS_2_",vintage_string,".Rds")
 saveRDS(APSD_DMIS_2, file=here("data","intermediate", APSD_DMIS_2_name))
-}else if(DMIS_STYLE=="none"){
-# Do nothing
-}
-
-
-if(DMIS_STYLE=="none"){
-# Do nothing
-} else {
-  if (DMIS_STYLE=="frozen_GARFO"){
-    load(file.path(offshoreWind_directory, "APSD_DMIS_2.rda"))
-    APSD_DMIS_2$dbsource="frozen_GARFO"
-  } else if(DMIS_STYLE=="live"){
-    oracle_server = "sole"
-    ODBC.CONNECTION <- RODBC::odbcConnect(dsn=oracle_server, uid=oracle_username, pwd=oracle_password, believeNRows=FALSE)
-    CURRENT.QUERY = paste ("select * FROM APSD.DMIS_WIND_TEST@garfo_nefsc")
-    APSD_DMIS_2 = sqlQuery(ODBC.CONNECTION, CURRENT.QUERY)
-    odbcCloseAll()
-    
-    APSD_DMIS_2$dbsource<-paste0("live_",vintage_string)
-}
+}else if(DMIS_STYLE=="copyover"){
   
-  # Merge and save to RDS
-  APSD_DMIS_2<-merge(APSD_DMIS_2,tripid_geoids, by.x="DOCID", by.y="tripid", all.x=TRUE, all.y=FALSE)
-  #save to RDS
-  APSD_DMIS_2_name <-paste0("APSD_DMIS_2_",vintage_string,".Rds")
-  saveRDS(APSD_DMIS_2, file=here("data","intermediate", APSD_DMIS_2_name))
+  mlee_data_vintage<-list.files(path=ml.intermediate.path, pattern="APSD_DMIS_2_")
+  mlee_data_vintage<-gsub("APSD_DMIS_2_","",mlee_data_vintage )
+  mlee_data_vintage<-gsub(".Rds","",mlee_data_vintage)
+  mlee_data_vintage<-gsub(".csv","",mlee_data_vintage)
+  mlee_data_vintage<-max(mlee_data_vintage)
+  
+  APSD_static_nefsc<-file.path(net,"home2","mlee","Effort-Displacement---Scallop","data","intermediate",paste0("APSD_DMIS_2_",mlee_data_vintage, ".Rds"))
+  
+  # Copy it over to the current directory. Note that the vintage string is rewritten here, which is a little sketchy.
+  destination<-here("data","intermediate",paste0("APSD_DMIS_2_",vintage_string,".Rds"))
+                    
+  file.copy(APSD_static_nefsc,destination, overwrite=FALSE)
 }
+
+
+
+
+
+
+
+
+
+
+##### copy over a frozen DMIS table from a location on the network.
+
+# Pick the most recent APSD_DMIS2 file. 
+
+
+```
+
+
+
+
+
+
+
+
+
+
 
 ```
 
