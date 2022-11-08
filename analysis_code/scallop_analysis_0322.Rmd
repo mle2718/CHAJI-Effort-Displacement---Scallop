@@ -32,14 +32,18 @@ location --- NEFSC folks should set location=Woods_Hole. AK folks should set it 
 PreRelease -- controls the location of FishSET package. Set to FALSE to load without options. Set to TRUE to load from a particular lib.loc
 --->
 ## Warning and Options
-Please be careful with interpretation. Some outputs are uninterpretable when certain options are done. For example when we *do not* aggregate subtrips to trips:
+Please be careful with interpretation. Some outputs are uninterpretable when certain options are selected. For example, when we *do not* aggregate subtrips to trips:
 
 1. the "per-unit-effort" outputs are not meaningful. 
 2. Any statistics that are averaged are now averaged over subtrips, so this may not have a meaning either.
 
 There may be other, so think carefully.
 
-You are sitting in  `r params$AA_DAS_only`. The value of AA_DAS is `r params$AA_DAS_only`.  The value of subtrip_aggregate is `r params$subtrip_aggregate`.  The value of  BIN_GEARS is `r params$BIN_GEARS`.  The input shapefile has been set to   `r params$input_shapefile`.
+1.  Your location is  `r params$AA_DAS_only`.
+2.  The value of AA_DAS is `r params$AA_DAS_only`.
+3.  The value of subtrip_aggregate is `r params$subtrip_aggregate`.
+4.  The value of  BIN_GEARS is `r params$BIN_GEARS`.
+5.  The input shapefile has been set to   `r params$input_shapefile`.
 
 
 
