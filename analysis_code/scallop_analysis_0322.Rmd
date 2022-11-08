@@ -9,7 +9,7 @@ output:
     toc_float: true
     code_folding: show
 params:
-    AA_DAS_only: FALSE
+    AA_DAS_only: TRUE
     subtrip_aggregate: TRUE
     BIN_GEARS: TRUE
     location: 
