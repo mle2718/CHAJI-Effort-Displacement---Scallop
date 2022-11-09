@@ -285,6 +285,7 @@ view_spat(wind_NY3)
 view_spat(wind_Central_Atlantic_1)
 view_spat(wind_Central_Atlantic_2)
 
+```
 ### Save 
 ```{r}
 lease_dirpath <- here("data", "main", "spatial")
