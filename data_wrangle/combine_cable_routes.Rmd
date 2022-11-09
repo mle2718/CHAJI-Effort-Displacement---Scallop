@@ -213,8 +213,7 @@ cable_list <- lapply(cable_folders, function(x) sf::st_read(dsn = x))
 # wind lease areas
 wind_sf <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "All_Lease_Areas_Shapefile"))
 
-#wind_NY1 <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "NY Bight Nov 2022 Lease Areas","FILENAME HERE.shp"))
-
+wind_NY1 <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "NY Bight Nov 2022 Lease Areas","NY Bight Call Areas.shp"))
 wind_NY2 <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "NY Bight Nov 2022 Lease Areas","NY Bight Wind Energy Area 2021.shp"))
 wind_NY3 <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "NY Bight Nov 2022 Lease Areas","NY Bight Lease Areas pulled Nov 2022.shp"))
 
@@ -232,7 +231,7 @@ cable_list <- lapply(cable_list, prep_spat)
 
 wind_sf <- prep_spat(wind_sf)
 
-#wind_NY1 <- prep_spat(wind_NY1)
+wind_NY1 <- prep_spat(wind_NY1)
 wind_NY2 <- prep_spat(wind_NY2)
 wind_NY3 <- prep_spat(wind_NY3)
 
@@ -280,7 +279,7 @@ view_spat(wind_sf_final, id = "NAME")
 
 
 ```{r}
-#view_spat(wind_NY1)
+view_spat(wind_NY1)
 view_spat(wind_NY2)
 view_spat(wind_NY3)
 view_spat(wind_Central_Atlantic_1)
@@ -295,7 +294,7 @@ saveRDS(wind_sf,file=file.path(lease_dirpath,"wind_sf_nocable.RDS"))
 
 
 
-#saveRDS(wind_NY1,file=file.path(lease_dirpath,"wind_NY1.RDS"))
+saveRDS(wind_NY1,file=file.path(lease_dirpath,"wind_NY1.RDS"))
 saveRDS(wind_NY2,file=file.path(lease_dirpath,"wind_NY2.RDS"))
 saveRDS(wind_NY3,file=file.path(lease_dirpath,"wind_NY3.RDS"))
 
