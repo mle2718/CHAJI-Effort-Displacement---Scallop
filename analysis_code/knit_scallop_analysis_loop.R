@@ -27,9 +27,9 @@ render_report = function(AA_DAS_only, subtrip_aggregate, input_shapefile) {
 
 # input_shapefile_val in c("wind_NY1.RDS", "wind_NY2.RDS","wind_Central_Atlantic_1.RDS","wind_Central_Atlantic_2.RDS") 
 # 
-for (AA_DAS_only_val in c(TRUE, FALSE) ) {
-  for (subtrip_aggregate_val in c(TRUE, FALSE) ) {
-    for (input_shapefile_val in c("wind_sf_final.RDS", "wind_sf_nocable.RDS") ) {
+for (AA_DAS_only_val in c(TRUE) ) {
+  for (subtrip_aggregate_val in c(TRUE) ) {
+    for (input_shapefile_val in c("wind_sf_final.RDS", "wind_sf_nocable.RDS", "wind_NY2.RDS") ) {
       render_report(AA_DAS_only_val,subtrip_aggregate_val, input_shapefile_val)
     }
   }
