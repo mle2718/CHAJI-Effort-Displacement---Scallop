@@ -39,7 +39,7 @@ Please be careful with interpretation. Some outputs are uninterpretable when cer
 
 There may be other, so think carefully.
 
-1.  Your location is  `r params$AA_DAS_only`.
+1.  Your location is  `r params$location`.
 2.  The value of AA_DAS is `r params$AA_DAS_only`.
 3.  The value of subtrip_aggregate is `r params$subtrip_aggregate`.
 4.  The value of  BIN_GEARS is `r params$BIN_GEARS`.
