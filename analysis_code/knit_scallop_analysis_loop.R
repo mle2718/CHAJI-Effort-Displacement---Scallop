@@ -7,9 +7,9 @@ library("rmarkdown")
 here::i_am("analysis_code/knit_scallop_analysis_loop.R")
 
 # Define the "things" you want to loop over.
-AA_Vals_to_loop<-c(TRUE, FALSE)
-subtrip_aggregate_vals_to_loop<-c(TRUE, FALSE)
-input_shapefile_vals_to_loop<-c("wind_sf_final.RDS","wind_NY2.RDS")
+AADAS_Vals_to_loop<-c(TRUE, FALSE) # TRUE is the AADAS fleet. FALSE is the IFQ fleet
+subtrip_aggregate_vals_to_loop<-c(TRUE, FALSE) # TRUE aggregates subtrips to trips. FALSE does not
+input_shapefile_vals_to_loop<-c("wind_sf_final.RDS","wind_NY2.RDS") # Different "closure areas"
 
 
 # You shouldn't need to edit anything below this.
@@ -44,7 +44,7 @@ render_report = function(AA_DAS_only, subtrip_aggregate, input_shapefile) {
 
 
 # Run lots of scallop analysis reports.
-for (AA_DAS_only_val in AA_Vals_to_loop ) {
+for (AA_DAS_only_val in AADAS_Vals_to_loop ) {
   for (subtrip_aggregate_val in subtrip_aggregate_vals_to_loop ) {
     for (input_shapefile_val in input_shapefile_vals_to_loop)  {
       render_report(AA_DAS_only_val,subtrip_aggregate_val, input_shapefile_val)
