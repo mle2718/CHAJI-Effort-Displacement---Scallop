@@ -9,8 +9,8 @@ here::i_am("analysis_code/knit_scallop_analysis_loop.R")
 rmarkdown::render(here("data_wrangle","combine_cable_routes.Rmd"),
                   output_file = here("data_wrangle","combine_cable_routes.html"))
 #To just render the scallop_analysis_0322.Rmd with whatever parameters are in the markdown, do this:
-rmarkdown::render(here("analysis_code","scallop_analysis_0322.Rmd"),
-                  output_file = here("results","scallop_analysis_0322.html"))
+# rmarkdown::render(here("analysis_code","scallop_analysis_0322.Rmd"),
+#                   output_file = here("results","scallop_analysis_0322.html"))
 #Borrowed heavily from https://bookdown.org/yihui/rmarkdown/params-knit.html
 
 #Define a function that passes parameters into the rmarkdown::render function
