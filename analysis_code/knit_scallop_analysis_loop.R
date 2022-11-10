@@ -5,6 +5,9 @@ library("rmarkdown")
 
 here::i_am("analysis_code/knit_scallop_analysis_loop.R")
 
+# The combine_cable_routes.Rmd must be rendered to process the cable route and finagle the shapefiles into a format required by FishSET
+rmarkdown::render(here("data_wrangle","combine_cable_routes.Rmd"),
+                  output_file = here("data_wrangle","combine_cable_routes.html"))
 #To just render the scallop_analysis_0322.Rmd with whatever parameters are in the markdown, do this:
 rmarkdown::render(here("analysis_code","scallop_analysis_0322.Rmd"),
                   output_file = here("results","scallop_analysis_0322.html"))
