@@ -12,6 +12,11 @@ subtrip_aggregate_vals_to_loop<-c(TRUE, FALSE)
 input_shapefile_vals_to_loop<-c("wind_sf_final.RDS","wind_NY2.RDS")
 
 
+# You shouldn't need to edit anything below this.
+
+
+
+
 ##################################################################################
 # The combine_cable_routes.Rmd must be rendered to process the cable route and finagle the shapefiles into a format required by FishSET
 rmarkdown::render(here("data_wrangle","combine_cable_routes.Rmd"),
