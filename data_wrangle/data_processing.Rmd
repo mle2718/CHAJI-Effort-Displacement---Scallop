@@ -49,7 +49,7 @@ rm(datasets_list)
 ```
 
 
-```{r shortcut_dmis, include=TRUE, echo=TRUE, eval=FALSE}
+```{r shortcut_dmis, include=TRUE, echo=TRUE, eval=TRUE}
 ##### copy over a frozen DMIS table from a location on the network.
 
 # Pick the most recent APSD_DMIS2 file. 
