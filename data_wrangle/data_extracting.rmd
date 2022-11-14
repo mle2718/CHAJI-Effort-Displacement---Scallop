@@ -6,6 +6,12 @@ output:
   pdf_document: default
   html_document: default
 urlcolor: blue
+params:
+    DMIS_STYLE: 
+      label: "DMIS_STYLE:"
+      value: "live"
+      input: select
+      choices: ["copyover", "live", "frozen_GARFO"]
 
 ---
 
