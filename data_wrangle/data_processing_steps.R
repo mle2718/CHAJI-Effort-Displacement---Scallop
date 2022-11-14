@@ -7,8 +7,10 @@ library("rmarkdown")
 here::i_am("data_wrangle/data_processing_steps.R")
 
 #To render the data_extracting.Rmd
-rmarkdown::render(here("data_wrangle","data_extracting.rmd"),
-                  output_file = here("data_wrangle","data_extracting.pdf"))
+rmarkdown::render(here("data_wrangle","data_extracting.rmd"),params = list(
+  DMIS_STYLE = "copyover"
+      ),
+      output_file = here("data_wrangle","data_extracting.pdf"))
 
 #To render the data_processing.Rmd
 rmarkdown::render(here("data_wrangle","data_processing.Rmd"),
