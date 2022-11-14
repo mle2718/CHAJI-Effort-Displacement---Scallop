@@ -64,7 +64,7 @@ APSD_static_nefsc<-file.path("net","home2","mlee","Effort-Displacement---Scallop
 # Copy it over to the current directory. Note that the vintage string is rewritten here, which is a little sketchy.
 destination<-here("data","intermediate",paste0("APSD_DMIS_2_",vintage_string,".Rds"))
                   
-file.copy(APSD_static_nefsc,destination) , overwrite=FALSE)
+file.copy(APSD_static_nefsc,destination , overwrite=FALSE)
 
 
 ```
