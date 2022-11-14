@@ -62,7 +62,7 @@ mlee_data_vintage<-max(mlee_data_vintage)
 APSD_static_nefsc<-file.path("net","home2","mlee","Effort-Displacement---Scallop","data","intermediate",paste0("APSD_DMIS_2_",mlee_data_vintage, ".Rds"))
 
 # Copy it over to the current directory. Note that the vintage string is rewritten here, which is a little sketchy.
-destination<-here("data","intermediate",paste0("APSD_DMIS_2_",vintage_string,".Rds")
+destination<-here("data","intermediate",paste0("APSD_DMIS_2_",vintage_string,".Rds"))
                   
 file.copy(APSD_static_nefsc,destination) , overwrite=FALSE)
 
