@@ -49,8 +49,6 @@ rm(datasets_list)
 ```
 
 
-
-
 We will:
 
 1. Try to avoid copying data; when we rely on data from other people, we will read it directly into memory from the network location or Oracle.
