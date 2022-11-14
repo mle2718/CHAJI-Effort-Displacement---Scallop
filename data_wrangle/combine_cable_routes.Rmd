@@ -211,7 +211,7 @@ cable_folders <-
 cable_list <- lapply(cable_folders, function(x) sf::st_read(dsn = x))
 
 # wind lease areas
-wind_sf <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "Wind_Lease_Outlines_Nov_22.shp"))
+wind_sf <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "All_Lease_Areas_Shapefile","Wind_Lease_Outlines_Nov_22.shp"))
 
 wind_NY1 <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "NY Bight Nov 2022 Lease Areas","NY Bight Call Areas Nov 22.shp"))
 wind_NY2 <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "NY Bight Nov 2022 Lease Areas","NY Bight Wind Energy Area 2021 Nov 22.shp"))
