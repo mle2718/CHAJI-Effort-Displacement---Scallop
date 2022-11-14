@@ -49,28 +49,6 @@ rm(datasets_list)
 ```
 
 
-```{r shortcut_dmis, include=TRUE, echo=TRUE, eval=TRUE}
-##### copy over a frozen DMIS table from a location on the network.
-
-# Pick the most recent APSD_DMIS2 file. 
-mlee_data_vintage<-list.files(path=file.path(net,"home2","mlee","Effort-Displacement---Scallop","data","intermediate"), pattern="APSD_DMIS_2_")
-mlee_data_vintage<-gsub("APSD_DMIS_2_","",mlee_data_vintage )
-mlee_data_vintage<-gsub(".Rds","",mlee_data_vintage)
-mlee_data_vintage<-gsub(".csv","",mlee_data_vintage)
-mlee_data_vintage<-max(mlee_data_vintage)
-
-APSD_static_nefsc<-file.path("net","home2","mlee","Effort-Displacement---Scallop","data","intermediate",paste0("APSD_DMIS_2_",mlee_data_vintage, ".Rds"))
-
-# Copy it over to the current directory. Note that the vintage string is rewritten here, which is a little sketchy.
-destination<-here("data","intermediate",paste0("APSD_DMIS_2_",vintage_string,".Rds"))
-                  
-file.copy(APSD_static_nefsc,destination , overwrite=FALSE)
-
-
-```
-
-
-
 We will:
 
 1. Try to avoid copying data; when we rely on data from other people, we will read it directly into memory from the network location or Oracle.
