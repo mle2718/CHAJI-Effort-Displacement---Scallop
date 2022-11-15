@@ -621,9 +621,9 @@ lease_sp <- st_read(All_Lease_Areas_Shapefile_path)
 point_geo_lease <- st_as_sf(final_product, 
                       coords = c(x  = "DDLON", y = "DDLAT"), crs = crs )
 
+lease_sp<-st_transform(lease_sp,crs)
 
 final_product_lease <- st_join(point_geo_lease, lease_sp, join = st_within)
-
 #geometry carries over all the way from the initial read in.
 identical(final_product_lease$geometry, point_geo$geometry)
 
