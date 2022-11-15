@@ -309,10 +309,10 @@ The frozen DMIS table from the offshoreWind project (APSD_DMIS_2) is the base da
 # Load a frozen DMIS table provided by GARFO OR
 # Do a live data query on DMIS OR 
 #
-if (DMIS_STYLE=="frozen_GARFO"){
+if (params$DMIS_STYLE=="frozen_GARFO"){
   load(file.path(offshoreWind_directory, "APSD_DMIS_2.rda"))
   APSD_DMIS_2$dbsource="frozen_GARFO"
-} else if(DMIS_STYLE=="live"){
+} else if(params$DMIS_STYLE=="live"){
   oracle_server = "sole"
   ODBC.CONNECTION <- RODBC::odbcConnect(dsn=oracle_server, uid=oracle_username, pwd=oracle_password, believeNRows=FALSE)
   CURRENT.QUERY = paste ("select * FROM APSD.DMIS_WIND_TEST@garfo_nefsc")
@@ -324,12 +324,12 @@ if (DMIS_STYLE=="frozen_GARFO"){
 # Do nothing
 }
 
-if (DMIS_STYLE=="frozen_GARFO" | DMIS_STYLE=="live"){
+if (params$DMIS_STYLE=="frozen_GARFO" | params$DMIS_STYLE=="live"){
 APSD_DMIS_2<-merge(APSD_DMIS_2,tripid_geoids, by.x="DOCID", by.y="tripid", all.x=TRUE, all.y=FALSE)
 #save to RDS
 APSD_DMIS_2_name <-paste0("APSD_DMIS_2_",vintage_string,".Rds")
 saveRDS(APSD_DMIS_2, file=here("data","intermediate", APSD_DMIS_2_name))
-}else if(DMIS_STYLE=="copyover"){
+}else if(params$DMIS_STYLE=="copyover"){
   
   mlee_data_vintage<-list.files(path=ml.intermediate.path, pattern="APSD_DMIS_2_")
   mlee_data_vintage<-gsub("APSD_DMIS_2_","",mlee_data_vintage )
