@@ -9,9 +9,11 @@ net<-network_location_remote
 vintage_string<-Sys.Date()
 vintage_string<-gsub("-","_",vintage_string)
 
-#To render the data_extracting.Rmd
+# #To render the data_extracting.Rmd
 # rmarkdown::render(here("data_wrangle","data_extracting.rmd"),params = list(
-#   DMIS_STYLE = "copyover"
+#   DMIS_STYLE = "copyover",
+#   VTR_extraction="copyover",
+#   scallop_linking_extraction="copyover"
 #       ),
 #       output_file = here("data_wrangle","data_extracting.pdf"))
 # 
@@ -28,12 +30,12 @@ ml.data.main<-file.path(net,"home2","mlee","Effort-Displacement---Scallop","data
   mlee_data_vintage<-gsub(".Rds","",mlee_data_vintage)
   mlee_data_vintage<-gsub(".csv","",mlee_data_vintage)
   mlee_data_vintage<-max(mlee_data_vintage)
-  
+
   final_product_lease_static<-file.path(ml.data.main,paste0("final_product_lease_",mlee_data_vintage, ".Rds"))
-  
+
   # Copy it over to the current directory. Note that the vintage string is rewritten here, which is a little sketchy.
   destination<-here("data","main",paste0("final_product_lease_",vintage_string,".Rds"))
-  
+
   file.copy(final_product_lease_static,destination, overwrite=FALSE)
 
   
