@@ -26,8 +26,7 @@ params:
 ---
 
 <!---
-You can either 
---->
+In order to do a data update, you need all of the params set to "live". It takes a long, long time. --->
 # Project setup
 here(), load libraries, and set a data vintage.  
 DMIS_STYLE= live pulls new data from the APSD.WIND_TEST table.  the DMIS_STYLE=Frozen pulls the APSD_DMIS_2.rda file. DMIS_STYLE= "copyover" grabs data from ml.intermediate.
