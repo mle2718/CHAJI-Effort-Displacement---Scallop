@@ -9,7 +9,7 @@ urlcolor: blue
 params:
     DMIS_STYLE: 
       label: "DMIS_STYLE:"
-      value: "live"
+      value: "copyover"
       input: select
       choices: ["copyover", "live", "frozen_GARFO"]
     VTR_extraction: 
