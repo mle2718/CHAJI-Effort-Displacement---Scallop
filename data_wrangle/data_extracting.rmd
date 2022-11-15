@@ -321,7 +321,7 @@ if (params$DMIS_STYLE=="frozen_GARFO"){
   odbcCloseAll()
   
   APSD_DMIS_2$dbsource<-paste0("live_",vintage_string)
-} else if(DMIS_STYLE=="copyover"){
+} else if(params$DMIS_STYLE=="copyover"){
 # Do nothing
 }
 
