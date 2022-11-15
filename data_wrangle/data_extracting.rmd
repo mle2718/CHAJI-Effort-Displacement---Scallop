@@ -12,13 +12,21 @@ params:
       value: "live"
       input: select
       choices: ["copyover", "live", "frozen_GARFO"]
+    VTR_extraction: 
+      label: "VTR_extraction:"
+      value: "copyover"
+      input: select
+      choices: ["copyover", "live"]
+    scallop_linking_extraction: 
+      label: "scallop_linking_extraction:"
+      value: "copyover"
+      input: select
+      choices: ["copyover", "live"]
 
 ---
 
 <!---
-You might want to run this code. To do so, set extract_switch=FALSE
-You might want to use a LIVE version of DMIS. To do so, set LIVE_DMIS to TRUE
-
+You can either 
 --->
 # Project setup
 here(), load libraries, and set a data vintage.  
@@ -40,12 +48,6 @@ library("readxl")
 library("tibble")
 vintage_string<-Sys.Date()
 vintage_string<-gsub("-","_",vintage_string)
-
-DMIS_STYLE <-"copyover"
-#DMIS_STYLE may be "live", "frozen_GARFO", or "copyover".  Running the code with DMIS_STYLE="live" takes a very long time to pull data from the servers.
-VTR_extract_switch<-TRUE
-scallop_linking_extract_switch<-TRUE
-
 
 ```
 
@@ -357,20 +359,6 @@ saveRDS(APSD_DMIS_2, file=here("data","intermediate", APSD_DMIS_2_name))
 ##### copy over a frozen DMIS table from a location on the network.
 
 # Pick the most recent APSD_DMIS2 file. 
-
-
-```
-
-
-
-
-
-
-
-
-
-
-
 ```
 
 
@@ -384,9 +372,10 @@ The APSD_DMIS_2 table must be supplemented with additional data.  This section q
 
 Some Trip-level data in the VTR schema is needed. See table at the top.  We extract them here. 
 
-```{r VTR_Query, echo=TRUE, results=FALSE,eval=VTR_extract_switch}
+```{r VTR_Query, echo=TRUE, results=FALSE,eval=TRUE}
 
-
+# Get the live data 
+if (params$VTR_extraction=="live"){ 
 
 oracle_server = "sole"
 ODBC.CONNECTION <- RODBC::odbcConnect(dsn=oracle_server, uid=oracle_username, pwd=oracle_password, believeNRows=FALSE)
@@ -403,10 +392,24 @@ for(i in START.YEAR:END.YEAR) {
 }    
 
 RESULT.COMPILED<-do.call(rbind.data.frame, RESULT.COMPILED)
-#save to RDS
 RESULT.COMPILED_name <-paste0("RESULT_COMPILED_",vintage_string,".Rds")
 saveRDS(RESULT.COMPILED, file=here("data","intermediate",RESULT.COMPILED_name))
 
+#save to RDS
+} else if (params$VTR_extraction=="copyover"){
+  mlee_data_vintage<-list.files(path=ml.intermediate.path, pattern="RESULT_COMPILED_")
+  mlee_data_vintage<-gsub("RESULT_COMPILED_","",mlee_data_vintage )
+  mlee_data_vintage<-gsub(".Rds","",mlee_data_vintage)
+  mlee_data_vintage<-gsub(".csv","",mlee_data_vintage)
+  mlee_data_vintage<-max(mlee_data_vintage)
+  
+  RESULT_COMPILED_static<-file.path(net,"home2","mlee","Effort-Displacement---Scallop","data","intermediate",paste0("RESULT_COMPILED_",mlee_data_vintage, ".Rds"))
+  
+  # Copy it over to the current directory. Note that the vintage string is rewritten here, which is a little sketchy.
+  destination<-here("data","intermediate",paste0("RESULT_COMPILED_",vintage_string,".Rds"))
+                    
+  file.copy(RESULT_COMPILED_static,destination, overwrite=FALSE)
+}
 
 ```
 
@@ -418,8 +421,9 @@ saveRDS(RESULT.COMPILED, file=here("data","intermediate",RESULT.COMPILED_name))
 We also extract the activity code from DMIS.  This will describe the type of trip that the vessel has declared into.  The most important types of trips will be Scallop Trips; however, fishing vessels with the proper permits are allowed to retain scallops while declared into other fisheries.  When this happens, the volume of scallops will be much lower.
 
 We  also extract the T/F variables corresponding the the PLAN_CAT in DMIS.  
-```{r DMIS_Query, echo=TRUE,eval=scallop_linking_extract_switch}
- 
+```{r DMIS_Query, echo=TRUE,eval=TRUE}
+ if (params$scallop_linking_extraction=="live"){ 
+
 oracle_server = "sole"
 CURRENT.QUERY = paste ("SELECT TRIP_ID, DOCID, ACTIVITY_CODE, DAS_ID, LGC_A, LGC_B, LGC_C, SC_2, SC_3, SC_4, SC_5, SC_6, SC_7, SC_8, SC_9, SG_1A, SG_1B
  FROM APSD.t_ssb_trip_current@garfo_nefsc")
@@ -432,10 +436,24 @@ odbcCloseAll()
 #save to RDS
 Scallop_Linkingorg_name <-paste0("Scallop_Linkingorg_",vintage_string,".Rds")
 saveRDS(Scallop_Linkingorg, file=here("data","intermediate",Scallop_Linkingorg_name))
+ } else if(params$scallop_linking_extraction=="copyover"){
+   mlee_data_vintage<-list.files(path=ml.intermediate.path, pattern="Scallop_Linkingorg_")
+  mlee_data_vintage<-gsub("Scallop_Linkingorg_","",mlee_data_vintage )
+  mlee_data_vintage<-gsub(".Rds","",mlee_data_vintage)
+  mlee_data_vintage<-gsub(".csv","",mlee_data_vintage)
+  mlee_data_vintage<-max(mlee_data_vintage)
+  
+  Scallop_Linkingorg_static<-file.path(net,"home2","mlee","Effort-Displacement---Scallop","data","intermediate",paste0("Scallop_Linkingorg_",mlee_data_vintage, ".Rds"))
+  
+  # Copy it over to the current directory. Note that the vintage string is rewritten here, which is a little sketchy.
+  destination<-here("data","intermediate",paste0("Scallop_Linkingorg_",vintage_string,".Rds"))
+                    
+  file.copy(Scallop_Linkingorg_static,destination, overwrite=FALSE)
+   
+   
+}
+
 ```
-
-
-
 
 
 # Add in cost data 
