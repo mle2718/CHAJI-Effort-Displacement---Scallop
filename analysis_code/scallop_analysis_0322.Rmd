@@ -697,7 +697,7 @@ agg_helper(scallop0322MainDataTable, value = "in_closure",
 ### Frequency
 
 Zone frequency (Access Area and Days at Sea fleets).
-```{r eval=AA_DAS_param_hack, echo=params$AA_DAS_only}
+```{r eval=AA_DAS_param_hack, echo=AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>%
   add_count(ZoneID) %>% 
@@ -721,7 +721,7 @@ zone_out$table %>%
 <br><br><br>
 
 Zone frequency (Access Area fleet).
-```{r eval=AA_DAS_param_hack, echo=params$AA_DAS_only}
+```{r eval=AA_DAS_param_hack, echo=AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>% 
   filter(fleet == "Access Area") %>% 
@@ -747,7 +747,7 @@ zone_out$table %>%
 <br><br><br>
 
 Zone frequency (Days at Sea fleet).
-```{r eval=AA_DAS_param_hack, echo=params$AA_DAS_only}
+```{r eval=AA_DAS_param_hack, echo=AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>% 
   filter(fleet == "Days at Sea") %>% 
@@ -772,7 +772,7 @@ zone_out$table %>%
 <br><br><br>
 
 Zone frequency (GCIFQ fleet).
-```{r eval=!AA_DAS_param_hack, echo=!params$AA_DAS_only}
+```{r eval=!AA_DAS_param_hack, echo=!AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>% 
   add_count(ZoneID) %>%
@@ -796,7 +796,7 @@ zone_out$table %>%
 <br><br><br>
 
 Percent of observations (Access Area and Day at Sea fleet).
-```{r eval=AA_DAS_param_hack, echo=params$AA_DAS_only}
+```{r eval=AA_DAS_param_hack, echo=AA_DAS_param_hack}
 `%` <- function(x) x
 
 zone_out <- 
@@ -824,7 +824,7 @@ zone_out$table %>%
 <br><br><br>
 
 Percent of observations (Access Area fleet).
-```{r eval=AA_DAS_param_hack, echo=params$AA_DAS_only}
+```{r eval=AA_DAS_param_hack, echo=AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>% 
   filter(fleet == "Access Area") %>% 
@@ -852,7 +852,7 @@ zone_out$table %>%
 <br><br><br>
 
 Percent of observations (Day at Sea fleet).
-```{r eval=AA_DAS_param_hack, echo=params$AA_DAS_only}
+```{r eval=AA_DAS_param_hack, echo=AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>% 
   filter(fleet == "Days at Sea") %>% 
@@ -881,7 +881,7 @@ zone_out$table %>%
 
 
 Percent of observations (GCIFQ fleet). 
-```{r eval=!AA_DAS_param_hack, echo=!params$AA_DAS_only}
+```{r eval=!AA_DAS_param_hack, echo=!AA_DAS_param_hack}
 zone_out <-
   scallop0322MainDataTable %>% 
   count(ZoneID) %>% 
@@ -914,7 +914,7 @@ zone_out$table %>%
 ### Catch
 
 Total catch for Access Area and Days at Sea fleets (meats). 
-```{r eval=AA_DAS_param_hack, echo=params$AA_DAS_only}
+```{r eval=AA_DAS_param_hack, echo=AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>%
   add_count(ZoneID) %>%
@@ -936,7 +936,7 @@ zone_out$table %>%
 <br><br>
 
 Total catch for Access Area (meats). 
-```{r eval=AA_DAS_param_hack, echo=params$AA_DAS_only}
+```{r eval=AA_DAS_param_hack, echo=AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>% 
   filter(fleet == "Access Area") %>% 
@@ -961,7 +961,7 @@ zone_out$table %>%
 <br><br>
 
 Total catch for Days at Sea (meats). 
-```{r eval=AA_DAS_param_hack, echo=params$AA_DAS_only}
+```{r eval=AA_DAS_param_hack, echo=AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>% 
   filter(fleet == "Days at Sea") %>% 
@@ -984,7 +984,7 @@ zone_out$table %>%
 <br><br>
 
 Total catch for GCIFQ (meats, all observations). 
-```{r eval=!AA_DAS_param_hack, echo=!params$AA_DAS_only}
+```{r eval=!AA_DAS_param_hack, echo=!AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>% 
   add_count(ZoneID) %>%
@@ -1006,7 +1006,7 @@ zone_out$table %>%
 <br><br>
 
 Average catch for Access Area and Days at Sea fleets (meats). 
-```{r eval=AA_DAS_param_hack, echo=params$AA_DAS_only}
+```{r eval=AA_DAS_param_hack, echo=AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>% 
   add_count(ZoneID) %>%
@@ -1029,7 +1029,7 @@ zone_out$table %>%
 
 
 Average catch for Access Area fleet (meats). 
-```{r eval=AA_DAS_param_hack, echo=params$AA_DAS_only}
+```{r eval=AA_DAS_param_hack, echo=AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>% 
   filter(fleet == "Access Area") %>% 
@@ -1054,7 +1054,7 @@ zone_out$table %>%
 
 
 Average catch for Days at Sea fleet (meats). 
-```{r eval=AA_DAS_param_hack, echo=params$AA_DAS_only}
+```{r eval=AA_DAS_param_hack, echo=AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>% 
   filter(fleet == "Days at Sea") %>% 
@@ -1079,7 +1079,7 @@ zone_out$table %>%
 
 
 Average catch for GCIFQ fleet (meats). 
-```{r eval=!AA_DAS_param_hack, echo=!params$AA_DAS_only}
+```{r eval=!AA_DAS_param_hack, echo=!AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>% 
   add_count(ZoneID) %>%
@@ -1100,7 +1100,7 @@ zone_out$table %>%
 <br><br><br>
 
 Median catch (meats, Access Area and Days at Sea fleets).
-```{r eval=AA_DAS_param_hack, echo=params$AA_DAS_only}
+```{r eval=AA_DAS_param_hack, echo=AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>% 
   add_count(ZoneID) %>%
@@ -1122,7 +1122,7 @@ zone_out$table %>%
 <br><br><br>
 
 Median catch (meats Access Area fleet).
-```{r eval=AA_DAS_param_hack, echo=params$AA_DAS_only}
+```{r eval=AA_DAS_param_hack, echo=AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>% 
   filter(fleet == "Access Area") %>% 
@@ -1145,7 +1145,7 @@ zone_out$table %>%
 <br><br><br>
 
 Median catch (meats, Days at Sea fleet).
-```{r eval=AA_DAS_param_hack, echo=params$AA_DAS_only}
+```{r eval=AA_DAS_param_hack, echo=AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>% 
   filter(fleet == "Days at Sea") %>% 
@@ -1170,7 +1170,7 @@ zone_out$table %>%
 
 
 Median catch (meats General Category IFQ fleet).
-```{r eval=!AA_DAS_param_hack, echo=!params$AA_DAS_only}
+```{r eval=!AA_DAS_param_hack, echo=!AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>% 
   add_count(ZoneID) %>%
@@ -1192,7 +1192,7 @@ zone_out$table %>%
 <br><br><br>
 
 Percent of total catch (meat) for Access Area and Days at Sea fleets. 
-```{r eval=AA_DAS_param_hack, echo=params$AA_DAS_only}
+```{r eval=AA_DAS_param_hack, echo=AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>% 
   mutate(MEAT_KG_total = sum(MEAT_KG)) %>% 
@@ -1220,7 +1220,7 @@ zone_out$table %>%
 
 Percent of total catch (meats) within Access Area fleet. 
 
-```{r eval=AA_DAS_param_hack, echo=params$AA_DAS_only}
+```{r eval=AA_DAS_param_hack, echo=AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>% 
   filter(fleet == "Access Area") %>% 
@@ -1249,7 +1249,7 @@ zone_out$table %>%
 
 Percent of total catch (meats) within Days at Sea fleet. 
 
-```{r eval=AA_DAS_param_hack, echo=params$AA_DAS_only}
+```{r eval=AA_DAS_param_hack, echo=AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>% 
   filter(fleet == "Days at Sea") %>% 
@@ -1278,7 +1278,7 @@ zone_out$table %>%
 
 Percent of total catch (meats) within GCIFQ fleet. 
 
-```{r eval=!AA_DAS_param_hack, echo=!params$AA_DAS_only}
+```{r eval=!AA_DAS_param_hack, echo=!AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>% 
   mutate(MEAT_KG_total = sum(MEAT_KG)) %>% 
@@ -1309,7 +1309,7 @@ zone_out$table %>%
 ### Trip Length
 
 Average trip length for Access Area and Days at Sea fleet.
-```{r eval=AA_DAS_param_hack, echo=params$AA_DAS_only}
+```{r eval=AA_DAS_param_hack, echo=AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>% 
   add_count(ZoneID) %>% 
@@ -1332,7 +1332,7 @@ zone_out$table %>%
 
 
 Average trip length for Access Area fleet.
-```{r eval=AA_DAS_param_hack, echo=params$AA_DAS_only}
+```{r eval=AA_DAS_param_hack, echo=AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>% 
   filter(fleet == "Access Area") %>% 
@@ -1355,7 +1355,7 @@ zone_out$table %>%
 
 
 Average trip length for Days at Sea fleet.
-```{r eval=AA_DAS_param_hack, echo=params$AA_DAS_only}
+```{r eval=AA_DAS_param_hack, echo=AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>% 
   filter(fleet == "Days at Sea") %>% 
@@ -1380,7 +1380,7 @@ zone_out$table %>%
 
 
 Average trip length for GCIFQ fleet.
-```{r eval=!AA_DAS_param_hack, echo=!params$AA_DAS_only}
+```{r eval=!AA_DAS_param_hack, echo=!AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>% 
   add_count(ZoneID) %>% 
@@ -1406,7 +1406,7 @@ zone_out$table %>%
 
 Percent of total trip length for Access Area and Days at Sea fleets. This is summing  trip lengths by zone and dividing 
 by total trip length. Working on fixing the legend labels. 
-```{r eval=AA_DAS_param_hack, echo=params$AA_DAS_only}
+```{r eval=AA_DAS_param_hack, echo=AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>% 
   mutate(TRIP_total = sum(TRIP_LENGTH)) %>% 
@@ -1437,7 +1437,7 @@ zone_out$table %>%
 
 
 Share of trip length (Access Area fleet).
-```{r eval=AA_DAS_param_hack, echo=params$AA_DAS_only}
+```{r eval=AA_DAS_param_hack, echo=AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>% 
   filter(fleet == "Access Area") %>% 
@@ -1469,7 +1469,7 @@ zone_out$table %>%
 <br><br><br>
 
 Share of trip length (Days at Sea fleet).
-```{r eval=AA_DAS_param_hack, echo=params$AA_DAS_only}
+```{r eval=AA_DAS_param_hack, echo=AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>% 
   filter(fleet == "Days at Sea") %>% 
@@ -1501,7 +1501,7 @@ zone_out$table %>%
 
 
 Share of trip length (GCIFQ fleet).
-```{r eval=!AA_DAS_param_hack, echo=!params$AA_DAS_only}
+```{r eval=!AA_DAS_param_hack, echo=!AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>% 
   mutate(TRIP_total = sum(TRIP_LENGTH)) %>% 
@@ -1534,7 +1534,7 @@ zone_out$table %>%
 ### CPUE
 
 Average CPUE for Access Area and Days at Sea fleets.
-```{r eval = params$AA_DAS_only, echo=params$AA_DAS_only}
+```{r eval = AA_DAS_param_hack, echo=AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>% 
   add_count(ZoneID) %>%
@@ -1557,7 +1557,7 @@ zone_out$table %>%
 <br><br><br>
 
 Average CPUE for Access Area fleet.
-```{r eval = params$AA_DAS_only, echo=params$AA_DAS_only}
+```{r eval = AA_DAS_param_hack, echo=AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>% 
   filter(fleet == "Access Area") %>% 
@@ -1581,7 +1581,7 @@ zone_out$table %>%
 <br><br><br>
 
 Average CPUE for Days at Sea fleet.
-```{r eval = params$AA_DAS_only, echo=params$AA_DAS_only}
+```{r eval = AA_DAS_param_hack, echo=AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>% 
   filter(fleet == "Days at Sea") %>% 
@@ -1604,7 +1604,7 @@ zone_out$table %>%
 <br><br><br>
 
 Average CPUE for GCIFQ fleet.
-```{r eval=!AA_DAS_param_hack, echo=!params$AA_DAS_only}
+```{r eval=!AA_DAS_param_hack, echo=!AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>% 
   add_count(ZoneID) %>%
@@ -1626,7 +1626,7 @@ zone_out$table %>%
 
 
 Average VPUE for Access Area and Days at Sea fleets.
-```{r eval = params$AA_DAS_only, echo=params$AA_DAS_only}
+```{r eval = AA_DAS_param_hack, echo=AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>% 
   add_count(ZoneID) %>%
@@ -1649,7 +1649,7 @@ zone_out$table %>%
 <br><br><br>
 
 Average VPUE for Access Area fleet. 
-```{r eval = params$AA_DAS_only, echo=params$AA_DAS_only}
+```{r eval = AA_DAS_param_hack, echo=AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>% 
   filter(fleet == "Access Area") %>% 
@@ -1671,7 +1671,7 @@ zone_out$table %>%
 <br><br><br>
 
 Average VPUE for Days at Sea fleet. 
-```{r eval = params$AA_DAS_only, echo=params$AA_DAS_only}
+```{r eval = AA_DAS_param_hack, echo=AA_DAS_param_hack}
 zone_out <- 
   scallop0322MainDataTable %>% 
   filter(fleet == "Days at Sea") %>% 
@@ -1694,7 +1694,7 @@ zone_out$table %>%
 <br><br><br>
 
 Average VPUE for GCIFQ fleet. 
-```{r eval = !params$AA_DAS_only, echo=!params$AA_DAS_only}
+```{r eval = !AA_DAS_param_hack, echo=!AA_DAS_param_hack}
 
 zone_out <- 
   scallop0322MainDataTable %>% 
