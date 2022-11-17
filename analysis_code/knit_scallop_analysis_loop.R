@@ -7,9 +7,9 @@ library("rmarkdown")
 here::i_am("analysis_code/knit_scallop_analysis_loop.R")
 
 # Define the "things" you want to loop over.
-AADAS_Vals_to_loop<-c(TRUE) # TRUE is the AADAS fleet. FALSE is the IFQ fleet
-subtrip_aggregate_vals_to_loop<-c(TRUE) # TRUE aggregates subtrips to trips. FALSE does not
-input_shapefile_vals_to_loop<-c("wind_NY2.RDS", "wind_sf_final.RDS") # Different "closure areas"
+AADAS_Vals_to_loop<-c(TRUE, FALSE) # TRUE is the AADAS fleet. FALSE is the IFQ fleet
+subtrip_aggregate_vals_to_loop<-c(TRUE, FALSE) # TRUE aggregates subtrips to trips. FALSE does not
+input_shapefile_vals_to_loop<-c("wind_sf_final.RDS") # Different "closure areas"
 
 
 # You shouldn't need to edit anything below this.
@@ -42,7 +42,6 @@ render_report = function(AA_DAS_only, subtrip_aggregate, input_shapefile) {
 }
 ################################################################################## 
 
-
 # Run lots of scallop analysis reports.
 for (AA_DAS_only_val in AADAS_Vals_to_loop ) {
   for (subtrip_aggregate_val in subtrip_aggregate_vals_to_loop ) {
@@ -51,6 +50,34 @@ for (AA_DAS_only_val in AADAS_Vals_to_loop ) {
     }
   }
 }
+
+
+
+##################################################################################
+#Define a function that passes parameters into the rmarkdown::render function
+render_tiny_report = function(AA_DAS_only, subtrip_aggregate, input_shapefile) {
+  rmarkdown::render(here("analysis_code","scallop_analysis_tiny_report.Rmd"), params = list(
+    AA_DAS_only = AA_DAS_only,
+    subtrip_aggregate = subtrip_aggregate,
+    input_shapefile=input_shapefile
+  ),
+  output_file = here("results",paste0("scallop_tiny_AA_",AA_DAS_only,"_subtripaggregate_",subtrip_aggregate,"_shapefile_",input_shapefile, ".html")
+  ))
+}
+################################################################################## 
+
+
+input_shapefile_vals_to_loop2<-c("wind_NY1.RDS","wind_NY2.RDS","wind_NY3.RDS","wind_Central_Atlantic_1.RDS", "wind_Central_Atlantic_2.RDS")
+# Run lots of scallop analysis reports.
+for (AA_DAS_only_val in AADAS_Vals_to_loop ) {
+  for (subtrip_aggregate_val in subtrip_aggregate_vals_to_loop ) {
+    for (input_shapefile_val in input_shapefile_vals_to_loop2)  {
+      render_report(AA_DAS_only_val,subtrip_aggregate_val, input_shapefile_val)
+    }
+  }
+}
+
+
 
 
 
