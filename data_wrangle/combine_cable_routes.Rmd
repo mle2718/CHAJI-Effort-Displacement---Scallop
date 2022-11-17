@@ -232,6 +232,14 @@ cable_list <- lapply(cable_list, prep_spat)
 wind_sf <- prep_spat(wind_sf)
 
 wind_NY1 <- prep_spat(wind_NY1)
+
+wind_NY1 <- 
+  wind_NY1 %>% 
+    st_union() %>% 
+    st_as_sf() %>% 
+    mutate(LEASE_NUMB = "NY Bight Call Area") %>%
+    rename(geometry = "x")
+
 wind_NY2 <- prep_spat(wind_NY2)
 wind_NY3 <- prep_spat(wind_NY3)
 
@@ -267,6 +275,8 @@ wind_sf_final <- add_polygon(cable_list, spat = wind_sf, spat.id = "LEASE_NUMB",
 
 ```{r}
 print(wind_sf_final, n = nrow(wind_sf_final))
+
+print(wind_NY1)
 ```
 
 
@@ -279,7 +289,7 @@ view_spat(wind_sf_final, id = "NAME")
 
 
 ```{r}
-view_spat(wind_NY1)
+view_spat(wind_NY1, id = "LEASE_NUMB")
 view_spat(wind_NY2)
 view_spat(wind_NY3)
 view_spat(wind_Central_Atlantic_1)
