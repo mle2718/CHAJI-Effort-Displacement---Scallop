@@ -9,17 +9,17 @@ urlcolor: blue
 params:
     DMIS_STYLE: 
       label: "DMIS_STYLE:"
-      value: "copyover"
+      value: "live"
       input: select
       choices: ["copyover", "live", "frozen_GARFO"]
     VTR_extraction: 
       label: "VTR_extraction:"
-      value: "copyover"
+      value: "live"
       input: select
       choices: ["copyover", "live"]
     scallop_linking_extraction: 
       label: "scallop_linking_extraction:"
-      value: "copyover"
+      value: "live"
       input: select
       choices: ["copyover", "live"]
 
