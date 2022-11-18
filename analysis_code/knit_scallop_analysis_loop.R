@@ -9,7 +9,7 @@ here::i_am("analysis_code/knit_scallop_analysis_loop.R")
 # Define the "things" you want to loop over.
 AADAS_Vals_to_loop<-c(TRUE) # TRUE is the AADAS fleet. FALSE is the IFQ fleet
 subtrip_aggregate_vals_to_loop<-c(TRUE) # TRUE aggregates subtrips to trips. FALSE does not
-input_shapefile_vals_to_loop<-c("wind_NY2.RDS", "wind_sf_final.RDS") # Different "closure areas"
+input_shapefile_vals_to_loop<-c("wind_NY2.RDS", "wind_sf_final.RDS", "wind_sf_nocable.RDS") # Different "closure areas". 
 
 
 # You shouldn't need to edit anything below this.
