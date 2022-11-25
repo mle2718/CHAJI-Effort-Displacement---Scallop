@@ -260,7 +260,7 @@ cat(tabl)
 tabl <- "
 | Column  | Description           |
 |------------|:-----------------------------------------------|
-|NAME| The name of an individual lease areas.| 
+|NAME| The name of an individual lease area.| 
 |LEASE_NUMB|Unique identifier assigned to a BOEM outer continental shelf (OCS) lease block|
 |MN10SQID|Unique identifier assigned to a ten-minute square. Ten-minute squares are represented by blocks comprising an area of ten minutes of latitude by ten minutes of longitude.|
 |MN30SQID|Unique identifier assigned to a ten-minute square. Ten-minute squares are represented by blocks comprising an area of thirty minutes of latitude by ten minutes of longitude|
