@@ -1196,7 +1196,7 @@ Percent of total catch (meat) for Access Area and Days at Sea fleets.
 zone_out <- 
   scallop0322MainDataTable %>% 
   mutate(MEAT_KG_total = sum(MEAT_KG)) %>% 
-  select(ZoneID, MEAT_KG, MEAT_KG_total) %>% 
+  dplyr::select(ZoneID, MEAT_KG, MEAT_KG_total) %>% 
   group_by(ZoneID) %>% 
   mutate(MEAT_KG = sum(MEAT_KG)/MEAT_KG_total * 100, n = n()) %>% 
   filter(n >= 10) %>% 
@@ -1225,7 +1225,7 @@ zone_out <-
   scallop0322MainDataTable %>% 
   filter(fleet == "Access Area") %>% 
   mutate(MEAT_KG_total = sum(MEAT_KG)) %>% 
-  select(ZoneID, MEAT_KG, MEAT_KG_total) %>% 
+  dplyr::select(ZoneID, MEAT_KG, MEAT_KG_total) %>% 
   group_by(ZoneID) %>% 
   mutate(MEAT_KG = sum(MEAT_KG)/MEAT_KG_total * 100, n = n()) %>% 
   filter(n >= 10) %>% 
@@ -1254,7 +1254,7 @@ zone_out <-
   scallop0322MainDataTable %>% 
   filter(fleet == "Days at Sea") %>% 
   mutate(MEAT_KG_total = sum(MEAT_KG)) %>% 
-  select(ZoneID, MEAT_KG, MEAT_KG_total) %>% 
+  dplyr::select(ZoneID, MEAT_KG, MEAT_KG_total) %>% 
   group_by(ZoneID) %>% 
   mutate(MEAT_KG = sum(MEAT_KG)/MEAT_KG_total * 100, n = n()) %>% 
   filter(n >= 10) %>% 
@@ -1282,7 +1282,7 @@ Percent of total catch (meats) within GCIFQ fleet.
 zone_out <- 
   scallop0322MainDataTable %>% 
   mutate(MEAT_KG_total = sum(MEAT_KG)) %>% 
-  select(ZoneID, MEAT_KG, MEAT_KG_total) %>% 
+  dplyr::select(ZoneID, MEAT_KG, MEAT_KG_total) %>% 
   group_by(ZoneID) %>% 
   mutate(MEAT_KG = sum(MEAT_KG)/MEAT_KG_total * 100,
          n = n()) %>% 
@@ -1410,7 +1410,7 @@ by total trip length. Working on fixing the legend labels.
 zone_out <- 
   scallop0322MainDataTable %>% 
   mutate(TRIP_total = sum(TRIP_LENGTH)) %>% 
-  select(ZoneID, TRIP_LENGTH, TRIP_total) %>% 
+  dplyr::select(ZoneID, TRIP_LENGTH, TRIP_total) %>% 
   group_by(ZoneID) %>% 
   mutate(TRIP_LENGTH = sum(TRIP_LENGTH)/TRIP_total * 100, n = n()) %>% 
   filter(n >= 10) %>% 
@@ -1442,7 +1442,7 @@ zone_out <-
   scallop0322MainDataTable %>% 
   filter(fleet == "Access Area") %>% 
   mutate(TRIP_total = sum(TRIP_LENGTH)) %>% 
-  select(ZoneID, TRIP_LENGTH, TRIP_total) %>% 
+  dplyr::select(ZoneID, TRIP_LENGTH, TRIP_total) %>% 
   group_by(ZoneID) %>% 
   mutate(TRIP_LENGTH = sum(TRIP_LENGTH)/TRIP_total * 100,
          n = n()) %>% 
@@ -1474,7 +1474,7 @@ zone_out <-
   scallop0322MainDataTable %>% 
   filter(fleet == "Days at Sea") %>% 
   mutate(TRIP_total = sum(TRIP_LENGTH)) %>% 
-  select(ZoneID, TRIP_LENGTH, TRIP_total) %>% 
+  dplyr::select(ZoneID, TRIP_LENGTH, TRIP_total) %>% 
   group_by(ZoneID) %>% 
   mutate(TRIP_LENGTH = sum(TRIP_LENGTH)/TRIP_total * 100, n = n()) %>% 
   filter(n >= 10) %>% 
@@ -1505,7 +1505,7 @@ Share of trip length (GCIFQ fleet).
 zone_out <- 
   scallop0322MainDataTable %>% 
   mutate(TRIP_total = sum(TRIP_LENGTH)) %>% 
-  select(ZoneID, TRIP_LENGTH, TRIP_total) %>% 
+  dplyr::select(ZoneID, TRIP_LENGTH, TRIP_total) %>% 
   group_by(ZoneID) %>% 
   mutate(TRIP_LENGTH = sum(TRIP_LENGTH)/TRIP_total * 100, n = n()) %>% 
   filter(n >= 10) %>% 
