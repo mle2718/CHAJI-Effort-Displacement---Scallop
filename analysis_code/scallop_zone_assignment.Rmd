@@ -37,7 +37,7 @@ for (p in PKG) {
 }
 
 # Set data vintage
-vintage_string<-"2022_02_16"
+vintage_string<-"2022_10_17"
 ```
    
    
@@ -51,7 +51,7 @@ FishSET team in Oct/Nov of last year.
 scallop_10_18 <- read_csv(here("data","main","cost_join_10_18.csv"))
 
 # load in final product
-final_product_savename<-paste0("final_product_lease",vintage_string,".Rds")
+final_product_savename<-paste0("final_product_lease_",vintage_string,".Rds")
 final_product_lease<-readRDS(here("data","main",final_product_savename))
 
 # overwrite 
