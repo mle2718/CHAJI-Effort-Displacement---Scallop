@@ -10,3 +10,5 @@ credentials.R
 *.RDS
 scallop_zone_assignment_files
 /FishSETFolder/*
+*.png
+*.sr.lock

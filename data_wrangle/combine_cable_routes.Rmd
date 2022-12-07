@@ -211,7 +211,15 @@ cable_folders <-
 cable_list <- lapply(cable_folders, function(x) sf::st_read(dsn = x))
 
 # wind lease areas
-wind_sf <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "All_Lease_Areas_Shapefile"))
+wind_sf <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "All_Lease_Areas_Shapefile","Wind_Lease_Outlines_Nov_22.shp"))
+
+wind_NY1 <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "NY Bight Nov 2022 Lease Areas","NY Bight Call Areas Nov 22.shp"))
+wind_NY2 <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "NY Bight Nov 2022 Lease Areas","NY Bight Wind Energy Area 2021 Nov 22.shp"))
+wind_NY3 <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "NY Bight Nov 2022 Lease Areas","NY Bight Lease Areas Nov 22.shp"))
+
+wind_Central_Atlantic_1 <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "Central Atlantic Planning and Call Area Shapefiles", "Central Atlantic Planning Area as of Jan 2022 Nov 22.shp"))
+wind_Central_Atlantic_2 <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "Central Atlantic Planning and Call Area Shapefiles", "Central Atlantic Call Area as of Feb 2022 Nov 22.shp"))
+
 
 ```
 
@@ -222,6 +230,25 @@ wind_sf <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "All_L
 cable_list <- lapply(cable_list, prep_spat) 
 
 wind_sf <- prep_spat(wind_sf)
+
+wind_NY1 <- prep_spat(wind_NY1)
+
+wind_NY1 <- 
+  wind_NY1 %>% 
+    st_union() %>% 
+    st_as_sf() %>% 
+    mutate(LEASE_NUMB = "NY Bight Call Area") %>%
+    rename(geometry = "x")
+
+wind_NY2 <- prep_spat(wind_NY2)
+wind_NY3 <- prep_spat(wind_NY3)
+
+wind_Central_Atlantic_1 <- prep_spat(wind_Central_Atlantic_1)
+wind_Central_Atlantic_2 <- prep_spat(wind_Central_Atlantic_2)
+
+
+
+
 ```
 
 
@@ -248,18 +275,44 @@ wind_sf_final <- add_polygon(cable_list, spat = wind_sf, spat.id = "LEASE_NUMB",
 
 ```{r}
 print(wind_sf_final, n = nrow(wind_sf_final))
+
+print(wind_NY1)
 ```
 
 
 ```{r}
+view_spat(wind_sf)
+
 view_spat(wind_sf_final, id = "NAME")
+
 ```
 
 
+```{r}
+view_spat(wind_NY1, id = "LEASE_NUMB")
+view_spat(wind_NY2)
+view_spat(wind_NY3)
+view_spat(wind_Central_Atlantic_1)
+view_spat(wind_Central_Atlantic_2)
+
+```
 ### Save 
 ```{r}
 lease_dirpath <- here("data", "main", "spatial")
 dir.create(lease_dirpath, showWarnings=FALSE)
 saveRDS(wind_sf_final,file=file.path(lease_dirpath,"wind_sf_final.RDS"))
+saveRDS(wind_sf,file=file.path(lease_dirpath,"wind_sf_nocable.RDS"))
+
+
+
+saveRDS(wind_NY1,file=file.path(lease_dirpath,"wind_NY1.RDS"))
+saveRDS(wind_NY2,file=file.path(lease_dirpath,"wind_NY2.RDS"))
+saveRDS(wind_NY3,file=file.path(lease_dirpath,"wind_NY3.RDS"))
+
+saveRDS(wind_Central_Atlantic_1,file=file.path(lease_dirpath,"wind_Central_Atlantic_1.RDS"))
+saveRDS(wind_Central_Atlantic_2,file=file.path(lease_dirpath,"wind_Central_Atlantic_2.RDS"))
+
+
+
 ```
 
