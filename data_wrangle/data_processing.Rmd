@@ -36,7 +36,6 @@ library("epiDisplay")
 library("fredr")
 vintage_string<-Sys.Date()
 vintage_string<-gsub("-","_",vintage_string)
-
 ```
 
 ```{r reset_vintage_string, include=TRUE, echo=TRUE, results=FALSE}
@@ -48,6 +47,7 @@ datasets_list<-gsub(".csv","",datasets_list)
 vintage_string<-max(datasets_list)
 rm(datasets_list)
 ```
+
 
 We will:
 
@@ -102,7 +102,8 @@ net<-network_location_remote
 # These are not part of the project path
 offshoreWind_directory<-file.path(net,"home5", "dcorvi","OffshoreWind","offshoreWind4","data")
 spacepanels_directory<-file.path(net,"home2", "mlee","dropoff","wind")
-cost_directory<-file.path(net,"work5","socialsci","Trip_Costs","2007-2020")
+cost_directory1<-file.path(net,"work5","socialsci","Trip_Costs","2000-2009")
+cost_directory2<-file.path(net,"work5","socialsci","Trip_Costs","2010-2021")
 
 # Set up paths.
 East_Cst_crop_2020_path<- here("data","external","shapefiles","East_Cst_crop_2020_extended")
@@ -117,6 +118,7 @@ All_Lease_Areas_Shapefile_path<-here("data","external","shapefiles","All_Lease_A
 
 Scallop_Linkingorg <- readRDS(here("data","intermediate",paste0("Scallop_Linkingorg_",vintage_string,".Rds")))
 RESULT_COMPILED <- readRDS(here("data","intermediate",paste0("RESULT_COMPILED_",vintage_string,".Rds")))
+
 APSD_DMIS_2 <- readRDS(here("data","intermediate",paste0("APSD_DMIS_2_",vintage_string,".Rds")))
 all_yrs_costs <- readRDS(here("data","intermediate",paste0("all_yrs_costs_",vintage_string,".Rds")))
 
@@ -226,15 +228,22 @@ Limited_Access_ft<-Limited_Access %>%
 ```{r subtrip_revenue, echo=TRUE}
 APSD_DMIS_2<-APSD_DMIS_2 %>% 
   group_by(IMGID) %>%
-  mutate(DOLLAR_ALL_SP=sum(DOLLAR)) %>%
+  mutate(DOLLAR_ALL_SP=sum(DOLLAR, na.rm=TRUE)) %>%
   relocate(DOLLAR_ALL_SP, .after=DOLLAR)
 ```
 
 
 ```{r datacleaning_step1, echo=TRUE}
+# FROZEN DMIS table has SPPNAME, but live DMIS table does not. USE NESPP3=800 to filter instead
+type<-strsplit(APSD_DMIS_2$dbsource[1],"_")[[1]][1]
 
-Scallops <- APSD_DMIS_2 %>% 
-  filter (SPPNAME == "SCALLOPS/BUSHEL")
+if(type=="frozen_GARFO"){
+  Scallops <- APSD_DMIS_2 %>% 
+    filter (SPPNAME == "SCALLOPS/BUSHEL")
+}else if(type=="live"){
+    Scallops <- APSD_DMIS_2 %>% 
+    filter (NESPP3 == 800)
+}
 
 #Separate Dates & Times
 Scallops$Date <- as.Date(Scallops$DATE_TRIP)
@@ -358,7 +367,7 @@ group_by("YEAR") %>%
 
 # Converting Revenues to Real Dollars 
 
-In order to construct operating profits later on we need to ensure that DOLLAR and TRIP_COST_WINSOR_2020_DOL match. The original data set has DOLLAR in nominal dollars and TRIP_COST_WINSOR_2020_DOL is in 2020 Real Dollars. To make the conversion we will use GDP Implicit Price Deflators collected from the Federal Reserve Bank and adjust the index to Q2 2020 to match calculation methods of the TRIP_COST_WINSOR_2020_DOL variable. 
+Revenues (DOLLAR) are nominal.  Trip costs are now provided in nominal terms.  However, we need Real values to compare across time. This code pull deflators st. louis federal reserve.
 
 ```{r obtain and set fred API key, echo=TRUE}
 
@@ -421,7 +430,9 @@ VTR_DMIS_AC <- VTR_DMIS_AC %>%
                          with_year = TRUE)) %>%
                          left_join(deflators, by =c("qdate"="date")) %>%
                mutate(DOLLAR_ALL_SP_2020=DOLLAR_ALL_SP/value,
-                      DOLLAR_2020=DOLLAR/value)
+                      DOLLAR_2020=DOLLAR/value,
+                      TRIP_COST_WINSOR_2020_DOL=TRIP_COST_NOMINALDOLS_WINSOR/value,
+                      TRIP_COST_2020_DOL=TRIP_COST_NOMINALDOLS/value)
 
 
 # Delete unnecessary data frame and variable
@@ -610,9 +621,9 @@ lease_sp <- st_read(All_Lease_Areas_Shapefile_path)
 point_geo_lease <- st_as_sf(final_product, 
                       coords = c(x  = "DDLON", y = "DDLAT"), crs = crs )
 
+lease_sp<-st_transform(lease_sp,crs)
 
 final_product_lease <- st_join(point_geo_lease, lease_sp, join = st_within)
-
 #geometry carries over all the way from the initial read in.
 identical(final_product_lease$geometry, point_geo$geometry)
 
