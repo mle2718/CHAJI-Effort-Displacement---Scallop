@@ -289,6 +289,8 @@ tabl <- "
 "
 cat(tabl) 
 ```
+Shapefiles outlining the Greater Atlantic region with ten-minute squares and lease areas are included in our analysis. Lease area outlines are downloaded periodically from collected from BOEM's Renewable Energy GIS Data website [https://www.boem.gov/renewable-energy/mapping-and-data/renewable-energy-gis-data]. The ten-minute square grid was created in ArcGIS Pro with help from Talya tenBrink, GARFO.
+
 
 # Read in Port lats and lons  
 
