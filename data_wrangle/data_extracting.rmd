@@ -9,17 +9,17 @@ urlcolor: blue
 params:
     DMIS_STYLE: 
       label: "DMIS_STYLE:"
-      value: "copyover"
+      value: "live"
       input: select
       choices: ["copyover", "live", "frozen_GARFO"]
     VTR_extraction: 
       label: "VTR_extraction:"
-      value: "copyover"
+      value: "live"
       input: select
       choices: ["copyover", "live"]
     scallop_linking_extraction: 
       label: "scallop_linking_extraction:"
-      value: "copyover"
+      value: "live"
       input: select
       choices: ["copyover", "live"]
 
@@ -276,6 +276,20 @@ cat(tabl)
 ```
 
 
+
+##  Description of spatial data.
+```{r Shapefiles overview, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
+tabl <- "
+| Column  | Description           |
+|------------|:-----------------------------------------------|
+|NAME| The name of an individual lease area.| 
+|LEASE_NUMB|Unique identifier assigned to a BOEM outer continental shelf (OCS) lease block|
+|MN10SQID|Unique identifier assigned to a ten-minute square. Ten-minute squares are represented by blocks comprising an area of ten minutes of latitude by ten minutes of longitude.|
+|MN30SQID|Unique identifier assigned to a ten-minute square. Ten-minute squares are represented by blocks comprising an area of thirty minutes of latitude by ten minutes of longitude|
+"
+cat(tabl) 
+```
+Shapefiles outlining the Greater Atlantic region with ten-minute squares and lease areas are included in our analysis. Lease area outlines are downloaded periodically from collected from BOEM's Renewable Energy GIS Data website [https://www.boem.gov/renewable-energy/mapping-and-data/renewable-energy-gis-data]. The ten-minute square grid was created in ArcGIS Pro with help from Talya tenBrink, GARFO.
 
 
 # Read in Port lats and lons  
