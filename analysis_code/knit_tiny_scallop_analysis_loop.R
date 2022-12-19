@@ -4,7 +4,7 @@
 library("here")
 library("rmarkdown")
 
-here::i_am("analysis_code/knit_scallop_analysis_loop.R")
+here::i_am("analysis_code/knit_tiny_scallop_analysis_loop.R")
 
 # Define the "things" you want to loop over.
 AADAS_Vals_to_loop<-c(TRUE) # TRUE is the AADAS fleet. FALSE is the IFQ fleet
