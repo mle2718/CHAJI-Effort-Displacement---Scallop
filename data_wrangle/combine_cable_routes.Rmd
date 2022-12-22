@@ -216,6 +216,7 @@ wind_sf <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "All_L
 wind_NY1 <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "NY Bight Nov 2022 Lease Areas","NY Bight Call Areas Nov 22.shp"))
 wind_NY2 <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "NY Bight Nov 2022 Lease Areas","NY Bight Wind Energy Area 2021 Nov 22.shp"))
 wind_NY3 <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "NY Bight Nov 2022 Lease Areas","NY Bight Lease Areas Nov 22.shp"))
+wind_NY_combined <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "NY Bight Nov 2022 Lease Areas","NY Bight Merge.shp"))
 
 wind_Central_Atlantic_1 <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "Central Atlantic Planning and Call Area Shapefiles", "Central Atlantic Planning Area as of Jan 2022 Nov 22.shp"))
 wind_Central_Atlantic_2 <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "Central Atlantic Planning and Call Area Shapefiles", "Central Atlantic Call Area as of Feb 2022 Nov 22.shp"))
