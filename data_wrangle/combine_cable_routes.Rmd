@@ -243,6 +243,7 @@ wind_NY1 <-
 
 wind_NY2 <- prep_spat(wind_NY2)
 wind_NY3 <- prep_spat(wind_NY3)
+wind_NY_combined <- prep_spat(wind_NY_combined)
 
 wind_Central_Atlantic_1 <- prep_spat(wind_Central_Atlantic_1)
 wind_Central_Atlantic_2 <- prep_spat(wind_Central_Atlantic_2)
@@ -293,6 +294,7 @@ view_spat(wind_sf_final, id = "NAME")
 view_spat(wind_NY1, id = "LEASE_NUMB")
 view_spat(wind_NY2)
 view_spat(wind_NY3)
+view_spat(wind_NY_combined)
 view_spat(wind_Central_Atlantic_1)
 view_spat(wind_Central_Atlantic_2)
 
@@ -309,6 +311,7 @@ saveRDS(wind_sf,file=file.path(lease_dirpath,"wind_sf_nocable.RDS"))
 saveRDS(wind_NY1,file=file.path(lease_dirpath,"wind_NY1.RDS"))
 saveRDS(wind_NY2,file=file.path(lease_dirpath,"wind_NY2.RDS"))
 saveRDS(wind_NY3,file=file.path(lease_dirpath,"wind_NY3.RDS"))
+saveRDS(wind_NY_combined,file=file.path(lease_dirpath,"wind_NY_combined.RDS"))
 
 saveRDS(wind_Central_Atlantic_1,file=file.path(lease_dirpath,"wind_Central_Atlantic_1.RDS"))
 saveRDS(wind_Central_Atlantic_2,file=file.path(lease_dirpath,"wind_Central_Atlantic_2.RDS"))
