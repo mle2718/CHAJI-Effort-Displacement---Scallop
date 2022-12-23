@@ -18,7 +18,7 @@ params:
       input: select
       choices: [Woods_Hole, Seattle]
     input_shapefile:
-      value: "wind_NY2.RDS"
+      value: "wind_NY_combined.RDS"
       choices: ["wind_NY1.RDS","wind_NY2.RDS","wind_NY3.RDS","wind_Central_Atlantic_1.RDS", "wind_Central_Atlantic_2.RDS"]
 
     PreRelease: TRUE
@@ -639,7 +639,8 @@ agg_helper(scallop0322MainDataTable, value = "in_closure",
 
 Number of observations.
 ```{r}
-out_switch <- ifelse(params$input_shapefile == "wind_NY1.RDS", "table", "tab_plot")
+table_convert <- c("wind_NY1.RDS", "wind_NY3.RDS")
+out_switch <- ifelse(params$input_shapefile %in% table_convert, "table", "tab_plot")
 
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
