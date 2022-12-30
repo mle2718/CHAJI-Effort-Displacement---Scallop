@@ -18,7 +18,7 @@ params:
       input: select
       choices: [Woods_Hole, Seattle]
     input_shapefile:
-      value: "wind_NY_combined.RDS"
+      value: "wind_NY2.RDS"
       choices: ["wind_NY1.RDS","wind_NY2.RDS","wind_NY3.RDS","wind_Central_Atlantic_1.RDS", "wind_Central_Atlantic_2.RDS"]
 
     PreRelease: TRUE
@@ -357,7 +357,7 @@ Here is DOLLAR, KILOGRAMS, and TRIP_LENGTH separately.
 ```{r}
 scallop0322MainDataTable %>% 
   summarize(across(.cols = c("DOLLAR_2020", "KILOGRAMS", "TRIP_LENGTH"), 
-                   .fns = list(min = min, median = median, mean = mean, max = max, sum=sum,
+                   .fns = list(min = min, median = median, mean = mean, max = max, StdDev = sd ,sum=sum, Q25 = ~quantile(.,0.25), Q50 = ~quantile(.,0.50), Q75 = ~quantile(.,0.75), Q95 = ~quantile(.,0.95),
                                NAs = ~sum(is.na(.x)), UniqueObs = n_distinct, 
                                "No. 0's" = ~sum(.x == 0)), 
                    .names = "{.col}__{.fn}")) %>% 
@@ -639,7 +639,7 @@ agg_helper(scallop0322MainDataTable, value = "in_closure",
 
 Number of observations.
 ```{r}
-table_convert <- c("wind_NY1.RDS", "wind_NY3.RDS")
+table_convert <- c("wind_NY1.RDS","wind_NY2.RDS", "wind_NY3.RDS")
 out_switch <- ifelse(params$input_shapefile %in% table_convert, "table", "tab_plot")
 
 zone_out <- 
