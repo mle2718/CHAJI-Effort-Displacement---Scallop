@@ -51,6 +51,9 @@ The data processing code depends on:
 1.  The ability to connect to NEFSC oracle databases (VTR and the Live DMIS tables at APSD.t_ssb_trip_current@garfo_nefsc).  We are using RODBC.  R may need to be aware of where your ORACLE_HOME is  -- take a look [here](https://github.com/NEFSC/READ-SSB-LEE-On-the-servers).  
 2.  The ability to get files from the frozen `APSD_DMIS_2.rda`, `trip_cost.xlsx`, and `just_ports_YYYY_MM_DD.dta` files from the network.
 
+You may also need to use set R's libPath to home2/mlee/R/x86_64_pc-linux-gnu-library to use a pre-release version of FishSET.
+
+
 # Project Roles and Responsibilities
 
 The roles/responsibilties doesn't quite belong in this spot, and yet here we are.
