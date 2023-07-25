@@ -13,3 +13,4 @@ scallop_zone_assignment_files
 *.png
 *.sr.lock
 .renviron
+.Renviron
