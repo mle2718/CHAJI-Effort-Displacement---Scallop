@@ -160,7 +160,9 @@ final_product_lease$scallop_fishing_yearD <- lubridate::date_decimal(final_produ
 
 final_product_lease <- final_product_lease %>%
   mutate(KILOGRAMS = POUNDS/pounds_to_kg,
-         LANDED_KG=LANDED/pounds_to_kg)
+         LANDED_KG=LANDED/pounds_to_kg) %>%
+  mutate(NAME= stringr::str_replace(NAME,"OCS-A 0499", "OCS-A0499"),
+         lease_FS=stringr::str_replace(lease_FS,"OCS-A 0499", "OCS-A0499") )
 
 #A column of ones. Useful for many things
 final_product_lease$ones<-1
