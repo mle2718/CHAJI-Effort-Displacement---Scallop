@@ -35,13 +35,17 @@ here(), load libraries, and set a data vintage.
 # Set Path
 here::i_am("data_wrangle/data_extracting.rmd")
 
-# Please ensure you have the proper packages installed with (install.packages()) or a request to ITD if any libaries do not load.  
+# Please ensure you have the proper packages installed with (install.packages()) or a request to ITD if any libraries do not load.  
 library("here")
 library("RODBC")
-library(readstata13, lib.loc="/net/home2/mlee/R/x86_64_pc-linux-gnu-library")
-#library("readstata13")
+#library(readstata13, lib.loc="/net/home2/mlee/R/x86_64_pc-linux-gnu-library")
+library("readstata13")
 library("readxl")
 library("tibble")
+library("DBI")
+library("dplyr")
+library("tidyr")
+library("ROracle")
 vintage_string<-Sys.Date()
 vintage_string<-gsub("-","_",vintage_string)
 
@@ -81,20 +85,23 @@ This is a block of code where we set up the oracle passwords and make R aware of
 ```{r oracle_connections, echo=TRUE, results=FALSE}
 source(here("data_wrangle","credentials.R"))
 
-# Set the network_location_desktop and network_location_remote variables somewhere OUTSIDE of this code.  The best place to do this is in the .Rprofile or .Renviron files that are in your root directory.  
-
-#Comment one of these out, depending on whether you are running this code on a server or locally (with VPN) 
-net<-network_location_desktop
-net<-network_location_remote
+# If using a user container, ITD will need to mount mlee, dcorvi and socialsci in order to access all necessary directories.   
+# If using the network_location_desktop and network_location_remote variables set these somewhere OUTSIDE of this code. The best place to do this is in the .Rprofile or .Renviron files that are in your root directory.   
 
 
-ml.intermediate.path<-file.path(net,"home2","mlee","Effort-Displacement---Scallop","data","intermediate")
+# Note in both cases, Directories should be set in your credentials.R file
+
+ml.intermediate.path<-file.path(mlee_dir,"Effort-Displacement---Scallop","data","intermediate")
 
 # These are not part of the project path
-offshoreWind_directory<-file.path(net,"home5", "dcorvi","OffshoreWind","offshoreWind4","data")
-spacepanels_directory<-file.path(net,"home2", "mlee","dropoff","wind")
-cost_directory1<-file.path(net,"work5","socialsci","Trip_Costs","2000-2009")
-cost_directory2<-file.path(net,"work5","socialsci","Trip_Costs","2010-2021")
+
+offshoreWind_directory<-file.path(socialsci_dir,"Geret_Rasters","Data","offshore_wind_package_data","support_tables","backup_data_folder","data")
+
+spacepanels_directory<-file.path(mlee_dir,"dropoff","wind")
+
+cost_directory1<-file.path(socialsci_dir,"Trip_Costs","2000-2009")
+cost_directory2<-file.path(socialsci_dir,"Trip_Costs","2010-2021")
+
 
 # Set up paths.
 East_Cst_crop_2020_path<- here("data","external","shapefiles","East_Cst_crop_2020_extended")
@@ -325,13 +332,20 @@ if (params$DMIS_STYLE=="frozen_GARFO"){
   load(file.path(offshoreWind_directory, "APSD_DMIS_2.rda"))
   APSD_DMIS_2$dbsource="frozen_GARFO"
 } else if(params$DMIS_STYLE=="live"){
-  oracle_server = "sole"
-  ODBC.CONNECTION <- RODBC::odbcConnect(dsn=oracle_server, uid=oracle_username, pwd=oracle_password, believeNRows=FALSE)
-  CURRENT.QUERY = paste ("select * FROM APSD.DMIS_WIND_TEST@garfo_nefsc")
-  APSD_DMIS_2 = sqlQuery(ODBC.CONNECTION, CURRENT.QUERY)
-  odbcCloseAll()
   
-  APSD_DMIS_2$dbsource<-paste0("live_",vintage_string)
+con <- ROracle::dbConnect(
+  drv = ROracle::Oracle(),
+  username = oracle_username,
+  password = oracle_password,
+  dbname = "sole")
+
+APSD_DMIS_2 <- tbl(con, sql("select * from APSD.DMIS_WIND_TEST@garfo_nefsc")) %>%
+  mutate("year" = lubridate::year(DATE_TRIP)) %>%
+  mutate("month" = lubridate::month(DATE_TRIP)) %>%
+  mutate("day" = lubridate::day(DATE_TRIP)) %>%
+  dplyr::select(-DATE_TRIP) %>% collect()
+
+  
 } else if(params$DMIS_STYLE=="copyover"){
 # Do nothing
 }
