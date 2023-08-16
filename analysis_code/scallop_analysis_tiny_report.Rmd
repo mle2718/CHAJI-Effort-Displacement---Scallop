@@ -730,20 +730,27 @@ zone_summary(scallop0322MainDataTable, project = project,
          output = out_switch)
 
 if (out_switch == "table") {
-  
+  eval_next=FALSE
   zone_out %>% 
     pretty_lab() %>% 
     pretty_tab_sb(width = "40%")
   
-} else {
-  
+} else if (out_switch=="tab_plot"){
+
+  eval_next=TRUE
+  zone_out$plot
+
+}
+```
+
+```{r, eval=eval_next}
   zone_out$table %>%
     pretty_lab() %>% 
     pretty_tab_sb(width = "40%")
 
-  zone_out$plot
-}
+
 ```
+
 
 <br><br><br>
 Percent of Scallop revenue by closure area. 
@@ -1198,7 +1205,7 @@ if (out_switch == "table") {
   zone_out$table %>%
     pretty_lab() %>% 
     pretty_tab_sb(width = "40%")
-
+  
   zone_out$plot
 }
 ```
