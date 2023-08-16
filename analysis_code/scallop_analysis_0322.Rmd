@@ -21,7 +21,6 @@ params:
       value: "wind_sf_nocable.RDS"
       choices: ["wind_sf_final.RDS","wind_sf_nocable.RDS","wind_NY2.RDS"]
 
-    PreRelease: FALSE
 ---
 <!---
 YAML options: 
@@ -76,11 +75,7 @@ underdeveloped, or any thoughts or suggestions you may have.
 
 ```{r setup, echo=FALSE}
 # Load the PreRelease version of FishSET if PreRelease==TRUE. Otherwise, load the normal install.
-if (params$PreRelease==TRUE){
-  library(FishSET, lib.loc="/net/home2/mlee/R/x86_64_pc-linux-gnu-library")
-} else{
-  library(FishSET)
-}
+library(FishSET)
 
 #library("tidyverse")
 tidyverse_short <- c("dplyr",  "ggplot2", "magrittr", "tidyr", "lubridate") 
