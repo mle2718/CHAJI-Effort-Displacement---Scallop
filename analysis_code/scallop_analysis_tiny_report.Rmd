@@ -1,12 +1,12 @@
 ---
 title: "Mini Scallop Data Summary"
 author: "Alan Haynie, Melanie Harsch, Bryce McManus"
-date: '`r Sys.Date()`'
+date: "`r Sys.Date()`"
 output:
   html_document:
     keep_md: yes
-    toc: true
-    toc_float: true
+    toc: yes
+    toc_float: yes
     code_folding: show
 params:
     AA_DAS_only: TRUE
@@ -20,8 +20,6 @@ params:
     input_shapefile:
       value: "wind_NY1.RDS"
       choices: ["wind_NY1.RDS","wind_NY2.RDS","wind_NY3.RDS","wind_Central_Atlantic_1.RDS", "wind_Central_Atlantic_2.RDS","wind_sf_final.RDS","wind_sf_nocable.RDS"]
-
-    PreRelease: FALSE
 ---
 <!---
 YAML options: 
@@ -75,12 +73,8 @@ underdeveloped, or any thoughts or suggestions you may have.
 ## Library
 
 ```{r setup, echo=FALSE}
-# Load the PreRelease version of FishSET if PreRelease==TRUE. Otherwise, load the normal install.
-if (params$PreRelease==TRUE){
-  library(FishSET, lib.loc="/net/home2/mlee/R/x86_64_pc-linux-gnu-library")
-} else{
-  library(FishSET)
-}
+
+library(FishSET)
 
 #library("tidyverse")
 tidyverse_short <- c("dplyr",  "ggplot2", "magrittr", "tidyr", "lubridate") 
