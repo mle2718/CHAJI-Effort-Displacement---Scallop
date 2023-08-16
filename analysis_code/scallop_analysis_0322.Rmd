@@ -21,7 +21,7 @@ params:
       value: "wind_sf_nocable.RDS"
       choices: ["wind_sf_final.RDS","wind_sf_nocable.RDS","wind_NY2.RDS"]
 
-    PreRelease: TRUE
+    PreRelease: FALSE
 ---
 <!---
 YAML options: 
