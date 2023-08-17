@@ -19,17 +19,19 @@ While the empirical setting that we have chosen is the Limited Access Scallop fi
 
 # Testing and Functionality
 
-The data extraction code has primarily been developed by Marina Chaji and runs on the neptune server at NEFSC. 
+The data extraction code was primarily been developed by Marina Chaji and ran on the neptune server at NEFSC. 
 *   R version 4.0.5 (2021-03-31) -- "Shake and Throw"
 *   Rstudio server Version 1.4.1103
 
-Don't use mars because it's on an older version of R.
+In preparation for the retirement on the Neptune server, development was moved to individual containers in July 2023. This code will run on the standard NEFSC R container, which is running R 4.3.0 (2023-04-21)
+The data analysis code runs properly.  The containers do not support RODBC, so all of the data extraction code has to be switched to ROracle.  Only some of it has been switched over.
 
 # Getting started
 
-1.  Clone the repository onto the neptune server on the NEFSC network.
-    1.  If you are already using github on neptune, then this is straightforward.
-    1.  If not, you will need to follow the steps here [here](https://github.com/NEFSC/READ-SSB-LEE-On-the-servers) for the steps to create an access token, store it on neptune, and clone a repository.
+1. Get a container set up on the NEFSC network.
+1.  Clone the repository onto the your container on the NEFSC network.
+    1.  If you are already using github on your container, then this is straightforward.
+    1.  If not, you will need to follow the steps here [here](https://github.com/NEFSC/READ-SSB-LEE-On-the-servers) for the steps to create an access token, store it, and clone a repository.
 1.  Rename and edit your local copy of [R_credentials_sample.R](/data_wrangle/R_credentials_sample.R) to `credentials.R`. Follow the instructions in comments at the top.
 1.  Edit your .Rprofile or .Renviron to be aware of *network_location_desktop* and *network_location_remote* variables.
 1.  Use Rstudio to knit the [code to extract and processes data](/data_wrangle/data_extraction_and_processing_code.Rmd) to html.
@@ -70,12 +72,10 @@ The roles/responsibilties doesn't quite belong in this spot, and yet here we are
 
 * Lisa - actual modeling advice
 
-## AKFSC  
+## Others  
 
-* Alan- Big picture fishery applications.
-* Bryce - Day to day FishSET
-* Melanie -  Day to day FishSET 
-
+* Alan (ICES)- Big picture fishery applications.
+* Paul - Pacific States Marine Fisheries Commission - FishSET development.
 
 # Outside data sources
 We have added various shapefiles to the repository. 
