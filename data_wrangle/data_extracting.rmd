@@ -407,7 +407,6 @@ con <- ROracle::dbConnect(
   dbname = "sole")
 
 
-#ODBC.CONNECTION <- RODBC::odbcConnect(dsn=oracle_server, uid=oracle_username, pwd=oracle_password, believeNRows=FALSE)
 START.YEAR = 2007
 END.YEAR = 2022
 
