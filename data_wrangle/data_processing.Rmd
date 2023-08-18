@@ -93,17 +93,23 @@ This is a block of code where we set up the oracle passwords and make R aware of
 ```{r oracle_connections, echo=TRUE, results=FALSE}
 source(here("data_wrangle","credentials.R"))
 
-# Set the network_location_desktop and network_location_remote variables somewhere OUTSIDE of this code.  The best place to do this is in the .Rprofile or .Renviron files that are in your root directory.  
+# If using a user container, ITD will need to mount mlee, dcorvi and socialsci in order to access all necessary directories.   
+# If using the network_location_desktop and network_location_remote variables set these somewhere OUTSIDE of this code. The best place to do this is in the .Rprofile or .Renviron files that are in your root directory.   
 
-#Comment one of these out, depending on whether you are running this code on a server or locally (with VPN) 
-net<-network_location_desktop
-net<-network_location_remote
+
+# Note in both cases, Directories should be set in your credentials.R file
+
+ml.intermediate.path<-file.path(mlee_dir,"Effort-Displacement---Scallop","data","intermediate")
 
 # These are not part of the project path
-offshoreWind_directory<-file.path(net,"home5", "dcorvi","OffshoreWind","offshoreWind4","data")
-spacepanels_directory<-file.path(net,"home2", "mlee","dropoff","wind")
-cost_directory1<-file.path(net,"work5","socialsci","Trip_Costs","2000-2009")
-cost_directory2<-file.path(net,"work5","socialsci","Trip_Costs","2010-2021")
+
+offshoreWind_directory<-file.path(socialsci_dir,"Geret_Rasters","Data","offshore_wind_package_data","support_tables","backup_data_folder","data")
+
+spacepanels_location<-file.path(mlee_dir,"dropoff","wind","just_ports_2023_08_11.dta")
+
+cost_directory1<-file.path(socialsci_dir,"Trip_Costs","2000-2009")
+cost_directory2<-file.path(socialsci_dir,"Trip_Costs","2010-2021")
+
 
 # Set up paths.
 East_Cst_crop_2020_path<- here("data","external","shapefiles","East_Cst_crop_2020_extended")
