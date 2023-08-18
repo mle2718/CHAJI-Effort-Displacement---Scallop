@@ -37,8 +37,6 @@ here::i_am("data_wrangle/data_extracting.rmd")
 
 # Please ensure you have the proper packages installed with (install.packages()) or a request to ITD if any libraries do not load.  
 library("here")
-library("RODBC")
-#library(readstata13, lib.loc="/net/home2/mlee/R/x86_64_pc-linux-gnu-library")
 library("readstata13")
 library("readxl")
 library("tibble")
@@ -402,19 +400,27 @@ Some Trip-level data in the VTR schema is needed. See table at the top.  We extr
 # Get the live data 
 if (params$VTR_extraction=="live"){ 
 
-oracle_server = "sole"
-ODBC.CONNECTION <- RODBC::odbcConnect(dsn=oracle_server, uid=oracle_username, pwd=oracle_password, believeNRows=FALSE)
+con <- ROracle::dbConnect(
+  drv = ROracle::Oracle(),
+  username = oracle_username,
+  password = oracle_password,
+  dbname = "sole")
+
+
+#ODBC.CONNECTION <- RODBC::odbcConnect(dsn=oracle_server, uid=oracle_username, pwd=oracle_password, believeNRows=FALSE)
 START.YEAR = 2007
 END.YEAR = 2022
+
 RESULT.COMPILED<-list()
 t<-1
 for(i in START.YEAR:END.YEAR) {
   print(i)
-  CURRENT.QUERY = paste("SELECT VTR.veslog",i,"t.TRIPID,tripcatg, operator, opernum, permit, nsubtrip, crew,not_fished, port as VTR_PORTNUM  
-                FROM VTR.veslog",i,"t", sep="")
-  RESULT.COMPILED[[t]] = sqlQuery(ODBC.CONNECTION, CURRENT.QUERY)  
+  CURRENT.QUERY = paste("SELECT TRIPID, tripcatg, operator, opernum, permit, nsubtrip, crew,not_fished, port as VTR_PORTNUM FROM VTR.veslog",i,"t", sep="")
+  RESULT.COMPILED[[t]] <- tbl(con,sql(CURRENT.QUERY)) %>% collect()
   t<-t+1
 }    
+dbDisconnect(con)
+
 
 RESULT.COMPILED<-do.call(rbind.data.frame, RESULT.COMPILED)
 RESULT.COMPILED_name <-paste0("RESULT_COMPILED_",vintage_string,".Rds")
@@ -449,13 +455,18 @@ We  also extract the T/F variables corresponding the the PLAN_CAT in DMIS.
 ```{r DMIS_Query, echo=TRUE,eval=TRUE}
  if (params$scallop_linking_extraction=="live"){ 
 
-oracle_server = "sole"
+con <- ROracle::dbConnect(
+  drv = ROracle::Oracle(),
+  username = oracle_username,
+  password = oracle_password,
+  dbname = "sole")
+
 CURRENT.QUERY = paste ("SELECT TRIP_ID, DOCID, ACTIVITY_CODE, DAS_ID, LGC_A, LGC_B, LGC_C, SC_2, SC_3, SC_4, SC_5, SC_6, SC_7, SC_8, SC_9, SG_1A, SG_1B
  FROM APSD.t_ssb_trip_current@garfo_nefsc")
-Scallop_Linkingorg = sqlQuery(ODBC.CONNECTION, CURRENT.QUERY)
 
-odbcCloseAll()
+Scallop_Linkingorg <- tbl(con,sql(CURRENT.QUERY)) %>% collect()
 
+dbDisconnect(con)
 
 
 #save to RDS
