@@ -97,7 +97,7 @@ ml.intermediate.path<-file.path(mlee_dir,"Effort-Displacement---Scallop","data",
 
 offshoreWind_directory<-file.path(socialsci_dir,"Geret_Rasters","Data","offshore_wind_package_data","support_tables","backup_data_folder","data")
 
-spacepanels_directory<-file.path(mlee_dir,"dropoff","wind")
+spacepanels_location<-file.path(mlee_dir,"dropoff","wind","just_ports_2023_08_11.dta")
 
 cost_directory1<-file.path(socialsci_dir,"Trip_Costs","2000-2009")
 cost_directory2<-file.path(socialsci_dir,"Trip_Costs","2010-2021")
@@ -305,7 +305,7 @@ Load in the lats and lons of all ports from the spacepanels directory. Change th
 
 ```{r readin_spacepanels, echo=TRUE,eval=TRUE}
 #Import Data
-tripid_geoids<- read.dta13(file.path(spacepanels_directory,"just_ports_2022_01_26.dta"))
+tripid_geoids<- read.dta13(spacepanels_location)
 #Could do all this in one step, but ...
 # Pick the cols that start with previous
 prev<-tripid_geoids[grepl("^previous_", colnames(tripid_geoids))]
