@@ -74,7 +74,6 @@ underdeveloped, or any thoughts or suggestions you may have.
 ## Library
 
 ```{r setup, echo=FALSE}
-# Load the PreRelease version of FishSET if PreRelease==TRUE. Otherwise, load the normal install.
 library(FishSET)
 
 #library("tidyverse")
