@@ -211,7 +211,7 @@ cable_folders <-
 cable_list <- lapply(cable_folders, function(x) sf::st_read(dsn = x))
 
 # wind lease areas
-wind_sf <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "All_Lease_Areas_Shapefile","Wind_Lease_Outlines_Nov_22.shp"))
+wind_sf <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "Leases August 2023","August_Leases_BOEM_Greater_Atl_No_Cable.shp"))
 
 wind_NY1 <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "NY Bight Aug 2023","Combined 3 Areas","NY Bight Call Area.shp"))
 wind_NY2 <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "NY Bight Aug 2023","Combined 3 Areas","NY Bight Wind Energy Area.shp"))
@@ -233,6 +233,11 @@ wind_Central_Atlantic_2 <- sf::st_read(dsn = here::here("data", "external", "sha
 cable_list <- lapply(cable_list, prep_spat) 
 
 wind_sf <- prep_spat(wind_sf)
+
+#Rename columns to match all shapefiles
+  colnames(wind_sf)[colnames(wind_sf) == "LEASE_NUMB"] <- "LEASE_NUMB_NN"
+colnames(wind_sf)[colnames(wind_sf) == "LEASE_NU_1"] <- "LEASE_NUMB"
+  
 
 wind_NY1 <- prep_spat(wind_NY1)
 
