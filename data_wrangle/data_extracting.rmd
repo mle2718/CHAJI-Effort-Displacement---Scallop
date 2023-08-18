@@ -337,7 +337,7 @@ con <- ROracle::dbConnect(
   password = oracle_password,
   dbname = "sole")
 
-APSD_DMIS_2 <- tbl(con, sql("select * from APSD.DMIS_WIND_TEST@garfo_nefsc")) %>%
+APSD_DMIS_2 <- tbl(con, sql("select * from APSD.DMIS_WIND_111522@garfo_nefsc")) %>%
   mutate("year" = lubridate::year(DATE_TRIP)) %>%
   mutate("month" = lubridate::month(DATE_TRIP)) %>%
   mutate("day" = lubridate::day(DATE_TRIP)) %>%
