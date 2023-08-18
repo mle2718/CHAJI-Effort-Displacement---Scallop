@@ -18,7 +18,7 @@ params:
       input: select
       choices: [Woods_Hole, Seattle]
     input_shapefile:
-      value: "wind_NY1.RDS"
+      value: "wind_sf_nocable.RDS"
       choices: ["wind_NY1.RDS","wind_NY2.RDS","wind_NY3.RDS","wind_Central_Atlantic_1.RDS", "wind_Central_Atlantic_2.RDS","wind_sf_final.RDS","wind_sf_nocable.RDS"]
 
     PreRelease: FALSE
@@ -641,8 +641,8 @@ agg_helper(scallop0322MainDataTable, value = "in_closure",
 
 Number of observations.
 ```{r}
-table_convert <- c("wind_NY1.RDS","wind_NY2.RDS","wind_NY3.RDS","wind_Central_Atlantic_1.RDS", "wind_Central_Atlantic_2.RDS","wind_sf_final.RDS","wind_sf_nocable.RDS")
-out_switch <- ifelse(params$input_shapefile %in% table_convert, "tab_plot")
+table_convert <- c("wind_NY1.RDS","wind_NY2.RDS","wind_NY3.RDS","wind_Central_Atlantic_1.RDS", "wind_Central_Atlantic_2.RDS")
+out_switch <- ifelse(params$input_shapefile %in% table_convert, "table", "tab_plot")
 
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -655,19 +655,25 @@ zone_summary(scallop0322MainDataTable, project = project,
          output = out_switch)
 
 if (out_switch == "table") {
-  
+  eval_next=FALSE
   zone_out %>% 
     pretty_lab() %>% 
     pretty_tab_sb(width = "40%")
   
-} else {
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+```
+
+```{r, eval=eval_next}
   
   zone_out$table %>%
     pretty_lab() %>% 
     pretty_tab_sb(width = "40%")
 
   zone_out$plot
-}
+
 ```
 
 
@@ -710,14 +716,20 @@ if (out_switch == "table") {
     pretty_lab() %>% 
     pretty_tab_sb(width = "40%")
   
-} else {
-  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+```
+
+```{r, eval=eval_next}
+  eval_next=FALSE
   zone_out$table %>%
     pretty_lab() %>% 
     pretty_tab_sb(width = "40%")
 
   zone_out$plot
-}
+
 ```
 
 <br><br><br>
@@ -736,19 +748,25 @@ zone_summary(scallop0322MainDataTable, project = project,
          output = out_switch)
 
 if (out_switch == "table") {
-  
+  eval_next=FALSE
   zone_out %>% 
     pretty_lab() %>% 
     pretty_tab_sb(width = "40%")
   
-} else {
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+```
+
+```{r, eval=eval_next}
   
   zone_out$table %>%
     pretty_lab() %>% 
     pretty_tab_sb(width = "40%")
 
   zone_out$plot
-}
+
 ```
 
 <br><br><br>
@@ -767,19 +785,25 @@ zone_summary(scallop0322MainDataTable, project = project,
          output = out_switch)
 
 if (out_switch == "table") {
-  
+  eval_next=FALSE
   zone_out %>% 
     pretty_lab() %>% 
     pretty_tab_sb(width = "60%")
   
-} else {
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+```
+
+```{r, eval=eval_next}
   
   zone_out$table %>%
     pretty_lab() %>% 
     pretty_tab_sb(width = "60%")
 
-  zone_out$plot
-}
+
+
 ```
 
 
@@ -797,22 +821,30 @@ zone_summary(scallop0322MainDataTable, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = FALSE, dat.center = FALSE,
+         for(y in 1:ncol(df)){
+ if (is.na(df[1,y])) df[1,y] = 0
+}
          output = out_switch)
 
 if (out_switch == "table") {
-  
+  eval_next=FALSE
   zone_out %>% 
     pretty_lab() %>% 
     pretty_tab_sb(width = "60%")
   
-} else {
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+```
+
+```{r, eval=eval_next}
   
   zone_out$table %>%
     pretty_lab() %>% 
     pretty_tab_sb(width = "60%")
 
-  zone_out$plot
-}
+
 ```
 
 
@@ -834,19 +866,23 @@ zone_summary(scallop0322MainDataTable, project = project,
          output = out_switch)
 
 if (out_switch == "table") {
-  
+  eval_next=FALSE
   zone_out %>% 
     pretty_lab() %>% 
     pretty_tab_sb(width = "60%")
   
-} else {
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+zone_out$plot }
+
+```
+
+```{r, eval=eval_next}
   
   zone_out$table %>%
     pretty_lab() %>% 
-    pretty_tab_sb(width = "60%")
+    pretty_tab_sb(width = "40%")
 
-  zone_out$plot
-}
 ```
 
 <br><br><br>
@@ -865,19 +901,23 @@ zone_summary(scallop0322MainDataTable, project = project,
          output = out_switch)
 
 if (out_switch == "table") {
-  
+  eval_next=FALSE
   zone_out %>% 
     pretty_lab() %>% 
     pretty_tab_sb(width = "60%")
   
-} else {
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+```
+
+```{r, eval=eval_next}
   
   zone_out$table %>%
     pretty_lab() %>% 
     pretty_tab_sb(width = "60%")
 
-  zone_out$plot
-}
 ```
 
 
@@ -898,19 +938,23 @@ zone_summary(scallop0322MainDataTable, project = project,
          output = out_switch)
 
 if (out_switch == "table") {
-  
+  eval_next=FALSE
   zone_out %>% 
     pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
+    pretty_tab_sb(width = "60%")
   
-} else {
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+```
+
+```{r, eval=eval_next}
   
   zone_out$table %>%
     pretty_lab() %>% 
     pretty_tab_sb(width = "40%")
 
-  zone_out$plot
-}
 ```
 
 <br><br><br>
@@ -929,19 +973,23 @@ zone_summary(scallop0322MainDataTable, project = project,
          output = out_switch)
 
 if (out_switch == "table") {
-  
+  eval_next=FALSE
   zone_out %>% 
     pretty_lab() %>% 
     pretty_tab_sb(width = "50%")
   
-} else {
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+```
+
+```{r, eval=eval_next}
   
   zone_out$table %>%
     pretty_lab() %>% 
     pretty_tab_sb(width = "50%")
 
-  zone_out$plot
-}
 ```
 
 
@@ -959,19 +1007,25 @@ zone_summary(scallop0322MainDataTable, project = project,
          output = out_switch)
 
 if (out_switch == "table") {
-  
+  eval_next=FALSE
   zone_out %>% 
     pretty_lab() %>% 
     pretty_tab_sb(width = "50%")
   
-} else {
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+```
+
+```{r, eval=eval_next}
   
   zone_out$table %>%
     pretty_lab() %>% 
     pretty_tab_sb(width = "50%")
 
   zone_out$plot
-}
+
 ```
 
 
@@ -991,19 +1045,23 @@ zone_summary(scallop0322MainDataTable, project = project,
          output = out_switch)
 
 if (out_switch == "table") {
-  
+  eval_next=FALSE
   zone_out %>% 
     pretty_lab() %>% 
     pretty_tab_sb(width = "50%")
   
-} else {
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+```
+
+```{r, eval=eval_next}
   
   zone_out$table %>%
     pretty_lab() %>% 
     pretty_tab_sb(width = "50%")
 
-  zone_out$plot
-}
 ```
 
 
@@ -1021,19 +1079,23 @@ zone_summary(scallop0322MainDataTable, project = project,
          output = out_switch)
 
 if (out_switch == "table") {
-  
+  eval_next=FALSE
   zone_out %>% 
     pretty_lab() %>% 
     pretty_tab_sb(width = "50%")
   
-} else {
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+```
+
+```{r, eval=eval_next}
   
   zone_out$table %>%
     pretty_lab() %>% 
     pretty_tab_sb(width = "50%")
 
-  zone_out$plot
-}
 ```
 
 
@@ -1053,19 +1115,24 @@ zone_summary(scallop0322MainDataTable, project = project,
          output = out_switch)
 
 if (out_switch == "table") {
-  
+  eval_next=FALSE
   zone_out %>% 
     pretty_lab() %>% 
     pretty_tab_sb(width = "50%")
   
-} else {
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+```
+
+```{r, eval=eval_next}
   
   zone_out$table %>%
     pretty_lab() %>% 
     pretty_tab_sb(width = "50%")
 
-  zone_out$plot
-}
+
 ```
 
 <br><br><br>
@@ -1084,19 +1151,24 @@ zone_summary(scallop0322MainDataTable, project = project,
          output = out_switch)
 
 if (out_switch == "table") {
-  
+  eval_next=FALSE
   zone_out %>% 
     pretty_lab() %>% 
     pretty_tab_sb(width = "50%")
   
-} else {
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+```
+
+```{r, eval=eval_next}
   
   zone_out$table %>%
     pretty_lab() %>% 
     pretty_tab_sb(width = "50%")
 
-  zone_out$plot
-}
+
 ```
 
 <br><br><br>
@@ -1161,19 +1233,24 @@ zone_summary(project = project,
          output = out_switch)
 
 if (out_switch == "table") {
-  
+  eval_next=FALSE
   zone_out %>% 
     pretty_lab() %>% 
     pretty_tab_sb(width = "40%")
   
-} else {
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+```
+
+```{r, eval=eval_next}
   
   zone_out$table %>%
     pretty_lab() %>% 
     pretty_tab_sb(width = "40%")
 
-  zone_out$plot
-}
+
 ```
 
 <br><br><br>
@@ -1194,19 +1271,23 @@ zone_summary(project = project,
          output = out_switch)
 
 if (out_switch == "table") {
-  
+  eval_next=FALSE
   zone_out %>% 
     pretty_lab() %>% 
     pretty_tab_sb(width = "40%")
   
-} else {
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+```
+
+```{r, eval=eval_next}
   
   zone_out$table %>%
     pretty_lab() %>% 
     pretty_tab_sb(width = "40%")
 
-  zone_out$plot
-}
 ```
 
 <br><br><br>
@@ -1244,19 +1325,23 @@ zone_summary(project = project,
          output = out_switch)
 
 if (out_switch == "table") {
-  
+  eval_next=FALSE
   zone_out %>% 
     pretty_lab() %>% 
     pretty_tab_sb(width = "40%")
   
-} else {
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+```
+
+```{r, eval=eval_next}
   
   zone_out$table %>%
     pretty_lab() %>% 
     pretty_tab_sb(width = "40%")
 
-  zone_out$plot
-}
 ```
 
 <br><br><br>
@@ -1277,19 +1362,21 @@ zone_summary(project = project,
          output = out_switch)
 
 if (out_switch == "table") {
-  
+  eval_next=FALSE
   zone_out %>% 
     pretty_lab() %>% 
     pretty_tab_sb(width = "40%")
-  
-} else {
-  
+  } else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+  }
+
+```
+
+```{r, eval=eval_next}
   zone_out$table %>%
     pretty_lab() %>% 
     pretty_tab_sb(width = "40%")
-
-  zone_out$plot
-}
 ```
 
 <br><br><br>
