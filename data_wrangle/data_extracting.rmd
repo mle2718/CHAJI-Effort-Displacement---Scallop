@@ -345,6 +345,7 @@ APSD_DMIS_2 <- tbl(con, sql("select * from APSD.DMIS_WIND_TEST@garfo_nefsc")) %>
   mutate("day" = lubridate::day(DATE_TRIP)) %>%
   dplyr::select(-DATE_TRIP) %>% collect()
 
+dbDisconnect(con)
   
 } else if(params$DMIS_STYLE=="copyover"){
 # Do nothing
