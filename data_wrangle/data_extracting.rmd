@@ -3,8 +3,8 @@ title: "data_extracting"
 author: "Marina Chaji"
 date: "3/7/2022"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 urlcolor: blue
 params:
     DMIS_STYLE: 
@@ -22,7 +22,6 @@ params:
       value: "live"
       input: select
       choices: ["copyover", "live"]
-
 ---
 
 <!---
@@ -338,7 +337,7 @@ con <- ROracle::dbConnect(
   dbname = "sole")
 
 APSD_DMIS_2 <- tbl(con, sql("select TO_CHAR(DATE_TRIP, 'MM/DD/YY HH24:MI:SS ') AS DATE_TRIP, VTR_PORT
-                            VTR_STATE, TRIP_LENGTH, PERMIT, DEALER_RPT_ID, DOLLAR, POUNDS, LANDED, DDLON, DDLAT,
+                            VTR_STATE, TRIP_LENGTH, PERMIT, DEALER_RPT_ID, DOLLAR, POUNDS, LANDED, DDLON, DDLAT, DOCID,
                             GEARCODE, SECGEARFISH, NESPP3, SOURCE, DEALNUM from APSD.DMIS_WIND_111522@garfo_nefsc")) %>% collect()
 dbDisconnect(con)
 
