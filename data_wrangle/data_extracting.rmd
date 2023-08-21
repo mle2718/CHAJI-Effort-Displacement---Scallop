@@ -3,8 +3,8 @@ title: "data_extracting"
 author: "Marina Chaji"
 date: "3/7/2022"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 urlcolor: blue
 params:
     DMIS_STYLE: 
@@ -22,7 +22,6 @@ params:
       value: "live"
       input: select
       choices: ["copyover", "live"]
-
 ---
 
 <!---
@@ -37,8 +36,6 @@ here::i_am("data_wrangle/data_extracting.rmd")
 
 # Please ensure you have the proper packages installed with (install.packages()) or a request to ITD if any libraries do not load.  
 library("here")
-library("RODBC")
-#library(readstata13, lib.loc="/net/home2/mlee/R/x86_64_pc-linux-gnu-library")
 library("readstata13")
 library("readxl")
 library("tibble")
@@ -97,7 +94,7 @@ ml.intermediate.path<-file.path(mlee_dir,"Effort-Displacement---Scallop","data",
 
 offshoreWind_directory<-file.path(socialsci_dir,"Geret_Rasters","Data","offshore_wind_package_data","support_tables","backup_data_folder","data")
 
-spacepanels_directory<-file.path(mlee_dir,"dropoff","wind")
+spacepanels_location<-file.path(mlee_dir,"dropoff","wind","just_ports_2023_08_11.dta")
 
 cost_directory1<-file.path(socialsci_dir,"Trip_Costs","2000-2009")
 cost_directory2<-file.path(socialsci_dir,"Trip_Costs","2010-2021")
@@ -305,7 +302,7 @@ Load in the lats and lons of all ports from the spacepanels directory. Change th
 
 ```{r readin_spacepanels, echo=TRUE,eval=TRUE}
 #Import Data
-tripid_geoids<- read.dta13(file.path(spacepanels_directory,"just_ports_2022_01_26.dta"))
+tripid_geoids<- read.dta13(spacepanels_location)
 #Could do all this in one step, but ...
 # Pick the cols that start with previous
 prev<-tripid_geoids[grepl("^previous_", colnames(tripid_geoids))]
@@ -339,11 +336,13 @@ con <- ROracle::dbConnect(
   password = oracle_password,
   dbname = "sole")
 
-APSD_DMIS_2 <- tbl(con, sql("select * from APSD.DMIS_WIND_TEST@garfo_nefsc")) %>%
-  mutate("year" = lubridate::year(DATE_TRIP)) %>%
-  mutate("month" = lubridate::month(DATE_TRIP)) %>%
-  mutate("day" = lubridate::day(DATE_TRIP)) %>%
-  dplyr::select(-DATE_TRIP) %>% collect()
+APSD_DMIS_2 <- tbl(con, sql("select TO_CHAR(DATE_TRIP, 'MM/DD/YY HH24:MI:SS ') AS DATE_TRIP, VTR_PORT
+                            VTR_STATE, TRIP_LENGTH, PERMIT, DEALER_RPT_ID, DOLLAR, POUNDS, LANDED, DDLON, DDLAT, DOCID,
+                            GEARCODE, SECGEARFISH, NESPP3, SOURCE, DEALNUM from APSD.DMIS_WIND_111522@garfo_nefsc")) %>% collect()
+dbDisconnect(con)
+
+APSD_DMIS_2<-APSD_DMIS_2 %>%
+  mutate("DATE_TRIP"=lubridate::mdy_hms(DATE_TRIP))
 
   
 } else if(params$DMIS_STYLE=="copyover"){
@@ -401,19 +400,26 @@ Some Trip-level data in the VTR schema is needed. See table at the top.  We extr
 # Get the live data 
 if (params$VTR_extraction=="live"){ 
 
-oracle_server = "sole"
-ODBC.CONNECTION <- RODBC::odbcConnect(dsn=oracle_server, uid=oracle_username, pwd=oracle_password, believeNRows=FALSE)
+con <- ROracle::dbConnect(
+  drv = ROracle::Oracle(),
+  username = oracle_username,
+  password = oracle_password,
+  dbname = "sole")
+
+
 START.YEAR = 2007
 END.YEAR = 2022
+
 RESULT.COMPILED<-list()
 t<-1
 for(i in START.YEAR:END.YEAR) {
   print(i)
-  CURRENT.QUERY = paste("SELECT VTR.veslog",i,"t.TRIPID,tripcatg, operator, opernum, permit, nsubtrip, crew,not_fished, port as VTR_PORTNUM  
-                FROM VTR.veslog",i,"t", sep="")
-  RESULT.COMPILED[[t]] = sqlQuery(ODBC.CONNECTION, CURRENT.QUERY)  
+  CURRENT.QUERY = paste("SELECT TRIPID, tripcatg, operator, opernum, permit, nsubtrip, crew,not_fished, port as VTR_PORTNUM FROM VTR.veslog",i,"t", sep="")
+  RESULT.COMPILED[[t]] <- tbl(con,sql(CURRENT.QUERY)) %>% collect()
   t<-t+1
 }    
+dbDisconnect(con)
+
 
 RESULT.COMPILED<-do.call(rbind.data.frame, RESULT.COMPILED)
 RESULT.COMPILED_name <-paste0("RESULT_COMPILED_",vintage_string,".Rds")
@@ -448,13 +454,18 @@ We  also extract the T/F variables corresponding the the PLAN_CAT in DMIS.
 ```{r DMIS_Query, echo=TRUE,eval=TRUE}
  if (params$scallop_linking_extraction=="live"){ 
 
-oracle_server = "sole"
+con <- ROracle::dbConnect(
+  drv = ROracle::Oracle(),
+  username = oracle_username,
+  password = oracle_password,
+  dbname = "sole")
+
 CURRENT.QUERY = paste ("SELECT TRIP_ID, DOCID, ACTIVITY_CODE, DAS_ID, LGC_A, LGC_B, LGC_C, SC_2, SC_3, SC_4, SC_5, SC_6, SC_7, SC_8, SC_9, SG_1A, SG_1B
  FROM APSD.t_ssb_trip_current@garfo_nefsc")
-Scallop_Linkingorg = sqlQuery(ODBC.CONNECTION, CURRENT.QUERY)
 
-odbcCloseAll()
+Scallop_Linkingorg <- tbl(con,sql(CURRENT.QUERY)) %>% collect()
 
+dbDisconnect(con)
 
 
 #save to RDS
