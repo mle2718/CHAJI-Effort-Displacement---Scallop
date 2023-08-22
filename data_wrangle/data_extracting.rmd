@@ -343,6 +343,7 @@ dbDisconnect(con)
 
 APSD_DMIS_2<-APSD_DMIS_2 %>%
   mutate("DATE_TRIP"=lubridate::mdy_hms(DATE_TRIP))
+  APSD_DMIS_2$dbsource="live"
 
   
 } else if(params$DMIS_STYLE=="copyover"){
