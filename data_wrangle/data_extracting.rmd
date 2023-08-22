@@ -336,9 +336,9 @@ con <- ROracle::dbConnect(
   password = oracle_password,
   dbname = "sole")
 
-APSD_DMIS_2 <- tbl(con, sql("select TO_CHAR(DATE_TRIP, 'MM/DD/YY HH24:MI:SS ') AS DATE_TRIP, VTR_PORT
-                            VTR_STATE, TRIP_LENGTH, PERMIT, DEALER_RPT_ID, DOLLAR, POUNDS, LANDED, DDLON, DDLAT, DOCID,
-                            GEARCODE, SECGEARFISH, NESPP3, SOURCE, DEALNUM from APSD.DMIS_WIND_111522@garfo_nefsc")) %>% collect()
+APSD_DMIS_2 <- tbl(con, sql("select IMGID, DOCID, YEAR, TO_CHAR(DATE_TRIP, 'MM/DD/YY HH24:MI:SS ') AS DATE_TRIP, 
+                            VTR_PORT,  VTR_STATE, TRIP_LENGTH, PERMIT, DEALER_RPT_ID, DOLLAR, POUNDS, 
+                            LANDED, DDLON, DDLAT,GEARCODE, SECGEARFISH, NESPP3, SOURCE, DEALNUM from APSD.DMIS_WIND_111522@garfo_nefsc")) %>% collect()
 dbDisconnect(con)
 
 APSD_DMIS_2<-APSD_DMIS_2 %>%
@@ -370,7 +370,7 @@ saveRDS(APSD_DMIS_2, file=here("data","intermediate", APSD_DMIS_2_name))
   file.copy(APSD_static_nefsc,destination, overwrite=FALSE)
 }
 
-
+colnames(APSD_DMIS_2)
 
 
 
@@ -441,6 +441,8 @@ saveRDS(RESULT.COMPILED, file=here("data","intermediate",RESULT.COMPILED_name))
   file.copy(RESULT_COMPILED_static,destination, overwrite=FALSE)
 }
 
+
+colnames(RESULT.COMPILED)
 ```
 
 
@@ -486,7 +488,9 @@ saveRDS(Scallop_Linkingorg, file=here("data","intermediate",Scallop_Linkingorg_n
   file.copy(Scallop_Linkingorg_static,destination, overwrite=FALSE)
    
    
-}
+ }
+
+colnames(Scallop_Linkingorg_static)
 
 ```
 
