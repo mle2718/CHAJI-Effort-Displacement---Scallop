@@ -491,7 +491,7 @@ saveRDS(Scallop_Linkingorg, file=here("data","intermediate",Scallop_Linkingorg_n
    
  }
 
-colnames(Scallop_Linkingorg_static)
+colnames(Scallop_Linkingorg)
 
 ```
 
