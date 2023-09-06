@@ -8,18 +8,29 @@ output:
     toc: yes
     toc_float: yes
     code_folding: show
+  pdf_document:
+    toc: yes
 params:
-    AA_DAS_only: TRUE
-    subtrip_aggregate: TRUE
-    BIN_GEARS: TRUE
-    location: 
-      label: "Location:"
-      value: Woods_Hole
-      input: select
-      choices: [Woods_Hole, Seattle]
-    input_shapefile:
-      value: "wind_sf_nocable.RDS"
-      choices: ["wind_NY1.RDS","wind_NY2.RDS","wind_NY3.RDS","wind_Central_Atlantic_1.RDS", "wind_Central_Atlantic_2.RDS","wind_sf_final.RDS","wind_sf_nocable.RDS"]
+  AA_DAS_only: yes
+  subtrip_aggregate: yes
+  BIN_GEARS: yes
+  location:
+    label: 'Location:'
+    value: Woods_Hole
+    input: select
+    choices:
+    - Woods_Hole
+    - Seattle
+  input_shapefile:
+    value: wind_sf_nocable.RDS
+    choices:
+    - wind_NY1.RDS
+    - wind_NY2.RDS
+    - wind_NY3.RDS
+    - wind_Central_Atlantic_1.RDS
+    - wind_Central_Atlantic_2.RDS
+    - wind_sf_final.RDS
+    - wind_sf_nocable.RDS
 ---
 <!---
 YAML options: 
@@ -145,7 +156,7 @@ if (params$location=="Woods_Hole"){
 final_product_lease <- readRDS(dat_filepath)
 # needed to rename this for now since it matches the name outputted from the
 # zone assignment function we use. 
-final_product_lease <- final_product_lease %>% rename(Zone_ID = "ZoneID") 
+#final_product_lease <- final_product_lease %>% rename(Zone_ID = "ZoneID") 
 final_product_lease$scallop_fishing_year<-as.numeric(final_product_lease$scallop_fishing_year)
 
 # convert the scallop_fishing_year variable into a "date" format that is amenable to the vessel_count() function
@@ -154,9 +165,18 @@ final_product_lease$scallop_fishing_yearD <- lubridate::date_decimal(final_produ
 
 final_product_lease <- final_product_lease %>%
   mutate(KILOGRAMS = POUNDS/pounds_to_kg,
-         LANDED_KG=LANDED/pounds_to_kg) %>%
-  mutate(NAME= stringr::str_replace(NAME,"OCS-A 0499", "OCS-A0499"),
-         lease_FS=stringr::str_replace(lease_FS,"OCS-A 0499", "OCS-A0499") )
+         LANDED_KG=LANDED/pounds_to_kg) 
+
+# converted column types to be compatible with tiny report  
+final_product_lease$IMGID <- as.numeric(final_product_lease$IMGID)
+final_product_lease$DEALER_RPT_ID <- as.numeric(final_product_lease$DEALER_RPT_ID)
+final_product_lease$VTR_PORTNUM<- as.integer(final_product_lease$VTR_PORTNUM)
+final_product_lease$YEAR<-as.integer(final_product_lease$YEAR)
+final_product_lease$PERMIT.y<- as.integer(final_product_lease$PERMIT.y)
+final_product_lease$DEALNUM<- as.integer(final_product_lease$DEALNUM)
+
+
+final_product_lease$DEALNUM
 
 #A column of ones. Useful for many things
 final_product_lease$ones<-1
@@ -635,7 +655,7 @@ agg_helper(scallop0322MainDataTable, value = "in_closure",
 
 Number of observations.
 ```{r}
-table_convert <- c("wind_NY1.RDS","wind_NY2.RDS","wind_NY3.RDS","wind_Central_Atlantic_1.RDS", "wind_Central_Atlantic_2.RDS")
+table_convert <- c("wind_NY1.RDS","wind_NY2.RDS","wind_NY3.RDS")
 out_switch <- ifelse(params$input_shapefile %in% table_convert, "table", "tab_plot")
 
 zone_out <- 
@@ -813,9 +833,6 @@ zone_summary(scallop0322MainDataTable, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = FALSE, dat.center = FALSE,
-         for(y in 1:ncol(df)){
- if (is.na(df[1,y])) df[1,y] = 0
-}
          output = out_switch)
 
 if (out_switch == "table") {
