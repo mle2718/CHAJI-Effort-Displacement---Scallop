@@ -172,6 +172,9 @@ It's not entirely clear how the the PLAN_CAT variables are constructed in DMIS. 
 
 
 ```{r DMIS_Tidy, echo=TRUE}
+# Change codes to be logical
+Scallop_Linkingorg[5:17] <- sapply(Scallop_Linkingorg[5:17],as.logical)
+
 # Bin the LA vessels into full time or part time. 
 Scallop_Linkingorg$ftpt<-"None"
 Scallop_Linkingorg$ftpt[Scallop_Linkingorg$SC_2=="TRUE"]<-"FullTime"
