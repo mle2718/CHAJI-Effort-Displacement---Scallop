@@ -73,7 +73,7 @@ dir.create(here("data", "intermediate"), showWarnings="FALSE")
 dir.create(here("data", "main"), showWarnings="FALSE")
 dir.create(here("data","external","shapefiles","East_Cst_crop_2020_extended"), showWarnings="FALSE")
 dir.create(here("data","external","shapefiles","Ten Minute Squares Cut North and Greater Atlantic"), showWarnings="FALSE")
-dir.create(here("data","external","shapefiles","All_Lease_Areas_Shapefile"), showWarnings="FALSE")
+dir.create(here("data","external","shapefiles","All_Lease_Areas_Shapefile_August"), showWarnings="FALSE")
 
 ```
 
@@ -114,7 +114,7 @@ cost_directory2<-file.path(socialsci_dir,"Trip_Costs","2010-2021")
 # Set up paths.
 East_Cst_crop_2020_path<- here("data","external","shapefiles","East_Cst_crop_2020_extended")
 TMSQ_path<-here("data","external","shapefiles","Ten Minute Squares Cut North and Greater Atlantic")
-All_Lease_Areas_Shapefile_path<-here("data","external","shapefiles","All_Lease_Areas_Shapefile")
+All_Lease_Areas_Shapefile_path<-here("data","external","shapefiles","All_Lease_Areas_Shapefile_August")
 ```
 
 
@@ -699,7 +699,7 @@ lease <-
   here("data",
        "external",
        "shapefiles",
-       "All_Lease_Areas_Shapefile") %>% 
+       "All_Lease_Areas_Shapefile_August") %>% 
   st_read() %>% 
   st_zm()
 
