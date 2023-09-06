@@ -241,11 +241,12 @@ APSD_DMIS_2<-APSD_DMIS_2 %>%
 
 ```{r datacleaning_step1, echo=TRUE}
 # FROZEN DMIS table has SPPNAME, but live DMIS table does not. USE NESPP3=800 to filter instead
+DMIS_type<-APSD_DMIS_2$dbsource[1]
 
-if(type=="frozen_GARFO"){
+if(DMIS_type=="frozen_GARFO"){
   Scallops <- APSD_DMIS_2 %>% 
     filter (SPPNAME == "SCALLOPS/BUSHEL")
-}else if(type=="live"){
+}else if(DMIS_type=="live"){
     Scallops <- APSD_DMIS_2 %>% 
     filter (NESPP3 == 800)
 }
@@ -289,6 +290,8 @@ Scallops$scallop_fishing_year[Scallops$Date >= "2019-04-01" & Scallops$Date <= "
 Scallops$scallop_fishing_year[Scallops$Date >= "2020-04-01" & Scallops$Date <= "2021-03-31"] <- "2020"
 Scallops$scallop_fishing_year[Scallops$Date >= "2021-04-01" & Scallops$Date <= "2022-03-31"] <- "2021"
 Scallops$scallop_fishing_year[Scallops$Date >= "2022-04-01" & Scallops$Date <= "2023-03-31"] <- "2022"
+Scallops$scallop_fishing_year[Scallops$Date >= "2023-04-01" & Scallops$Date <= "2023-03-31"] <- "2023"
+
 
 ```
 
@@ -314,10 +317,10 @@ Scallops$scallop_fishing_year[Scallops$Date >= "2022-04-01" & Scallops$Date <= "
 VTR_DMIS_merge <- merge(RESULT_COMPILED,Scallops, by.x = "TRIPID", by.y = "DOCID", all.x = FALSE, all.y = TRUE)
 
 ## Filter out 2020 values 
-if(type=="frozen_GARFO"){
+if(DMIS_type=="frozen_GARFO"){
   VTR_DMIS_merge <- VTR_DMIS_merge %>%
   filter(YEAR <= "2019")
-}else if(type=="live"){
+}else if(DMIS_type=="live"){
     VTR_DMIS_merge <- VTR_DMIS_merge %>%
   filter(scallop_fishing_year <= "2019")
 }
