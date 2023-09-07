@@ -635,6 +635,23 @@ agg_helper(scallop0322MainDataTable, value = "in_closure",
 ```
 
 <br><br><br>
+
+Observations inside/outside closures by month. 
+```{r}
+scallop0322MainDataTable$month <- month(ymd(scallop0322MainDataTable$DATE_TRIP))
+agg_helper(scallop0322MainDataTable, value = "in_closure", 
+            group = "month", 
+            count = TRUE) %>% 
+  pivot_wider(names_from = "in_closure", values_from = "n",
+              values_fill = 0) %>% 
+  arrange(month) %>% 
+  rename("Outside closure(s)" = "FALSE", "Inside closure(s)" = "TRUE") %>% 
+  pretty_lab(ignore = "month") %>% 
+  pretty_tab()
+```
+
+
+<br><br><br>
 Observations inside/outside closures by year and fleet. 
 ```{r}
 agg_helper(scallop0322MainDataTable, value = "in_closure", 
@@ -647,6 +664,22 @@ agg_helper(scallop0322MainDataTable, value = "in_closure",
   pretty_lab(ignore = "scallop_fishing_year") %>% 
   pretty_tab_sb(width = "50%") 
 ```
+
+
+<br><br><br>
+Observations inside/outside closures by month and fleet. 
+```{r}
+agg_helper(scallop0322MainDataTable, value = "in_closure", 
+            group = c("month", "fleet"), 
+            count = TRUE) %>% 
+  pivot_wider(names_from = "in_closure", values_from = "n",
+              values_fill = 0) %>% 
+  arrange(month) %>% 
+  rename("Outside closure(s)" = "FALSE", "Inside closure(s)" = "TRUE") %>% 
+  pretty_lab(ignore = "month") %>% 
+  pretty_tab_sb(width = "50%") 
+```
+
 
 ## Zone Summary
 
