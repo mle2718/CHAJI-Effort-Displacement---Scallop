@@ -154,9 +154,15 @@ final_product_lease$scallop_fishing_yearD <- lubridate::date_decimal(final_produ
 
 final_product_lease <- final_product_lease %>%
   mutate(KILOGRAMS = POUNDS/pounds_to_kg,
-         LANDED_KG=LANDED/pounds_to_kg) %>%
-  mutate(NAME= stringr::str_replace(NAME,"OCS-A 0499", "OCS-A0499"),
-         lease_FS=stringr::str_replace(lease_FS,"OCS-A 0499", "OCS-A0499") )
+         LANDED_KG=LANDED/pounds_to_kg)
+
+# converted column types to be compatible with tiny report  
+final_product_lease$IMGID <- as.numeric(final_product_lease$IMGID)
+final_product_lease$DEALER_RPT_ID <- as.numeric(final_product_lease$DEALER_RPT_ID)
+final_product_lease$VTR_PORTNUM<- as.integer(final_product_lease$VTR_PORTNUM)
+final_product_lease$YEAR<-as.integer(final_product_lease$YEAR)
+final_product_lease$PERMIT.y<- as.integer(final_product_lease$PERMIT.y)
+final_product_lease$DEALNUM<- as.integer(final_product_lease$DEALNUM)
 
 #A column of ones. Useful for many things
 final_product_lease$ones<-1
@@ -675,6 +681,22 @@ agg_helper(scallop0322MainDataTable, value = "in_closure",
 ```
 
 <br><br><br>
+
+Observations inside/outside closures by month. 
+```{r}
+scallop0322MainDataTable$month <- month(ymd(scallop0322MainDataTable$DATE_TRIP))
+agg_helper(scallop0322MainDataTable, value = "in_closure", 
+            group = "month", 
+            count = TRUE) %>% 
+  pivot_wider(names_from = "in_closure", values_from = "n",
+              values_fill = 0) %>% 
+  arrange(month) %>% 
+  rename("Outside closure(s)" = "FALSE", "Inside closure(s)" = "TRUE") %>% 
+  pretty_lab(ignore = "month") %>% 
+  pretty_tab()
+```
+
+<br><br><br>
 Observations inside/outside closures by year and fleet. 
 ```{r}
 agg_helper(scallop0322MainDataTable, value = "in_closure", 
@@ -687,6 +709,21 @@ agg_helper(scallop0322MainDataTable, value = "in_closure",
   pretty_lab(ignore = "scallop_fishing_year") %>% 
   pretty_tab_sb(width = "50%") 
 ```
+
+<br><br><br>
+Observations inside/outside closures by month and fleet. 
+```{r}
+agg_helper(scallop0322MainDataTable, value = "in_closure", 
+            group = c("month", "fleet"), 
+            count = TRUE) %>% 
+  pivot_wider(names_from = "in_closure", values_from = "n",
+              values_fill = 0) %>% 
+  arrange(month) %>% 
+  rename("Outside closure(s)" = "FALSE", "Inside closure(s)" = "TRUE") %>% 
+  pretty_lab(ignore = "month") %>% 
+  pretty_tab_sb(width = "50%") 
+```
+
 
 ## Zone Summary
 
