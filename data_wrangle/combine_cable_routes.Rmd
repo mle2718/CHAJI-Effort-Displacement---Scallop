@@ -220,14 +220,14 @@ wind_NY4 <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "NY B
 wind_NY_combined <- sf::st_read(dsn = here::here("data", "external", "shapefiles","NY Bight Aug 2023","Combined 3 Areas","NYBightCombined_Merge.shp"))
 
 
-wind_Central_Atlantic_1 <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "Central Atlantic Planning and Call Area Shapefiles", "Central Atlantic Planning Area as of Jan 2022 Nov 22.shp"))
-wind_Central_Atlantic_2 <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "Central Atlantic Planning and Call Area Shapefiles", "Central Atlantic Call Area as of Feb 2022 Nov 22.shp"))
-
+wind_Central_Atlantic_1 <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "Central Atlantic Shapefiles", "CenAtlCallAreasAug23.shp"))
+wind_Central_Atlantic_2 <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "Central Atlantic Shapefiles", "CenAtlDraftWEAAug23.shp"))
+wind_Central_Atlantic_3 <- sf::st_read(dsn = here::here("data", "external", "shapefiles", "Central Atlantic Shapefiles", "CenAtlFinalWEAAug23.shp"))
 
 ```
 
 
-### Data Prep
+### Data Prep 
 ```{r}
 # Can also set CRS and buffer distance if needed (defaults to WGS 84 and 10 meters)
 cable_list <- lapply(cable_list, prep_spat) 
@@ -257,10 +257,15 @@ wind_NY3$LEASE_NUMB <- "NY Bight Lease Areas"
 wind_NY_combined <- prep_spat(wind_NY_combined)
 wind_NY_combined$LEASE_NUMB <- c("NY Bight Lease Areas","NY Bight WEA","NY Bight Call Area")
 
+
 wind_Central_Atlantic_1 <- prep_spat(wind_Central_Atlantic_1)
+wind_Central_Atlantic_1$LEASE_NUMB <- "Central Atlantic Call Area"
+
 wind_Central_Atlantic_2 <- prep_spat(wind_Central_Atlantic_2)
+wind_Central_Atlantic_2$LEASE_NUMB <- "Central Atlantic Draft WEA"
 
-
+wind_Central_Atlantic_3 <- prep_spat(wind_Central_Atlantic_3)
+wind_Central_Atlantic_3$LEASE_NUMB <- "Central Atlantic Final WEA"
 
 
 ```
@@ -309,6 +314,7 @@ view_spat(wind_NY3)
 view_spat(wind_NY_combined)
 view_spat(wind_Central_Atlantic_1)
 view_spat(wind_Central_Atlantic_2)
+view_spat(wind_Central_Atlantic_3)
 
 ```
 ### Save 
@@ -327,7 +333,7 @@ saveRDS(wind_NY_combined,file=file.path(lease_dirpath,"wind_NY_combined.RDS"))
 
 saveRDS(wind_Central_Atlantic_1,file=file.path(lease_dirpath,"wind_Central_Atlantic_1.RDS"))
 saveRDS(wind_Central_Atlantic_2,file=file.path(lease_dirpath,"wind_Central_Atlantic_2.RDS"))
-
+saveRDS(wind_Central_Atlantic_2,file=file.path(lease_dirpath,"wind_Central_Atlantic_3.RDS"))
 
 
 ```
