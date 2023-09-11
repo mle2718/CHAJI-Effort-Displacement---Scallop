@@ -381,6 +381,35 @@ scallop0322MainDataTable %>%
   pivot_wider(names_from = "var", values_from = "value") %>% 
   pretty_tab()
  
+
+boxplot(scallop0322MainDataTable$DOLLAR_2020,
+  main = "Revenue in 2020 Dollars",
+  xlab = "USD$",
+  ylab = "Revenue",
+  col = "orange",
+  border = "brown",
+  horizontal = TRUE,
+  notch = TRUE)
+
+boxplot(scallop0322MainDataTable$KILOGRAMS,
+  main = "Catch in Kilograms",
+  xlab = "Kilograms",
+  ylab = "Catch",
+  col = "green",
+  border = "blue",
+  horizontal = TRUE,
+  notch = TRUE)
+
+boxplot(scallop0322MainDataTable$TRIP_LENGTH,
+  main = "Trip Length in Days",
+  xlab = "Trip Length",
+  ylab = "Days",
+  col = "orange",
+  border = "black",
+  horizontal = TRUE,
+  notch = TRUE)
+
+
 ```
 
 
