@@ -369,6 +369,32 @@ scallop0322MainDataTable %>%
   pivot_wider(names_from = "var", values_from = "value") %>% 
   pretty_tab()
  
+boxplot(scallop0322MainDataTable$DOLLAR_2020,
+  main = "Revenue in 2020 Dollars",
+  xlab = "USD$",
+  ylab = "Revenue",
+  col = "orange",
+  border = "brown",
+  horizontal = TRUE,
+  notch = TRUE)
+
+boxplot(scallop0322MainDataTable$KILOGRAMS,
+  main = "Catch in Kilograms",
+  xlab = "Kilograms",
+  ylab = "Catch",
+  col = "green",
+  border = "blue",
+  horizontal = TRUE,
+  notch = TRUE)
+
+boxplot(scallop0322MainDataTable$TRIP_LENGTH,
+  main = "Trip Length in Days",
+  xlab = "Trip Length",
+  ylab = "Days",
+  col = "orange",
+  border = "black",
+  horizontal = TRUE,
+  notch = TRUE)
 ```
 
 
@@ -650,6 +676,19 @@ agg_helper(scallop0322MainDataTable, group = "fleet",
   pretty_tab()
 ```
 
+
+<br><br><br>
+Observations inside/outside closures by OPERNUM. 
+```{r}
+agg_helper(scallop0322MainDataTable, group = "OPERNUM", 
+            value = "in_closure", count = TRUE) %>% 
+  pivot_wider(names_from = "in_closure", values_from = "n") %>% 
+  rename("Outside Closure(s)" = "FALSE", "Inside Closure(s)" = "TRUE") %>% 
+  pretty_lab() %>% 
+  pretty_tab()
+
+```
+
 <br><br><br>
 Observations inside/outside closures by fleet, LA, and GC. 
 ```{r}
@@ -694,6 +733,8 @@ agg_helper(scallop0322MainDataTable, value = "in_closure",
   rename("Outside closure(s)" = "FALSE", "Inside closure(s)" = "TRUE") %>% 
   pretty_lab(ignore = "month") %>% 
   pretty_tab()
+
+
 ```
 
 <br><br><br>
