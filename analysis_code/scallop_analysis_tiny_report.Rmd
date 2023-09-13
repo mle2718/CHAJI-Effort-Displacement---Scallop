@@ -22,7 +22,7 @@ params:
     - Woods_Hole
     - Seattle
   input_shapefile:
-    value: wind_sf_nocable.RDS
+    value: wind_NY1.RDS
     choices:
     - wind_NY1.RDS
     - wind_NY2.RDS
@@ -386,8 +386,8 @@ boxplot(scallop0322MainDataTable$DOLLAR_2020,
   main = "Revenue in 2020 Dollars",
   xlab = "USD$",
   ylab = "Revenue",
-  col = "orange",
-  border = "brown",
+  col = "white",
+  border = "black",
   horizontal = TRUE,
   notch = TRUE)
 
@@ -395,8 +395,8 @@ boxplot(scallop0322MainDataTable$KILOGRAMS,
   main = "Catch in Kilograms",
   xlab = "Kilograms",
   ylab = "Catch",
-  col = "green",
-  border = "blue",
+  col = "white",
+  border = "black",
   horizontal = TRUE,
   notch = TRUE)
 
@@ -404,7 +404,7 @@ boxplot(scallop0322MainDataTable$TRIP_LENGTH,
   main = "Trip Length in Days",
   xlab = "Trip Length",
   ylab = "Days",
-  col = "orange",
+  col = "white",
   border = "black",
   horizontal = TRUE,
   notch = TRUE)
@@ -631,6 +631,21 @@ agg_helper(scallop0322MainDataTable, group = "fleet",
   pretty_tab()
 ```
 
+
+<br><br><br>
+Observations inside/outside closures by OPERNUM. 
+```{r}
+agg_helper(scallop0322MainDataTable, group = "OPERNUM", 
+            value = "in_closure", count = TRUE) %>% 
+  pivot_wider(names_from = "in_closure", values_from = "n") %>% 
+  rename("Outside Closure(s)" = "FALSE", "Inside Closure(s)" = "TRUE") %>% 
+  pretty_lab() %>% 
+  pretty_tab()
+
+```
+
+
+
 <br><br><br>
 Observations inside/outside closures by fleet, LA, and GC. 
 ```{r}
@@ -708,6 +723,162 @@ agg_helper(scallop0322MainDataTable, value = "in_closure",
   rename("Outside closure(s)" = "FALSE", "Inside closure(s)" = "TRUE") %>% 
   pretty_lab(ignore = "month") %>% 
   pretty_tab_sb(width = "50%") 
+```
+
+
+<br><br>
+
+### Top 10 Ports
+Top ten ports by frequency. Could also do by catch. 
+```{r}
+top_ten_ports <- 
+scallop0322MainDataTable %>% 
+  count(VTR_PORT, sort = TRUE) %>% 
+  pull(VTR_PORT) %>% 
+  head(10)
+
+scallop0322MainDataTable <- 
+  scallop0322MainDataTable %>% 
+  mutate(TOP_10_PORT = VTR_PORT %in% top_ten_ports)
+```
+
+
+Vessel count by top ten port
+
+```{r}
+ves_out <- 
+  vessel_count(scallop0322MainDataTable, project,
+               v_id = "PERMIT.y",
+               group = "VTR_PORT",
+               filter_by = "TOP_10_PORT",
+               filter_value = TRUE)
+
+ves_out$table %>% pretty_tab()
+
+ves_out$plot + angled_theme()
+```
+
+<br><br><br>
+
+Vessel count by top ten port and year.
+```{r}
+ves_out <- 
+  vessel_count(scallop0322MainDataTable, project,
+               v_id = "PERMIT.y",
+               group = "VTR_PORT",
+               date = "scallop_fishing_yearD",
+               period = "year",
+               filter_by = "TOP_10_PORT",
+               filter_value = TRUE,
+               type = "line")
+
+ves_out$table %>% 
+  pivot_wider(names_from = VTR_PORT, values_from = PERMIT.y) %>% 
+  pretty_lab(ignore = "year") %>%
+  pretty_tab_sb()
+
+ves_out$plot
+```
+
+<br><br><br>
+
+Vessel count by top ten port and gearcode.
+```{r}
+ves_out <- 
+  vessel_count(scallop0322MainDataTable, project,
+               v_id = "PERMIT.y",
+               group = c("VTR_PORT", "GEARCODE"),
+               filter_by = "TOP_10_PORT",
+               filter_value = TRUE, type = "line")
+
+ves_out$table %>% 
+  pivot_wider(names_from = GEARCODE, values_from = PERMIT.y) %>% 
+  pretty_lab() %>%
+  pretty_tab_sb()
+
+ves_out$plot + angled_theme()
+```
+
+
+<br><br><br>
+
+Total Revenue by Top 10 port and gearcode. 
+```{r}
+catch_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "DOLLAR_2020",
+                group = c("VTR_PORT", "GEARCODE"),
+                filter_by = "TOP_10_PORT",
+                filter_value = TRUE,
+                fun = "sum", type = "line",
+                format_lab = "scientific", tran = "log")
+
+catch_out$table %>% 
+  pivot_wider(names_from = GEARCODE, values_from = DOLLAR_2020) %>% 
+  pretty_lab() %>%
+  pretty_tab_sb() 
+  
+catch_out$plot + angled_theme()
+```
+
+
+<br><br><br>
+Average Revenue by top 10 ports. 
+```{r}
+cpue_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "DOLLAR_2020",
+                group = "VTR_PORT",
+                filter_by = "TOP_10_PORT",
+                filter_value = TRUE,
+                fun = "mean", type = "line")
+
+cpue_out$table %>% 
+  pretty_lab() %>%
+  pretty_tab()
+
+cpue_out$plot + angled_theme() 
+```
+
+
+<br><br><br>
+
+Total Operating Profit by Top 10 port and gearcode. 
+```{r}
+catch_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "OPERATING_PROFIT_2020",
+                group = c("VTR_PORT", "GEARCODE"),
+                filter_by = "TOP_10_PORT",
+                filter_value = TRUE,
+                fun = "sum", type = "line",
+                format_lab = "scientific", tran = "log")
+
+catch_out$table %>% 
+  pivot_wider(names_from = GEARCODE, values_from = OPERATING_PROFIT_2020) %>% 
+  pretty_lab() %>%
+  pretty_tab_sb() 
+  
+catch_out$plot + angled_theme()
+```
+
+<br><br><br>
+
+Average Operating Profit by top 10 ports. 
+```{r}
+cpue_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "OPERATING_PROFIT_2020",
+                group = "VTR_PORT",
+                filter_by = "TOP_10_PORT",
+                filter_value = TRUE,
+                fun = "mean", type = "line")
+
+cpue_out$table %>% 
+  pretty_lab() %>%
+  pretty_tab()
+
+cpue_out$plot + angled_theme() 
 ```
 
 
@@ -918,7 +1089,6 @@ if (out_switch == "table") {
 
 
 ```
-
 
 
 
