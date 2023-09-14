@@ -12,7 +12,7 @@ output:
     toc: yes
 params:
   AA_DAS_only: yes
-  subtrip_aggregate: yes
+  subtrip_aggregate: no
   BIN_GEARS: yes
   location:
     label: 'Location:'
@@ -22,7 +22,7 @@ params:
     - Woods_Hole
     - Seattle
   input_shapefile:
-    value: wind_NY1.RDS
+    value: wind_sf_nocable.RDS
     choices:
     - wind_NY1.RDS
     - wind_NY2.RDS
@@ -367,10 +367,10 @@ summary_stats(scallop0322MainDataTable, project) %>%
   pretty_tab_sb()
 ```
 
-Here is DOLLAR, KILOGRAMS, and TRIP_LENGTH separately. 
+Here is DOLLAR, KILOGRAMS, CREW, LANDED, DOLLAR, OPERATING PROFIT and TRIP_LENGTH separately. 
 ```{r}
 scallop0322MainDataTable %>% 
-  summarize(across(.cols = c("DOLLAR_2020", "KILOGRAMS", "TRIP_LENGTH"), 
+  summarize(across(.cols = c("LANDED_KG","LANDED", "DOLLAR_2020" , "OPERATING_PROFIT_2020","TRIP_LENGTH"), 
                    .fns = list(min = min, median = median, mean = mean, max = max, StdDev = sd ,sum=sum, Q25 = ~quantile(.,0.25), Q50 = ~quantile(.,0.50), Q75 = ~quantile(.,0.75), Q95 = ~quantile(.,0.95),
                                NAs = ~sum(is.na(.x)), UniqueObs = n_distinct, 
                                "No. 0's" = ~sum(.x == 0)), 
@@ -820,6 +820,31 @@ catch_out$table %>%
   
 catch_out$plot + angled_theme()
 ```
+
+
+<br><br><br>
+
+Total Revenue by Top 10 port and fleet. 
+```{r}
+catch_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "DOLLAR_2020",
+                group = c("VTR_PORT", "fleet"),
+                filter_by = "TOP_10_PORT",
+                filter_value = TRUE,
+                fun = "sum", type = "line",
+                format_lab = "scientific", tran = "log")
+
+catch_out$table %>% 
+  pivot_wider(names_from = fleet, values_from = DOLLAR_2020) %>% 
+  pretty_lab() %>%
+  pretty_tab_sb() 
+  
+catch_out$plot + angled_theme()
+```
+
+
+
 
 
 <br><br><br>

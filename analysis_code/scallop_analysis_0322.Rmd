@@ -373,8 +373,8 @@ boxplot(scallop0322MainDataTable$DOLLAR_2020,
   main = "Revenue in 2020 Dollars",
   xlab = "USD$",
   ylab = "Revenue",
-  col = "orange",
-  border = "brown",
+  col = "white",
+  border = "black",
   horizontal = TRUE,
   notch = TRUE)
 
@@ -382,8 +382,8 @@ boxplot(scallop0322MainDataTable$KILOGRAMS,
   main = "Catch in Kilograms",
   xlab = "Kilograms",
   ylab = "Catch",
-  col = "green",
-  border = "blue",
+  col = "white",
+  border = "black",
   horizontal = TRUE,
   notch = TRUE)
 
@@ -391,10 +391,11 @@ boxplot(scallop0322MainDataTable$TRIP_LENGTH,
   main = "Trip Length in Days",
   xlab = "Trip Length",
   ylab = "Days",
-  col = "orange",
+  col = "white",
   border = "black",
   horizontal = TRUE,
   notch = TRUE)
+
 ```
 
 
