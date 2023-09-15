@@ -12,7 +12,7 @@ output:
     toc: yes
 params:
   AA_DAS_only: yes
-  subtrip_aggregate: no
+  subtrip_aggregate: yes
   BIN_GEARS: yes
   location:
     label: 'Location:'
@@ -1056,19 +1056,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          na.rm = FALSE, dat.center = FALSE,
          output = out_switch)
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
-```
 
-```{r, eval=eval_next}
   zone_out$table %>%
   filter(!is.na(closeID)) %>%
     pretty_lab() %>% 
