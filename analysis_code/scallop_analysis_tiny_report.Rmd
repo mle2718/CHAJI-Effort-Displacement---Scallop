@@ -11,7 +11,7 @@ output:
   pdf_document:
     toc: yes
 params:
-  AA_DAS_only: yes
+  AA_DAS_only: no
   subtrip_aggregate: yes
   BIN_GEARS: yes
   location:
@@ -22,7 +22,7 @@ params:
     - Woods_Hole
     - Seattle
   input_shapefile:
-    value: wind_sf_nocable.RDS
+    value: wind_NY1.RDS
     choices:
     - wind_NY1.RDS
     - wind_NY2.RDS
@@ -1056,11 +1056,11 @@ zone_summary(scallop0322MainDataTable, project = project,
          na.rm = FALSE, dat.center = FALSE,
          output = out_switch)
 
-
+if (params$input_shapefile=="wind_sf_nocable.RDS"){
   zone_out$table %>%
   filter(!is.na(closeID)) %>%
     pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
+    pretty_tab_sb(width = "40%")}
 
 ```
 
