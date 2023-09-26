@@ -11,7 +11,7 @@ output:
   pdf_document:
     toc: yes
 params:
-  AA_DAS_only: no
+  AA_DAS_only: yes
   subtrip_aggregate: yes
   BIN_GEARS: yes
   location:
@@ -22,7 +22,7 @@ params:
     - Woods_Hole
     - Seattle
   input_shapefile:
-    value: wind_NY1.RDS
+    value: wind_sf_nocable_agg.RDS
     choices:
     - wind_NY1.RDS
     - wind_NY2.RDS
@@ -31,6 +31,7 @@ params:
     - wind_Central_Atlantic_2.RDS
     - wind_sf_final.RDS
     - wind_sf_nocable.RDS
+    - wind_sf_nocable_agg.RDS
 ---
 <!---
 YAML options: 
