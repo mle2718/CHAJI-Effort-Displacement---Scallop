@@ -333,7 +333,7 @@ saveRDS(wind_NY_combined,file=file.path(lease_dirpath,"wind_NY_combined.RDS"))
 
 saveRDS(wind_Central_Atlantic_1,file=file.path(lease_dirpath,"wind_Central_Atlantic_1.RDS"))
 saveRDS(wind_Central_Atlantic_2,file=file.path(lease_dirpath,"wind_Central_Atlantic_2.RDS"))
-saveRDS(wind_Central_Atlantic_2,file=file.path(lease_dirpath,"wind_Central_Atlantic_3.RDS"))
+saveRDS(wind_Central_Atlantic_3,file=file.path(lease_dirpath,"wind_Central_Atlantic_3.RDS"))
 
 
 ```
