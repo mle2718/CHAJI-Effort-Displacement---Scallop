@@ -855,7 +855,7 @@ Average Revenue by top 10 ports.
 cpue_out <- 
   species_catch(scallop0322MainDataTable, project,
                 species = "DOLLAR_2020",
-                group = "VTR_PORT",
+                group = c("VTR_PORT", "fleet"),
                 filter_by = "TOP_10_PORT",
                 filter_value = TRUE,
                 fun = "mean", type = "line")
@@ -948,7 +948,8 @@ if (out_switch == "table") {
     pretty_tab_sb(width = "40%")
 
   zone_out$plot
-
+    
+  
 ```
 
 
