@@ -11,7 +11,7 @@ output:
   pdf_document:
     toc: yes
 params:
-  AA_DAS_only: yes
+  AA_DAS_only: no
   subtrip_aggregate: yes
   BIN_GEARS: yes
   location:
@@ -751,7 +751,7 @@ Vessel count by top ten port
 ves_out <- 
   vessel_count(scallop0322MainDataTable, project,
                v_id = "PERMIT.y",
-               group = "VTR_PORT",
+               group = c("VTR_PORT","fleet"),
                filter_by = "TOP_10_PORT",
                filter_value = TRUE)
 
@@ -1707,6 +1707,23 @@ agg_helper(scallop0322MainDataTable, "NSUBTRIP",
 ```
 
 
+<br><br>
+
+## Correlation Matrix
+
+```{r}
+corr <- 
+corr_out(scallop0322MainDataTable, project,
+         variables = "all",
+         method = "pearson")
+
+corr$plot + theme(axis.text.x = element_text(size = 7),
+                  axis.text.y = element_text(size = 8))
+
+corr$table %>% pretty_tab_sb()
+```
+
+<br><br>
 
 
 
