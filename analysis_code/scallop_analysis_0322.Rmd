@@ -21,7 +21,6 @@ params:
       value: "wind_sf_nocable.RDS"
       choices: ["wind_sf_final.RDS","wind_sf_nocable.RDS","wind_NY2.RDS"]
 
-    PreRelease: TRUE
 ---
 <!---
 YAML options: 
@@ -75,12 +74,7 @@ underdeveloped, or any thoughts or suggestions you may have.
 ## Library
 
 ```{r setup, echo=FALSE}
-# Load the PreRelease version of FishSET if PreRelease==TRUE. Otherwise, load the normal install.
-if (params$PreRelease==TRUE){
-  library(FishSET, lib.loc="/net/home2/mlee/R/x86_64_pc-linux-gnu-library")
-} else{
-  library(FishSET)
-}
+library(FishSET)
 
 #library("tidyverse")
 tidyverse_short <- c("dplyr",  "ggplot2", "magrittr", "tidyr", "lubridate") 
@@ -163,6 +157,14 @@ final_product_lease <- final_product_lease %>%
          LANDED_KG=LANDED/pounds_to_kg) %>%
   mutate(NAME= stringr::str_replace(NAME,"OCS-A 0499", "OCS-A0499"),
          lease_FS=stringr::str_replace(lease_FS,"OCS-A 0499", "OCS-A0499") )
+
+# converted column types to be compatible with tiny report  
+final_product_lease$IMGID <- as.numeric(final_product_lease$IMGID)
+final_product_lease$DEALER_RPT_ID <- as.numeric(final_product_lease$DEALER_RPT_ID)
+final_product_lease$VTR_PORTNUM<- as.integer(final_product_lease$VTR_PORTNUM)
+final_product_lease$YEAR<-as.integer(final_product_lease$YEAR)
+final_product_lease$PERMIT.y<- as.integer(final_product_lease$PERMIT.y)
+final_product_lease$DEALNUM<- as.integer(final_product_lease$DEALNUM)
 
 #A column of ones. Useful for many things
 final_product_lease$ones<-1
@@ -369,6 +371,33 @@ scallop0322MainDataTable %>%
   pivot_wider(names_from = "var", values_from = "value") %>% 
   pretty_tab()
  
+boxplot(scallop0322MainDataTable$DOLLAR_2020,
+  main = "Revenue in 2020 Dollars",
+  xlab = "USD$",
+  ylab = "Revenue",
+  col = "white",
+  border = "black",
+  horizontal = TRUE,
+  notch = TRUE)
+
+boxplot(scallop0322MainDataTable$KILOGRAMS,
+  main = "Catch in Kilograms",
+  xlab = "Kilograms",
+  ylab = "Catch",
+  col = "white",
+  border = "black",
+  horizontal = TRUE,
+  notch = TRUE)
+
+boxplot(scallop0322MainDataTable$TRIP_LENGTH,
+  main = "Trip Length in Days",
+  xlab = "Trip Length",
+  ylab = "Days",
+  col = "white",
+  border = "black",
+  horizontal = TRUE,
+  notch = TRUE)
+
 ```
 
 
@@ -650,6 +679,19 @@ agg_helper(scallop0322MainDataTable, group = "fleet",
   pretty_tab()
 ```
 
+
+<br><br><br>
+Observations inside/outside closures by OPERNUM. 
+```{r}
+agg_helper(scallop0322MainDataTable, group = "OPERNUM", 
+            value = "in_closure", count = TRUE) %>% 
+  pivot_wider(names_from = "in_closure", values_from = "n") %>% 
+  rename("Outside Closure(s)" = "FALSE", "Inside Closure(s)" = "TRUE") %>% 
+  pretty_lab() %>% 
+  pretty_tab()
+
+```
+
 <br><br><br>
 Observations inside/outside closures by fleet, LA, and GC. 
 ```{r}
@@ -681,6 +723,24 @@ agg_helper(scallop0322MainDataTable, value = "in_closure",
 ```
 
 <br><br><br>
+
+Observations inside/outside closures by month. 
+```{r}
+scallop0322MainDataTable$month <- month(ymd(scallop0322MainDataTable$DATE_TRIP))
+agg_helper(scallop0322MainDataTable, value = "in_closure", 
+            group = "month", 
+            count = TRUE) %>% 
+  pivot_wider(names_from = "in_closure", values_from = "n",
+              values_fill = 0) %>% 
+  arrange(month) %>% 
+  rename("Outside closure(s)" = "FALSE", "Inside closure(s)" = "TRUE") %>% 
+  pretty_lab(ignore = "month") %>% 
+  pretty_tab()
+
+
+```
+
+<br><br><br>
 Observations inside/outside closures by year and fleet. 
 ```{r}
 agg_helper(scallop0322MainDataTable, value = "in_closure", 
@@ -693,6 +753,21 @@ agg_helper(scallop0322MainDataTable, value = "in_closure",
   pretty_lab(ignore = "scallop_fishing_year") %>% 
   pretty_tab_sb(width = "50%") 
 ```
+
+<br><br><br>
+Observations inside/outside closures by month and fleet. 
+```{r}
+agg_helper(scallop0322MainDataTable, value = "in_closure", 
+            group = c("month", "fleet"), 
+            count = TRUE) %>% 
+  pivot_wider(names_from = "in_closure", values_from = "n",
+              values_fill = 0) %>% 
+  arrange(month) %>% 
+  rename("Outside closure(s)" = "FALSE", "Inside closure(s)" = "TRUE") %>% 
+  pretty_lab(ignore = "month") %>% 
+  pretty_tab_sb(width = "50%") 
+```
+
 
 ## Zone Summary
 
