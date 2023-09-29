@@ -12,3 +12,5 @@ scallop_zone_assignment_files
 /FishSETFolder/*
 *.png
 *.sr.lock
+.renviron
+.Renviron

@@ -3,8 +3,8 @@ title: "data_extracting"
 author: "Marina Chaji"
 date: "3/7/2022"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 urlcolor: blue
 params:
     DMIS_STYLE: 
@@ -22,7 +22,6 @@ params:
       value: "live"
       input: select
       choices: ["copyover", "live"]
-
 ---
 
 <!---
@@ -35,13 +34,15 @@ here(), load libraries, and set a data vintage.
 # Set Path
 here::i_am("data_wrangle/data_extracting.rmd")
 
-# Please ensure you have the proper packages installed with (install.packages()) or a request to ITD if any libaries do not load.  
+# Please ensure you have the proper packages installed with (install.packages()) or a request to ITD if any libraries do not load.  
 library("here")
-library("RODBC")
-library(readstata13, lib.loc="/net/home2/mlee/R/x86_64_pc-linux-gnu-library")
-#library("readstata13")
+library("readstata13")
 library("readxl")
 library("tibble")
+library("DBI")
+library("dplyr")
+library("tidyr")
+library("ROracle")
 vintage_string<-Sys.Date()
 vintage_string<-gsub("-","_",vintage_string)
 
@@ -62,7 +63,7 @@ dir.create(here("data", "intermediate"), showWarnings="FALSE")
 dir.create(here("data", "main"), showWarnings="FALSE")
 dir.create(here("data","external","shapefiles","East_Cst_crop_2020_extended"), showWarnings="FALSE")
 dir.create(here("data","external","shapefiles","Ten Minute Squares Cut North and Greater Atlantic"), showWarnings="FALSE")
-dir.create(here("data","external","shapefiles","All_Lease_Areas_Shapefile"), showWarnings="FALSE")
+dir.create(here("data","external","shapefiles","All_Lease_Areas_Shapefile_August"), showWarnings="FALSE")
 
 ```
 
@@ -81,25 +82,28 @@ This is a block of code where we set up the oracle passwords and make R aware of
 ```{r oracle_connections, echo=TRUE, results=FALSE}
 source(here("data_wrangle","credentials.R"))
 
-# Set the network_location_desktop and network_location_remote variables somewhere OUTSIDE of this code.  The best place to do this is in the .Rprofile or .Renviron files that are in your root directory.  
-
-#Comment one of these out, depending on whether you are running this code on a server or locally (with VPN) 
-net<-network_location_desktop
-net<-network_location_remote
+# If using a user container, ITD will need to mount mlee, dcorvi and socialsci in order to access all necessary directories.   
+# If using the network_location_desktop and network_location_remote variables set these somewhere OUTSIDE of this code. The best place to do this is in the .Rprofile or .Renviron files that are in your root directory.   
 
 
-ml.intermediate.path<-file.path(net,"home2","mlee","Effort-Displacement---Scallop","data","intermediate")
+# Note in both cases, Directories should be set in your credentials.R file
+
+ml.intermediate.path<-file.path(mlee_dir,"Effort-Displacement---Scallop","data","intermediate")
 
 # These are not part of the project path
-offshoreWind_directory<-file.path(net,"home5", "dcorvi","OffshoreWind","offshoreWind4","data")
-spacepanels_directory<-file.path(net,"home2", "mlee","dropoff","wind")
-cost_directory1<-file.path(net,"work5","socialsci","Trip_Costs","2000-2009")
-cost_directory2<-file.path(net,"work5","socialsci","Trip_Costs","2010-2021")
+
+offshoreWind_directory<-file.path(socialsci_dir,"Geret_Rasters","Data","offshore_wind_package_data","support_tables","backup_data_folder","data")
+
+spacepanels_location<-file.path(mlee_dir,"dropoff","wind","just_ports_2023_08_11.dta")
+
+cost_directory1<-file.path(socialsci_dir,"Trip_Costs","2000-2009")
+cost_directory2<-file.path(socialsci_dir,"Trip_Costs","2010-2021")
+
 
 # Set up paths.
 East_Cst_crop_2020_path<- here("data","external","shapefiles","East_Cst_crop_2020_extended")
 TMSQ_path<-here("data","external","shapefiles","Ten Minute Squares Cut North and Greater Atlantic")
-All_Lease_Areas_Shapefile_path<-here("data","external","shapefiles","All_Lease_Areas_Shapefile")
+All_Lease_Areas_Shapefile_path<-here("data","external","shapefiles","All_Lease_Areas_Shapefile_August")
 ```
 
 
@@ -298,7 +302,7 @@ Load in the lats and lons of all ports from the spacepanels directory. Change th
 
 ```{r readin_spacepanels, echo=TRUE,eval=TRUE}
 #Import Data
-tripid_geoids<- read.dta13(file.path(spacepanels_directory,"just_ports_2022_01_26.dta"))
+tripid_geoids<- read.dta13(spacepanels_location)
 #Could do all this in one step, but ...
 # Pick the cols that start with previous
 prev<-tripid_geoids[grepl("^previous_", colnames(tripid_geoids))]
@@ -325,13 +329,23 @@ if (params$DMIS_STYLE=="frozen_GARFO"){
   load(file.path(offshoreWind_directory, "APSD_DMIS_2.rda"))
   APSD_DMIS_2$dbsource="frozen_GARFO"
 } else if(params$DMIS_STYLE=="live"){
-  oracle_server = "sole"
-  ODBC.CONNECTION <- RODBC::odbcConnect(dsn=oracle_server, uid=oracle_username, pwd=oracle_password, believeNRows=FALSE)
-  CURRENT.QUERY = paste ("select * FROM APSD.DMIS_WIND_TEST@garfo_nefsc")
-  APSD_DMIS_2 = sqlQuery(ODBC.CONNECTION, CURRENT.QUERY)
-  odbcCloseAll()
   
-  APSD_DMIS_2$dbsource<-paste0("live_",vintage_string)
+con <- ROracle::dbConnect(
+  drv = ROracle::Oracle(),
+  username = oracle_username,
+  password = oracle_password,
+  dbname = "sole")
+
+APSD_DMIS_2 <- tbl(con, sql("select IMGID, DOCID, YEAR, TO_CHAR(DATE_TRIP, 'MM/DD/YY HH24:MI:SS ') AS DATE_TRIP, 
+                            VTR_PORT,  VTR_STATE, TRIP_LENGTH, PERMIT, DEALER_RPT_ID, DOLLAR, POUNDS, 
+                            LANDED, DDLON, DDLAT,GEARCODE, SECGEARFISH, NESPP3, SOURCE, DEALNUM from APSD.DMIS_WIND_111522@garfo_nefsc")) %>% collect()
+dbDisconnect(con)
+
+APSD_DMIS_2<-APSD_DMIS_2 %>%
+  mutate("DATE_TRIP"=lubridate::mdy_hms(DATE_TRIP))
+  APSD_DMIS_2$dbsource="live"
+
+  
 } else if(params$DMIS_STYLE=="copyover"){
 # Do nothing
 }
@@ -357,7 +371,7 @@ saveRDS(APSD_DMIS_2, file=here("data","intermediate", APSD_DMIS_2_name))
   file.copy(APSD_static_nefsc,destination, overwrite=FALSE)
 }
 
-
+colnames(APSD_DMIS_2)
 
 
 
@@ -387,19 +401,26 @@ Some Trip-level data in the VTR schema is needed. See table at the top.  We extr
 # Get the live data 
 if (params$VTR_extraction=="live"){ 
 
-oracle_server = "sole"
-ODBC.CONNECTION <- RODBC::odbcConnect(dsn=oracle_server, uid=oracle_username, pwd=oracle_password, believeNRows=FALSE)
+con <- ROracle::dbConnect(
+  drv = ROracle::Oracle(),
+  username = oracle_username,
+  password = oracle_password,
+  dbname = "sole")
+
+
 START.YEAR = 2007
 END.YEAR = 2022
+
 RESULT.COMPILED<-list()
 t<-1
 for(i in START.YEAR:END.YEAR) {
   print(i)
-  CURRENT.QUERY = paste("SELECT VTR.veslog",i,"t.TRIPID,tripcatg, operator, opernum, permit, nsubtrip, crew,not_fished, port as VTR_PORTNUM  
-                FROM VTR.veslog",i,"t", sep="")
-  RESULT.COMPILED[[t]] = sqlQuery(ODBC.CONNECTION, CURRENT.QUERY)  
+  CURRENT.QUERY = paste("SELECT TRIPID, tripcatg, operator, opernum, permit, nsubtrip, crew,not_fished, port as VTR_PORTNUM FROM VTR.veslog",i,"t", sep="")
+  RESULT.COMPILED[[t]] <- tbl(con,sql(CURRENT.QUERY)) %>% collect()
   t<-t+1
 }    
+dbDisconnect(con)
+
 
 RESULT.COMPILED<-do.call(rbind.data.frame, RESULT.COMPILED)
 RESULT.COMPILED_name <-paste0("RESULT_COMPILED_",vintage_string,".Rds")
@@ -421,6 +442,8 @@ saveRDS(RESULT.COMPILED, file=here("data","intermediate",RESULT.COMPILED_name))
   file.copy(RESULT_COMPILED_static,destination, overwrite=FALSE)
 }
 
+
+colnames(RESULT.COMPILED)
 ```
 
 
@@ -434,13 +457,18 @@ We  also extract the T/F variables corresponding the the PLAN_CAT in DMIS.
 ```{r DMIS_Query, echo=TRUE,eval=TRUE}
  if (params$scallop_linking_extraction=="live"){ 
 
-oracle_server = "sole"
+con <- ROracle::dbConnect(
+  drv = ROracle::Oracle(),
+  username = oracle_username,
+  password = oracle_password,
+  dbname = "sole")
+
 CURRENT.QUERY = paste ("SELECT TRIP_ID, DOCID, ACTIVITY_CODE, DAS_ID, LGC_A, LGC_B, LGC_C, SC_2, SC_3, SC_4, SC_5, SC_6, SC_7, SC_8, SC_9, SG_1A, SG_1B
  FROM APSD.t_ssb_trip_current@garfo_nefsc")
-Scallop_Linkingorg = sqlQuery(ODBC.CONNECTION, CURRENT.QUERY)
 
-odbcCloseAll()
+Scallop_Linkingorg <- tbl(con,sql(CURRENT.QUERY)) %>% collect()
 
+dbDisconnect(con)
 
 
 #save to RDS
@@ -461,7 +489,9 @@ saveRDS(Scallop_Linkingorg, file=here("data","intermediate",Scallop_Linkingorg_n
   file.copy(Scallop_Linkingorg_static,destination, overwrite=FALSE)
    
    
-}
+ }
+
+colnames(Scallop_Linkingorg)
 
 ```
 
