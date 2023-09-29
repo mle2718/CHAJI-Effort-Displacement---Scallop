@@ -11,8 +11,8 @@ AADAS_Vals_to_loop<-c(TRUE) # TRUE is the AADAS fleet. FALSE is the IFQ fleet
 subtrip_aggregate_vals_to_loop<-c(TRUE) # TRUE aggregates subtrips to trips. FALSE does not
 
 # We want to be able to run the tiny "area" level analysis on all the shapefiles. I don't know if we can.
-# input_shapefile_vals_to_loop2<-c("wind_NY1.RDS","wind_NY2.RDS","wind_NY3.RDS","wind_Central_Atlantic_1.RDS", "wind_Central_Atlantic_2.RDS")
-input_shapefile_vals_to_loop2<-c("wind_NY2.RDS")
+input_shapefile_vals_to_loop2<-c("wind_NY1.RDS","wind_NY2.RDS","wind_NY3.RDS","wind_Central_Atlantic_1.RDS", "wind_Central_Atlantic_2.RDS","wind_Central_Atlantic_3.RDS")
+#input_shapefile_vals_to_loop2<-c("wind_NY2.RDS")
 
 
 
