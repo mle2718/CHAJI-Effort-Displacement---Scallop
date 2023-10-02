@@ -22,7 +22,7 @@ params:
     - Woods_Hole
     - Seattle
   input_shapefile:
-    value: wind_sf_nocable_agg.RDS
+    value: wind_NY1.RDS
     choices:
     - wind_NY1.RDS
     - wind_NY2.RDS
@@ -1058,10 +1058,16 @@ zone_summary(scallop0322MainDataTable, project = project,
          na.rm = FALSE, dat.center = FALSE,
          output = out_switch)
 
-  zone_out$table %>%
-  filter(!is.na(closeID)) %>%
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
     pretty_lab() %>% 
     pretty_tab_sb(width = "40%")
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
 
 ```
 
@@ -1081,11 +1087,16 @@ zone_summary(scallop0322MainDataTable, project = project,
          na.rm = FALSE, dat.center = FALSE,
          output = out_switch)
 
-  zone_out$table %>%
-  filter(!is.na(closeID)) %>%
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
     pretty_lab() %>% 
     pretty_tab_sb(width = "40%")
-
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
 ```
 
 
@@ -1106,10 +1117,17 @@ zone_summary(scallop0322MainDataTable, project = project,
          na.rm = FALSE, dat.center = FALSE,
          output = out_switch)
 
-  zone_out$table %>%
-  filter(!is.na(closeID)) %>%
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
     pretty_lab() %>% 
     pretty_tab_sb(width = "40%")
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+
 
 ```
 <br><br><br>
@@ -1292,10 +1310,16 @@ zone_summary(scallop0322MainDataTable, project = project,
          na.rm = FALSE, dat.center = FALSE,
          output = out_switch)
 
-  zone_out$table %>%
-  filter(!is.na(closeID)) %>%
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
     pretty_lab() %>% 
     pretty_tab_sb(width = "40%")
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
 
 ```
 
@@ -1316,10 +1340,17 @@ zone_summary(scallop0322MainDataTable, project = project,
          na.rm = FALSE, dat.center = FALSE,
          output = out_switch)
 
-  zone_out$table %>%
-  filter(!is.na(closeID)) %>%
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
     pretty_lab() %>% 
     pretty_tab_sb(width = "40%")
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+
 
 ```
 
