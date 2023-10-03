@@ -1260,6 +1260,45 @@ zone_out$plot }
 
 
 <br><br><br>
+
+Percent of Scallop profit by fleet. 
+```{r}
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "OPERATING_PROFIT_2020", group = "fleet",
+         fun = "percent",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = out_switch)
+
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "60%")
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+```
+
+```{r, eval=eval_next}
+  
+  zone_out$table %>%
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "60%")
+
+
+```
+
+
+
+<br><br><br>
 Average Operating Profit by closure area. 
 ```{r}
 zone_out <- 
