@@ -742,7 +742,18 @@ scallop0322MainDataTable %>%
 scallop0322MainDataTable <- 
   scallop0322MainDataTable %>% 
   mutate(TOP_10_PORT = VTR_PORT %in% top_ten_ports)
+
+
+top_ten_ports_freq <- 
+  scallop0322MainDataTable %>%  
+  group_by(VTR_PORT) %>% summarise(n=n()) %>% 
+  arrange(desc(n)) %>% head(10)
+
+pretty_tab(top_ten_ports_freq)
+
 ```
+
+
 
 
 Vessel count by top ten port
