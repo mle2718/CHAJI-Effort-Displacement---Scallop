@@ -267,6 +267,19 @@ wind_Central_Atlantic_2$LEASE_NUMB <- "Central Atlantic Draft WEA"
 wind_Central_Atlantic_3 <- prep_spat(wind_Central_Atlantic_3)
 wind_Central_Atlantic_3$LEASE_NUMB <- "Central Atlantic Final WEA"
 
+```
+
+```{r}
+# Adding an area values for shapefiles in the NY Bight and Central Atlantic to compare changes over time by area 
+## note that area is in meters squared but can be changed later
+
+wind_NY1$area_ms2 <- sf::st_area(wind_NY1)
+wind_NY2$area_ms2 <- sf::st_area(wind_NY2)
+wind_NY3$area_ms2 <- sf::st_area(wind_NY3)
+
+wind_Central_Atlantic_1$area_ms2 <- sf::st_area(wind_Central_Atlantic_1)
+wind_Central_Atlantic_2$area_ms2 <- sf::st_area(wind_Central_Atlantic_2)
+wind_Central_Atlantic_3$area_ms2 <- sf::st_area(wind_Central_Atlantic_3)
 
 ```
 
