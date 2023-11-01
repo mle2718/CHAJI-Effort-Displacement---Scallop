@@ -108,7 +108,7 @@ offshoreWind_directory<-file.path(socialsci_dir,"Geret_Rasters","Data","offshore
 spacepanels_location<-file.path(mlee_dir,"dropoff","wind","just_ports_2023_08_11.dta")
 
 cost_directory1<-file.path(socialsci_dir,"Trip_Costs","2000-2009")
-cost_directory2<-file.path(socialsci_dir,"Trip_Costs","2010-2021")
+cost_directory2<-file.path(socialsci_dir,"Trip_Costs","Archived","2010-2021")
 
 
 # Set up paths.
