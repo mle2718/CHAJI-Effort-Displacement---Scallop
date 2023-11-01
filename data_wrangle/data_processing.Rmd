@@ -293,7 +293,7 @@ Scallops$scallop_fishing_year[Scallops$Date >= "2019-04-01" & Scallops$Date <= "
 Scallops$scallop_fishing_year[Scallops$Date >= "2020-04-01" & Scallops$Date <= "2021-03-31"] <- "2020"
 Scallops$scallop_fishing_year[Scallops$Date >= "2021-04-01" & Scallops$Date <= "2022-03-31"] <- "2021"
 Scallops$scallop_fishing_year[Scallops$Date >= "2022-04-01" & Scallops$Date <= "2023-03-31"] <- "2022"
-Scallops$scallop_fishing_year[Scallops$Date >= "2023-04-01" & Scallops$Date <= "2023-03-31"] <- "2023"
+Scallops$scallop_fishing_year[Scallops$Date >= "2023-04-01" & Scallops$Date <= "2024-03-31"] <- "2023"
 
 
 ```
