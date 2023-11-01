@@ -22,7 +22,7 @@ params:
     - Woods_Hole
     - Seattle
   input_shapefile:
-    value: wind_sf_nocable_agg.RDS
+    value: wind_sf_nocable.RDS
     choices:
     - wind_NY1.RDS
     - wind_NY2.RDS
@@ -31,7 +31,7 @@ params:
     - wind_Central_Atlantic_2.RDS
     - wind_sf_final.RDS
     - wind_sf_nocable.RDS
-    - wind_sf_nocable_agg.RDS
+    
 ---
 <!---
 YAML options: 
@@ -742,8 +742,18 @@ scallop0322MainDataTable %>%
 scallop0322MainDataTable <- 
   scallop0322MainDataTable %>% 
   mutate(TOP_10_PORT = VTR_PORT %in% top_ten_ports)
+
+
+top_ten_ports_freq <- 
+  scallop0322MainDataTable %>%  
+  group_by(VTR_PORT) %>% summarise(n=n()) %>% 
+  arrange(desc(n)) %>% head(10)
+
+pretty_tab(top_ten_ports_freq)
+
 ```
 
+<br><br><br>
 
 Vessel count by top ten port
 
@@ -916,7 +926,7 @@ cpue_out$plot + angled_theme()
 
 Number of observations.
 ```{r}
-table_convert <- c("wind_NY1.RDS","wind_NY2.RDS","wind_NY3.RDS")
+table_convert <- c("wind_NY1.RDS","wind_NY2.RDS","wind_NY3.RDS","wind_sf_nocable_agg.RDS","wind_sf_nocable.RDS")
 out_switch <- ifelse(params$input_shapefile %in% table_convert, "table", "tab_plot")
 
 zone_out <- 
@@ -1043,7 +1053,7 @@ if (out_switch == "table") {
 ```
 
 <br><br><br>
-Revenue in closures by port
+Total Revenue in closures by port
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -1058,17 +1068,152 @@ zone_summary(scallop0322MainDataTable, project = project,
          na.rm = FALSE, dat.center = FALSE,
          output = out_switch)
 
-if (params$input_shapefile=="wind_sf_nocable.RDS"){
-  zone_out$table %>%
-  filter(!is.na(closeID)) %>%
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
     pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")}
+    pretty_tab_sb(width = "40%")
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+
+```
+
+<br><br><br>
+Average Revenue in closures
+```{r}
+
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2020",
+         fun = "mean",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = out_switch)
+
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+
+```
+
+<br><br><br>
+Average landed in closures
+```{r}
+
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "LANDED",
+         fun = "mean",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = out_switch)
+
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
 
 ```
 
 
+<br><br><br>
+Average Revenue in closures by fleet
+```{r}
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2020",
+         fun = "mean",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = out_switch)
+
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+```
 
 
+
+<br><br><br>
+Average Revenue in closures by port
+```{r}
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2020",
+         fun = "mean",
+         group = "VTR_PORT",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = out_switch)
+
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+
+
+```
+<br><br><br>
+Average Revenue by top 10 ports, fleet, and closure
+```{r}
+cpue_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "DOLLAR_2020",
+                group = c("VTR_PORT", "fleet","NAME"),
+                filter_by = c("TOP_10_PORT"),
+                filter_value = TRUE,
+                fun = "mean")
+
+cpue_out$table %>% 
+  pretty_lab() %>%
+  pretty_tab()
+```
 
 <br><br><br>
 Percent of Scallop revenue by closure area. 
@@ -1181,6 +1326,158 @@ zone_out$plot }
     pretty_tab_sb(width = "40%")
 
 ```
+
+
+<br><br><br>
+
+Percent of Scallop profit by fleet. 
+```{r}
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "OPERATING_PROFIT_2020", group = "fleet",
+         fun = "percent",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = out_switch)
+
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "60%")
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+```
+
+```{r, eval=eval_next}
+  
+  zone_out$table %>%
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "60%")
+
+
+```
+
+
+
+<br><br><br>
+Average Operating Profit by closure area. 
+```{r}
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "OPERATING_PROFIT_2020",
+         fun = "mean",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = out_switch)
+
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "60%")
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+zone_out$plot }
+
+```
+
+```{r, eval=eval_next}
+  
+  zone_out$table %>%
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+
+```
+
+<br><br><br>
+Average Operating Profit in closures by port
+```{r}
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "OPERATING_PROFIT_2020",
+         fun = "mean",
+         group = "VTR_PORT",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = out_switch)
+
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+
+```
+
+
+<br><br><br>
+Average Operating Profit in closures by fleet
+```{r}
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "OPERATING_PROFIT_2020",
+         fun = "mean",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = out_switch)
+
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+
+
+```
+
+<br><br><br>
+Average Operating Profit by top 10 ports, fleet, and closure
+```{r}
+cpue_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "OPERATING_PROFIT_2020",
+                group = c("VTR_PORT", "fleet","NAME"),
+                filter_by = c("TOP_10_PORT"),
+                filter_value = TRUE,
+                fun = "mean")
+
+cpue_out$table %>% 
+  pretty_lab() %>%
+  pretty_tab()
+```
+
 
 <br><br><br>
 Percent of operating profit by closure area. 
@@ -1642,7 +1939,7 @@ if (out_switch == "table") {
 
 <br><br><br>
 
-Average VPUE per closure area. 
+Average VPUE per closure area by fleet 
 ```{r}
 zone_out <- 
     scallop0322MainDataTable %>% 
@@ -1690,6 +1987,27 @@ agg_helper(value = "VPUE",
   pretty_lab() %>% 
   pretty_tab_sb()
 ```
+
+<br><br><br>
+Average VPUE by top 10 ports, fleet, and closure
+```{r}
+cpue_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "VPUE",
+                group = c("VTR_PORT", "fleet","NAME"),
+                filter_by = c("TOP_10_PORT"),
+                filter_value = TRUE,
+                fun = "mean")
+
+cpue_out$table %>% 
+  pretty_lab() %>%
+  pretty_tab()
+```
+
+
+
+
+
 
 <br><br>
 
