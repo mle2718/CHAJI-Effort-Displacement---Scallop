@@ -270,8 +270,10 @@ wind_Central_Atlantic_3$LEASE_NUMB <- "Central Atlantic Final WEA"
 ```
 
 ```{r}
-# Adding an area values for shapefiles in the NY Bight and Central Atlantic to compare changes over time by area 
+# Adding an area values for shapefiles in the NY Bight, Central Atlantic, and all leases to compare changes over time by area 
 ## note that area is in meters squared but can be changed later
+
+wind_sf$area_ms2 <- sf::st_area(wind_sf)
 
 wind_NY1$area_ms2 <- sf::st_area(wind_NY1)
 wind_NY2$area_ms2 <- sf::st_area(wind_NY2)
