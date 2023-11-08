@@ -328,11 +328,11 @@ if (params$subtrip_aggregate==TRUE){
 scallop0322MainDataTable <- 
   scallop0322MainDataTable %>%
   group_by(TRIPID) %>%
-  mutate(Agg_DOLLAR = sum(DOLLAR),Agg_DOLLAR_2020 = sum(DOLLAR_2020),  Agg_POUNDS = sum(POUNDS), Agg_LANDED = sum(LANDED), Agg_DOLLAR_ALL_SP_2020 = sum(DOLLAR_ALL_SP_2020))%>% 
+  mutate(Agg_DOLLAR = sum(DOLLAR),Agg_DOLLAR_2022 = sum(DOLLAR_2022),  Agg_POUNDS = sum(POUNDS), Agg_LANDED = sum(LANDED), Agg_DOLLAR_ALL_SP_2022 = sum(DOLLAR_ALL_SP_2022))%>% 
   arrange(desc(DOLLAR)) %>%
   dplyr::filter(row_number()==1) %>% 
-  dplyr::select(-DOLLAR, -POUNDS, -LANDED,-DOLLAR_ALL_SP_2020, -DOLLAR_2020) %>% 
-  rename(DOLLAR = "Agg_DOLLAR", POUNDS = "Agg_POUNDS", LANDED = "Agg_LANDED", DOLLAR_ALL_SP_2020 = "Agg_DOLLAR_ALL_SP_2020", DOLLAR_2020="Agg_DOLLAR_2020") %>% 
+  dplyr::select(-DOLLAR, -POUNDS, -LANDED,-DOLLAR_ALL_SP_2022, -DOLLAR_2022) %>% 
+  rename(DOLLAR = "Agg_DOLLAR", POUNDS = "Agg_POUNDS", LANDED = "Agg_LANDED", DOLLAR_ALL_SP_2022 = "Agg_DOLLAR_ALL_SP_2022", DOLLAR_2022="Agg_DOLLAR_2022") %>% 
   ungroup()
 
 scallop0322MainDataTable <- scallop0322MainDataTable %>%
@@ -355,8 +355,8 @@ scallop0322MainDataTable$OPERATING_PROFIT <-
   (scallop0322MainDataTable$DOLLAR_ALL_SP - scallop0322MainDataTable$TRIP_COST_NOMINALDOLS_WINSOR)
 
 
-scallop0322MainDataTable$OPERATING_PROFIT_2020 <- 
-  (scallop0322MainDataTable$DOLLAR_ALL_SP_2020 - scallop0322MainDataTable$TRIP_COST_WINSOR_2020_DOL)
+scallop0322MainDataTable$OPERATING_PROFIT_2022 <- 
+  (scallop0322MainDataTable$DOLLAR_ALL_SP_2022 - scallop0322MainDataTable$TRIP_COST_WINSOR_2022_DOL)
 
 
 ```
@@ -371,8 +371,8 @@ summary_stats(scallop0322MainDataTable, project) %>%
 Here is DOLLAR, KILOGRAMS, CREW, LANDED, DOLLAR, OPERATING PROFIT and TRIP_LENGTH separately. 
 ```{r}
 scallop0322MainDataTable %>% 
-  summarize(across(.cols = c("LANDED_KG","LANDED", "DOLLAR_2020" , "OPERATING_PROFIT_2020","TRIP_LENGTH"), 
-                   .fns = list(min = min, median = median, mean = mean, max = max, StdDev = sd ,sum=sum, Q25 = ~quantile(.,0.25), Q50 = ~quantile(.,0.50), Q75 = ~quantile(.,0.75), Q95 = ~quantile(.,0.95),
+  summarize(across(.cols = c("LANDED_KG","LANDED", "DOLLAR_2022" , "OPERATING_PROFIT_2022","TRIP_LENGTH"), 
+                   .fns = list(min = min, median = median, mean = mean, max = max, StdDev = sd ,sum=sum, Q25 = ~quantile(.,0.25,na.rm=TRUE), Q50 = ~quantile(.,0.50,na.rm=TRUE), Q75 = ~quantile(.,0.75,na.rm=TRUE), Q95 = ~quantile(.,0.95,na.rm=TRUE),
                                NAs = ~sum(is.na(.x)), UniqueObs = n_distinct, 
                                "No. 0's" = ~sum(.x == 0)), 
                    .names = "{.col}__{.fn}")) %>% 
@@ -383,7 +383,7 @@ scallop0322MainDataTable %>%
   pretty_tab()
  
 
-boxplot(scallop0322MainDataTable$DOLLAR_2020,
+boxplot(scallop0322MainDataTable$DOLLAR_2022,
   main = "Revenue in 2020 Dollars",
   xlab = "USD$",
   ylab = "Revenue",
@@ -557,7 +557,7 @@ Same as above but with revenue instead of meat KG
 ```{r}
 scallop0322MainDataTable <- 
   cpue(scallop0322MainDataTable, project,
-       xWeight = "DOLLAR_2020",
+       xWeight = "DOLLAR_2022",
        xTime = "TRIP_LENGTH", 
        name = "VPUE")
 
@@ -818,7 +818,7 @@ Total Revenue by Top 10 port and gearcode.
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "DOLLAR_2020",
+                species = "DOLLAR_2022",
                 group = c("VTR_PORT", "GEARCODE"),
                 filter_by = "TOP_10_PORT",
                 filter_value = TRUE,
@@ -826,7 +826,7 @@ catch_out <-
                 format_lab = "scientific", tran = "log")
 
 catch_out$table %>% 
-  pivot_wider(names_from = GEARCODE, values_from = DOLLAR_2020) %>% 
+  pivot_wider(names_from = GEARCODE, values_from = DOLLAR_2022) %>% 
   pretty_lab() %>%
   pretty_tab_sb() 
   
@@ -840,7 +840,7 @@ Total Revenue by Top 10 port and fleet.
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "DOLLAR_2020",
+                species = "DOLLAR_2022",
                 group = c("VTR_PORT", "fleet"),
                 filter_by = "TOP_10_PORT",
                 filter_value = TRUE,
@@ -848,7 +848,7 @@ catch_out <-
                 format_lab = "scientific", tran = "log")
 
 catch_out$table %>% 
-  pivot_wider(names_from = fleet, values_from = DOLLAR_2020) %>% 
+  pivot_wider(names_from = fleet, values_from = DOLLAR_2022) %>% 
   pretty_lab() %>%
   pretty_tab_sb() 
   
@@ -864,7 +864,7 @@ Average Revenue by top 10 ports.
 ```{r}
 cpue_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "DOLLAR_2020",
+                species = "DOLLAR_2022",
                 group = c("VTR_PORT", "fleet"),
                 filter_by = "TOP_10_PORT",
                 filter_value = TRUE,
@@ -884,7 +884,7 @@ Total Operating Profit by Top 10 port and gearcode.
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "OPERATING_PROFIT_2020",
+                species = "OPERATING_PROFIT_2022",
                 group = c("VTR_PORT", "GEARCODE"),
                 filter_by = "TOP_10_PORT",
                 filter_value = TRUE,
@@ -892,7 +892,7 @@ catch_out <-
                 format_lab = "scientific", tran = "log")
 
 catch_out$table %>% 
-  pivot_wider(names_from = GEARCODE, values_from = OPERATING_PROFIT_2020) %>% 
+  pivot_wider(names_from = GEARCODE, values_from = OPERATING_PROFIT_2022) %>% 
   pretty_lab() %>%
   pretty_tab_sb() 
   
@@ -905,7 +905,7 @@ Average Operating Profit by top 10 ports.
 ```{r}
 cpue_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "OPERATING_PROFIT_2020",
+                species = "OPERATING_PROFIT_2022",
                 group = "VTR_PORT",
                 filter_by = "TOP_10_PORT",
                 filter_value = TRUE,
@@ -1026,7 +1026,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable,
          zone.dat = "closeID",
          zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2020",
+         var = "DOLLAR_2022",
          fun = "sum",
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
@@ -1060,7 +1060,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable,
          zone.dat = "closeID",
          zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2020",
+         var = "DOLLAR_2022",
          fun = "sum",
          group = "VTR_PORT",
          count = FALSE, 
@@ -1090,7 +1090,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable,
          zone.dat = "closeID",
          zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2020",
+         var = "DOLLAR_2022",
          fun = "mean",
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
@@ -1148,7 +1148,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable,
          zone.dat = "closeID",
          zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2020",
+         var = "DOLLAR_2022",
          fun = "mean",
          group = "fleet",
          count = FALSE, 
@@ -1178,7 +1178,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable,
          zone.dat = "closeID",
          zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2020",
+         var = "DOLLAR_2022",
          fun = "mean",
          group = "VTR_PORT",
          count = FALSE, 
@@ -1204,7 +1204,7 @@ Average Revenue by top 10 ports, fleet, and closure
 ```{r}
 cpue_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "DOLLAR_2020",
+                species = "DOLLAR_2022",
                 group = c("VTR_PORT", "fleet","NAME"),
                 filter_by = c("TOP_10_PORT"),
                 filter_value = TRUE,
@@ -1223,7 +1223,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable,
          zone.dat = "closeID",
          zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2020",
+         var = "DOLLAR_2022",
          fun = "percent",
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
@@ -1262,7 +1262,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable,
          zone.dat = "closeID",
          zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2020", group = "fleet",
+         var = "DOLLAR_2022", group = "fleet",
          fun = "percent",
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
@@ -1300,7 +1300,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable,
          zone.dat = "closeID",
          zone.spat = "LEASE_NUMB",
-         var = "OPERATING_PROFIT_2020",
+         var = "OPERATING_PROFIT_2022",
          fun = "sum",
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
@@ -1337,7 +1337,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable,
          zone.dat = "closeID",
          zone.spat = "LEASE_NUMB",
-         var = "OPERATING_PROFIT_2020", group = "fleet",
+         var = "OPERATING_PROFIT_2022", group = "fleet",
          fun = "percent",
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
@@ -1375,7 +1375,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable,
          zone.dat = "closeID",
          zone.spat = "LEASE_NUMB",
-         var = "OPERATING_PROFIT_2020",
+         var = "OPERATING_PROFIT_2022",
          fun = "mean",
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
@@ -1410,7 +1410,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable,
          zone.dat = "closeID",
          zone.spat = "LEASE_NUMB",
-         var = "OPERATING_PROFIT_2020",
+         var = "OPERATING_PROFIT_2022",
          fun = "mean",
          group = "VTR_PORT",
          count = FALSE, 
@@ -1440,7 +1440,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable,
          zone.dat = "closeID",
          zone.spat = "LEASE_NUMB",
-         var = "OPERATING_PROFIT_2020",
+         var = "OPERATING_PROFIT_2022",
          fun = "mean",
          group = "fleet",
          count = FALSE, 
@@ -1467,7 +1467,7 @@ Average Operating Profit by top 10 ports, fleet, and closure
 ```{r}
 cpue_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "OPERATING_PROFIT_2020",
+                species = "OPERATING_PROFIT_2022",
                 group = c("VTR_PORT", "fleet","NAME"),
                 filter_by = c("TOP_10_PORT"),
                 filter_value = TRUE,
@@ -1487,7 +1487,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable,
          zone.dat = "closeID",
          zone.spat = "LEASE_NUMB",
-         var = "OPERATING_PROFIT_2020",
+         var = "OPERATING_PROFIT_2022",
          fun = "percent",
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
@@ -1524,7 +1524,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable,
          zone.dat = "closeID",
          zone.spat = "LEASE_NUMB",
-         var = "OPERATING_PROFIT_2020", group = "fleet",
+         var = "OPERATING_PROFIT_2022", group = "fleet",
          fun = "percent",
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),

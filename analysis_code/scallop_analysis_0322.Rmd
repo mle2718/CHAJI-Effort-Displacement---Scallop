@@ -18,7 +18,7 @@ params:
       input: select
       choices: [Woods_Hole, Seattle]
     input_shapefile:
-      value: "wind_sf_nocable.RDS"
+      value: "wind_NY2.RDS"
       choices: ["wind_sf_final.RDS","wind_sf_nocable.RDS","wind_NY2.RDS"]
 
 ---
@@ -153,10 +153,8 @@ final_product_lease$scallop_fishing_yearD <- lubridate::date_decimal(final_produ
 
 
 final_product_lease <- final_product_lease %>%
-  mutate(KILOGRAMS = POUNDS/pounds_to_kg,
-         LANDED_KG=LANDED/pounds_to_kg) %>%
-  mutate(NAME= stringr::str_replace(NAME,"OCS-A 0499", "OCS-A0499"),
-         lease_FS=stringr::str_replace(lease_FS,"OCS-A 0499", "OCS-A0499") )
+  mutate(KILOGRAMS = POUNDS/pounds_to_kg,LANDED_KG=LANDED/pounds_to_kg) 
+
 
 # converted column types to be compatible with tiny report  
 final_product_lease$IMGID <- as.numeric(final_product_lease$IMGID)
@@ -317,11 +315,11 @@ if (params$subtrip_aggregate==TRUE){
 scallop0322MainDataTable <- 
   scallop0322MainDataTable %>%
   group_by(TRIPID) %>%
-  mutate(Agg_DOLLAR = sum(DOLLAR),Agg_DOLLAR_2020 = sum(DOLLAR_2020),  Agg_POUNDS = sum(POUNDS), Agg_LANDED = sum(LANDED), Agg_DOLLAR_ALL_SP_2020 = sum(DOLLAR_ALL_SP_2020))%>% 
+  mutate(Agg_DOLLAR = sum(DOLLAR),Agg_DOLLAR_2022 = sum(DOLLAR_2022),  Agg_POUNDS = sum(POUNDS), Agg_LANDED = sum(LANDED), Agg_DOLLAR_ALL_SP_2022 = sum(DOLLAR_ALL_SP_2022))%>% 
   arrange(desc(DOLLAR)) %>%
   dplyr::filter(row_number()==1) %>% 
-  dplyr::select(-DOLLAR, -POUNDS, -LANDED,-DOLLAR_ALL_SP_2020, -DOLLAR_2020) %>% 
-  rename(DOLLAR = "Agg_DOLLAR", POUNDS = "Agg_POUNDS", LANDED = "Agg_LANDED", DOLLAR_ALL_SP_2020 = "Agg_DOLLAR_ALL_SP_2020", DOLLAR_2020="Agg_DOLLAR_2020") %>% 
+  dplyr::select(-DOLLAR, -POUNDS, -LANDED,-DOLLAR_ALL_SP_2022, -DOLLAR_2022) %>% 
+  rename(DOLLAR = "Agg_DOLLAR", POUNDS = "Agg_POUNDS", LANDED = "Agg_LANDED", DOLLAR_ALL_SP_2022 = "Agg_DOLLAR_ALL_SP_2022", DOLLAR_2022="Agg_DOLLAR_2022") %>% 
   ungroup()
 
 scallop0322MainDataTable <- scallop0322MainDataTable %>%
@@ -344,8 +342,8 @@ scallop0322MainDataTable$OPERATING_PROFIT <-
   (scallop0322MainDataTable$DOLLAR_ALL_SP - scallop0322MainDataTable$TRIP_COST_NOMINALDOLS_WINSOR)
 
 
-scallop0322MainDataTable$OPERATING_PROFIT_2020 <- 
-  (scallop0322MainDataTable$DOLLAR_ALL_SP_2020 - scallop0322MainDataTable$TRIP_COST_WINSOR_2020_DOL)
+scallop0322MainDataTable$OPERATING_PROFIT_2022 <- 
+  (scallop0322MainDataTable$DOLLAR_ALL_SP_2022 - scallop0322MainDataTable$TRIP_COST_WINSOR_2022_DOL)
 
 
 ```
@@ -360,7 +358,7 @@ summary_stats(scallop0322MainDataTable, project) %>%
 Here is DOLLAR, KILOGRAMS, and TRIP_LENGTH separately. 
 ```{r}
 scallop0322MainDataTable %>% 
-  summarize(across(.cols = c("DOLLAR_2020", "KILOGRAMS", "TRIP_LENGTH"), 
+  summarize(across(.cols = c("DOLLAR_2022", "KILOGRAMS", "TRIP_LENGTH"), 
                    .fns = list(min = min, median = median, mean = mean, max = max, sum=sum,
                                NAs = ~sum(is.na(.x)), UniqueObs = n_distinct, 
                                "No. 0's" = ~sum(.x == 0)), 
@@ -371,7 +369,7 @@ scallop0322MainDataTable %>%
   pivot_wider(names_from = "var", values_from = "value") %>% 
   pretty_tab()
  
-boxplot(scallop0322MainDataTable$DOLLAR_2020,
+boxplot(scallop0322MainDataTable$DOLLAR_2022,
   main = "Revenue in 2020 Dollars",
   xlab = "USD$",
   ylab = "Revenue",
@@ -544,7 +542,7 @@ Same as above but with revenue instead of meat KG
 ```{r}
 scallop0322MainDataTable <- 
   cpue(scallop0322MainDataTable, project,
-       xWeight = "DOLLAR_2020",
+       xWeight = "DOLLAR_2022",
        xTime = "TRIP_LENGTH", 
        name = "VPUE")
 
@@ -1864,15 +1862,15 @@ zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable,
          zone.dat = "closeID",
          zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2020",
+         var = "DOLLAR_2022",
          fun = "sum",
          count = FALSE, 
-         #breaks = c(.001, .01, .1, .3, .5, .7),
+         breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
          output = "tab_plot")
 
 zone_out$table %>%
-  arrange(-DOLLAR_2020) %>%
+  arrange(-DOLLAR_2022) %>%
   pretty_lab() %>% 
   pretty_tab_sb(width = "60%")
 
@@ -1887,7 +1885,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable,
          zone.dat = "closeID",
          zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2020",
+         var = "DOLLAR_2022",
          fun = "percent",
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
@@ -1895,7 +1893,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          output = "tab_plot")
 
 zone_out$table %>% 
-  arrange(-DOLLAR_2020) %>%
+  arrange(-DOLLAR_2022) %>%
   pretty_lab() %>% 
   pretty_tab_sb(width = "60%")
 
@@ -1912,7 +1910,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable,
          zone.dat = "closeID",
          zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2020", group = "fleet",
+         var = "DOLLAR_2022", group = "fleet",
          fun = "percent",
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
@@ -1920,7 +1918,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          output = "tab_plot")
 
 zone_out$table %>% 
-  arrange(fleet,-DOLLAR_2020) %>%
+  arrange(fleet,-DOLLAR_2022) %>%
   pretty_lab() %>% 
   pretty_tab_sb(width = "60%")
 
@@ -1938,7 +1936,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable,
          zone.dat = "closeID",
          zone.spat = "LEASE_NUMB",
-         var = "OPERATING_PROFIT_2020",
+         var = "OPERATING_PROFIT_2022",
          fun = "sum",
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
@@ -1946,7 +1944,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          output = "tab_plot")
 
 zone_out$table %>% 
-  arrange(-OPERATING_PROFIT_2020) %>%
+  arrange(-OPERATING_PROFIT_2022) %>%
  pretty_lab() %>% 
   pretty_tab_sb(width = "60%")
 
@@ -1961,7 +1959,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable,
          zone.dat = "closeID",
          zone.spat = "LEASE_NUMB",
-         var = "OPERATING_PROFIT_2020",
+         var = "OPERATING_PROFIT_2022",
          fun = "percent",
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
@@ -1969,7 +1967,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          output = "tab_plot")
 
 zone_out$table %>% 
-  arrange(-OPERATING_PROFIT_2020) %>%
+  arrange(-OPERATING_PROFIT_2022) %>%
   pretty_lab() %>% 
   pretty_tab_sb(width = "60%")
 
@@ -1986,7 +1984,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable,
          zone.dat = "closeID",
          zone.spat = "LEASE_NUMB",
-         var = "OPERATING_PROFIT_2020", group = "fleet",
+         var = "OPERATING_PROFIT_2022", group = "fleet",
          fun = "percent",
          count = FALSE, 
          # breaks = c(.001, .01, .1, .3, .5, .7),
@@ -1994,7 +1992,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          output = "tab_plot")
 
 zone_out$table %>% 
-  arrange(fleet,-OPERATING_PROFIT_2020) %>%
+  arrange(fleet,-OPERATING_PROFIT_2022) %>%
   pretty_lab() %>% 
   pretty_tab_sb(width = "60%")
 
@@ -2391,7 +2389,7 @@ outlier_plot(scallop0322MainDataTable, project,
 
 ```{r}
 outlier_table(scallop0322MainDataTable, project,
-              x = "DOLLAR_2020") %>% 
+              x = "DOLLAR_2022") %>% 
   pretty_lab() %>% 
   pretty_tab()
 ```
@@ -2399,7 +2397,7 @@ outlier_table(scallop0322MainDataTable, project,
 
 ```{r}
 outlier_plot(scallop0322MainDataTable, project,
-             x = "DOLLAR_2020", 
+             x = "DOLLAR_2022", 
              dat.remove = "none",
              x.dist = "normal",
              output.screen = TRUE)
@@ -2408,7 +2406,7 @@ outlier_plot(scallop0322MainDataTable, project,
 
 ```{r}
 outlier_plot(scallop0322MainDataTable, project,
-             x = "DOLLAR_2020", 
+             x = "DOLLAR_2022", 
              dat.remove = "mean_3SD",
              x.dist = "normal",
              output.screen = TRUE)
@@ -2416,11 +2414,11 @@ outlier_plot(scallop0322MainDataTable, project,
 
 <br><br>
 
-### OPERATING_PROFIT_2020
+### OPERATING_PROFIT_2022
 
 ```{r}
 outlier_table(scallop0322MainDataTable, project,
-              x = "OPERATING_PROFIT_2020") %>% 
+              x = "OPERATING_PROFIT_2022") %>% 
   pretty_lab() %>% 
   pretty_tab()
 ```
@@ -2428,7 +2426,7 @@ outlier_table(scallop0322MainDataTable, project,
 
 ```{r}
 outlier_plot(scallop0322MainDataTable, project,
-             x = "OPERATING_PROFIT_2020", 
+             x = "OPERATING_PROFIT_2022", 
              dat.remove = "none",
              x.dist = "normal",
              output.screen = TRUE)
@@ -2437,7 +2435,7 @@ outlier_plot(scallop0322MainDataTable, project,
 
 ```{r}
 outlier_plot(scallop0322MainDataTable, project,
-             x = "OPERATING_PROFIT_2020", 
+             x = "OPERATING_PROFIT_2022", 
              dat.remove = "mean_3SD",
              x.dist = "normal",
              output.screen = TRUE)
@@ -2447,11 +2445,11 @@ outlier_plot(scallop0322MainDataTable, project,
 
 
 <br><br>
-### TRIP_COST_2020_DOL
+### TRIP_COST_2022_DOL
 
 ```{r}
 outlier_table(scallop0322MainDataTable, project,
-              x = "TRIP_COST_2020_DOL") %>% 
+              x = "TRIP_COST_2022_DOL") %>% 
   pretty_lab() %>% 
   pretty_tab()
 ```
@@ -2460,7 +2458,7 @@ outlier_table(scallop0322MainDataTable, project,
 
 ```{r}
 outlier_plot(scallop0322MainDataTable, project,
-             x = "TRIP_COST_2020_DOL", 
+             x = "TRIP_COST_2022_DOL", 
              dat.remove = "none",
              x.dist = "normal",
              output.screen = TRUE)
@@ -2469,7 +2467,7 @@ outlier_plot(scallop0322MainDataTable, project,
 
 ```{r}
 outlier_plot(scallop0322MainDataTable, project,
-             x = "TRIP_COST_2020_DOL", 
+             x = "TRIP_COST_2022_DOL", 
              dat.remove = "mean_3SD",
              x.dist = "normal",
              output.screen = TRUE)
@@ -2477,12 +2475,12 @@ outlier_plot(scallop0322MainDataTable, project,
 
 <br><br>
 
-### TRIP_COST_WINSOR_2020_DOL
+### TRIP_COST_WINSOR_2022_DOL
 
 
 ```{r}
 outlier_table(scallop0322MainDataTable, project,
-              x = "TRIP_COST_WINSOR_2020_DOL") %>% 
+              x = "TRIP_COST_WINSOR_2022_DOL") %>% 
   pretty_lab() %>% 
   pretty_tab()
 ```
@@ -2491,7 +2489,7 @@ outlier_table(scallop0322MainDataTable, project,
 
 ```{r}
 outlier_plot(scallop0322MainDataTable, project,
-             x = "TRIP_COST_WINSOR_2020_DOL", 
+             x = "TRIP_COST_WINSOR_2022_DOL", 
              dat.remove = "none",
              x.dist = "normal",
              output.screen = TRUE)
@@ -2500,7 +2498,7 @@ outlier_plot(scallop0322MainDataTable, project,
 
 ```{r}
 outlier_plot(scallop0322MainDataTable, project,
-             x = "TRIP_COST_WINSOR_2020_DOL", 
+             x = "TRIP_COST_WINSOR_2022_DOL", 
              dat.remove = "mean_3SD",
              x.dist = "normal",
              output.screen = TRUE)
@@ -2584,7 +2582,7 @@ temp_plot(scallop0322MainDataTable, project,
 
 ```{r}
 temp_plot(scallop0322MainDataTable, project,
-          var.select = "DOLLAR_2020",
+          var.select = "DOLLAR_2022",
           len.fun = "percent",
           agg.fun = "sum",
           date.var = "scallop_fishing_yearD")
@@ -2594,7 +2592,7 @@ temp_plot(scallop0322MainDataTable, project,
 
 ```{r}
 temp_plot(scallop0322MainDataTable, project,
-          var.select = "TRIP_COST_2020_DOL",
+          var.select = "TRIP_COST_2022_DOL",
           len.fun = "percent",
           agg.fun = "sum",
           date.var = "scallop_fishing_yearD")
@@ -2604,7 +2602,7 @@ temp_plot(scallop0322MainDataTable, project,
 
 ```{r}
 temp_plot(scallop0322MainDataTable, project,
-          var.select = "TRIP_COST_WINSOR_2020_DOL",
+          var.select = "TRIP_COST_WINSOR_2022_DOL",
           len.fun = "percent",
           agg.fun = "sum",
           date.var = "scallop_fishing_yearD")
@@ -2615,7 +2613,7 @@ temp_plot(scallop0322MainDataTable, project,
 
 ```{r}
 temp_plot(scallop0322MainDataTable, project,
-          var.select = "OPERATING_PROFIT_2020",
+          var.select = "OPERATING_PROFIT_2022",
           len.fun = "percent",
           agg.fun = "sum",
           date.var = "scallop_fishing_yearD")
@@ -2640,7 +2638,7 @@ xy_plot(scallop0322MainDataTable, project,
 Trip length by revenue. 
 ```{r}
 xy_plot(scallop0322MainDataTable, project,
-        var1 = "TRIP_LENGTH", var2 = "DOLLAR_2020",
+        var1 = "TRIP_LENGTH", var2 = "DOLLAR_2022",
         regress = FALSE)
 ```
 
@@ -2649,7 +2647,7 @@ xy_plot(scallop0322MainDataTable, project,
 Trip length by trip cost.
 ```{r}
 xy_plot(scallop0322MainDataTable, project,
-        var1 = "TRIP_LENGTH", var2 = "TRIP_COST_2020_DOL",
+        var1 = "TRIP_LENGTH", var2 = "TRIP_COST_2022_DOL",
         regress = FALSE)
 ```
 
@@ -2659,7 +2657,7 @@ xy_plot(scallop0322MainDataTable, project,
 Trip length by trip cost (Winsor).
 ```{r}
 xy_plot(scallop0322MainDataTable, project,
-        var1 = "TRIP_LENGTH", var2 = "TRIP_COST_WINSOR_2020_DOL",
+        var1 = "TRIP_LENGTH", var2 = "TRIP_COST_WINSOR_2022_DOL",
         regress = FALSE)
 ```
 
@@ -3010,14 +3008,14 @@ Total Scallop Revenue  by year.
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "DOLLAR_2020",
+                species = "DOLLAR_2022",
                 date = "scallop_fishing_yearD", 
                 period = "year",
                 fun = "sum",
                 type = "line", format_lab = "decimal")
 
 catch_out$table %>% 
-  pretty_lab(cols = "DOLLAR_2020") %>%
+  pretty_lab(cols = "DOLLAR_2022") %>%
   pretty_tab()
 
 catch_out$plot
@@ -3030,13 +3028,13 @@ Total Scallop Revenue by fleet.
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "DOLLAR_2020",
+                species = "DOLLAR_2022",
                 group = "fleet",
                 fun = "sum",
                 type = "bar", format_lab = "decimal")
 
 catch_out$table %>% 
-  pretty_lab(cols = "DOLLAR_2020") %>%
+  pretty_lab(cols = "DOLLAR_2022") %>%
   pretty_tab()
 
 catch_out$plot
@@ -3048,7 +3046,7 @@ Total Scallop Revenue by year and fleet.
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "DOLLAR_2020",
+                species = "DOLLAR_2022",
                 date = "scallop_fishing_yearD", 
                 period = "year",
                 group = "fleet",
@@ -3056,7 +3054,7 @@ catch_out <-
                 type = "line", format_lab = "decimal")
 
 catch_out$table %>% 
-  pretty_lab(cols = "DOLLAR_2020") %>%
+  pretty_lab(cols = "DOLLAR_2022") %>%
   pretty_tab_sb(width = "40%")
 
 catch_out$plot
@@ -3068,13 +3066,13 @@ Average Scallop Revenue by year.
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "DOLLAR_2020",
+                species = "DOLLAR_2022",
                 date = "scallop_fishing_yearD", 
                 period = "year",
                 fun = "mean", type = "line")
 
 catch_out$table %>% 
-  pretty_lab(cols = "DOLLAR_2020") %>%
+  pretty_lab(cols = "DOLLAR_2022") %>%
   pretty_tab()
 
 catch_out$plot
@@ -3086,14 +3084,14 @@ Average Scallop Revenue by year and fleet.
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "DOLLAR_2020",
+                species = "DOLLAR_2022",
                 date = "scallop_fishing_yearD", 
                 period = "year",
                 group = "fleet",
                 fun = "mean", type = "line")
 
 catch_out$table %>% 
-  pretty_lab(cols = "DOLLAR_2020") %>%
+  pretty_lab(cols = "DOLLAR_2022") %>%
   pretty_tab_sb(width = "40%")
 
 catch_out$plot
@@ -3104,12 +3102,12 @@ Total Scallop Revenue by gearcode.
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "DOLLAR_2020",
+                species = "DOLLAR_2022",
                 group = "GEARCODE",
                 fun = "sum", tran = "log")
 
 catch_out$table %>% 
-  pretty_lab(cols = "DOLLAR_2020") %>%
+  pretty_lab(cols = "DOLLAR_2022") %>%
   pretty_tab()
 
 catch_out$plot
@@ -3121,12 +3119,12 @@ Average Scallop Revenue by gearcode.
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "DOLLAR_2020",
+                species = "DOLLAR_2022",
                 group = "GEARCODE",
                 fun = "mean")
 
 catch_out$table %>% 
-  pretty_lab(cols = "DOLLAR_2020") %>%
+  pretty_lab(cols = "DOLLAR_2022") %>%
   pretty_tab()
 
 catch_out$plot 
@@ -3138,7 +3136,7 @@ Total Scallop Revenue by Top 10 port and gearcode.
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "DOLLAR_2020",
+                species = "DOLLAR_2022",
                 group = c("VTR_PORT", "GEARCODE"),
                 filter_by = "TOP_10_PORT",
                 filter_value = TRUE,
@@ -3146,7 +3144,7 @@ catch_out <-
                 format_lab = "scientific", tran = "log")
 
 catch_out$table %>% 
-  pivot_wider(names_from = GEARCODE, values_from = DOLLAR_2020) %>% 
+  pivot_wider(names_from = GEARCODE, values_from = DOLLAR_2022) %>% 
   pretty_lab() %>%
   pretty_tab_sb() 
   
@@ -3164,14 +3162,14 @@ Total Revenue All Species  by year.
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "DOLLAR_ALL_SP_2020",
+                species = "DOLLAR_ALL_SP_2022",
                 date = "scallop_fishing_yearD", 
                 period = "year",
                 fun = "sum",
                 type = "line", format_lab = "decimal")
 
 catch_out$table %>% 
-  pretty_lab(cols = "DOLLAR_ALL_SP_2020") %>%
+  pretty_lab(cols = "DOLLAR_ALL_SP_2022") %>%
   pretty_tab()
 
 catch_out$plot
@@ -3184,13 +3182,13 @@ Total Revenue All Species by fleet.
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "DOLLAR_ALL_SP_2020",
+                species = "DOLLAR_ALL_SP_2022",
                 group = "fleet",
                 fun = "sum",
                 type = "bar", format_lab = "decimal")
 
 catch_out$table %>% 
-  pretty_lab(cols = "DOLLAR_ALL_SP_2020") %>%
+  pretty_lab(cols = "DOLLAR_ALL_SP_2022") %>%
   pretty_tab()
 
 catch_out$plot
@@ -3202,7 +3200,7 @@ Total Revenue All Species by year and fleet.
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "DOLLAR_ALL_SP_2020",
+                species = "DOLLAR_ALL_SP_2022",
                 date = "scallop_fishing_yearD", 
                 period = "year",
                 group = "fleet",
@@ -3210,7 +3208,7 @@ catch_out <-
                 type = "line", format_lab = "decimal")
 
 catch_out$table %>% 
-  pretty_lab(cols = "DOLLAR_ALL_SP_2020") %>%
+  pretty_lab(cols = "DOLLAR_ALL_SP_2022") %>%
   pretty_tab_sb(width = "40%")
 
 catch_out$plot
@@ -3222,13 +3220,13 @@ Total Revenue All Species by year.
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "DOLLAR_ALL_SP_2020",
+                species = "DOLLAR_ALL_SP_2022",
                 date = "scallop_fishing_yearD", 
                 period = "year",
                 fun = "mean", type = "line")
 
 catch_out$table %>% 
-  pretty_lab(cols = "DOLLAR_ALL_SP_2020") %>%
+  pretty_lab(cols = "DOLLAR_ALL_SP_2022") %>%
   pretty_tab()
 
 catch_out$plot
@@ -3240,14 +3238,14 @@ Total Revenue All Species by year and fleet.
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "DOLLAR_ALL_SP_2020",
+                species = "DOLLAR_ALL_SP_2022",
                 date = "scallop_fishing_yearD", 
                 period = "year",
                 group = "fleet",
                 fun = "mean", type = "line")
 
 catch_out$table %>% 
-  pretty_lab(cols = "DOLLAR_ALL_SP_2020") %>%
+  pretty_lab(cols = "DOLLAR_ALL_SP_2022") %>%
   pretty_tab_sb(width = "40%")
 
 catch_out$plot
@@ -3258,12 +3256,12 @@ Total Revenue All Species by gearcode.
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "DOLLAR_ALL_SP_2020",
+                species = "DOLLAR_ALL_SP_2022",
                 group = "GEARCODE",
                 fun = "sum", tran = "log")
 
 catch_out$table %>% 
-  pretty_lab(cols = "DOLLAR_ALL_SP_2020") %>%
+  pretty_lab(cols = "DOLLAR_ALL_SP_2022") %>%
   pretty_tab()
 
 catch_out$plot
@@ -3275,12 +3273,12 @@ Total Revenue All Species by gearcode.
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "DOLLAR_ALL_SP_2020",
+                species = "DOLLAR_ALL_SP_2022",
                 group = "GEARCODE",
                 fun = "mean")
 
 catch_out$table %>% 
-  pretty_lab(cols = "DOLLAR_ALL_SP_2020") %>%
+  pretty_lab(cols = "DOLLAR_ALL_SP_2022") %>%
   pretty_tab()
 
 catch_out$plot 
@@ -3292,7 +3290,7 @@ Total Revenue All Species by Top 10 port and gearcode.
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "DOLLAR_ALL_SP_2020",
+                species = "DOLLAR_ALL_SP_2022",
                 group = c("VTR_PORT", "GEARCODE"),
                 filter_by = "TOP_10_PORT",
                 filter_value = TRUE,
@@ -3300,7 +3298,7 @@ catch_out <-
                 format_lab = "scientific", tran = "log")
 
 catch_out$table %>% 
-  pivot_wider(names_from = GEARCODE, values_from = DOLLAR_ALL_SP_2020) %>% 
+  pivot_wider(names_from = GEARCODE, values_from = DOLLAR_ALL_SP_2022) %>% 
   pretty_lab() %>%
   pretty_tab_sb() 
   
@@ -3331,14 +3329,14 @@ Operating Profit  by year.
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "OPERATING_PROFIT_2020",
+                species = "OPERATING_PROFIT_2022",
                 date = "scallop_fishing_yearD", 
                 period = "year",
                 fun = "sum",
                 type = "line", format_lab = "decimal")
 
 catch_out$table %>% 
-  pretty_lab(cols = "OPERATING_PROFIT_2020") %>%
+  pretty_lab(cols = "OPERATING_PROFIT_2022") %>%
   pretty_tab()
 
 catch_out$plot
@@ -3351,13 +3349,13 @@ Total Operating Profit by fleet.
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "OPERATING_PROFIT_2020",
+                species = "OPERATING_PROFIT_2022",
                 group = "fleet",
                 fun = "sum",
                 type = "bar", format_lab = "decimal")
 
 catch_out$table %>% 
-  pretty_lab(cols = "OPERATING_PROFIT_2020") %>%
+  pretty_lab(cols = "OPERATING_PROFIT_2022") %>%
   pretty_tab()
 
 catch_out$plot
@@ -3369,7 +3367,7 @@ Total Operating Profit by year and fleet.
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "OPERATING_PROFIT_2020",
+                species = "OPERATING_PROFIT_2022",
                 date = "scallop_fishing_yearD", 
                 period = "year",
                 group = "fleet",
@@ -3377,7 +3375,7 @@ catch_out <-
                 type = "line", format_lab = "decimal")
 
 catch_out$table %>% 
-  pretty_lab(cols = "OPERATING_PROFIT_2020") %>%
+  pretty_lab(cols = "OPERATING_PROFIT_2022") %>%
   pretty_tab_sb(width = "40%")
 
 catch_out$plot
@@ -3389,13 +3387,13 @@ Average Operating Profit by year.
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "OPERATING_PROFIT_2020",
+                species = "OPERATING_PROFIT_2022",
                 date = "scallop_fishing_yearD", 
                 period = "year",
                 fun = "mean", type = "line")
 
 catch_out$table %>% 
-  pretty_lab(cols = "OPERATING_PROFIT_2020") %>%
+  pretty_lab(cols = "OPERATING_PROFIT_2022") %>%
   pretty_tab()
 
 catch_out$plot
@@ -3407,14 +3405,14 @@ Average Operating Profit by year and fleet.
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "OPERATING_PROFIT_2020",
+                species = "OPERATING_PROFIT_2022",
                 date = "scallop_fishing_yearD", 
                 period = "year",
                 group = "fleet",
                 fun = "mean", type = "line")
 
 catch_out$table %>% 
-  pretty_lab(cols = "OPERATING_PROFIT_2020") %>%
+  pretty_lab(cols = "OPERATING_PROFIT_2022") %>%
   pretty_tab_sb(width = "40%")
 
 catch_out$plot
@@ -3425,12 +3423,12 @@ Total Operating Profit by gearcode.
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "OPERATING_PROFIT_2020",
+                species = "OPERATING_PROFIT_2022",
                 group = "GEARCODE",
                 fun = "sum", tran = "log")
 
 catch_out$table %>% 
-  pretty_lab(cols = "OPERATING_PROFIT_2020") %>%
+  pretty_lab(cols = "OPERATING_PROFIT_2022") %>%
   pretty_tab()
 
 catch_out$plot
@@ -3442,12 +3440,12 @@ Average Operating Profit by gearcode.
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "OPERATING_PROFIT_2020",
+                species = "OPERATING_PROFIT_2022",
                 group = "GEARCODE",
                 fun = "mean")
 
 catch_out$table %>% 
-  pretty_lab(cols = "OPERATING_PROFIT_2020") %>%
+  pretty_lab(cols = "OPERATING_PROFIT_2022") %>%
   pretty_tab()
 
 catch_out$plot 
@@ -3459,7 +3457,7 @@ Total Operating Profit by Top 10 port and gearcode.
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
-                species = "OPERATING_PROFIT_2020",
+                species = "OPERATING_PROFIT_2022",
                 group = c("VTR_PORT", "GEARCODE"),
                 filter_by = "TOP_10_PORT",
                 filter_value = TRUE,
@@ -3467,7 +3465,7 @@ catch_out <-
                 format_lab = "scientific", tran = "log")
 
 catch_out$table %>% 
-  pivot_wider(names_from = GEARCODE, values_from = OPERATING_PROFIT_2020) %>% 
+  pivot_wider(names_from = GEARCODE, values_from = OPERATING_PROFIT_2022) %>% 
   pretty_lab() %>%
   pretty_tab_sb() 
   
@@ -4044,12 +4042,12 @@ density_plot(scallop0322MainDataTable, project,
 
 <br><br>
 
-### TRIP_COST_2020_DOL
+### TRIP_COST_2022_DOL
 
 KDE and ECDF of trip cost. 
 ```{r}
 density_plot(scallop0322MainDataTable, project,
-             var = "TRIP_COST_2020_DOL", 
+             var = "TRIP_COST_2022_DOL", 
              type = c("kde", "ecdf"), tran = "log", 
              pages = "multi")
 ```
@@ -4059,7 +4057,7 @@ density_plot(scallop0322MainDataTable, project,
 KDE of trip cost by year. 
 ```{r}
 density_plot(scallop0322MainDataTable, project,
-             var = "TRIP_COST_2020_DOL", 
+             var = "TRIP_COST_2022_DOL", 
              facet_by = "scallop_fishing_year",
              type = "kde", tran = "log") + angled_theme()
 ```
@@ -4069,7 +4067,7 @@ density_plot(scallop0322MainDataTable, project,
 KDE, ECDF, and CDF of trip cost by fleet. 
 ```{r}
 density_plot(scallop0322MainDataTable, project,
-             var = "TRIP_COST_2020_DOL", 
+             var = "TRIP_COST_2022_DOL", 
              group = "fleet",
              type = "all", tran = "log", 
              pages = "multi", position = "stack")
@@ -4080,7 +4078,7 @@ density_plot(scallop0322MainDataTable, project,
 KDE and ECDF of trip cost by gear. 
 ```{r}
 density_plot(scallop0322MainDataTable, project,
-             var = "TRIP_COST_2020_DOL", 
+             var = "TRIP_COST_2022_DOL", 
              group = "GEARCODE",
              type = c("kde", "ecdf"), tran = "log", 
              position = "stack",  pages = "multi")
@@ -4089,12 +4087,12 @@ density_plot(scallop0322MainDataTable, project,
 
 <br><br>
 
-### TRIP_COST_WINSOR_2020_DOL
+### TRIP_COST_WINSOR_2022_DOL
 
 KDE and ECDF of trip cost (Winsor). 
 ```{r}
 density_plot(scallop0322MainDataTable, project,
-             var = "TRIP_COST_WINSOR_2020_DOL", 
+             var = "TRIP_COST_WINSOR_2022_DOL", 
              type = c("kde", "ecdf"), tran = "log", 
              pages = "multi")
 ```
@@ -4104,7 +4102,7 @@ density_plot(scallop0322MainDataTable, project,
 KDE of trip cost by year (Winsor). 
 ```{r}
 density_plot(scallop0322MainDataTable, project,
-             var = "TRIP_COST_WINSOR_2020_DOL", 
+             var = "TRIP_COST_WINSOR_2022_DOL", 
              facet_by = "scallop_fishing_year",
              type = "kde", tran = "log") + angled_theme()
 ```
@@ -4114,7 +4112,7 @@ density_plot(scallop0322MainDataTable, project,
 KDE, ECDF, and CDF of trip cost by fleet (Winsor). 
 ```{r}
 density_plot(scallop0322MainDataTable, project,
-             var = "TRIP_COST_WINSOR_2020_DOL", 
+             var = "TRIP_COST_WINSOR_2022_DOL", 
              group = "fleet",
              type = "all", tran = "log", 
              pages = "multi", position = "stack")
@@ -4125,7 +4123,7 @@ density_plot(scallop0322MainDataTable, project,
 KDE and ECDF of trip cost by gear (Winsor). 
 ```{r}
 density_plot(scallop0322MainDataTable, project,
-             var = "TRIP_COST_WINSOR_2020_DOL", 
+             var = "TRIP_COST_WINSOR_2022_DOL", 
              group = "GEARCODE",
              type = c("kde", "ecdf"), tran = "log", 
              position = "stack",  pages = "multi")
