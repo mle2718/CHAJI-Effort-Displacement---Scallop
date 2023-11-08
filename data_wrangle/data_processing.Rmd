@@ -319,13 +319,13 @@ Scallops$scallop_fishing_year[Scallops$Date >= "2023-04-01" & Scallops$Date <= "
 # DOCID is used because of the following found in the data dictionary "VESLOG Trip record identifier, which is generated internally; Primary key for VESLOGyyyyT; Foreign key to VESLOGyyS, VESLOGyyG. Equivalent to DOCID in VTR DOCUMENT table"
 VTR_DMIS_merge <- merge(RESULT_COMPILED,Scallops, by.x = "TRIPID", by.y = "DOCID", all.x = FALSE, all.y = TRUE)
 
-## Filter out 2020 values 
+## Filter out 2022 values 
 if(DMIS_type=="frozen_GARFO"){
   VTR_DMIS_merge <- VTR_DMIS_merge %>%
-  filter(YEAR <= "2019")
+  filter(YEAR <= "2022")
 }else if(DMIS_type=="live"){
     VTR_DMIS_merge <- VTR_DMIS_merge %>%
-  filter(scallop_fishing_year <= "2019")
+  filter(scallop_fishing_year <= "2022")
 }
 
 
@@ -411,7 +411,7 @@ stopifnot(fredr_has_key()==TRUE)
 deflators <- fredr(
   series_id = "GDPDEF",
   observation_start = as.Date("2007-01-01"),
-  observation_end = as.Date("2020-06-01"),
+  observation_end = as.Date("2022-06-01"),
   realtime_start =NULL,
   realtime_end =NULL,
   frequency = "q")
@@ -433,7 +433,7 @@ deflators <- deflators %>%
 # The default index year for the GDP Implicit Price Deflator in United States data is 2015 which needs to be changed to match Q2 2020 cost dollars. 
 ## Index quarter/year can be updated by changing "2020.2" to desired quarter and year combination
 
-assign("base_year_index",deflators[deflators$date == "2020.2","value"])
+assign("base_year_index",deflators[deflators$date == "2022.2","value"])
 base_year_index <- as.numeric(base_year_index)       
 
 deflators <- deflators %>%
@@ -446,10 +446,10 @@ VTR_DMIS_AC <- VTR_DMIS_AC %>%
                          fiscal_start = 1,
                          with_year = TRUE)) %>%
                          left_join(deflators, by =c("qdate"="date")) %>%
-               mutate(DOLLAR_ALL_SP_2020=DOLLAR_ALL_SP/value,
-                      DOLLAR_2020=DOLLAR/value,
-                      TRIP_COST_WINSOR_2020_DOL=TRIP_COST_NOMINALDOLS_WINSOR/value,
-                      TRIP_COST_2020_DOL=TRIP_COST_NOMINALDOLS/value)
+               mutate(DOLLAR_ALL_SP_2022=DOLLAR_ALL_SP/value,
+                      DOLLAR_2022=DOLLAR/value,
+                      TRIP_COST_WINSOR_2022_DOL=TRIP_COST_NOMINALDOLS_WINSOR/value,
+                      TRIP_COST_2022_DOL=TRIP_COST_NOMINALDOLS/value)
 
 
 # Delete unnecessary data frame and variable
@@ -491,7 +491,7 @@ We are now pulling subtrips along to the end instead of aggregating.  If you wan
 ### 1. Aggregate DOLLAR, POUNDS, LANDED
 Agg_DOL_POUN_LAND <- VTR_DMIS_AC %>%
   group_by(TRIPID) %>%
- summarise(Agg_DOLLAR = sum(DOLLAR), Agg_POUNDS = sum(POUNDS), Agg_LANDED = sum(LANDED), Agg_DOLLAR_2020=sum(DOLLAR_2020))
+ summarise(Agg_DOLLAR = sum(DOLLAR), Agg_POUNDS = sum(POUNDS), Agg_LANDED = sum(LANDED), Agg_DOLLAR_2022=sum(DOLLAR_2022))
 
 #### Testing to make sure there are no duplicates in TRIPID groups; this should equal 0
 sum(duplicated(Agg_DOL_POUN_LAND$TRIPID))
