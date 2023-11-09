@@ -413,6 +413,23 @@ boxplot(scallop0322MainDataTable$TRIP_LENGTH,
 
 ```
 
+<br><br>
+
+## Active Vessels
+
+vessel count by year. 
+```{r}
+ves_out <- 
+vessel_count(scallop0322MainDataTable, project,
+             v_id = "PERMIT.y",
+             date = "scallop_fishing_yearD",
+             period = "year", type = "line")
+
+ves_out$table %>% pretty_tab()
+
+ves_out$plot 
+```
+
 
 <br><br>
 
