@@ -294,8 +294,8 @@ area_name <- c(wind_NY1$LEASE_NUMB,wind_NY2$LEASE_NUMB,wind_NY3$LEASE_NUMB)
 area_calc <- c(wind_NY1$area_ms2,wind_NY2$area_ms2,wind_NY3$area_ms2)
 wind_NY_area_differences <- data.frame(area_name,area_calc)
 
-units(wind_NY_area_differences $area_calc) <- NULL
-wind_NY_area_differences$change <- ((test$area_calc/lag(test$area_calc) - 1) * 100)
+units(wind_NY_area_differences$area_calc) <- NULL
+wind_NY_area_differences$change <- ((wind_NY_area_differences$area_calc/lag(wind_NY_area_differences$area_calc) - 1) * 100)
   
 
 ```
