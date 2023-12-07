@@ -11,7 +11,7 @@ output:
   pdf_document:
     toc: yes
 params:
-  AA_DAS_only: no
+  AA_DAS_only: yes
   subtrip_aggregate: yes
   BIN_GEARS: yes
   location:
@@ -22,13 +22,14 @@ params:
     - Woods_Hole
     - Seattle
   input_shapefile:
-    value:"wind_Central_Atlantic_3.RDS"
+    value: wind_Central_Atlantic_1.RDS
     choices:
     - wind_NY1.RDS
     - wind_NY2.RDS
     - wind_NY3.RDS
     - wind_Central_Atlantic_1.RDS
     - wind_Central_Atlantic_2.RDS
+    - wind_Central_Atlantic_3.RDS
     - wind_sf_final.RDS
     - wind_sf_nocable.RDS
     
@@ -357,6 +358,10 @@ scallop0322MainDataTable$OPERATING_PROFIT <-
 
 scallop0322MainDataTable$OPERATING_PROFIT_2022 <- 
   (scallop0322MainDataTable$DOLLAR_ALL_SP_2022 - scallop0322MainDataTable$TRIP_COST_WINSOR_2022_DOL)
+
+#Remove NAs in operating profits and replace with column mean
+sum(is.na(scallop0322MainDataTable$OPERATING_PROFIT_2022))
+scallop0322MainDataTable$OPERATING_PROFIT_2022[is.na(scallop0322MainDataTable$OPERATING_PROFIT_2022)] <- mean(scallop0322MainDataTable$OPERATING_PROFIT_2022, na.rm = TRUE)
 
 
 ```
@@ -1547,7 +1552,7 @@ zone_out$plot }
   
   zone_out$table %>%
     pretty_lab() %>% 
-    pretty_tab_sb(width = "60%")
+    pretty_tab_sb(width = "40%")
 
 ```
 
