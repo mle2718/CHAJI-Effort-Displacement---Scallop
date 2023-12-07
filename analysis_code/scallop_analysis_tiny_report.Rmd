@@ -1204,6 +1204,26 @@ boxplot(out_closure_scallop0322MainDataTable$DOLLAR_2022_win,
   border = "black",
   horizontal = TRUE,
   notch = TRUE)
+
+
+
+
+BSDA::z.test(out_closure_scallop0322MainDataTable$DOLLAR_2022,
+  y = in_closure_scallop0322MainDataTable$DOLLAR_2022,
+  sigma.x = sd(out_closure_scallop0322MainDataTable$DOLLAR_2022),
+  sigma.y = sd(in_closure_scallop0322MainDataTable$DOLLAR_2022),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(out_closure_scallop0322MainDataTable$DOLLAR_2022_win,
+  y = in_closure_scallop0322MainDataTable$DOLLAR_2022_win,
+  sigma.x = sd(out_closure_scallop0322MainDataTable$DOLLAR_2022_win),
+  sigma.y = sd(in_closure_scallop0322MainDataTable$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
 ```
 
 <br><br><br>
@@ -1245,6 +1265,90 @@ if (out_switch == "table") {
 
 ```
 
+<br><br><br>
+Box Plots of Landed in and outside of closures
+```{r}
+# To perform the t-tests and make boxplots, observations are separated into two separate samples, inside and outside of closures
+
+boxplot(in_closure_scallop0322MainDataTable$LANDED,
+  main = "Revenue in 2021 Dollars",
+  xlab = "USD$",
+  ylab = "Revenue",
+  col = "white",
+  border = "black",
+  horizontal = TRUE,
+  notch = TRUE)
+
+boxplot(out_closure_scallop0322MainDataTable$LANDED,
+  main = "Revenue in 2021 Dollars",
+  xlab = "USD$",
+  ylab = "Revenue",
+  col = "white",
+  border = "black",
+  horizontal = TRUE,
+  notch = TRUE)
+
+
+ggpubr::ggdensity(out_closure_scallop0322MainDataTable$LANDED, 
+          main = "Revenues Outside of Closure",
+          xlab = "USD$")
+
+ggpubr::ggdensity(in_closure_scallop0322MainDataTable$LANDED, 
+          main = "Revenues In Closure",
+          xlab = "USD$")
+
+
+
+# Winsorize Data
+out_closure_scallop0322MainDataTable$LANDED_win<- datawizard::winsorize(out_closure_scallop0322MainDataTable$LANDED, threshold = 0.1)
+
+in_closure_scallop0322MainDataTable$LANDED_win<- datawizard::winsorize(in_closure_scallop0322MainDataTable$LANDED, threshold = 0.1)
+
+ggpubr::ggdensity(out_closure_scallop0322MainDataTable$LANDED_win, 
+          main = "Winsorized Revenues Outside of Closure",
+          xlab = "USD$")
+
+ggpubr::ggdensity(in_closure_scallop0322MainDataTable$LANDED_win, 
+          main = "Winsorized Revenues In Closure",
+          xlab = "USD$")
+
+boxplot(in_closure_scallop0322MainDataTable$LANDED_win,
+  main = "Revenue in 2021 Dollars",
+  xlab = "USD$",
+  ylab = "Winsorized Revenues",
+  col = "white",
+  border = "black",
+  horizontal = TRUE,
+  notch = TRUE)
+
+boxplot(out_closure_scallop0322MainDataTable$LANDED_win,
+  main = "Revenue in 2021 Dollars",
+  xlab = "USD$",
+  ylab = "Winsorized Revenues",
+  col = "white",
+  border = "black",
+  horizontal = TRUE,
+  notch = TRUE)
+
+
+
+
+BSDA::z.test(out_closure_scallop0322MainDataTable$LANDED,
+  y = in_closure_scallop0322MainDataTable$LANDED,
+  sigma.x = sd(out_closure_scallop0322MainDataTable$LANDED),
+  sigma.y = sd(in_closure_scallop0322MainDataTable$LANDED),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(out_closure_scallop0322MainDataTable$LANDED_win,
+  y = in_closure_scallop0322MainDataTable$LANDED_win,
+  sigma.x = sd(out_closure_scallop0322MainDataTable$LANDED_win),
+  sigma.y = sd(in_closure_scallop0322MainDataTable$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+```
 <br><br><br>
 
 Average landed in closures by fleet
@@ -1479,7 +1583,93 @@ zone_out$plot }
 
 
 ```
+<br><br><br>
+Box Plots of Operating Profits in and outside of closures
+```{r}
+# To perform the t-tests and make boxplots, observations are separated into two separate samples, inside and outside of closures
+in_closure_scallop0322MainDataTable <- scallop0322MainDataTable %>% filter(in_closure == "TRUE")
+out_closure_scallop0322MainDataTable <- scallop0322MainDataTable %>% filter(in_closure == "FALSE")
 
+boxplot(in_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022,
+  main = "Revenue in 2021 Dollars",
+  xlab = "USD$",
+  ylab = "Revenue",
+  col = "white",
+  border = "black",
+  horizontal = TRUE,
+  notch = TRUE)
+
+boxplot(out_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022,
+  main = "Revenue in 2021 Dollars",
+  xlab = "USD$",
+  ylab = "Revenue",
+  col = "white",
+  border = "black",
+  horizontal = TRUE,
+  notch = TRUE)
+
+
+ggpubr::ggdensity(out_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022, 
+          main = "Revenues Outside of Closure",
+          xlab = "USD$")
+
+ggpubr::ggdensity(in_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022, 
+          main = "Revenues In Closure",
+          xlab = "USD$")
+
+
+
+# Winsorize Data
+out_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022_win<- datawizard::winsorize(out_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022, threshold = 0.1)
+
+in_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022_win<- datawizard::winsorize(in_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022, threshold = 0.1)
+
+ggpubr::ggdensity(out_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022_win, 
+          main = "Winsorized Revenues Outside of Closure",
+          xlab = "USD$")
+
+ggpubr::ggdensity(in_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022_win, 
+          main = "Winsorized Revenues In Closure",
+          xlab = "USD$")
+
+boxplot(in_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022_win,
+  main = "Revenue in 2021 Dollars",
+  xlab = "USD$",
+  ylab = "Winsorized Revenues",
+  col = "white",
+  border = "black",
+  horizontal = TRUE,
+  notch = TRUE)
+
+boxplot(out_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022_win,
+  main = "Revenue in 2021 Dollars",
+  xlab = "USD$",
+  ylab = "Winsorized Revenues",
+  col = "white",
+  border = "black",
+  horizontal = TRUE,
+  notch = TRUE)
+
+
+
+
+BSDA::z.test(out_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022,
+  y = in_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022,
+  sigma.x = sd(out_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022),
+  sigma.y = sd(in_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(out_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022_win,
+  y = in_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(out_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(in_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+```
 
 
 <br><br><br>
@@ -2107,6 +2297,91 @@ if (out_switch == "table") {
     pretty_tab_sb(width = "40%")
 
 ```
+<br><br><br>
+Box Plots of VPUE in and outside of closures
+```{r}
+# To perform the t-tests and make boxplots, observations are separated into two separate samples, inside and outside of closures
+
+boxplot(in_closure_scallop0322MainDataTable$VPUE,
+  main = "Revenue in 2021 Dollars",
+  xlab = "USD$",
+  ylab = "Revenue",
+  col = "white",
+  border = "black",
+  horizontal = TRUE,
+  notch = TRUE)
+
+boxplot(out_closure_scallop0322MainDataTable$VPUE,
+  main = "Revenue in 2021 Dollars",
+  xlab = "USD$",
+  ylab = "Revenue",
+  col = "white",
+  border = "black",
+  horizontal = TRUE,
+  notch = TRUE)
+
+
+ggpubr::ggdensity(out_closure_scallop0322MainDataTable$VPUE, 
+          main = "Revenues Outside of Closure",
+          xlab = "USD$")
+
+ggpubr::ggdensity(in_closure_scallop0322MainDataTable$VPUE, 
+          main = "Revenues In Closure",
+          xlab = "USD$")
+
+
+
+# Winsorize Data
+out_closure_scallop0322MainDataTable$VPUE_win<- datawizard::winsorize(out_closure_scallop0322MainDataTable$VPUE, threshold = 0.1)
+
+in_closure_scallop0322MainDataTable$VPUE_win<- datawizard::winsorize(in_closure_scallop0322MainDataTable$VPUE, threshold = 0.1)
+
+ggpubr::ggdensity(out_closure_scallop0322MainDataTable$VPUE_win, 
+          main = "Winsorized Revenues Outside of Closure",
+          xlab = "USD$")
+
+ggpubr::ggdensity(in_closure_scallop0322MainDataTable$VPUE_win, 
+          main = "Winsorized Revenues In Closure",
+          xlab = "USD$")
+
+boxplot(in_closure_scallop0322MainDataTable$VPUE_win,
+  main = "Revenue in 2021 Dollars",
+  xlab = "USD$",
+  ylab = "Winsorized Revenues",
+  col = "white",
+  border = "black",
+  horizontal = TRUE,
+  notch = TRUE)
+
+boxplot(out_closure_scallop0322MainDataTable$VPUE_win,
+  main = "Revenue in 2021 Dollars",
+  xlab = "USD$",
+  ylab = "Winsorized Revenues",
+  col = "white",
+  border = "black",
+  horizontal = TRUE,
+  notch = TRUE)
+
+
+
+
+BSDA::z.test(out_closure_scallop0322MainDataTable$VPUE,
+  y = in_closure_scallop0322MainDataTable$VPUE,
+  sigma.x = sd(out_closure_scallop0322MainDataTable$VPUE),
+  sigma.y = sd(in_closure_scallop0322MainDataTable$VPUE),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(out_closure_scallop0322MainDataTable$VPUE_win,
+  y = in_closure_scallop0322MainDataTable$VPUE_win,
+  sigma.x = sd(out_closure_scallop0322MainDataTable$VPUE_win),
+  sigma.y = sd(in_closure_scallop0322MainDataTable$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+```
+<br><br><br>
 
 <br><br><br>
 Average VPUE per closure area by fleet.
@@ -2150,42 +2425,6 @@ if (out_switch == "table") {
 
 
 
-<br><br><br>
-
-Average VPUE per closure area by fleet 
-```{r}
-zone_out <- 
-    scallop0322MainDataTable %>% 
-  filter(VPUE_p >= .025 & VPUE_p <= .975) %>% 
-zone_summary(project = project,
-         spat = scallop0322WindCloseSpatTable, 
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "VPUE", group = "fleet",
-         fun = "mean",
-         count = FALSE,
-         na.rm = TRUE, dat.center = FALSE, 
-         output = out_switch)
-
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  } else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-  }
-
-```
-
-```{r, eval=eval_next}
-  zone_out$table %>%
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-```
-
-<br><br><br>
 
 Average VPUE by year. 
 ```{r}
