@@ -22,7 +22,7 @@ params:
     - Woods_Hole
     - Seattle
   input_shapefile:
-    value: wind_NY1.RDS
+    value: wind_sf_combined.RDS
     choices:
     - wind_NY1.RDS
     - wind_NY2.RDS
@@ -32,6 +32,7 @@ params:
     - wind_Central_Atlantic_3.RDS
     - wind_sf_final.RDS
     - wind_sf_nocable.RDS
+    - wind_sf_combined.RDS
     
 ---
 <!---
