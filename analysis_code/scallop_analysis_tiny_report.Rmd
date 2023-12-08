@@ -11,7 +11,7 @@ output:
   pdf_document:
     toc: yes
 params:
-  AA_DAS_only: yes
+  AA_DAS_only: no
   subtrip_aggregate: yes
   BIN_GEARS: yes
   location:
@@ -22,7 +22,7 @@ params:
     - Woods_Hole
     - Seattle
   input_shapefile:
-    value: wind_sf_combined.RDS
+    value: wind_sf_nocable.RDS
     choices:
     - wind_NY1.RDS
     - wind_NY2.RDS
@@ -1463,7 +1463,7 @@ if (out_switch == "table") {
 
 
 ```{r}
-
+if (params$AA_DAS_only==TRUE){
 
 # LA Trip Type
 BSDA::z.test(in_closure_scallop0322MainDataTable_AA$DOLLAR_2022,
@@ -1480,7 +1480,7 @@ BSDA::z.test(in_closure_scallop0322MainDataTable_DAS$DOLLAR_2022,
   sigma.y = sd(out_closure_scallop0322MainDataTable_DAS$DOLLAR_2022),
   alternative = c("two.sided"),
   conf.level = 0.95)
-
+}
 
 
 ```
@@ -1694,7 +1694,7 @@ ggpubr::ggdensity(in_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022_win,
           xlab = "USD$")
 
 boxplot(in_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022_win,
-  main = "Revenue in 2021 Dollars",
+  main = "Operating Profit in 2021 Dollars inside Potential Development Area",
   xlab = "USD$",
   ylab = "Winsorized Revenues",
   col = "white",
@@ -1702,10 +1702,10 @@ boxplot(in_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022_win,
   horizontal = TRUE,
   notch = TRUE)
 
-boxplot(out_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022_win,
-  main = "Revenue in 2021 Dollars",
+boxplot(out_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022,
+  main = "Operating Profit in 2021 Dollars outside Potential Development Area",
   xlab = "USD$",
-  ylab = "Winsorized Revenues",
+  ylab = "Operating Profit",
   col = "white",
   border = "black",
   horizontal = TRUE,
