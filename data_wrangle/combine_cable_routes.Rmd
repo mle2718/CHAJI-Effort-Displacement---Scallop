@@ -267,6 +267,9 @@ wind_Central_Atlantic_2$LEASE_NUMB <- "Central Atlantic Draft WEA"
 wind_Central_Atlantic_3 <- prep_spat(wind_Central_Atlantic_3)
 wind_Central_Atlantic_3$LEASE_NUMB <- "Central Atlantic Final WEA"
 
+wind_sf_combined <- prep_spat(wind_sf)
+wind_sf$LEASE_NUMB <- "NY Bight WEA"
+
 ```
 
 ```{r}
@@ -341,7 +344,7 @@ view_spat(wind_sf_final, id = "NAME")
 view_spat(wind_NY1, id = "LEASE_NUMB")
 view_spat(wind_NY2)
 view_spat(wind_NY3)
-view_spat(wind_NY_combined)
+view_spat(wind_NY_combined, id = "LEASE_NUMB")
 view_spat(wind_Central_Atlantic_1)
 view_spat(wind_Central_Atlantic_2)
 view_spat(wind_Central_Atlantic_3)
@@ -353,6 +356,7 @@ lease_dirpath <- here("data", "main", "spatial")
 dir.create(lease_dirpath, showWarnings=FALSE)
 saveRDS(wind_sf_final,file=file.path(lease_dirpath,"wind_sf_final.RDS"))
 saveRDS(wind_sf,file=file.path(lease_dirpath,"wind_sf_nocable.RDS"))
+saveRDS(wind_sf,file=file.path(lease_dirpath,"wind_sf_combined.RDS")) 
 
 
 
