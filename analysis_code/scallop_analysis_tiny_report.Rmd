@@ -22,7 +22,7 @@ params:
     - Woods_Hole
     - Seattle
   input_shapefile:
-    value: wind_Central_Atlantic_1.RDS
+    value: wind_NY1.RDS
     choices:
     - wind_NY1.RDS
     - wind_NY2.RDS
@@ -1348,6 +1348,41 @@ BSDA::z.test(out_closure_scallop0322MainDataTable$LANDED_win,
   alternative = c("two.sided"),
   conf.level = 0.95)
 
+
+
+
+#Set up fleet type z test
+
+if (params$AA_DAS_only==TRUE){
+ in_closure_scallop0322MainDataTable_AA <- in_closure_scallop0322MainDataTable %>% filter(fleet == "Access Area") 
+ in_closure_scallop0322MainDataTable_DAS <- in_closure_scallop0322MainDataTable %>% filter(fleet == "Days at Sea") 
+ out_closure_scallop0322MainDataTable_AA <- out_closure_scallop0322MainDataTable %>% filter(fleet == "Access Area")
+ out_closure_scallop0322MainDataTable_DAS <- out_closure_scallop0322MainDataTable %>% filter(fleet == "Days at Sea") }
+
+
+
+
+if (params$AA_DAS_only==TRUE){
+# LA Trip Type
+BSDA::z.test(in_closure_scallop0322MainDataTable_AA$LANDED,
+  y = out_closure_scallop0322MainDataTable_AA$LANDED,
+  sigma.x = sd(in_closure_scallop0322MainDataTable_AA$LANDED),
+  sigma.y = sd(out_closure_scallop0322MainDataTable_AA$LANDED),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+# DAS Trip Type
+BSDA::z.test(in_closure_scallop0322MainDataTable_DAS$LANDED,
+  y = out_closure_scallop0322MainDataTable_DAS$LANDED,
+  sigma.x = sd(in_closure_scallop0322MainDataTable_DAS$LANDED),
+  sigma.y = sd(out_closure_scallop0322MainDataTable_DAS$LANDED),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+}
+
+
+
+
 ```
 <br><br><br>
 
@@ -1424,6 +1459,31 @@ if (out_switch == "table") {
     pretty_tab_sb(width = "40%")
 
 ```
+
+
+```{r}
+
+
+# LA Trip Type
+BSDA::z.test(in_closure_scallop0322MainDataTable_AA$DOLLAR_2022,
+  y = out_closure_scallop0322MainDataTable_AA$DOLLAR_2022,
+  sigma.x = sd(in_closure_scallop0322MainDataTable_AA$DOLLAR_2022),
+  sigma.y = sd(out_closure_scallop0322MainDataTable_AA$DOLLAR_2022),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+# DAS Trip Type
+BSDA::z.test(in_closure_scallop0322MainDataTable_DAS$DOLLAR_2022,
+  y = out_closure_scallop0322MainDataTable_DAS$DOLLAR_2022,
+  sigma.x = sd(in_closure_scallop0322MainDataTable_DAS$DOLLAR_2022),
+  sigma.y = sd(out_closure_scallop0322MainDataTable_DAS$DOLLAR_2022),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+
+```
+
 
 
 <br><br><br>
@@ -1667,6 +1727,26 @@ BSDA::z.test(out_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022_win,
   sigma.y = sd(in_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022_win),
   alternative = c("two.sided"),
   conf.level = 0.95)
+
+
+if (params$AA_DAS_only==TRUE){
+# LA Trip Type
+BSDA::z.test(in_closure_scallop0322MainDataTable_AA$OPERATING_PROFIT_2022,
+  y = out_closure_scallop0322MainDataTable_AA$OPERATING_PROFIT_2022,
+  sigma.x = sd(in_closure_scallop0322MainDataTable_AA$OPERATING_PROFIT_2022),
+  sigma.y = sd(out_closure_scallop0322MainDataTable_AA$OPERATING_PROFIT_2022),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+# DAS Trip Type
+BSDA::z.test(in_closure_scallop0322MainDataTable_DAS$OPERATING_PROFIT_2022,
+  y = out_closure_scallop0322MainDataTable_DAS$OPERATING_PROFIT_2022,
+  sigma.x = sd(in_closure_scallop0322MainDataTable_DAS$OPERATING_PROFIT_2022),
+  sigma.y = sd(out_closure_scallop0322MainDataTable_DAS$OPERATING_PROFIT_2022),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+}
+
 
 
 ```
@@ -2379,6 +2459,26 @@ BSDA::z.test(out_closure_scallop0322MainDataTable$VPUE_win,
   sigma.y = sd(in_closure_scallop0322MainDataTable$VPUE_win),
   alternative = c("two.sided"),
   conf.level = 0.95)
+
+
+if (params$AA_DAS_only==TRUE){
+# LA Trip Type
+BSDA::z.test(in_closure_scallop0322MainDataTable_AA$VPUE,
+  y = out_closure_scallop0322MainDataTable_AA$VPUE,
+  sigma.x = sd(in_closure_scallop0322MainDataTable_AA$VPUE),
+  sigma.y = sd(out_closure_scallop0322MainDataTable_AA$VPUE),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+# DAS Trip Type
+BSDA::z.test(in_closure_scallop0322MainDataTable_DAS$VPUE,
+  y = out_closure_scallop0322MainDataTable_DAS$VPUE,
+  sigma.x = sd(in_closure_scallop0322MainDataTable_DAS$VPUE),
+  sigma.y = sd(out_closure_scallop0322MainDataTable_DAS$VPUE),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+}
+
 
 ```
 <br><br><br>
