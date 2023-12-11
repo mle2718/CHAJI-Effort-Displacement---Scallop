@@ -11,7 +11,7 @@ output:
   pdf_document:
     toc: yes
 params:
-  AA_DAS_only: no
+  AA_DAS_only: yes
   subtrip_aggregate: yes
   BIN_GEARS: yes
   location:
@@ -670,6 +670,31 @@ agg_helper(scallop0322MainDataTable, group = "OPERNUM",
 
 ```
 
+
+<br><br>
+
+
+vessel count by Lease Area. 
+```{r}
+ves_out <- 
+vessel_count(scallop0322MainDataTable, project,
+             v_id = "PERMIT.y",
+             date = "scallop_fishing_yearD",
+             group = "closeID",
+             type = "line")
+
+ves_out$table %>% pretty_tab()
+
+ves_out$plot 
+
+```
+
+```{r}
+  ves_out$table %>%
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+
+```
 
 
 <br><br><br>
