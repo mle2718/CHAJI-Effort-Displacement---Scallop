@@ -466,8 +466,31 @@ VTR_DMIS_AC$qdate <- NULL
 Subtrips are generated when a vessel switches gear or statistical areas. Subtrips have identical TRIPID/DOCID.  A trip may have many (8+) subtrips, but the majority of trips observed only have one subtrip (95.7% using original VTR & DMIS merged data set). If a trip has just 1 subtrip, the trip took place in a single statistical area.  If a trip crosses four different statistical areas, the NSUBTRIP is then equal to 4, and the landings, value, latitude, and longitude are reported separately for each area. 
 
 
-```{r count_subtrips, echo=TRUE}
+```{r count_subtrips by fleet, echo=TRUE}
 table(VTR_DMIS_AC$NSUBTRIP)
+
+VTR_DMIS_AC$NSUBTRIP[VTR_DMIS_AC$NSUBTRIP > 1] <- "More than 1 Subtrip"
+
+# Assigning fleet names by using plan and program codes
+VTR_DMIS_AC$fleet[VTR_DMIS_AC$`Plan Code` == "SES" & VTR_DMIS_AC$`Program Code` == "SAA" | VTR_DMIS_AC$`Plan Code` == "SES" & VTR_DMIS_AC$`Program Code` == "SCA"] <- "Limited Access"
+VTR_DMIS_AC$fleet[VTR_DMIS_AC$`Plan Code` == "SES" & VTR_DMIS_AC$`Program Code` == "SCG" & VTR_DMIS_AC$`Area Identifier` != "NG"] <- "GCIFQ"
+VTR_DMIS_AC$fleet[VTR_DMIS_AC$`Plan Code` == "SES" & VTR_DMIS_AC$`Program Code` == "SCG" & VTR_DMIS_AC$`Area Identifier` == "NG"] <- "GCNGOM"
+
+
+VTR_DMIS_AC %>%
+  group_by(fleet, NSUBTRIP) %>%
+  summarise(n = n()) %>%
+  mutate(freq = n / sum(n))
+
+# Assigning trip types (LA fleet) using plan and program codes
+VTR_DMIS_AC$fleet[VTR_DMIS_AC$`Plan Code` == "SES" & VTR_DMIS_AC$`Program Code` == "SAA"] <- "Access Area"
+VTR_DMIS_AC$fleet[VTR_DMIS_AC$`Plan Code` == "SES" & VTR_DMIS_AC$`Program Code` == "SCA"] <- "Days at Sea"
+
+VTR_DMIS_AC %>%
+  group_by(fleet, NSUBTRIP) %>%
+  summarise(n = n()) %>%
+  mutate(freq = n / sum(n))
+
 ```
 
 
