@@ -268,7 +268,7 @@ wind_Central_Atlantic_3 <- prep_spat(wind_Central_Atlantic_3)
 wind_Central_Atlantic_3$LEASE_NUMB <- "Central Atlantic Final WEA"
 
 wind_sf_combined <- prep_spat(wind_sf)
-wind_sf_combined$LEASE_NUMB <- "NY Bight WEA"
+wind_sf_combined$LEASE_NUMB <- "Combined Leases"
 
 ```
 
