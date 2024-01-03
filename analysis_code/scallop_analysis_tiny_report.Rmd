@@ -11,7 +11,7 @@ output:
   pdf_document:
     toc: yes
 params:
-  AA_DAS_only: yes
+  AA_DAS_only: no
   subtrip_aggregate: yes
   BIN_GEARS: yes
   location:
@@ -22,7 +22,8 @@ params:
     - Woods_Hole
     - Seattle
   input_shapefile:
-    value: wind_sf_nocable.RDS
+    
+    value: wind_sf_combined.RDS
     choices:
     - wind_NY1.RDS
     - wind_NY2.RDS
@@ -33,8 +34,9 @@ params:
     - wind_sf_final.RDS
     - wind_sf_nocable.RDS
     - wind_sf_combined.RDS
-    
 ---
+
+```{=html}
 <!---
 YAML options: 
 
@@ -43,44 +45,31 @@ location --- NEFSC folks should set location=Woods_Hole. AK folks should set it 
 
 PreRelease -- controls the location of FishSET package. Set to FALSE to load without options. Set to TRUE to load from a particular lib.loc
 --->
+```
 ## Warning and Options
+
 Please be careful with interpretation. Some outputs are uninterpretable when certain options are selected. For example, when we *do not* aggregate subtrips to trips:
 
-1. the "per-unit-effort" outputs are not meaningful. 
-2. Any statistics that are averaged are now averaged over subtrips, so this may not have a meaning either.
+1.  the "per-unit-effort" outputs are not meaningful.
+2.  Any statistics that are averaged are now averaged over subtrips, so this may not have a meaning either.
 
 There may be other, so think carefully.
 
-1.  Your location is  `r params$location`.
+1.  Your location is `r params$location`.
 2.  The value of AA_DAS is `r params$AA_DAS_only`.
 3.  The value of subtrip_aggregate is `r params$subtrip_aggregate`.
-4.  The value of  BIN_GEARS is `r params$BIN_GEARS`.
-5.  The input shapefile has been set to   `r params$input_shapefile`.
+4.  The value of BIN_GEARS is `r params$BIN_GEARS`.
+5.  The input shapefile has been set to `r params$input_shapefile`.
 
-This is a very short version of the scallop_analysis  
+This is a very short version of the scallop_analysis
 
-## Introduction 
- 
-This summary was done using a combination of FishSET console functions, the tidyverse
-(mainly dplyr and tidyr), and a few formatting functions. There is an option to hide 
-the code chunks at the top and a floating table of contents. All results are included in the 
-output (apologies for the general messiness). You'll need to download the html
-file to view the results (if you try to view the html file in Google Drive it will 
-only show the raw html). 
+## Introduction
 
-Here's some background on how FishSET works:
-Everything that runs through FishSET is saved to the "FishSET Folder", 
-which houses all the user's FishSET projects. The FishSET Folder gets created when a user 
-first loads FishSET. Each project folder contains a FishSET Database (sqlite), a 
-log of the function calls, metadata, automatically saved output, and a few other useful 
-features. The project name for this summary is "scallop0322" (the last four 
-digits are month and year) which you'll see in the names of the saved tables. 
+This summary was done using a combination of FishSET console functions, the tidyverse (mainly dplyr and tidyr), and a few formatting functions. There is an option to hide the code chunks at the top and a floating table of contents. All results are included in the output (apologies for the general messiness). You'll need to download the html file to view the results (if you try to view the html file in Google Drive it will only show the raw html).
 
-The easiest way to give feedback is by using the "Feedback/Comments" Google doc
-in the "Confidential NE scallop data analysis 03/22" folder. It includes an
-outline of the summary and a general feedback section to help organize the comments. 
-Please let us know what you find helpful or unhelpful, what feels unnecessary or 
-underdeveloped, or any thoughts or suggestions you may have. 
+Here's some background on how FishSET works: Everything that runs through FishSET is saved to the "FishSET Folder", which houses all the user's FishSET projects. The FishSET Folder gets created when a user first loads FishSET. Each project folder contains a FishSET Database (sqlite), a log of the function calls, metadata, automatically saved output, and a few other useful features. The project name for this summary is "scallop0322" (the last four digits are month and year) which you'll see in the names of the saved tables.
+
+The easiest way to give feedback is by using the "Feedback/Comments" Google doc in the "Confidential NE scallop data analysis 03/22" folder. It includes an outline of the summary and a general feedback section to help organize the comments. Please let us know what you find helpful or unhelpful, what feels unnecessary or underdeveloped, or any thoughts or suggestions you may have.
 
 <br><br>
 
@@ -109,19 +98,16 @@ options(scipen=999)
 AA_DAS_param_hack <-params$AA_DAS_only
 ```
 
-
-
-
 <br><br>
 
 ## Reset project
 
-FishSET stores data in a directory called "FishSETFolder".  You can put this directory anywhere you want.
+FishSET stores data in a directory called "FishSETFolder". You can put this directory anywhere you want.
 
-This chunk "resets" my project by erasing it. This is just to keep things tidy and
-avoid potential errors when kitting the doc. 
+This chunk "resets" my project by erasing it. This is just to keep things tidy and avoid potential errors when kitting the doc.
 
-At the dialog box, select the directory that contains the "FishSETFolder" or the directory in which you want the "FishSETFolder" to be created.  But don't select the "FishSETFolder" directory itself. 
+At the dialog box, select the directory that contains the "FishSETFolder" or the directory in which you want the "FishSETFolder" to be created. But don't select the "FishSETFolder" directory itself.
+
 ```{r project_cleanup,eval=TRUE}
 
   folderpath <- here("FishSETFolder")
@@ -129,9 +115,6 @@ At the dialog box, select the directory that contains the "FishSETFolder" or the
   unlink(here(folderpath,project), recursive = TRUE)
 
 ```
-
-
-
 
 <br><br>
 
@@ -187,11 +170,13 @@ final_product_lease$ones<-1
 load_maindata(dat = final_product_lease, project = project, over_write = TRUE)
 
 ```
+
 <br><br>
 
 ### Spatial data
-Since sqlite can't save spatial data, we save it as a GeoJSON file in the project's 
-data folder.
+
+Since sqlite can't save spatial data, we save it as a GeoJSON file in the project's data folder.
+
 ```{r}
  ten_filepath <- here("data", "external", "shapefiles", 
                       "Ten Minute Squares Cut North and Greater Atlantic")
@@ -213,12 +198,12 @@ scallop0322WindCloseSpatTable <- table_view("scallop0322WindCloseSpatTable",
 
 <br><br>
 
-This data contains `r nrow(scallop0322MainDataTable)` rows and 
-`r ncol(scallop0322MainDataTable)` variables. 
+This data contains `r nrow(scallop0322MainDataTable)` rows and `r ncol(scallop0322MainDataTable)` variables.
 
 <br><br>
 
 ## Assign Fleets and Subset
+
 We will want to do this before the rest of the QA/QC. There are always lots of broken bits, but many of them are going to be in the "other" fleet.
 
 ### Fleet assignment
@@ -251,6 +236,7 @@ scallop0322MainDataTable <-
 ```
 
 
+
 ```{r}
 # save fleet appropriate table to FishSET DB
 
@@ -278,9 +264,8 @@ scallop0322MainDataTable <-
 
 ### Subset
 
-1. Subset to just the Limited Access Fleet when AA_DAS_only is TRUE.
-2. Subset to just the General Category IFQ fleet when AA_DAS_only is FALSE
-
+1.  Subset to just the Limited Access Fleet when AA_DAS_only is TRUE.
+2.  Subset to just the General Category IFQ fleet when AA_DAS_only is FALSE
 
 ```{r subset_fleet, eval=TRUE}
 
@@ -300,10 +285,10 @@ if (params$AA_DAS_only==TRUE){
 
 <br><br>
 
-
 <br><br><br>
 
 ### Bin Gears
+
 ```{r bin_gears}
 if (params$BIN_GEARS==TRUE){
 
@@ -318,112 +303,69 @@ scallop0322MainDataTable$GEARCODE[!(scallop0322MainDataTable$GEARCODE %in%c('DRE
 }
 ```
 
+
 ## Aggregate subtrips to trips
 
+ 
 The input data ``final_product_lease`` contains subtrips, not trips. This code chunk contracts trips to a single row, applying subtrip attributes for the most valuable subtrip (``max(DOLLAR)``)to the entire trip.
 
+ 
 ```{r construct_trip_aggregates, echo=TRUE, eval=TRUE}
 
-if (params$subtrip_aggregate==TRUE){
-
+ 
+if (params$subtrip_aggregate==TRUE){ 
+ 
 # aggregate DOLLAR, POUNDS, LANDED by TRIPID and filter by max(DOLLAR)
+
 scallop0322MainDataTable <- 
   scallop0322MainDataTable %>%
   group_by(TRIPID) %>%
-  mutate(Agg_DOLLAR = sum(DOLLAR),Agg_DOLLAR_2022 = sum(DOLLAR_2022),  Agg_POUNDS = sum(POUNDS), Agg_LANDED = sum(LANDED), Agg_DOLLAR_ALL_SP_2022 = sum(DOLLAR_ALL_SP_2022))%>% 
+  mutate(Agg_DOLLAR = sum(DOLLAR),Agg_DOLLAR_2022 = sum(DOLLAR_2022),     Agg_POUNDS = sum(POUNDS), Agg_LANDED = sum(LANDED), Agg_DOLLAR_ALL_SP_2022 = sum(DOLLAR_ALL_SP_2022))%>% 
   arrange(desc(DOLLAR)) %>%
   dplyr::filter(row_number()==1) %>% 
   dplyr::select(-DOLLAR, -POUNDS, -LANDED,-DOLLAR_ALL_SP_2022, -DOLLAR_2022) %>% 
   rename(DOLLAR = "Agg_DOLLAR", POUNDS = "Agg_POUNDS", LANDED = "Agg_LANDED", DOLLAR_ALL_SP_2022 = "Agg_DOLLAR_ALL_SP_2022", DOLLAR_2022="Agg_DOLLAR_2022") %>% 
-  ungroup()
+ ungroup()
 
+ 
 scallop0322MainDataTable <- scallop0322MainDataTable %>%
-  mutate(KILOGRAMS = POUNDS/pounds_to_kg,
-         LANDED_KG=LANDED/pounds_to_kg)
+ mutate(KILOGRAMS = POUNDS/pounds_to_kg, LANDED_KG=LANDED/pounds_to_kg)
 
-
-
+ 
 ## Test out 
 sum(duplicated(scallop0322MainDataTable$TRIPID))
 stopifnot(sum(duplicated(scallop0322MainDataTable$TRIPID))==0)
-}
+ }
+
+ 
 ```
 
+## Calculate Operating Profit 
 
 ```{r calculate operating profit, echo=TRUE, eval=TRUE}
 
+ 
 #Calculate operating profit by subtracting nominal trip costs from nominal aggregated revenues. Then deal with real. 
+
 scallop0322MainDataTable$OPERATING_PROFIT <- 
-  (scallop0322MainDataTable$DOLLAR_ALL_SP - scallop0322MainDataTable$TRIP_COST_NOMINALDOLS_WINSOR)
+ (scallop0322MainDataTable$DOLLAR_ALL_SP - scallop0322MainDataTable$TRIP_COST_NOMINALDOLS_WINSOR)
 
-
+ 
 scallop0322MainDataTable$OPERATING_PROFIT_2022 <- 
-  (scallop0322MainDataTable$DOLLAR_ALL_SP_2022 - scallop0322MainDataTable$TRIP_COST_WINSOR_2022_DOL)
+ 	 (scallop0322MainDataTable$DOLLAR_ALL_SP_2022 -  scallop0322MainDataTable$TRIP_COST_WINSOR_2022_DOL)
 
+ 
 #Remove NAs in operating profits and replace with column mean
 sum(is.na(scallop0322MainDataTable$OPERATING_PROFIT_2022))
 scallop0322MainDataTable$OPERATING_PROFIT_2022[is.na(scallop0322MainDataTable$OPERATING_PROFIT_2022)] <- mean(scallop0322MainDataTable$OPERATING_PROFIT_2022, na.rm = TRUE)
 
-
 ```
 
-
-### summary table
-```{r}
-summary_stats(scallop0322MainDataTable, project) %>% 
-  pretty_tab_sb()
-```
-
-Here is DOLLAR, KILOGRAMS, CREW, LANDED, DOLLAR, OPERATING PROFIT and TRIP_LENGTH separately. 
-```{r}
-scallop0322MainDataTable %>% 
-  summarize(across(.cols = c("LANDED_KG","LANDED", "DOLLAR_2022" , "OPERATING_PROFIT_2022","TRIP_LENGTH"), 
-                   .fns = list(min = min, median = median, mean = mean, max = max, StdDev = sd ,sum=sum, Q25 = ~quantile(.,0.25,na.rm=TRUE), Q50 = ~quantile(.,0.50,na.rm=TRUE), Q75 = ~quantile(.,0.75,na.rm=TRUE), Q95 = ~quantile(.,0.95,na.rm=TRUE),
-                               NAs = ~sum(is.na(.x)), UniqueObs = n_distinct, 
-                               "No. 0's" = ~sum(.x == 0)), 
-                   .names = "{.col}__{.fn}")) %>% 
-  pivot_longer(cols = everything(), values_to = "value", names_to = "summary") %>% 
-  pretty_lab() %>% 
-  separate(col = "summary", sep = "__", into = c("var", "summary")) %>% 
-  pivot_wider(names_from = "var", values_from = "value") %>% 
-  pretty_tab()
- 
-
-boxplot(scallop0322MainDataTable$DOLLAR_2022,
-  main = "Revenue in 2020 Dollars",
-  xlab = "USD$",
-  ylab = "Revenue",
-  col = "white",
-  border = "black",
-  horizontal = TRUE,
-  notch = TRUE)
-
-boxplot(scallop0322MainDataTable$KILOGRAMS,
-  main = "Catch in Kilograms",
-  xlab = "Kilograms",
-  ylab = "Catch",
-  col = "white",
-  border = "black",
-  horizontal = TRUE,
-  notch = TRUE)
-
-boxplot(scallop0322MainDataTable$TRIP_LENGTH,
-  main = "Trip Length in Days",
-  xlab = "Trip Length",
-  ylab = "Days",
-  col = "white",
-  border = "black",
-  horizontal = TRUE,
-  notch = TRUE)
-
-
-```
-
-<br><br>
 
 ## Active Vessels
 
-vessel count by year. 
+vessel count by year.
+
 ```{r}
 ves_out <- 
 vessel_count(scallop0322MainDataTable, project,
@@ -436,7 +378,6 @@ ves_out$table %>% pretty_tab()
 ves_out$plot 
 
 ```
-
 
 <br><br>
 
@@ -455,18 +396,16 @@ scallop0322MainDataTable <-
 sum(scallop0322MainDataTable$dup_trip)
 ```
 
-
 <br><br>
 
 ## QAQC
 
-This section includes our standard QAQC checks. Here I'm only checking whether 
-a potential issue exists and not changing the data in any way (except in the
-empty variable section).
+This section includes our standard QAQC checks. Here I'm only checking whether a potential issue exists and not changing the data in any way (except in the empty variable section).
 
 <br><br>
 
 ### NA check
+
 ```{r}
 na_filter(scallop0322MainDataTable, 
           project = project, 
@@ -477,6 +416,7 @@ na_filter(scallop0322MainDataTable,
 <br><br>
 
 ### NaN check
+
 ```{r}
 nan_filter(scallop0322MainDataTable, 
            project = project, 
@@ -491,17 +431,19 @@ nan_filter(scallop0322MainDataTable,
 ```{r}
 unique_filter(scallop0322MainDataTable, project = project, remove = FALSE)
 ```
+
 <br><br>
 
 ### Empty variables
+
 By "empty" we mean containing all NAs.
+
 ```{r}
 empty_vars_filter(scallop0322MainDataTable, project = project, remove = FALSE)
 
 ```
 
 <br><br>
-
 
 ### Lon/Lat format
 
@@ -511,9 +453,10 @@ degree(scallop0322MainDataTable, project = project,
        latsign = NULL, lonsign = NULL,
        replace = FALSE)
 ```
+
 <br><br>
 
-### Spatial QAQC 
+### Spatial QAQC
 
 ```{r}
 spat_qaqc_out <-
@@ -526,11 +469,13 @@ spat_qaqc_out$spatial_summary %>%
    pretty_tab() 
 spat_qaqc_out[2:4]
 ```
+
 <br><br>
 
 ## Data creation
 
 ### Finagle Live pounds to meat weights
+
 ```{r}
 # rename POUNDS to LIVE_POUNDS for clarity.  Convert live pounds to meat pounds.
 scallop0322MainDataTable$LIVE_POUNDS <- scallop0322MainDataTable$POUNDS
@@ -544,13 +489,10 @@ scallop0322MainDataTable$MEAT_KG <- scallop0322MainDataTable$MEAT_POUNDS/pounds_
 
 ```
 
-
-
-
-
 ### CPUE
-Here I creating a CPUE variable using TRIP_LENGTH and MEAT_KG. I'm also filtering
-out any infinite values. 
+
+Here I creating a CPUE variable using TRIP_LENGTH and MEAT_KG. I'm also filtering out any infinite values.
+
 ```{r}
 scallop0322MainDataTable <- 
   cpue(scallop0322MainDataTable, project,
@@ -562,10 +504,13 @@ scallop0322MainDataTable <-
   scallop0322MainDataTable %>% 
   filter(!is.infinite(CPUE))
 ```
+
 <br><br>
 
 #### CPUE Percent Rank
+
 Add a percent rank column to filter outliers.
+
 ```{r}
 outlier_table(scallop0322MainDataTable, project, x = "CPUE")
 
@@ -577,7 +522,9 @@ scallop0322MainDataTable <-
 <br><br>
 
 ### VPUE
-Same as above but with revenue instead of meat KG 
+
+Same as above but with revenue instead of meat KG
+
 ```{r}
 scallop0322MainDataTable <- 
   cpue(scallop0322MainDataTable, project,
@@ -589,11 +536,13 @@ scallop0322MainDataTable <-
   scallop0322MainDataTable %>% 
   filter(!is.infinite(VPUE))
 ```
+
 <br><br>
 
 #### VPUE Percent Rank
 
 Add a percent rank column to filter outliers.
+
 ```{r}
 outlier_table(scallop0322MainDataTable, project, x = "VPUE")
 
@@ -604,7 +553,48 @@ scallop0322MainDataTable <-
 
 <br><br>
 
+```{r}
+#Calculate operating profit by subtracting nominal trip costs from nominal aggregated revenues. Then deal with real. 
+scallop0322MainDataTable$OPERATING_PROFIT <- 
+  (scallop0322MainDataTable$DOLLAR_ALL_SP - scallop0322MainDataTable$TRIP_COST_NOMINALDOLS_WINSOR)
+
+
+scallop0322MainDataTable$OPERATING_PROFIT_2022 <- 
+  (scallop0322MainDataTable$DOLLAR_ALL_SP_2022 - scallop0322MainDataTable$TRIP_COST_WINSOR_2022_DOL)
+```  
+
+
+### Create new indicator variables with winsor approach 
+
+Winsorized variables for revenue, landed, operating profit, and VPUE
+```{r}
+scallop0322MainDataTable$DOLLAR_2022_win <- 
+  datawizard::winsorize(scallop0322MainDataTable$DOLLAR_2022, threshold = 0.01)
+
+scallop0322MainDataTable$LANDED_win <- datawizard::winsorize(scallop0322MainDataTable$LANDED, threshold = 0.01)
+
+scallop0322MainDataTable$DOLLAR_ALL_SP_win <- 
+  datawizard::winsorize(scallop0322MainDataTable$DOLLAR_ALL_SP_2022, threshold = 0.01) 
+
+scallop0322MainDataTable$OPERATING_PROFIT_2022_win <- 
+  (scallop0322MainDataTable$DOLLAR_ALL_SP_win - scallop0322MainDataTable$TRIP_COST_WINSOR_2022_DOL)
+
+scallop0322MainDataTable$VPUE_win<- 
+  datawizard::winsorize(scallop0322MainDataTable$VPUE, threshold = 0.01)
+
+
+#Remove NAs in operating profits and replace with column mean
+sum(is.na(scallop0322MainDataTable$OPERATING_PROFIT_2022_win))
+scallop0322MainDataTable$OPERATING_PROFIT_2022_win[is.na(scallop0322MainDataTable$OPERATING_PROFIT_2022_win)] <- mean(scallop0322MainDataTable$OPERATING_PROFIT_2022_win, na.rm = TRUE)
+
+
+
+```
+<br><br>
+
+
 ### Closure area assignment
+
 ```{r}
 scallop0322MainDataTable <- 
   assignment_column(scallop0322MainDataTable, project = project,
@@ -623,7 +613,8 @@ scallop0322MainDataTable <-
 
 <br><br><br>
 
-Checking whether FishSET closure area assignment matches with what's in the scallop data.  This isn't quite the right check. We haven't been consistent with names.
+Checking whether FishSET closure area assignment matches with what's in the scallop data. This isn't quite the right check. We haven't been consistent with names.
+
 ```{r}
 scallop0322MainDataTable %>% 
   mutate(closure_match = closeID == NAME) %>% 
@@ -634,9 +625,8 @@ scallop0322MainDataTable %>%
 
 <br><br><br>
 
-`r sum(scallop0322MainDataTable$in_closure)` 
-observations (`r round(sum(scallop0322MainDataTable$in_closure)/nrow(scallop0322MainDataTable) * 100, 2)`%)
-occurred inside a closure area. 
+`r sum(scallop0322MainDataTable$in_closure)` observations (`r round(sum(scallop0322MainDataTable$in_closure)/nrow(scallop0322MainDataTable) * 100, 2)`%) occurred inside a closure area.
+
 ```{r}
 agg_helper(scallop0322MainDataTable, value = "in_closure", count = TRUE) %>% 
   pivot_wider(names_from = "in_closure", values_from = "n") %>% 
@@ -645,8 +635,8 @@ agg_helper(scallop0322MainDataTable, value = "in_closure", count = TRUE) %>%
   pretty_tab()
 ```
 
-<br><br><br>
-Observations inside/outside closures by fleet. 
+<br><br><br> Observations inside/outside closures by fleet.
+
 ```{r}
 agg_helper(scallop0322MainDataTable, group = "fleet", 
             value = "in_closure", count = TRUE) %>% 
@@ -656,9 +646,8 @@ agg_helper(scallop0322MainDataTable, group = "fleet",
   pretty_tab()
 ```
 
+<br><br><br> Observations inside/outside closures by OPERNUM.
 
-<br><br><br>
-Observations inside/outside closures by OPERNUM. 
 ```{r}
 agg_helper(scallop0322MainDataTable, group = "OPERNUM", 
             value = "in_closure", count = TRUE) %>% 
@@ -670,11 +659,10 @@ agg_helper(scallop0322MainDataTable, group = "OPERNUM",
 
 ```
 
-
 <br><br>
 
+Active vessel count by Lease Area.
 
-vessel count by Lease Area. 
 ```{r}
 ves_out <- 
 vessel_count(scallop0322MainDataTable, project,
@@ -695,10 +683,33 @@ ves_out$plot
     pretty_tab_sb(width = "40%")
 
 ```
+<br><br>
 
+Active vessel count by Lease Area by fleet.
 
-<br><br><br>
-Observations inside/outside closures by fleet, LA, and GC. 
+```{r}
+ves_out <- 
+vessel_count(scallop0322MainDataTable, project,
+             v_id = "PERMIT.y",
+             date = "scallop_fishing_yearD",
+             group = c("closeID","fleet"),
+             type = "line")
+
+ves_out$table %>% pretty_tab()
+
+ves_out$plot 
+
+```
+
+```{r}
+  ves_out$table %>%
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+
+```
+
+<br><br><br> Observations inside/outside closures by fleet, LA, and GC.
+
 ```{r}
 scallop0322MainDataTable %>% 
   count(fleet, in_closure, LA, GC, .drop = FALSE) %>% 
@@ -710,11 +721,10 @@ scallop0322MainDataTable %>%
   
 ```
 
-
-
 <br><br><br>
 
-Observations inside/outside closures by year. 
+Observations inside/outside closures by year.
+
 ```{r}
 agg_helper(scallop0322MainDataTable, value = "in_closure", 
             group = "scallop_fishing_year", 
@@ -729,7 +739,8 @@ agg_helper(scallop0322MainDataTable, value = "in_closure",
 
 <br><br><br>
 
-Observations inside/outside closures by month. 
+Observations inside/outside closures by month.
+
 ```{r}
 scallop0322MainDataTable$month <- month(ymd(scallop0322MainDataTable$DATE_TRIP))
 agg_helper(scallop0322MainDataTable, value = "in_closure", 
@@ -745,9 +756,8 @@ agg_helper(scallop0322MainDataTable, value = "in_closure",
 
 ```
 
+<br><br><br> Observations inside/outside closures by year and fleet.
 
-<br><br><br>
-Observations inside/outside closures by year and fleet. 
 ```{r}
 agg_helper(scallop0322MainDataTable, value = "in_closure", 
             group = c("scallop_fishing_year", "fleet"), 
@@ -761,9 +771,8 @@ agg_helper(scallop0322MainDataTable, value = "in_closure",
 
 ```
 
+<br><br><br> Observations inside/outside closures by month and fleet.
 
-<br><br><br>
-Observations inside/outside closures by month and fleet. 
 ```{r}
 agg_helper(scallop0322MainDataTable, value = "in_closure", 
             group = c("month", "fleet"), 
@@ -776,11 +785,12 @@ agg_helper(scallop0322MainDataTable, value = "in_closure",
   pretty_tab_sb(width = "50%") 
 ```
 
-
 <br><br>
 
 ### Top 10 Ports
-Top ten ports by frequency. Could also do by catch. 
+
+Top ten ports by frequency. Could also do by catch.
+
 ```{r}
 top_ten_ports <- 
 scallop0322MainDataTable %>% 
@@ -822,6 +832,7 @@ ves_out$plot + angled_theme()
 <br><br><br>
 
 Vessel count by top ten port and year.
+
 ```{r}
 ves_out <- 
   vessel_count(scallop0322MainDataTable, project,
@@ -844,6 +855,7 @@ ves_out$plot
 <br><br><br>
 
 Vessel count by top ten port and gearcode.
+
 ```{r}
 ves_out <- 
   vessel_count(scallop0322MainDataTable, project,
@@ -860,10 +872,10 @@ ves_out$table %>%
 ves_out$plot + angled_theme()
 ```
 
-
 <br><br><br>
 
-Total Revenue by Top 10 port and gearcode. 
+Total Revenue by Top 10 port and gearcode.
+
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
@@ -882,10 +894,10 @@ catch_out$table %>%
 catch_out$plot + angled_theme()
 ```
 
-
 <br><br><br>
 
-Total Revenue by Top 10 port and fleet. 
+Total Revenue by Top 10 port and fleet.
+
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
@@ -904,12 +916,8 @@ catch_out$table %>%
 catch_out$plot + angled_theme()
 ```
 
+<br><br><br> Average Revenue by top 10 ports.
 
-
-
-
-<br><br><br>
-Average Revenue by top 10 ports. 
 ```{r}
 cpue_out <- 
   species_catch(scallop0322MainDataTable, project,
@@ -926,10 +934,10 @@ cpue_out$table %>%
 cpue_out$plot + angled_theme() 
 ```
 
-
 <br><br><br>
 
-Total Operating Profit by Top 10 port and gearcode. 
+Total Operating Profit by Top 10 port and gearcode.
+
 ```{r}
 catch_out <- 
   species_catch(scallop0322MainDataTable, project,
@@ -950,7 +958,8 @@ catch_out$plot + angled_theme()
 
 <br><br><br>
 
-Average Operating Profit by top 10 ports. 
+Average Operating Profit by top 10 ports.
+
 ```{r}
 cpue_out <- 
   species_catch(scallop0322MainDataTable, project,
@@ -967,13 +976,12 @@ cpue_out$table %>%
 cpue_out$plot + angled_theme() 
 ```
 
-
 ## Zone Summary
 
 ## Closure summary
 
-
 Number of observations.
+
 ```{r}
 table_convert <- c("wind_NY1.RDS","wind_NY2.RDS","wind_NY3.RDS","wind_sf_nocable_agg.RDS","wind_sf_nocable.RDS")
 out_switch <- ifelse(params$input_shapefile %in% table_convert, "table", "tab_plot")
@@ -987,7 +995,6 @@ zone_summary(scallop0322MainDataTable, project = project,
          breaks = c(1, 10, 50, 100, 250, 500, 750, 1000, 1252),
          na.rm = FALSE, dat.center = FALSE, 
          output = out_switch)
-
 if (out_switch == "table") {
   eval_next=FALSE
   zone_out %>% 
@@ -1000,11 +1007,9 @@ if (out_switch == "table") {
 }
 ```
 
-
 <br><br><br>
 
-Duplicate trips by closure area. This shows whether observations that occurred
-in a closure area came from duplicate trip IDs. 
+Duplicate trips by closure area. This shows whether observations that occurred in a closure area came from duplicate trip IDs.
 
 ```{r}
 agg_helper(scallop0322MainDataTable, 
@@ -1022,6 +1027,7 @@ agg_helper(scallop0322MainDataTable,
 <br><br><br>
 
 Percent of observations in closure areas.
+
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -1055,9 +1061,8 @@ if (out_switch == "table") {
 
 <br><br><br>
 
+Aggregate Scallop revenue by closure area.
 
-
-Aggregate Scallop revenue by closure area. 
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -1090,11 +1095,47 @@ if (out_switch == "table") {
 
 ```
 
+<br><br><br>
 
+
+Aggregate Winsorized Scallop revenue by closure area.
+
+```{r}
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2022_win",
+         fun = "sum",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = out_switch)
+
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+```
+
+```{r, eval=eval_next}
+  zone_out$table %>%
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+
+```
 <br><br><br>
 
 
 Total Revenue in closures by port
+
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -1129,8 +1170,8 @@ if (out_switch == "table") {
 
 ```
 
-<br><br><br>
-Average Revenue in closures
+<br><br><br> Average Revenue in closures
+
 ```{r}
 
 zone_out <- 
@@ -1164,8 +1205,9 @@ if (out_switch == "table") {
     pretty_tab_sb(width = "40%")
 
 ```
-<br><br><br>
-Box Plots of Revenues in and outside of closures
+
+<br><br><br> Box Plots of Revenues in and outside of closures
+
 ```{r}
 # To perform the t-tests and make boxplots, observations are separated into two separate samples, inside and outside of closures
 in_closure_scallop0322MainDataTable <- scallop0322MainDataTable %>% filter(in_closure == "TRUE")
@@ -1200,10 +1242,6 @@ ggpubr::ggdensity(in_closure_scallop0322MainDataTable$DOLLAR_2022,
 
 
 
-# Winsorize Data
-out_closure_scallop0322MainDataTable$DOLLAR_2022_win<- datawizard::winsorize(out_closure_scallop0322MainDataTable$DOLLAR_2022, threshold = 0.1)
-
-in_closure_scallop0322MainDataTable$DOLLAR_2022_win<- datawizard::winsorize(in_closure_scallop0322MainDataTable$DOLLAR_2022, threshold = 0.1)
 
 ggpubr::ggdensity(out_closure_scallop0322MainDataTable$DOLLAR_2022_win, 
           main = "Winsorized Revenues Outside of Closure",
@@ -1252,11 +1290,8 @@ BSDA::z.test(out_closure_scallop0322MainDataTable$DOLLAR_2022_win,
 
 ```
 
-<br><br><br>
+<br><br><br> Average Winsorized Revenue in closures
 
-
-
-Average landed in closures
 ```{r}
 
 zone_out <- 
@@ -1264,7 +1299,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable,
          zone.dat = "closeID",
          zone.spat = "LEASE_NUMB",
-         var = "LANDED",
+         var = "DOLLAR_2022_win",
          fun = "mean",
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
@@ -1292,7 +1327,77 @@ if (out_switch == "table") {
 ```
 
 <br><br><br>
-Box Plots of Landed in and outside of closures
+
+Average Winsorized Revenue in closures by fleet
+
+```{r}
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2022_win",
+         fun = "mean",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = out_switch)
+
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+```
+
+```{r, eval=eval_next}
+  zone_out$table %>%
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+
+```
+
+<br><br><br>
+
+Average landed in closures
+
+```{r}
+
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "LANDED",
+         fun = "mean",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = out_switch)
+
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+
+```
+
+
+
+<br><br><br> Box Plots of Landed in and outside of closures
+
 ```{r}
 # To perform the t-tests and make boxplots, observations are separated into two separate samples, inside and outside of closures
 
@@ -1324,11 +1429,6 @@ ggpubr::ggdensity(in_closure_scallop0322MainDataTable$LANDED,
           xlab = "USD$")
 
 
-
-# Winsorize Data
-out_closure_scallop0322MainDataTable$LANDED_win<- datawizard::winsorize(out_closure_scallop0322MainDataTable$LANDED, threshold = 0.1)
-
-in_closure_scallop0322MainDataTable$LANDED_win<- datawizard::winsorize(in_closure_scallop0322MainDataTable$LANDED, threshold = 0.1)
 
 ggpubr::ggdensity(out_closure_scallop0322MainDataTable$LANDED_win, 
           main = "Winsorized Revenues Outside of Closure",
@@ -1387,17 +1487,18 @@ if (params$AA_DAS_only==TRUE){
 
 
 
-
-if (params$AA_DAS_only==TRUE){
 # LA Trip Type
+if (params$AA_DAS_only==TRUE){
 BSDA::z.test(in_closure_scallop0322MainDataTable_AA$LANDED,
   y = out_closure_scallop0322MainDataTable_AA$LANDED,
   sigma.x = sd(in_closure_scallop0322MainDataTable_AA$LANDED),
   sigma.y = sd(out_closure_scallop0322MainDataTable_AA$LANDED),
   alternative = c("two.sided"),
   conf.level = 0.95)
+}
 
 # DAS Trip Type
+if (params$AA_DAS_only==TRUE){
 BSDA::z.test(in_closure_scallop0322MainDataTable_DAS$LANDED,
   y = out_closure_scallop0322MainDataTable_DAS$LANDED,
   sigma.x = sd(in_closure_scallop0322MainDataTable_DAS$LANDED),
@@ -1406,13 +1507,112 @@ BSDA::z.test(in_closure_scallop0322MainDataTable_DAS$LANDED,
   conf.level = 0.95)
 }
 
+```
 
+
+```{r}
+# LA Trip Type - Winsorized
+if (params$AA_DAS_only==TRUE){
+BSDA::z.test(in_closure_scallop0322MainDataTable_AA$LANDED_win,
+  y = out_closure_scallop0322MainDataTable_AA$LANDED_win,
+  sigma.x = sd(in_closure_scallop0322MainDataTable_AA$LANDED_win),
+  sigma.y = sd(out_closure_scallop0322MainDataTable_AA$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+}
+
+# DAS Trip Type - Winsorized
+if (params$AA_DAS_only==TRUE){
+BSDA::z.test(in_closure_scallop0322MainDataTable_DAS$LANDED_win,
+  y = out_closure_scallop0322MainDataTable_DAS$LANDED_win,
+  sigma.x = sd(in_closure_scallop0322MainDataTable_DAS$LANDED_win),
+  sigma.y = sd(out_closure_scallop0322MainDataTable_DAS$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+}
 
 
 ```
+
 <br><br><br>
 
+Average winsorized landed in closures
+
+```{r}
+
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "LANDED_win",
+         fun = "mean",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = out_switch)
+
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+
+```
+
+```{r, eval=eval_next}
+  zone_out$table %>%
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+
+```
+
+<br><br><br> <br><br><br>
+
+Average winsorized landed in closures by fleet
+
+```{r}
+
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "LANDED_win",
+         fun = "mean",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = out_switch)
+
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+
+```
+
+```{r, eval=eval_next}
+  zone_out$table %>%
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+
+```
+
 Average landed in closures by fleet
+
 ```{r}
 
 zone_out <- 
@@ -1450,9 +1650,8 @@ if (out_switch == "table") {
 
 <br><br><br>
 
-
-
 Average Revenue in closures by fleet
+
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -1486,19 +1685,20 @@ if (out_switch == "table") {
 
 ```
 
-
 ```{r}
-if (params$AA_DAS_only==TRUE){
 
 # LA Trip Type
+if (params$AA_DAS_only==TRUE){
 BSDA::z.test(in_closure_scallop0322MainDataTable_AA$DOLLAR_2022,
   y = out_closure_scallop0322MainDataTable_AA$DOLLAR_2022,
   sigma.x = sd(in_closure_scallop0322MainDataTable_AA$DOLLAR_2022),
   sigma.y = sd(out_closure_scallop0322MainDataTable_AA$DOLLAR_2022),
   alternative = c("two.sided"),
   conf.level = 0.95)
+}
 
 # DAS Trip Type
+if (params$AA_DAS_only==TRUE){
 BSDA::z.test(in_closure_scallop0322MainDataTable_DAS$DOLLAR_2022,
   y = out_closure_scallop0322MainDataTable_DAS$DOLLAR_2022,
   sigma.x = sd(in_closure_scallop0322MainDataTable_DAS$DOLLAR_2022),
@@ -1506,14 +1706,35 @@ BSDA::z.test(in_closure_scallop0322MainDataTable_DAS$DOLLAR_2022,
   alternative = c("two.sided"),
   conf.level = 0.95)
 }
+```
+
+```{r}
+# LA Trip Type - Winsorized
+if (params$AA_DAS_only==TRUE){
+BSDA::z.test(in_closure_scallop0322MainDataTable_AA$DOLLAR_2022_win,
+  y = out_closure_scallop0322MainDataTable_AA$DOLLAR_2022_win,
+  sigma.x = sd(in_closure_scallop0322MainDataTable_AA$DOLLAR_2022_win),
+  sigma.y = sd(out_closure_scallop0322MainDataTable_AA$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+}
+
+# DAS Trip Type - Winsorized
+if (params$AA_DAS_only==TRUE){
+BSDA::z.test(in_closure_scallop0322MainDataTable_DAS$DOLLAR_2022_win,
+  y = out_closure_scallop0322MainDataTable_DAS$DOLLAR_2022_win,
+  sigma.x = sd(in_closure_scallop0322MainDataTable_DAS$DOLLAR_2022_win),
+  sigma.y = sd(out_closure_scallop0322MainDataTable_DAS$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+}
+
 
 
 ```
 
+<br><br><br> Average Revenue in closures by port
 
-
-<br><br><br>
-Average Revenue in closures by port
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -1541,8 +1762,9 @@ if (out_switch == "table") {
 
 
 ```
-<br><br><br>
-Average Revenue by top 10 ports, fleet, and closure
+
+<br><br><br> Average Revenue by top 10 ports, fleet, and closure
+
 ```{r}
 cpue_out <- 
   species_catch(scallop0322MainDataTable, project,
@@ -1557,8 +1779,8 @@ cpue_out$table %>%
   pretty_tab()
 ```
 
-<br><br><br>
-Percent of Scallop revenue by closure area. 
+<br><br><br> Percent of Scallop revenue by closure area.
+
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -1590,14 +1812,49 @@ if (out_switch == "table") {
     pretty_lab() %>% 
     pretty_tab_sb(width = "60%")
 
+```
 
+
+
+<br><br><br> Percent of Scallop winsorized revenue by closure area.
+
+```{r}
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2022_win",
+         fun = "percent",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = out_switch)
+
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "60%")
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+```
+
+```{r, eval=eval_next}
+  
+  zone_out$table %>%
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "60%")
 
 ```
 
 
 <br><br><br>
+Percent of Scallop revenue by fleet.
 
-Percent of Scallop revenue by fleet. 
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -1632,10 +1889,49 @@ if (out_switch == "table") {
 
 ```
 
-
-
 <br><br><br>
-Total Operating Profit by closure area. 
+
+Percent of Scallop winsorized revenue by fleet.
+
+```{r}
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2022_win", group = "fleet",
+         fun = "percent",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = out_switch)
+
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "60%")
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+```
+
+```{r, eval=eval_next}
+  
+  zone_out$table %>%
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "60%")
+
+
+```
+
+
+
+<br><br><br> 
+
+Total Operating Profit by closure area.
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -1669,8 +1965,48 @@ zone_out$plot }
 
 
 ```
-<br><br><br>
-Box Plots of Operating Profits in and outside of closures
+
+
+<br><br><br> 
+
+Total Winsorized Operating Profit by closure area.
+```{r}
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "OPERATING_PROFIT_2022_win",
+         fun = "sum",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = out_switch)
+
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "60%")
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+zone_out$plot }
+
+```
+
+```{r, eval=eval_next}
+  
+  zone_out$table %>%
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+
+
+```
+
+
+<br><br><br> Box Plots of Operating Profits in and outside of closures
+
 ```{r}
 # To perform the t-tests and make boxplots, observations are separated into two separate samples, inside and outside of closures
 in_closure_scallop0322MainDataTable <- scallop0322MainDataTable %>% filter(in_closure == "TRUE")
@@ -1706,9 +2042,6 @@ ggpubr::ggdensity(in_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022,
 
 
 # Winsorize Data
-out_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022_win<- datawizard::winsorize(out_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022, threshold = 0.1)
-
-in_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022_win<- datawizard::winsorize(in_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022, threshold = 0.1)
 
 ggpubr::ggdensity(out_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022_win, 
           main = "Winsorized Revenues Outside of Closure",
@@ -1727,7 +2060,7 @@ boxplot(in_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022_win,
   horizontal = TRUE,
   notch = TRUE)
 
-boxplot(out_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022,
+boxplot(out_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022_win,
   main = "Operating Profit in 2021 Dollars outside Potential Development Area",
   xlab = "USD$",
   ylab = "Operating Profit",
@@ -1755,16 +2088,18 @@ BSDA::z.test(out_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022_win,
   conf.level = 0.95)
 
 
-if (params$AA_DAS_only==TRUE){
 # LA Trip Type
+if (params$AA_DAS_only==TRUE){
 BSDA::z.test(in_closure_scallop0322MainDataTable_AA$OPERATING_PROFIT_2022,
   y = out_closure_scallop0322MainDataTable_AA$OPERATING_PROFIT_2022,
   sigma.x = sd(in_closure_scallop0322MainDataTable_AA$OPERATING_PROFIT_2022),
   sigma.y = sd(out_closure_scallop0322MainDataTable_AA$OPERATING_PROFIT_2022),
   alternative = c("two.sided"),
   conf.level = 0.95)
+}
 
 # DAS Trip Type
+if (params$AA_DAS_only==TRUE){
 BSDA::z.test(in_closure_scallop0322MainDataTable_DAS$OPERATING_PROFIT_2022,
   y = out_closure_scallop0322MainDataTable_DAS$OPERATING_PROFIT_2022,
   sigma.x = sd(in_closure_scallop0322MainDataTable_DAS$OPERATING_PROFIT_2022),
@@ -1774,13 +2109,36 @@ BSDA::z.test(in_closure_scallop0322MainDataTable_DAS$OPERATING_PROFIT_2022,
 }
 
 
+```
+
+```{r}
+# LA Trip Type - Winsorized
+if (params$AA_DAS_only==TRUE){
+BSDA::z.test(in_closure_scallop0322MainDataTable_AA$OPERATING_PROFIT_2022_win,
+  y = out_closure_scallop0322MainDataTable_AA$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(in_closure_scallop0322MainDataTable_AA$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(out_closure_scallop0322MainDataTable_AA$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+}
+
+# DAS Trip Type - Winsorized
+if (params$AA_DAS_only==TRUE){
+BSDA::z.test(in_closure_scallop0322MainDataTable_DAS$OPERATING_PROFIT_2022_win,
+  y = out_closure_scallop0322MainDataTable_DAS$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(in_closure_scallop0322MainDataTable_DAS$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(out_closure_scallop0322MainDataTable_DAS$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+}
+
 
 ```
 
-
 <br><br><br>
 
-Percent of Scallop profit by fleet. 
+Percent of Scallop profit by fleet.
+
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -1815,10 +2173,49 @@ if (out_switch == "table") {
 
 ```
 
+<br><br><br> 
 
+
+Percent of Scallop winsorized profit by fleet.
+
+```{r}
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "OPERATING_PROFIT_2022_win", group = "fleet",
+         fun = "percent",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = out_switch)
+
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "60%")
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+```
+
+```{r, eval=eval_next}
+  
+  zone_out$table %>%
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "60%")
+
+
+```
 
 <br><br><br>
-Average Operating Profit by closure area. 
+
+
+Average Operating Profit by closure area.
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -1852,8 +2249,8 @@ zone_out$plot }
 
 ```
 
-<br><br><br>
-Average Operating Profit in closures by port
+<br><br><br> Average Operating Profit in closures by port
+
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -1890,8 +2287,8 @@ if (out_switch == "table") {
 
 ```
 
-<br><br><br>
-Average Operating Profit in closures by fleet
+<br><br><br> Average Operating Profit in closures by fleet
+
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -1929,8 +2326,82 @@ if (out_switch == "table") {
 
 ```
 
-<br><br><br>
-Average Operating Profit by top 10 ports, fleet, and closure
+<br><br><br> Average Winsorized Operating Profit by closure area.
+
+```{r}
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "OPERATING_PROFIT_2022_win",
+         fun = "mean",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = out_switch)
+
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "60%")
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+zone_out$plot }
+
+```
+
+```{r, eval=eval_next}
+  
+  zone_out$table %>%
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+
+```
+
+<br><br><br> Average Winsorized Operating Profit in closures by fleet
+
+```{r}
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "OPERATING_PROFIT_2022_win",
+         fun = "mean",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = out_switch)
+
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+
+
+```
+
+```{r, eval=eval_next}
+  
+  zone_out$table %>%
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+
+
+```
+
+<br><br><br> Average Operating Profit by top 10 ports, fleet, and closure
+
 ```{r}
 cpue_out <- 
   species_catch(scallop0322MainDataTable, project,
@@ -1945,9 +2416,8 @@ cpue_out$table %>%
   pretty_tab()
 ```
 
+<br><br><br> Percent of operating profit by closure area.
 
-<br><br><br>
-Percent of operating profit by closure area. 
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -1981,10 +2451,10 @@ if (out_switch == "table") {
 
 ```
 
-
 <br><br><br>
 
-Percent of Operating Profit by fleet. 
+Percent of Operating Profit by fleet.
+
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -2021,6 +2491,7 @@ if (out_switch == "table") {
 <br><br><br>
 
 Average meat catch per closure area.
+
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -2053,8 +2524,8 @@ if (out_switch == "table") {
 
 ```
 
-
 Total meat catch per closure area.
+
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -2088,11 +2559,11 @@ if (out_switch == "table") {
   zone_out$plot
 
 ```
-
 
 <br><br><br>
 
 Average meat catch per closure area, by fleet.
+
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -2125,8 +2596,8 @@ if (out_switch == "table") {
 
 ```
 
+Total meat catch per closure area, by fleet.
 
-Total meat catch per closure area,  by fleet.
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -2159,10 +2630,10 @@ if (out_switch == "table") {
 
 ```
 
-
 <br><br><br>
 
-Percent of total meat catch. 
+Percent of total meat catch.
+
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -2198,7 +2669,8 @@ if (out_switch == "table") {
 
 <br><br><br>
 
-Percent of total meat catch. 
+Percent of total meat catch.
+
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -2234,7 +2706,8 @@ if (out_switch == "table") {
 
 <br><br><br>
 
-Total meat catch by year. 
+Total meat catch by year.
+
 ```{r}
 agg_helper(scallop0322MainDataTable, "MEAT_KG", 
             group = c("scallop_fishing_year", "closeID"), 
@@ -2248,7 +2721,8 @@ agg_helper(scallop0322MainDataTable, "MEAT_KG",
 
 <br><br><br>
 
-Average meat catch by year. 
+Average meat catch by year.
+
 ```{r}
 agg_helper(scallop0322MainDataTable, "MEAT_KG", 
             group = c("scallop_fishing_year", "closeID"), 
@@ -2262,7 +2736,8 @@ agg_helper(scallop0322MainDataTable, "MEAT_KG",
 
 <br><br><br>
 
-Percent of total trip length by year. 
+Percent of total trip length by year.
+
 ```{r}
 agg_helper(scallop0322MainDataTable, "TRIP_LENGTH", 
             group = c("scallop_fishing_year", "closeID"), 
@@ -2278,6 +2753,7 @@ agg_helper(scallop0322MainDataTable, "TRIP_LENGTH",
 <br><br><br>
 
 Average CPUE per closure area.
+
 ```{r}
 zone_out <- 
     scallop0322MainDataTable %>% 
@@ -2317,6 +2793,7 @@ if (out_switch == "table") {
 <br><br><br>
 
 Average CPUE by fleet.
+
 ```{r}
 zone_out <-
     scallop0322MainDataTable %>% 
@@ -2352,7 +2829,8 @@ if (out_switch == "table") {
 
 <br><br><br>
 
-Average CPUE by year. 
+Average CPUE by year.
+
 ```{r}
   scallop0322MainDataTable %>% 
   filter(CPUE_p >= .025 & CPUE_p <= .975) %>% 
@@ -2370,6 +2848,7 @@ agg_helper(value = "CPUE",
 <br><br><br>
 
 Average VPUE per closure area.
+
 ```{r}
 zone_out <- 
     scallop0322MainDataTable %>% 
@@ -2403,8 +2882,9 @@ if (out_switch == "table") {
     pretty_tab_sb(width = "40%")
 
 ```
-<br><br><br>
-Box Plots of VPUE in and outside of closures
+
+<br><br><br> Box Plots of VPUE in and outside of closures
+
 ```{r}
 # To perform the t-tests and make boxplots, observations are separated into two separate samples, inside and outside of closures
 
@@ -2435,12 +2915,6 @@ ggpubr::ggdensity(in_closure_scallop0322MainDataTable$VPUE,
           main = "Revenues In Closure",
           xlab = "USD$")
 
-
-
-# Winsorize Data
-out_closure_scallop0322MainDataTable$VPUE_win<- datawizard::winsorize(out_closure_scallop0322MainDataTable$VPUE, threshold = 0.1)
-
-in_closure_scallop0322MainDataTable$VPUE_win<- datawizard::winsorize(in_closure_scallop0322MainDataTable$VPUE, threshold = 0.1)
 
 ggpubr::ggdensity(out_closure_scallop0322MainDataTable$VPUE_win, 
           main = "Winsorized Revenues Outside of Closure",
@@ -2486,17 +2960,18 @@ BSDA::z.test(out_closure_scallop0322MainDataTable$VPUE_win,
   alternative = c("two.sided"),
   conf.level = 0.95)
 
-
-if (params$AA_DAS_only==TRUE){
 # LA Trip Type
+if (params$AA_DAS_only==TRUE){
 BSDA::z.test(in_closure_scallop0322MainDataTable_AA$VPUE,
   y = out_closure_scallop0322MainDataTable_AA$VPUE,
   sigma.x = sd(in_closure_scallop0322MainDataTable_AA$VPUE),
   sigma.y = sd(out_closure_scallop0322MainDataTable_AA$VPUE),
   alternative = c("two.sided"),
   conf.level = 0.95)
+}
 
 # DAS Trip Type
+if (params$AA_DAS_only==TRUE){
 BSDA::z.test(in_closure_scallop0322MainDataTable_DAS$VPUE,
   y = out_closure_scallop0322MainDataTable_DAS$VPUE,
   sigma.x = sd(in_closure_scallop0322MainDataTable_DAS$VPUE),
@@ -2504,13 +2979,35 @@ BSDA::z.test(in_closure_scallop0322MainDataTable_DAS$VPUE,
   alternative = c("two.sided"),
   conf.level = 0.95)
 }
+```
 
+```{r}
+# LA Trip Type - Winsorized
+if (params$AA_DAS_only==TRUE){
+BSDA::z.test(in_closure_scallop0322MainDataTable_AA$VPUE_win,
+  y = out_closure_scallop0322MainDataTable_AA$VPUE_win,
+  sigma.x = sd(in_closure_scallop0322MainDataTable_AA$VPUE_win),
+  sigma.y = sd(out_closure_scallop0322MainDataTable_AA$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+}
+
+# DAS Trip Type - Winsorized
+if (params$AA_DAS_only==TRUE){
+BSDA::z.test(in_closure_scallop0322MainDataTable_DAS$VPUE_win,
+  y = out_closure_scallop0322MainDataTable_DAS$VPUE_win,
+  sigma.x = sd(in_closure_scallop0322MainDataTable_DAS$VPUE_win),
+  sigma.y = sd(out_closure_scallop0322MainDataTable_DAS$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+}
 
 ```
-<br><br><br>
 
 <br><br><br>
+
 Average VPUE per closure area by fleet.
+
 ```{r}
 zone_out <- 
     scallop0322MainDataTable %>% 
@@ -2546,13 +3043,89 @@ if (out_switch == "table") {
 
 ```
 
+
 <br><br><br>
 
+Average winsorized VPUE in closures
+
+```{r}
+
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "VPUE_win",
+         fun = "mean",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = out_switch)
+
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+
+```
+
+```{r, eval=eval_next}
+  zone_out$table %>%
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+
+```
+
+<br><br><br> <br><br><br>
+
+Average winsorized VPUE in closures by fleet
+
+```{r}
+
+zone_out <- 
+zone_summary(scallop0322MainDataTable, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "VPUE_win",
+         fun = "mean",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = out_switch)
+
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+
+```
+
+```{r, eval=eval_next}
+  zone_out$table %>%
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+
+```
 
 
+<br><br><br>
 
+Average VPUE by year.
 
-Average VPUE by year. 
 ```{r}
   scallop0322MainDataTable %>% 
   filter(VPUE_p >= .025 & VPUE_p <= .975) %>% 
@@ -2566,8 +3139,8 @@ agg_helper(value = "VPUE",
   pretty_tab_sb()
 ```
 
-<br><br><br>
-Average VPUE by top 10 ports, fleet, and closure
+<br><br><br> Average VPUE by top 10 ports, fleet, and closure
+
 ```{r}
 cpue_out <- 
   species_catch(scallop0322MainDataTable, project,
@@ -2597,7 +3170,6 @@ agg_helper(scallop0322MainDataTable, "NSUBTRIP",
   pretty_tab_sb()
 ```
 
-
 <br><br>
 
 ## Correlation Matrix
@@ -2615,6 +3187,3 @@ corr$table %>% pretty_tab_sb()
 ```
 
 <br><br>
-
-
-
