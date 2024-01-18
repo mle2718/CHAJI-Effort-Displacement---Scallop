@@ -23,7 +23,7 @@ params:
     - Seattle
   input_shapefile:
     
-    value: wind_sf_combined.RDS
+    value: wind_NY3.RDS
     choices:
     - wind_NY1.RDS
     - wind_NY2.RDS
@@ -1037,7 +1037,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          fun = "percent",
          count = TRUE,
          breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = FALSE, dat.center = FALSE, 
+         na.rm = TRUE, dat.center = FALSE, 
          output = out_switch)
 
 if (out_switch == "table") {
@@ -1073,7 +1073,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          fun = "sum",
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = FALSE, dat.center = FALSE,
+         na.rm = TRUE, dat.center = FALSE,
          output = out_switch)
 
 if (out_switch == "table") {
@@ -1356,12 +1356,25 @@ if (out_switch == "table") {
 }
 ```
 
-```{r, eval=eval_next}
-  zone_out$table %>%
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
+<br><br><br>
 
+Average Winsorized Revenue by fleet and state.
+
+```{r}
+cpue_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "DOLLAR_2022_win",
+                group = c("VTR_STATE","fleet"),
+                filter_by = "in_closure",
+                filter_value = TRUE,
+                fun = "mean")
+
+cpue_out$table %>% 
+  pretty_lab() %>%
+  pretty_tab()
 ```
+
+
 
 <br><br><br>
 
@@ -1572,7 +1585,7 @@ if (out_switch == "table") {
 
 ```
 
-<br><br><br> <br><br><br>
+<br><br><br> 
 
 Average winsorized landed in closures by fleet
 
@@ -1610,6 +1623,25 @@ if (out_switch == "table") {
     pretty_tab_sb(width = "40%")
 
 ```
+<br><br><br>
+
+Average Winsorized Landed by fleet and state.
+
+```{r}
+cpue_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "LANDED_win",
+                group = c("VTR_STATE","fleet"),
+                filter_by = "in_closure",
+                filter_value = TRUE,
+                fun = "mean")
+
+cpue_out$table %>% 
+  pretty_lab() %>%
+  pretty_tab()
+```
+
+<br><br><br>
 
 Average landed in closures by fleet
 
@@ -2326,7 +2358,9 @@ if (out_switch == "table") {
 
 ```
 
-<br><br><br> Average Winsorized Operating Profit by closure area.
+<br><br><br> 
+
+Average Winsorized Operating Profit by closure area.
 
 ```{r}
 zone_out <- 
@@ -2399,6 +2433,24 @@ if (out_switch == "table") {
 
 
 ```
+<br><br><br>
+
+Average Winsorized Operating Profit by fleet and state.
+
+```{r}
+cpue_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "OPERATING_PROFIT_2022_win",
+                group = c("VTR_STATE","fleet"),
+                filter_by = "in_closure",
+                filter_value = TRUE,
+                fun = "mean")
+
+cpue_out$table %>% 
+  pretty_lab() %>%
+  pretty_tab()
+```
+
 
 <br><br><br> Average Operating Profit by top 10 ports, fleet, and closure
 
@@ -3120,6 +3172,25 @@ if (out_switch == "table") {
     pretty_tab_sb(width = "40%")
 
 ```
+
+<br><br><br>
+
+Average Winsorized VPUE by fleet and state.
+
+```{r}
+cpue_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "VPUE_win",
+                group = c("VTR_STATE","fleet"),
+                filter_by = "in_closure",
+                filter_value = TRUE,
+                fun = "mean")
+
+cpue_out$table %>% 
+  pretty_lab() %>%
+  pretty_tab()
+```
+
 
 
 <br><br><br>
