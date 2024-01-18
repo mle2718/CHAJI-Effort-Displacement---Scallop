@@ -1,0 +1,529 @@
+---
+title: "Trip Tests"
+author: "Marina Chaji"
+date: "2024-01-12"
+output: html_document
+params:
+  AA_DAS_only: no
+---
+
+```{r}
+
+#save to RDS
+rds_savename<-paste0("Inside_ny1_",vintage_string,".Rds")
+csv_savename<-paste0("Inside_ny1_",vintage_string,".csv")
+
+
+saveRDS(Inside_ny1, file=here("data","main",rds_savename))
+write.csv(Inside_ny1,file=here("data","main",csv_savename), row.names = FALSE)
+
+
+
+
+```
+
+```{r}
+
+#Inside_ny1 <- scallop0322MainDataTable %>%
+             # filter(in_closure == "TRUE")
+
+
+#Inside_ny2 <- scallop0322MainDataTable %>%
+              #filter(in_closure == "TRUE")
+
+
+#Inside_ny3 <- scallop0322MainDataTable %>%
+              #filter(in_closure == "TRUE")
+
+
+#dropped_values_ny_1_2 <- anti_join(Inside_ny1, Inside_ny2, by = c("TRIPID" = "TRIPID"))
+
+
+#dropped_values_ny_2_3 <- anti_join(Inside_ny2, Inside_ny3, by = c("TRIPID" = "TRIPID"))
+
+
+
+#Inside_CA1 <- scallop0322MainDataTable %>%
+             # filter(in_closure == "TRUE")
+
+#Inside_CA2 <- scallop0322MainDataTable %>%
+             # filter(in_closure == "TRUE")
+
+#Inside_CA3 <- scallop0322MainDataTable %>%
+             # filter(in_closure == "TRUE")
+
+#dropped_values_ca_1_2 <- anti_join(Inside_ny1, Inside_ny2, by = c("TRIPID" = "TRIPID"))
+
+
+#dropped_values_ca_2_3 <- anti_join(Inside_ny2, Inside_ny3, by = c("TRIPID" = "TRIPID"))
+
+```
+
+
+```{r}
+
+
+
+#if (params$AA_DAS_only==TRUE){
+# Inside_ny1_AA <- Inside_ny1 %>% filter(fleet == "Access Area") 
+# Inside_ny1_DAS <- Inside_ny1 %>% filter(fleet == "Days at Sea") 
+ 
+# Inside_ny2_AA <- Inside_ny1 %>% filter(fleet == "Access Area") 
+# Inside_ny2_DAS <- Inside_ny1 %>% filter(fleet == "Days at Sea") 
+ 
+# Inside_ny3_AA <- Inside_ny1 %>% filter(fleet == "Access Area") 
+# Inside_ny3_DAS <- Inside_ny1 %>% filter(fleet == "Days at Sea") 
+ 
+ 
+# dropped_values_1_2 <- Inside_ny1 %>% filter(fleet == "Access Area") 
+# dropped_values_1_2 <- Inside_ny1 %>% filter(fleet == "Days at Sea") 
+ 
+# dropped_values_2_3 <- Inside_ny1 %>% filter(fleet == "Access Area") 
+# dropped_values_2_3 <- Inside_ny1 %>% filter(fleet == "Days at Sea") 
+
+ 
+# }
+
+```
+
+<br><br><br> Average Winsorized Revenue in closures
+
+```{r}
+
+zone_out <- 
+zone_summary(dropped_values_2_3, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2022_win",
+         fun = "mean",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = out_switch)
+
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+
+```
+
+
+
+<br><br><br>
+
+
+Average Winsorized Revenue in closures by fleet
+
+```{r}
+zone_out <- 
+zone_summary(dropped_values_2_3, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2022_win",
+         fun = "mean",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = out_switch)
+
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+```
+
+
+
+<br><br><br>
+
+```{r}
+
+BSDA::z.test(dropped_values_1_2$DOLLAR_2022_win,
+  y = Inside_ny2$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_1_2$DOLLAR_2022_win),
+  sigma.y = sd(Inside_ny2$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_1_2$DOLLAR_2022_win,
+  y = Inside_ny2$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_1_2$DOLLAR_2022_win),
+  sigma.y = sd(Inside_ny2$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_1_2$DOLLAR_2022_win,
+  y = Inside_ny2$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_1_2$DOLLAR_2022_win),
+  sigma.y = sd(Inside_ny2$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+```
+
+
+```{r}
+# LA Trip Type - Winsorized
+#if (params$AA_DAS_only==TRUE){
+#BSDA::z.test(Inside_ny3_AA$DOLLAR_2022_win,
+#  y = dropped_values_2_3_AA$DOLLAR_2022_win,
+#  sigma.x = sd(Inside_ny3_AA$DOLLAR_2022_win),
+#  sigma.y = sd(dropped_values_2_3_AA$DOLLAR_2022_win),
+#  alternative = c("two.sided"),
+#  conf.level = 0.95)
+#}
+
+# DAS Trip Type - Winsorized
+#if (params$AA_DAS_only==TRUE){
+#BSDA::z.test(Inside_ny3_DAS$DOLLAR_2022_win,
+#  y = dropped_values_2_3_DAS$DOLLAR_2022_win,
+#  sigma.x = sd(Inside_ny3_DAS$DOLLAR_2022_win),
+#  sigma.y = sd(dropped_values_2_3_DAS$DOLLAR_2022_win),
+#  alternative = c("two.sided"),
+#  conf.level = 0.95)
+#}
+
+
+
+```
+
+<br><br><br>
+
+
+
+
+Average winsorized landed in closures
+
+```{r}
+
+zone_out <- 
+zone_summary(dropped_values_2_3, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "LANDED_win",
+         fun = "mean",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = out_switch)
+
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+
+```
+
+
+
+<br><br><br> <br><br><br>
+
+Average winsorized landed in closures by fleet
+
+```{r}
+
+zone_out <- 
+zone_summary(dropped_values_2_3, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "LANDED_win",
+         fun = "mean",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = out_switch)
+
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+
+```
+
+
+
+<br><br><br>
+
+```{r}
+
+BSDA::z.test(dropped_values_2_3$LANDED_win,
+  y = Inside_ny2$LANDED_win,
+  sigma.x = sd(dropped_values_2_3$LANDED_win),
+  sigma.y = sd(Inside_ny2$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+BSDA::z.test(dropped_values_2_3$LANDED_win,
+  y = Inside_ny2$LANDED_win,
+  sigma.x = sd(dropped_values_2_3$LANDED_win),
+  sigma.y = sd(Inside_ny2$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+BSDA::z.test(dropped_values_2_3$LANDED_win,
+  y = Inside_ny2$LANDED_win,
+  sigma.x = sd(dropped_values_2_3$LANDED_win),
+  sigma.y = sd(Inside_ny2$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+```
+
+
+<br><br><br>
+
+
+Average landed in closures by fleet
+
+```{r}
+
+zone_out <- 
+zone_summary(dropped_values_2_3, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "LANDED_win",
+         fun = "mean",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = out_switch)
+
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+
+```
+
+
+
+<br><br><br> 
+
+Average Winsorized Operating Profit by closure area.
+
+```{r}
+zone_out <- 
+zone_summary(dropped_values_2_3, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "OPERATING_PROFIT_2022_win",
+         fun = "mean",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = out_switch)
+
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "60%")
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+zone_out$plot }
+
+```
+
+
+<br><br><br> Average Winsorized Operating Profit in closures by fleet
+
+```{r}
+zone_out <- 
+zone_summary(dropped_values_2_3, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "OPERATING_PROFIT_2022_win",
+         fun = "mean",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = out_switch)
+
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+
+
+```
+
+
+
+<br><br><br>
+
+
+```{r}
+BSDA::z.test(dropped_values_2_3$OPERATING_PROFIT_2022_win,
+  y = Inside_ny2$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_2_3$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_ny2$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+BSDA::z.test(dropped_values_2_3$OPERATING_PROFIT_2022_win,
+  y = Inside_ny2$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_2_3$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_ny2$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_2_3$OPERATING_PROFIT_2022_win,
+  y = Inside_ny2$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_2_3$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_ny2$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+```
+
+
+
+<br><br><br>
+
+Average winsorized VPUE in closures
+
+```{r}
+
+zone_out <- 
+zone_summary(dropped_values_2_3, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "VPUE_win",
+         fun = "mean",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = out_switch)
+
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+
+```
+
+
+
+<br><br><br> <br><br><br>
+
+Average winsorized VPUE in closures by fleet
+
+```{r}
+
+zone_out <- 
+zone_summary(dropped_values_2_3, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "VPUE_win",
+         fun = "mean",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = out_switch)
+
+if (out_switch == "table") {
+  eval_next=FALSE
+  zone_out %>% 
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+  
+} else if (out_switch=="tab_plot"){
+  eval_next=TRUE
+  zone_out$plot
+}
+
+```
+
+
+
+<br><br><br>
+
+```{r}
+
+BSDA::z.test(dropped_values_1_2$VPUE_win,
+  y = Inside_ny2$VPUE_win,
+  sigma.x = sd(dropped_values_1_2$VPUE_win),
+  sigma.y = sd(Inside_ny2$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_1_2$VPUE_win,
+  y = Inside_ny2$VPUE_win,
+  sigma.x = sd(dropped_values_1_2$VPUE_win),
+  sigma.y = sd(Inside_ny2$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_1_2$VPUE_win,
+  y = Inside_ny2$VPUE_win,
+  sigma.x = sd(dropped_values_1_2$VPUE_win),
+  sigma.y = sd(Inside_ny2$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+```
+
+<br><br><br>
