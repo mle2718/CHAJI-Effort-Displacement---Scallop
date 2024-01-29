@@ -9,7 +9,14 @@ params:
   AA_DAS_only: no
 ---
 
+## About 
+ 
+This report uses data sets from the tiny reports to estimate based on our five key metrics: trips, ex-vessel scallop revenue, scallop landings, operating profit, and revenue per day across the Limited Acess and General Category-IFQ fleets. The Limited Access fleet is characterized by metiers, Access Area (AA) & Days-at-Sea(DAS). We also test for equality of means in areas excluded as regulatory processes occur using z-tests between phases, i.e., Call Area(s) to Wind Energy Area(s) and Wind Energy Area(s) to Lease Area(s) in the New York Bight (NY) & Central Atlantic (CA) regions. 
+
+
+
 ```{r}
+
 
 #Load data 
 
