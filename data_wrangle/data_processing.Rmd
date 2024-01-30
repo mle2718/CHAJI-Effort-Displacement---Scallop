@@ -49,15 +49,6 @@ rm(datasets_list)
 ```
 
 
-We will:
-
-1. Try to avoid copying data; when we rely on data from other people, we will read it directly into memory from the network location or Oracle.
-1. Sometimes this is unnecessary, so we will copy external data into the "data/external" folder. We will have a separate subfolder for shapefiles.
-1. Store an intermediate data product in "data/intermediate".
-1. Store final data products in "data/main."
-1. Use a vintage "suffix" to denote when we have extracted data.
-
-
 # Organization
 
 
