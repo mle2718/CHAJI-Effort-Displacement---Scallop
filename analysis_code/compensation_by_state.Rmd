@@ -1,0 +1,81 @@
+---
+title: "Compensation_by_state"
+author: "Marina Chaji"
+date: "2024-01-24"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+Load data sets 
+```{r setup, echo=FALSE}
+
+
+NY1_GC <- read_csv('scallop0322MainDataTable_ny1_2023_11_06.csv',show_col_types = FALSE)
+NY2_GC <- read_csv('scallop0322MainDataTable_ny2_2023_11_06.csv',show_col_types = FALSE)
+NY3_GC <- read_csv('scallop0322MainDataTable_ny3_2023_11_06.csv',show_col_types = FALSE)
+
+CA1_GC <- read_csv('scallop0322MainDataTable_gc_ca1_2023_11_06.csv',show_col_types = FALSE)
+CA2_GC <- read_csv('scallop0322MainDataTable_gc_ca2_2023_11_06.csv',show_col_types = FALSE)
+CA3_GC <- read_csv('scallop0322MainDataTable_gc_ca3_2023_11_06.csv',show_col_types = FALSE)
+
+
+NY1_LA <- read_csv('scallop0322MainDataTable_gc_ca1_2023_11_06.csv',show_col_types = FALSE)
+NY2_LA <- read_csv('scallop0322MainDataTable_gc_ca2_2023_11_06.csv',show_col_types = FALSE)
+NY3_LA <- read_csv('scallop0322MainDataTable_gc_ca3_2023_11_06.csv',show_col_types = FALSE)
+
+
+CA1_LA <- read_csv('scallop0322MainDataTable_gc_ca1_2023_11_06.csv',show_col_types = FALSE)
+CA2_LA <- read_csv('scallop0322MainDataTable_gc_ca2_2023_11_06.csv',show_col_types = FALSE)
+CA3_LA <- read_csv('scallop0322MainDataTable_gc_ca3_2023_11_06.csv',show_col_types = FALSE)
+
+```
+
+
+
+
+
+<br><br><br>
+
+Average Winsorized Revenue by fleet and state.
+
+```{r}
+cpue_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "DOLLAR_2022_win",
+                group = c("VTR_STATE","fleet"),
+                filter_by = "in_closure",
+                filter_value = TRUE,
+                fun = "mean")
+
+cpue_out$table %>% 
+  pretty_lab() %>%
+  pretty_tab()
+```
+
+
+
+<br><br><br>
+
+
+Average Winsorized Operating Profit by fleet and state.
+
+```{r}
+cpue_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "OPERATING_PROFIT_2022_win",
+                group = c("VTR_STATE","fleet"),
+                filter_by = "in_closure",
+                filter_value = TRUE,
+                fun = "mean")
+
+cpue_out$table %>% 
+  pretty_lab() %>%
+  pretty_tab()
+```
+
+
+<br><br><br>
