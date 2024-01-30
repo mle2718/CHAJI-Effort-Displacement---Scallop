@@ -23,7 +23,7 @@ params:
     - Seattle
   input_shapefile:
     
-    value: wind_NY2.RDS
+    value: wind_Central_Atlantic_1.RDS
     choices:
     - wind_NY1.RDS
     - wind_NY2.RDS
@@ -85,6 +85,7 @@ lapply(tidyverse_short, require, character.only = TRUE)
 rm(tidyverse_short)
 library(kableExtra) # table formatting 
 library(sf) # converting geometry points to separate cols
+library(BSDA) # z-tests 
 library(here)
 here::i_am("analysis_code/scallop_analysis_0322.Rmd")
 # helper functions
@@ -320,7 +321,7 @@ if (params$subtrip_aggregate==TRUE){
 scallop0322MainDataTable <- 
   scallop0322MainDataTable %>%
   group_by(TRIPID) %>%
-  mutate(Agg_DOLLAR = sum(DOLLAR),Agg_DOLLAR_2022 = sum(DOLLAR_2022),     Agg_POUNDS = sum(POUNDS), Agg_LANDED = sum(LANDED), Agg_DOLLAR_ALL_SP_2022 = sum(DOLLAR_ALL_SP_2022))%>% 
+  mutate(Agg_DOLLAR = sum(DOLLAR),Agg_DOLLAR_2022 = sum(DOLLAR_2022), Agg_POUNDS = sum(POUNDS), Agg_LANDED = sum(LANDED), Agg_DOLLAR_ALL_SP_2022 = sum(DOLLAR_ALL_SP_2022))%>% 
   arrange(desc(DOLLAR)) %>%
   dplyr::filter(row_number()==1) %>% 
   dplyr::select(-DOLLAR, -POUNDS, -LANDED,-DOLLAR_ALL_SP_2022, -DOLLAR_2022) %>% 
@@ -612,16 +613,6 @@ scallop0322MainDataTable <-
 ```
 
 
-#save to RDS
-```{r}
-rds_savename<-paste0("scallop0322MainDataTable_",vintage_string,".Rds")
-csv_savename<-paste0("scallop0322MainDataTable_",vintage_string,".csv")
-
-
-saveRDS(scallop0322MainDataTable, file=here("data","main",rds_savename))
-write.csv(scallop0322MainDataTable,file=here("data","main",csv_savename), row.names = FALSE)
-
-```
 
 <br><br><br>
 
