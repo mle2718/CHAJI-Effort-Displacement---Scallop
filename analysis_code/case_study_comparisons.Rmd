@@ -43,26 +43,26 @@ options(scipen=999)
 
 #Load GCIFQ data 
 
-NY1_GC <- readRDS(here("data","main","casestudies",casestudy_gc_NY1_2023_11_06))
-NY2_GC <- readRDS(here("data","main","casestudies",casestudy_gc_NY2_2023_11_06))
-NY3_GC <- readRDS(here("data","main","casestudies",casestudy_gc_NY3_2023_11_06))
+NY1_GC <- readRDS(here::here("data","main","casestudies","casestudy_gc_NY1_2023_11_06.Rds"))
+NY2_GC <- readRDS(here::here("data","main","casestudies","casestudy_gc_NY2_2023_11_06"))
+NY3_GC <- readRDS(here::here("data","main","casestudies","casestudy_gc_NY3_2023_11_06"))
 
-CA1_GC <- readRDS(here("data","main","casestudies",casestudy_gc_CA1_2023_11_06))
-CA2_GC <- readRDS(here("data","main","casestudies",casestudy_gc_CA2_2023_11_06))
-CA3_GC <- readRDS(here("data","main","casestudies",casestudy_gc_CA3_2023_11_06))
+CA1_GC <- readRDS(here::here("data","main","casestudies","casestudy_gc_CA1_2023_11_06"))
+CA2_GC <- readRDS(here::here("data","main","casestudies","casestudy_gc_CA2_2023_11_06"))
+CA3_GC <- readRDS(here::here("data","main","casestudies","casestudy_gc_CA3_2023_11_06"))
 
 
 
 #Load LA data 
 
 
-NY1_LA <- readRDS(here("data","main","casestudies",casestudy_LA_NY1_2023_11_06))
-NY2_LA <- readRDS(here("data","main","casestudies",casestudy_LA_NY2_2023_11_06))
-NY3_LA <- readRDS(here("data","main","casestudies",casestudy_LA_NY3_2023_11_06))
+NY1_LA <- readRDS(here::here("data","main","casestudies","casestudy_LA_NY1_2023_11_06"))
+NY2_LA <- readRDS(here::here("data","main","casestudies","casestudy_LA_NY2_2023_11_06"))
+NY3_LA <- readRDS(here::here("data","main","casestudies","casestudy_LA_NY3_2023_11_06"))
 
-CA1_LA <- readRDS(here("data","main","casestudies",casestudy_LA_CA1_2023_11_06))
-CA2_LA <- readRDS(here("data","main","casestudies",casestudy_LA_CA2_2023_11_06))
-CA3_LA <- readRDS(here("data","main","casestudies",casestudy_LA_CA3_2023_11_06))
+CA1_LA <- readRDS(here::here("data","main","casestudies","casestudy_LA_CA1_2023_11_06"))
+CA2_LA <- readRDS(here::here("data","main","casestudies","casestudy_LA_CA2_2023_11_06"))
+CA3_LA <- readRDS(here::here("data","main","casestudies","casestudy_LA_CA3_2023_11_06"))
 
 ```
 
