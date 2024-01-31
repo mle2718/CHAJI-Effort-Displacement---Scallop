@@ -29,7 +29,8 @@ pounds_to_kg<-2.20462
 # disable scientific notation
 options(scipen=999)
 
-#load in data here
+#load in data here The data sets used in this rmd are sourced from tiny reports after closure assignment using FishSET. Each should be categorized by shapefile name i.e. "Central Atlantic (CA)" and fleet type. All necessary data for this rmd can be loaded below and is updated as of January 31st 2024. Otherwise the chunk below can be used to create a new updated .RData file to use. 
+
 load("~/mchaji_net/READ-SSB-CHAJI-Effort-Displacement---Scallop/data/main/comparisons/comparasion_data_ALL.RData")
 
 ```
@@ -210,9 +211,10 @@ dropped_values_CA_1_3_DAS <- dropped_values_CA_1_3_LA %>% filter(fleet == "Days 
 
 # Save Data 
 ```{r}
+# This set is only necessary if using a new data set
+
 #save(CA1_GC, CA2_GC,CA3_GC,NY1_GC,NY2_GC,NY3_GC, CA1_LA, CA2_LA,CA3_LA, NY1_LA,NY2_LA,NY3_LA ,file = "~/mchaji_net/READ-SSB-CHAJI-Effort-Displacement---Scallop/data/main/comparisons/comparasion_data_ALL.RData")
-# To load the data again
-#load("compare_data_ALL.RData")
+
 
 ```
 
