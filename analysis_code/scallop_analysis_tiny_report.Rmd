@@ -87,7 +87,7 @@ library(kableExtra) # table formatting
 library(sf) # converting geometry points to separate cols
 library(BSDA) # z-tests 
 library(here)
-here::i_am("analysis_code/scallop_analysis_0322.Rmd")
+here::i_am("analysis_code/scallop_analysis_tiny_report.Rmd")
 # helper functions
 source(here("analysis_code", "format_helpers.R"))
 
