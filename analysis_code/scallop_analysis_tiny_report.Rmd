@@ -11,9 +11,9 @@ output:
   pdf_document:
     toc: yes
 params:
-  AA_DAS_only: yes
-  subtrip_aggregate: yes
-  BIN_GEARS: yes
+  AA_DAS_only: TRUE
+  subtrip_aggregate: TRUE
+  BIN_GEARS: TRUE
   location:
     label: 'Location:'
     value: Woods_Hole
@@ -97,6 +97,24 @@ pounds_to_kg<-2.20462
 options(scipen=999)
 
 AA_DAS_param_hack <-params$AA_DAS_only
+
+params$input_shapefile
+
+shapefile_shortname<-params$input_shapefile
+shapefile_shortname<-gsub(".RDS","",shapefile_shortname)
+shapefile_shortname<-gsub("Central_Atlantic_","CA",shapefile_shortname)
+shapefile_shortname<-gsub("wind_NY","NY",shapefile_shortname)
+shapefile_shortname<-gsub("wind_","",shapefile_shortname)
+
+fleet<-"NA"
+if (params$AA_DAS_only==TRUE){
+  fleet<-"LA"
+}
+if (params$AA_DAS_only==FALSE){
+  fleet<-"gc"
+}
+
+
 ```
 
 <br><br>
@@ -619,10 +637,11 @@ scallop0322MainDataTable <-
 
 # Names for saved files will need to be changed manually depending on the shapefile input and fleet type i.e. Limited Access New York Bight Call Area will need to be changed to rds_savename<-paste0("scallop0322MainDataTable_NYB1_LA",vintage_string,".Rds") 
 
-rds_savename<-paste0("scallop0322MainDataTable_",vintage_string,".Rds")	
-csv_savename<-paste0("scallop0322MainDataTable_",vintage_string,".csv")	
-saveRDS(scallop0322MainDataTable, file=here("data","main",rds_savename))	
-write.csv(scallop0322MainDataTable,file=here("data","main",csv_savename), row.names = FALSE)	
+
+rds_savename<-paste0("casestudy_",fleet,"_",shapefile_shortname,"_",vintage_string,".Rds")	
+csv_savename<-paste0("casestudy_",fleet,"_",shapefile_shortname,"_",vintage_string,".csv")	
+saveRDS(scallop0322MainDataTable, file=here("data","main","casestudies",rds_savename))	
+write.csv(scallop0322MainDataTable,file=here("data","main","casestudies",csv_savename), row.names = FALSE)	
 
 ```
 
