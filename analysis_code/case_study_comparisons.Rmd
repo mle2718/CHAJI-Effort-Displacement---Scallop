@@ -31,7 +31,7 @@ options(scipen=999)
 
 #load in data here The data sets used in this rmd are sourced from tiny reports after closure assignment using FishSET. Each should be categorized by shapefile name i.e. "Central Atlantic (CA)" and fleet type. All necessary data for this rmd can be loaded below and is updated as of January 31st 2024. Otherwise the chunk below can be used to create a new updated .RData file to use. 
 
-load("~/mchaji_net/READ-SSB-CHAJI-Effort-Displacement---Scallop/data/main/comparisons/comparasion_data_ALL.RData")
+# load("~/mchaji_net/READ-SSB-CHAJI-Effort-Displacement---Scallop/data/main/comparisons/comparasion_data_ALL.RData")
 
 ```
 
