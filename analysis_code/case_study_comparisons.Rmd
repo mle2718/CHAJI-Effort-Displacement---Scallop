@@ -5,26 +5,70 @@ date: "2024-01-19"
 output: html_document
 ---
 
-params:
-  AA_DAS_only: no
----
 
 ## About 
  
-This report uses data sets from the tiny reports to estimate based on our five key metrics: trips, ex-vessel scallop revenue, scallop landings, operating profit, and revenue per day across the Limited Acess and General Category-IFQ fleets. The Limited Access fleet is characterized by metiers, Access Area (AA) & Days-at-Sea(DAS). We also test for equality of means in areas excluded as regulatory processes occur using z-tests between phases, i.e., Call Area(s) to Wind Energy Area(s) and Wind Energy Area(s) to Lease Area(s) in the New York Bight (NY) & Central Atlantic (CA) regions. 
+This report uses data sets from the tiny reports to estimate based on our five key metrics: trips, ex-vessel scallop revenue, scallop landings, operating profit, and revenue per day across the Limited Access and General Category-IFQ fleets. The Limited Access fleet is characterized by metiers, Access Area (AA) & Days-at-Sea(DAS). We also test for equality of means in areas excluded as regulatory processes occur using z-tests between phases, i.e., Call Area(s) to Wind Energy Area(s) and Wind Energy Area(s) to Lease Area(s) in the New York Bight (NY) & Central Atlantic (CA) regions. 
+
+
+```{r setup, echo=FALSE}
+
+library(FishSET)
+library(BSDA) # z-tests 
+library(plyr)
+library(dplyr)
+library(readr)
+library(here)
+
+here::i_am("analysis_code/case_study_comparisons.Rmd")
+# helper functions
+source(here("analysis_code", "format_helpers.R"))
+
+project <- "scallop0322"
+pounds_to_kg<-2.20462
+# disable scientific notation
+options(scipen=999)
+
+#load in data here
+load("~/mchaji_net/READ-SSB-CHAJI-Effort-Displacement---Scallop/data/main/comparisons/comparasion_data_ALL.RData")
+
+```
+
 
 
 
 ```{r}
 
 
-#Load data 
+#Load GCIFQ data 
 
-NY1_GC <- readRDS("~/mchaji_net/READ-SSB-CHAJI-Effort-Displacement---Scallop/data/main/scallop0322MainDataTable_gc_NY1_2023_11_06.Rds")
+NY1_GC <- scallop0322MainDataTable_gc_NY1_2023_11_06
 
-NY2_GC <- readRDS("~/mchaji_net/READ-SSB-CHAJI-Effort-Displacement---Scallop/data/main/scallop0322MainDataTable_gc_NY2_2023_11_06.Rds")
+NY2_GC <- scallop0322MainDataTable_gc_NY2_2023_11_06
 
-NY3_GC <- readRDS("~/mchaji_net/READ-SSB-CHAJI-Effort-Displacement---Scallop/data/main/scallop0322MainDataTable_gc_NY3_2023_11_06.Rds")
+NY3_GC <- scallop0322MainDataTable_gc_NY3_2023_11_06
+
+CA1_GC <- scallop0322MainDataTable_gc_ca1_2023_11_06
+
+CA2_GC <- scallop0322MainDataTable_gc_ca2_2023_11_06
+
+CA3_GC <- scallop0322MainDataTable_gc_ca3_2023_11_06
+
+
+
+#Load LA data 
+NY1_LA <- scallop0322MainDataTable_LA_NY1_2023_11_06
+
+NY2_LA <- scallop0322MainDataTable_LA_NY2_2023_11_06
+
+NY3_LA <- scallop0322MainDataTable_LA_NY3_2023_11_06
+
+
+CA1_LA <- scallop0322MainDataTable_LA_CA1_2023_11_06
+
+CA2_LA <- scallop0322MainDataTable_LA_CA2_2023_11_06
+
+CA3_LA <- scallop0322MainDataTable_LA_CA3_2023_11_06
 
 ```
 
@@ -49,17 +93,18 @@ dropped_values_NY_2_3_GC <- anti_join(Inside_NY2_GC, Inside_NY3_GC, by = c("TRIP
 
 ## Central Atlantic 
 
-Inside_CA1_GC <- scallop0322MainDataTable %>% filter(in_closure == "TRUE")
+Inside_CA1_GC <- CA1_GC %>% filter(in_closure == "TRUE")
 
-#Inside_CA2_GC <- scallop0322MainDataTable_gc_ca2_2023_11_06 %>% filter(in_closure == "TRUE")
+Inside_CA2_GC <- CA2_GC %>% filter(in_closure == "TRUE")
 
-Inside_CA3_GC <- scallop0322MainDataTable %>% filter(in_closure == "TRUE")
+Inside_CA3_GC <- CA3_GC %>% filter(in_closure == "TRUE")
 
-#dropped_values_NY_1_2_GC <- anti_join(Inside_CA1_GC, Inside_CA2_GC, by = c("TRIPID" = "TRIPID"))
 
-#dropped_values_NY_2_3_GC <- anti_join(Inside_CA2_GC, Inside_CA3_GC, by = c("TRIPID" = "TRIPID"))
+dropped_values_CA_1_2_GC <- anti_join(Inside_CA1_GC, Inside_CA2_GC, by = c("TRIPID" = "TRIPID"))
 
-dropped_values_NY_1_3_GC <- anti_join(Inside_CA1_GC, Inside_CA3_GC, by = c("TRIPID" = "TRIPID"))
+dropped_values_CA_2_3_GC <- anti_join(Inside_CA2_GC, Inside_CA3_GC, by = c("TRIPID" = "TRIPID"))
+
+dropped_values_CA_1_3_GC <- anti_join(Inside_CA1_GC, Inside_CA3_GC, by = c("TRIPID" = "TRIPID"))
 
 
 ```
@@ -70,32 +115,31 @@ Limited Access
 
 ## New York Bight 
 
-Inside_CA1_LA <- scallop0322MainDataTable %>% filter(in_closure == "TRUE")
+Inside_NY1_LA <- NY1_LA %>% filter(in_closure == "TRUE")
 
-Inside_CA2_LA <- scallop0322MainDataTable %>% filter(in_closure == "TRUE")
+Inside_NY2_LA <- NY2_LA %>% filter(in_closure == "TRUE")
 
-Inside_CA3_LA <- scallop0322MainDataTable %>% filter(in_closure == "TRUE")
-
-
-dropped_values_NY_1_2_LA <- anti_join(Inside_CA1_LA, Inside_CA2_LA, by = "TRIPID")
+Inside_NY3_LA <- NY3_LA %>% filter(in_closure == "TRUE")
 
 
-dropped_values_NY_2_3_LA <- anti_join(Inside_CA2_LA, Inside_CA3_LA, by = "TRIPID")
+dropped_values_NY_1_2_LA <- anti_join(Inside_NY1_LA, Inside_NY2_LA, by = c("TRIPID" = "TRIPID"))
+
+dropped_values_NY_2_3_LA <- anti_join(Inside_NY2_LA, Inside_NY3_LA, by = c("TRIPID" = "TRIPID"))
 
 
 
 ## Central Atlantic 
 
-#Inside_CA1_LA <- scallop0322MainDataTable %>% filter(in_closure == "TRUE")
+Inside_CA1_LA <- CA1_LA %>% filter(in_closure == "TRUE")
 
-#Inside_CA2_LA <- scallop0322MainDataTable %>% filter(in_closure == "TRUE")
+Inside_CA2_LA <- CA2_LA %>% filter(in_closure == "TRUE")
 
-#Inside_CA3_LA <- scallop0322MainDataTable %>% filter(in_closure == "TRUE")
-
-#dropped_values_CA_1_2_LA <- anti_join(Inside_CA1_LA, Inside_CA2_LA, by = c("TRIPID" = "TRIPID"))
+Inside_CA3_LA <- CA3_LA %>% filter(in_closure == "TRUE")
 
 
-#dropped_values_CA_2_3_LA <- anti_join(Inside_CA2_LA, Inside_CA3_LA, by = c("TRIPID" = "TRIPID"))
+dropped_values_CA_1_2_LA <- anti_join(Inside_CA1_LA, Inside_CA2_LA, by = c("TRIPID" = "TRIPID"))
+
+dropped_values_CA_2_3_LA <- anti_join(Inside_CA2_LA, Inside_CA3_LA, by = c("TRIPID" = "TRIPID"))
 
 dropped_values_CA_1_3_LA <- anti_join(Inside_CA1_LA, Inside_CA3_LA, by = c("TRIPID" = "TRIPID"))
 
@@ -103,7 +147,6 @@ dropped_values_CA_1_3_LA <- anti_join(Inside_CA1_LA, Inside_CA3_LA, by = c("TRIP
 
 ```{r}
 #tests
-
 view_lon_lat(Inside_CA2_LA, lon = "DDLON", lat ="DDLAT")
 view_lon_lat(dropped_values_NY_2_3_LA, lon = "DDLON", lat ="DDLAT")
 view_lon_lat(Inside_CA3_LA, lon = "DDLON", lat ="DDLAT")
@@ -125,15 +168,15 @@ view_lon_lat(Inside_CA3_LA, lon = "DDLON", lat ="DDLAT")
  Inside_NY3_DAS <- Inside_CA3_LA %>% filter(fleet == "Days at Sea") 
  
  
- #dropped_values_NY_1_2_AA <- dropped_values_NY_1_2_LA %>% filter(fleet == "Access Area") 
- #dropped_values_NY_1_2_DAS <- dropped_values_NY_1_2_LA %>% filter(fleet == "Days at Sea") 
+ dropped_values_NY_1_2_AA <- dropped_values_NY_1_2_LA %>% filter(fleet == "Access Area") 
+ dropped_values_NY_1_2_DAS <- dropped_values_NY_1_2_LA %>% filter(fleet == "Days at Sea") 
  
- #dropped_values_NY_2_3_AA <- dropped_values_NY_2_3_LA %>% filter(fleet == "Access Area") 
- #dropped_values_NY_2_3_DAS <- dropped_values_NY_2_3_LA %>% filter(fleet == "Days at Sea") 
+ dropped_values_NY_2_3_AA <- dropped_values_NY_2_3_LA %>% filter(fleet == "Access Area") 
+ dropped_values_NY_2_3_DAS <- dropped_values_NY_2_3_LA %>% filter(fleet == "Days at Sea") 
 
  
- #dropped_values_NY_1_3_AA <- dropped_values_NY_1_2_LA %>% filter(fleet == "Access Area") 
- #dropped_values_NY_1_3_DAS <- dropped_values_NY_1_2_LA %>% filter(fleet == "Days at Sea") 
+ dropped_values_NY_1_3_AA <- dropped_values_NY_1_2_LA %>% filter(fleet == "Access Area") 
+ dropped_values_NY_1_3_DAS <- dropped_values_NY_1_2_LA %>% filter(fleet == "Days at Sea") 
 
 
 
@@ -150,11 +193,11 @@ Inside_CA3_AA <- Inside_CA3_LA %>% filter(fleet == "Access Area")
 Inside_CA3_DAS <- Inside_CA3_LA %>% filter(fleet == "Days at Sea") 
  
  
-#dropped_values_CA_1_2_AA <- dropped_values_CA_1_2_LA %>% filter(fleet == "Access Area") 
-#dropped_values_CA_1_2_DAS <- dropped_values_CA_1_2_LA %>% filter(fleet == "Days at Sea") 
+dropped_values_CA_1_2_AA <- dropped_values_CA_1_2_LA %>% filter(fleet == "Access Area") 
+dropped_values_CA_1_2_DAS <- dropped_values_CA_1_2_LA %>% filter(fleet == "Days at Sea") 
  
-#dropped_values_CA_2_3_AA <- dropped_values_CA_2_3_LA %>% filter(fleet == "Access Area") 
-#dropped_values_CA_2_3_DAS <- dropped_values_CA_2_3_LA %>% filter(fleet == "Days at Sea") 
+dropped_values_CA_2_3_AA <- dropped_values_CA_2_3_LA %>% filter(fleet == "Access Area") 
+dropped_values_CA_2_3_DAS <- dropped_values_CA_2_3_LA %>% filter(fleet == "Days at Sea") 
 
 dropped_values_CA_1_3_AA <- dropped_values_CA_1_3_LA %>% filter(fleet == "Access Area") 
 dropped_values_CA_1_3_DAS <- dropped_values_CA_1_3_LA %>% filter(fleet == "Days at Sea") 
@@ -165,48 +208,11 @@ dropped_values_CA_1_3_DAS <- dropped_values_CA_1_3_LA %>% filter(fleet == "Days 
 
 
 
-## Closure summary
-
-Number of observations.
-
-```{r}
-zone_out <- 
-zone_summary(Inside_CA1, project = project,
-         spat = scallop0322WindCloseSpatTable, 
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         count = TRUE,
-         breaks = c(1, 10, 50, 100, 250, 500, 750, 1000, 1252),
-         na.rm = FALSE, dat.center = FALSE, 
-         output = out_switch)
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
-
-
-
-
-spatial_qaqc(Inside_CA2_LA, project = project,
-             spat = scallop0322TenMNSQRSpatTable, lon.dat = "DDLON", lat.dat = "DDLAT")
-
-
-spatial_qaqc(dropped_values_NY_1_2_LA, project = project,
-             spat = scallop0322TenMNSQRSpatTable, lon.dat = "DDLON", lat.dat = "DDLAT")
-```
-
-
 # Save Data 
 ```{r}
-save(Inside_CA1, Inside_CA2,Inside_CA3, file = "compare_data.RData")
+#save(CA1_GC, CA2_GC,CA3_GC,NY1_GC,NY2_GC,NY3_GC, CA1_LA, CA2_LA,CA3_LA, NY1_LA,NY2_LA,NY3_LA ,file = "~/mchaji_net/READ-SSB-CHAJI-Effort-Displacement---Scallop/data/main/comparisons/comparasion_data_ALL.RData")
 # To load the data again
-#load("compare_data.RData")
+#load("compare_data_ALL.RData")
 
 ```
 
@@ -348,8 +354,8 @@ if (out_switch == "table") {
 
 ```
 
-```{r setup, include = FALSE}
-knitr::opts_chunk$set(eval = FALSE)
+```{r}
+
 
 zone_out <- 
 zone_summary(dropped_values_CA_1_2_GC, project = project,
@@ -376,9 +382,7 @@ if (out_switch == "table") {
 
 ```
 
-```{r setup, include = FALSE}
-knitr::opts_chunk$set(eval = FALSE)
-
+```{r }
 zone_out <- 
 zone_summary(dropped_values_CA_2_3_GC, project = project,
          spat = scallop0322WindCloseSpatTable,
@@ -411,8 +415,8 @@ if (out_switch == "table") {
 # Average Winsorized Revenue in CA closures by fleet LA 
 
 
-```{r setup, include = FALSE}
-knitr::opts_chunk$set(eval = FALSE)
+```{r}
+
 
 zone_out <- 
 zone_summary(dropped_values_CA_1_2_LA, project = project,
@@ -441,8 +445,8 @@ if (out_switch == "table") {
 ```
 
 
-```{r setup, include = FALSE}
-knitr::opts_chunk$set(eval = FALSE)
+```{r}
+
 
 zone_out <- 
 zone_summary(dropped_values_CA_2_3_LA, project = project,
@@ -584,7 +588,6 @@ zone_summary(dropped_values_CA_1_3_GC , project = project,
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
          output = out_switch)
-
 if (out_switch == "table") {
   eval_next=FALSE
   zone_out %>% 
@@ -599,8 +602,6 @@ if (out_switch == "table") {
 ```
 <br><br><br>
 
-
-<br><br><br>
 
 CA GC-IFQ Testing 
 ```{r}
@@ -822,12 +823,11 @@ if (out_switch == "table") {
   eval_next=TRUE
   zone_out$plot
 }
-
 ```
 
 
 
-<br><br><br> <br><br><br>
+<br><br><br> 
 
 Average winsorized Landed in closures by fleet
 
