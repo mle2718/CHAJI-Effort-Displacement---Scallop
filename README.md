@@ -1,7 +1,7 @@
 # Purpose
 This repository is intended to estimate a location choice model scallops to understand the effect of wind energy areas on this fleet.  Currently, we have code to [extract data](/data_wrangle/data_extracting.Rmd) and [process data](/data_wrangle/data_processing.Rmd). This code constructs aggregates NEFSC data into a dataset that can be imported to FishSET for data exploration and estimation.  We also have some code to analyse data in the analysis_code folder.
 
-We are using [DMIS](https://github.com/NEFSC/READ-SSB-Lee-metadata/blob/master/DMIS.md) data from 2007-2019 (calendar years).  The main datasource is a frozen DMIS table, you can see the two pieces of sql used to construct that table [here](https://github.com/NEFSC/READ-SSB-Lee-metadata/blob/master/external/MAKE_DMIS_SFCLAM_122121.sql) and [here](https://github.com/NEFSC/READ-SSB-Lee-metadata/blob/master/external/make_sfclam_only_013022.sql).
+We are using [DMIS](https://github.com/NEFSC/READ-SSB-Lee-metadata/blob/master/DMIS.md) data from 2007-2021 (calendar years).  The main datasource is a frozen DMIS table, you can see the two pieces of sql used to construct that table [here](https://github.com/NEFSC/READ-SSB-Lee-metadata/blob/master/external/MAKE_DMIS_SFCLAM_122121.sql) and [here](https://github.com/NEFSC/READ-SSB-Lee-metadata/blob/master/external/make_sfclam_only_013022.sql).
 
 We have documentation about the research question, motivation, and fishery context [here](effort_displacement_overview.Rmd).
 
