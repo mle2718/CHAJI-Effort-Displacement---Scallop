@@ -13,7 +13,7 @@ subtrip_aggregate_vals_to_loop<-c(TRUE) # TRUE aggregates subtrips to trips. FAL
 # We want to be able to run the tiny "area" level analysis on all the shapefiles. I don't know if we can.
 input_shapefile_vals_to_loop2<-c("wind_Central_Atlantic_1.RDS", "wind_Central_Atlantic_2.RDS","wind_Central_Atlantic_3.RDS", "wind_sf_nocable.RDS", "wind_sf_combined.RDS")
 #input_shapefile_vals_to_loop2<-c("wind_NY1.RDS","wind_NY2.RDS","wind_NY3.RDS","wind_Central_Atlantic_1.RDS", "wind_Central_Atlantic_2.RDS","wind_Central_Atlantic_3.RDS", "wind_sf_nocable.RDS", "wind_sf_combined.RDS")
-
+input_shapefile_vals_to_loop2<-c("wind_Central_Atlantic_1.RDS")
 
 
 
@@ -33,7 +33,7 @@ render_tiny_report = function(AA_DAS_only, subtrip_aggregate, input_shapefile) {
     subtrip_aggregate = subtrip_aggregate,
     input_shapefile=input_shapefile
   ),
-  output_file = here("results",paste0("scallop_tiny_AA_",AA_DAS_only,"_subtripaggregate_",subtrip_aggregate,"_shapefile_",input_shapefile, ".html")
+  output_file = here("results",paste0("scallop_tiny_AA_",AA_DAS_only,"_subtripaggregate_",subtrip_aggregate,"_shapefile_", gsub(".RDS", "",input_shapefile ), ".html")
   ))
 }
 ################################################################################## 
