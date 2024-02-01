@@ -18,6 +18,7 @@ library(BSDA) # z-tests
 library(plyr)
 library(dplyr)
 library(readr)
+library(knitr) #creates tables when knitting 
 library(here)
 
 here::i_am("analysis_code/case_study_comparisons.Rmd")
@@ -227,8 +228,6 @@ dropped_values_CA_1_3_DAS <- dropped_values_CA_1_3_LA %>% filter(fleet == "Days 
 
 <br><br><br> 
 
-
-
 # Aggregate Scallop revenue CA-LA
 
 ```{r}
@@ -243,18 +242,9 @@ zone_summary(Inside_CA1_LA , project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
+knitr::kable(zone_out)
 
 
 
@@ -269,18 +259,9 @@ zone_summary(Inside_CA2_LA , project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
+knitr::kable(zone_out)
 
 zone_out <- 
 zone_summary(Inside_CA3_LA , project = project,
@@ -293,18 +274,9 @@ zone_summary(Inside_CA3_LA , project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
+knitr::kable(zone_out)
 
 zone_out <- 
 zone_summary(dropped_values_CA_1_3_LA , project = project,
@@ -317,21 +289,10 @@ zone_summary(dropped_values_CA_1_3_LA , project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
-
+knitr::kable(zone_out)
 ```
-<br><br><br>
 
 
 # Average Winsorized Revenue in closures CA-GCIFQ
@@ -348,20 +309,14 @@ zone_summary(dropped_values_CA_1_3_GC, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = FALSE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
+
+knitr::kable(zone_out)
 
 ```
+
+
 
 ```{r}
 
@@ -376,19 +331,9 @@ zone_summary(dropped_values_CA_1_2_GC, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = FALSE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
-
+knitr::kable(zone_out)
 ```
 
 ```{r }
@@ -402,19 +347,9 @@ zone_summary(dropped_values_CA_2_3_GC, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = FALSE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
-
+knitr::kable(zone_out)
 ```
 
 
@@ -438,19 +373,9 @@ zone_summary(dropped_values_CA_1_2_LA, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = FALSE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
-
+knitr::kable(zone_out)
 ```
 
 
@@ -468,18 +393,9 @@ zone_summary(dropped_values_CA_2_3_LA, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = FALSE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
+knitr::kable(zone_out)
 
 ```
 
@@ -496,19 +412,9 @@ zone_summary(dropped_values_CA_1_3_LA, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = FALSE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
-
+knitr::kable(zone_out)
 ```
 
 <br><br><br>
@@ -525,19 +431,9 @@ zone_summary(Inside_CA1_GC , project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
-
+knitr::kable(zone_out)
 
 
 zone_out <- 
@@ -550,18 +446,9 @@ zone_summary(Inside_CA2_GC , project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
+knitr::kable(zone_out)
 
 zone_out <- 
 zone_summary(Inside_CA3_GC , project = project,
@@ -573,18 +460,9 @@ zone_summary(Inside_CA3_GC , project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
+knitr::kable(zone_out)
 
 zone_out <- 
 zone_summary(dropped_values_CA_1_3_GC , project = project,
@@ -596,18 +474,9 @@ zone_summary(dropped_values_CA_1_3_GC , project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
+         output = "table")
 
+knitr::kable(zone_out)
 ```
 <br><br><br>
 
@@ -820,18 +689,9 @@ zone_summary(dropped_values_CA_1_3_GC, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = FALSE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
+knitr::kable(zone_out)
 ```
 
 
@@ -853,18 +713,9 @@ zone_summary(dropped_values_CA_1_3_LA, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = FALSE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
+knitr::kable(zone_out)
 
 ```
 
@@ -1077,17 +928,9 @@ zone_summary(Inside_CA1_GC, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "60%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-zone_out$plot }
+knitr::kable(zone_out)
 
 
 zone_out <- 
@@ -1100,19 +943,9 @@ zone_summary(Inside_CA3_GC, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "60%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-zone_out$plot }
-
-
+knitr::kable(zone_out)
 
 zone_out <- 
 zone_summary(dropped_values_CA_2_3_GC, project = project,
@@ -1124,17 +957,9 @@ zone_summary(dropped_values_CA_2_3_GC, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "60%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-zone_out$plot }
+knitr::kable(zone_out)
 
 ```
 
@@ -1153,17 +978,9 @@ zone_summary(dropped_values_CA_2_3_GC, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "60%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-zone_out$plot }
+knitr::kable(zone_out)
 
 ```
 
@@ -1181,17 +998,9 @@ zone_summary(Inside_CA1_LA, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "60%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-zone_out$plot }
+knitr::kable(zone_out)
 
 
 zone_out <- 
@@ -1205,18 +1014,9 @@ zone_summary(Inside_CA3_LA, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "60%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-zone_out$plot }
-
+knitr::kable(zone_out)
 
 
 zone_out <- 
@@ -1230,18 +1030,9 @@ zone_summary(dropped_values_CA_1_3_LA, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "60%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-zone_out$plot }
-
+knitr::kable(zone_out)
 ```
 
 
@@ -1259,19 +1050,9 @@ zone_summary(dropped_values_CA_1_3_LA, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
-
+knitr::kable(zone_out)
 
 ```
 
@@ -1485,18 +1266,9 @@ zone_summary(dropped_values_CA_1_3_GC, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = FALSE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
+knitr::kable(zone_out)
 
 ```
 
@@ -1519,19 +1291,9 @@ zone_summary(dropped_values_CA_1_3_LA, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = FALSE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
-
+knitr::kable(zone_out)
 ```
 
 
@@ -1548,18 +1310,9 @@ zone_summary(dropped_values_CA_2_3_LA, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = FALSE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
+knitr::kable(zone_out)
 
 ```
 
@@ -1779,18 +1532,9 @@ zone_summary(Inside_NY1_GC, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
+knitr::kable(zone_out)
 ```
 
 ```{r}
@@ -1805,18 +1549,9 @@ zone_summary(Inside_NY2_GC, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
+knitr::kable(zone_out)
 ```
 
 ```{r}
@@ -1831,18 +1566,9 @@ zone_summary(Inside_NY3_GC, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
+knitr::kable(zone_out)
 ```
 
 
@@ -1857,18 +1583,9 @@ zone_summary(dropped_values_NY_1_2_GC, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
+knitr::kable(zone_out)
 ```
 
 ```{r}
@@ -1883,18 +1600,9 @@ zone_summary(dropped_values_NY_2_3_GC, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
+knitr::kable(zone_out)
 ```
 
 
@@ -1912,18 +1620,9 @@ zone_summary(dropped_values_NY_1_2_GC, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = FALSE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
+knitr::kable(zone_out)
 
 ```
 
@@ -1939,19 +1638,9 @@ zone_summary(dropped_values_NY_2_3_GC, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = FALSE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
-
+knitr::kable(zone_out)
 ```
 
 
@@ -1970,18 +1659,9 @@ zone_summary(Inside_NY1_LA, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
+knitr::kable(zone_out)
 ```
 
 ```{r}
@@ -1997,18 +1677,9 @@ zone_summary(Inside_NY2_LA, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
+knitr::kable(zone_out)
 ```
 
 ```{r}
@@ -2024,18 +1695,9 @@ zone_summary(Inside_NY3_LA, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
+knitr::kable(zone_out)
 ```
 
 
@@ -2051,18 +1713,9 @@ zone_summary(dropped_values_NY_1_2_LA, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
+knitr::kable(zone_out)
 ```
 
 ```{r}
@@ -2078,18 +1731,9 @@ zone_summary(dropped_values_NY_2_3_LA, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
+knitr::kable(zone_out)
 ```
 
 
@@ -2108,19 +1752,9 @@ zone_summary(dropped_values_NY_1_2_LA, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = FALSE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
-
+knitr::kable(zone_out)
 ```
 
 
@@ -2137,18 +1771,9 @@ zone_summary(dropped_values_NY_2_3_LA, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = FALSE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
+knitr::kable(zone_out)
 
 ```
 
@@ -2345,19 +1970,9 @@ zone_summary(dropped_values_NY_1_2_GC, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = FALSE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
-
+knitr::kable(zone_out)
 ```
 
 ```{r}
@@ -2372,18 +1987,9 @@ zone_summary(dropped_values_NY_2_3_GC, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = FALSE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
+knitr::kable(zone_out)
 
 ```
 
@@ -2404,18 +2010,9 @@ zone_summary(dropped_values_NY_1_2_LA, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = FALSE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
+knitr::kable(zone_out)
 
 ```
 
@@ -2432,19 +2029,9 @@ zone_summary(dropped_values_NY_2_3_LA, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = FALSE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
-
+knitr::kable(zone_out)
 ```
 
 <br><br><br>
@@ -2629,18 +2216,9 @@ zone_summary(Inside_NY1_GC, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
+knitr::kable(zone_out)
 
 
 
@@ -2654,18 +2232,9 @@ zone_summary(Inside_NY2_GC, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
+knitr::kable(zone_out)
 
 
 zone_out <- 
@@ -2678,18 +2247,9 @@ zone_summary(Inside_NY3_GC, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
+knitr::kable(zone_out)
 ```
 <br><br><br> 
 
@@ -2706,18 +2266,9 @@ zone_summary(dropped_values_NY_1_2_GC, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
+knitr::kable(zone_out)
 ```
 
 
@@ -2733,18 +2284,9 @@ zone_summary(dropped_values_NY_2_3_GC, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
+knitr::kable(zone_out)
 ```
 
 
@@ -2763,18 +2305,9 @@ zone_summary(dropped_values_NY_1_2_GC, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "60%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-zone_out$plot }
-
+knitr::kable(zone_out)
 ```
 <br><br><br> 
 
@@ -2791,18 +2324,9 @@ zone_summary(dropped_values_NY_2_3_GC, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "60%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-zone_out$plot }
-
+knitr::kable(zone_out)
 ```
 
 <br><br><br> 
@@ -2824,20 +2348,9 @@ zone_summary(Inside_NY1_LA, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
-
-
+knitr::kable(zone_out)
 
 zone_out <- 
 zone_summary(Inside_NY2_LA, project = project,
@@ -2850,19 +2363,9 @@ zone_summary(Inside_NY2_LA, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
-
+knitr::kable(zone_out)
 
 zone_out <- 
 zone_summary(Inside_NY3_LA, project = project,
@@ -2875,18 +2378,9 @@ zone_summary(Inside_NY3_LA, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
+knitr::kable(zone_out)
 ```
 
 
@@ -2904,18 +2398,9 @@ zone_summary(dropped_values_NY_1_2_LA, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
+knitr::kable(zone_out)
 ```
 
 
@@ -2932,18 +2417,9 @@ zone_summary(dropped_values_NY_2_3_LA, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
+knitr::kable(zone_out)
 ```
 
 
@@ -2964,19 +2440,9 @@ zone_summary(dropped_values_NY_1_2_LA, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
-
+knitr::kable(zone_out)
 
 ```
 
@@ -2992,18 +2458,9 @@ zone_summary(dropped_values_NY_2_3_LA, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = TRUE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
+knitr::kable(zone_out)
 
 ```
 
@@ -3193,19 +2650,9 @@ zone_summary(dropped_values_NY_1_2_GC, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = FALSE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
-
+knitr::kable(zone_out)
 ```
 
 
@@ -3221,19 +2668,9 @@ zone_summary(dropped_values_NY_2_3_GC, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = FALSE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
-
+knitr::kable(zone_out)
 ```
 
 
@@ -3255,19 +2692,9 @@ zone_summary(dropped_values_NY_1_2_LA, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = FALSE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
-
+knitr::kable(zone_out)
 ```
 
 
@@ -3284,18 +2711,9 @@ zone_summary(dropped_values_NY_2_3_LA, project = project,
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
          na.rm = FALSE, dat.center = FALSE,
-         output = out_switch)
+         output = "table")
 
-if (out_switch == "table") {
-  eval_next=FALSE
-  zone_out %>% 
-    pretty_lab() %>% 
-    pretty_tab_sb(width = "40%")
-  
-} else if (out_switch=="tab_plot"){
-  eval_next=TRUE
-  zone_out$plot
-}
+knitr::kable(zone_out)
 
 ```
 
