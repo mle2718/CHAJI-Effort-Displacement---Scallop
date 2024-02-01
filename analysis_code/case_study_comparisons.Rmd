@@ -33,6 +33,20 @@ options(scipen=999)
 
 # load("~/mchaji_net/READ-SSB-CHAJI-Effort-Displacement---Scallop/data/main/comparisons/comparasion_data_ALL.RData")
 
+
+project <- "scallop0322"
+ 
+  folderpath <- here("FishSETFolder")
+  proj_dir<-here("FishSETFolder") 
+ 
+scallop0322TenMNSQRSpatTable <- table_view("scallop0322TenMNSQRSpatTable", 
+
+                                           project)
+
+scallop0322WindCloseSpatTable <- table_view("scallop0322WindCloseSpatTable",
+                              project)
+
+
 ```
 
 
