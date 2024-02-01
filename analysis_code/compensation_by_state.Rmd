@@ -5,9 +5,16 @@ date: "2024-01-24"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+
+Introduction 
+
+This code will be used to explore the five key metrics of utility: number of trips, scallop revenue, landed pounds, operation profit, and revenue per day. All of which are calculated as averages per trip. The findings are used for discussion of compensation in the “Assessing Offshore Wind Development: A Comparative Analysis of Scallop Fishery Impacts throughout the Regulatory Process”  paper. Findings are also available in chunks throughout the scallop_tiny_report.
+
+Status of completion 
+
+Average revenue and operating profit chunks are provided as a template. Every version of shapefile used to show the stages of offshore development should be inserted into each template for therefore if using the Jan 2024 version of the paper as a baseline there should be 5 chunks for average revenue and 5 chunks for average operating profit for a total of at least 10 chunks (1) All aggregate leases, (2) New York Bight Call Area, (3) New York Bight Wind Energy Area, (4) Central Atlantic Call Area (5) Central Atlantic Wind Energy Area. 
+
+
 
 
 Load data sets 
