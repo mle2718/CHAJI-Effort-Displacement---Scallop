@@ -37,7 +37,7 @@ render_report = function(AA_DAS_only, subtrip_aggregate, input_shapefile) {
       subtrip_aggregate = subtrip_aggregate,
       input_shapefile=input_shapefile
     ),
-    output_file = here("results",paste0("scallop_analysis_AA_",AA_DAS_only,"_subtripaggregate_",subtrip_aggregate,"_shapefile_",input_shapefile, ".html")
+    output_file = here("results",paste0("scallop_analysis_AA_",AA_DAS_only,"_subtripaggregate_",subtrip_aggregate,"_shapefile_", gsub(".RDS", "",input_shapefile ), ".html")
   ))
 }
 ################################################################################## 
