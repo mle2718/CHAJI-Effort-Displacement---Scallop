@@ -6,14 +6,16 @@ library("rmarkdown")
 
 here::i_am("analysis_code/knit_tiny_scallop_analysis_loop.R")
 
+#create a directory in main for the casestudy data to go
+dir.create(here("data","main","casestudies"), showWarnings="FALSE")
+
 # Define the "things" you want to loop over.
-AADAS_Vals_to_loop<-c(TRUE) # TRUE is the AADAS fleet. FALSE is the IFQ fleet
+AADAS_Vals_to_loop<-c(TRUE,FALSE) # TRUE is the AADAS fleet. FALSE is the IFQ fleet
 subtrip_aggregate_vals_to_loop<-c(TRUE) # TRUE aggregates subtrips to trips. FALSE does not
 
 # We want to be able to run the tiny "area" level analysis on all the shapefiles. I don't know if we can.
+#input_shapefile_vals_to_loop2<-c("wind_Central_Atlantic_1.RDS", "wind_Central_Atlantic_2.RDS","wind_Central_Atlantic_3.RDS", "wind_sf_nocable.RDS", "wind_sf_combined.RDS")
 input_shapefile_vals_to_loop2<-c("wind_NY1.RDS","wind_NY2.RDS","wind_NY3.RDS","wind_Central_Atlantic_1.RDS", "wind_Central_Atlantic_2.RDS","wind_Central_Atlantic_3.RDS")
-#input_shapefile_vals_to_loop2<-c("wind_NY2.RDS")
-
 
 
 
@@ -33,7 +35,7 @@ render_tiny_report = function(AA_DAS_only, subtrip_aggregate, input_shapefile) {
     subtrip_aggregate = subtrip_aggregate,
     input_shapefile=input_shapefile
   ),
-  output_file = here("results",paste0("scallop_tiny_AA_",AA_DAS_only,"_subtripaggregate_",subtrip_aggregate,"_shapefile_",input_shapefile, ".html")
+  output_file = here("results",paste0("scallop_tiny_AA_",AA_DAS_only,"_subtripaggregate_",subtrip_aggregate,"_shapefile_", gsub(".RDS", "",input_shapefile ), ".html")
   ))
 }
 ################################################################################## 

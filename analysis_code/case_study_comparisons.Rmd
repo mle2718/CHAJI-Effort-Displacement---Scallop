@@ -1,0 +1,2939 @@
+---
+title: "case_study_comparisons"
+author: "Marina Chaji"
+date: "2024-01-19"
+output: html_document
+---
+
+
+## About 
+ 
+This report uses data sets from the tiny reports to estimate based on our five key metrics: trips, ex-vessel scallop revenue, scallop landings, operating profit, and revenue per day across the Limited Access and General Category-IFQ fleets. The Limited Access fleet is characterized by metiers, Access Area (AA) & Days-at-Sea(DAS). We also test for equality of means in areas excluded as regulatory processes occur using z-tests between phases, i.e., Call Area(s) to Wind Energy Area(s) and Wind Energy Area(s) to Lease Area(s) in the New York Bight (NY) & Central Atlantic (CA) regions. 
+
+
+```{r setup, echo=FALSE}
+
+library(FishSET)
+library(BSDA) # z-tests 
+library(plyr)
+library(dplyr)
+library(readr)
+library(knitr) #creates tables when knitting 
+library(here)
+
+here::i_am("analysis_code/case_study_comparisons.Rmd")
+# helper functions
+source(here("analysis_code", "format_helpers.R"))
+
+project <- "scallop0322"
+pounds_to_kg<-2.20462
+# disable scientific notation
+options(scipen=999)
+
+#load in data here The data sets used in this rmd are sourced from tiny reports after closure assignment using FishSET. Each should be categorized by shapefile name i.e. "Central Atlantic (CA)" and fleet type. All necessary data for this rmd can be loaded below and is updated as of January 31st 2024. Otherwise the chunk below can be used to create a new updated .RData file to use. 
+
+# load("~/mchaji_net/READ-SSB-CHAJI-Effort-Displacement---Scallop/data/main/comparisons/comparasion_data_ALL.RData")
+
+
+project <- "scallop0322"
+ 
+  folderpath <- here("FishSETFolder")
+  proj_dir<-here("FishSETFolder") 
+ 
+scallop0322TenMNSQRSpatTable <- table_view("scallop0322TenMNSQRSpatTable", 
+
+                                           project)
+
+scallop0322WindCloseSpatTable <- table_view("scallop0322WindCloseSpatTable",
+                              project)
+
+
+```
+
+
+
+
+```{r}
+
+
+#Load GCIFQ data 
+
+NY1_GC <- readRDS(here::here("data","main","casestudies","casestudy_gc_NY1_2023_11_06.Rds"))
+NY2_GC <- readRDS(here::here("data","main","casestudies","casestudy_gc_NY2_2023_11_06.Rds"))
+NY3_GC <- readRDS(here::here("data","main","casestudies","casestudy_gc_NY3_2023_11_06.Rds"))
+
+CA1_GC <- readRDS(here::here("data","main","casestudies","casestudy_gc_CA1_2023_11_06.Rds"))
+CA2_GC <- readRDS(here::here("data","main","casestudies","casestudy_gc_CA2_2023_11_06.Rds"))
+CA3_GC <- readRDS(here::here("data","main","casestudies","casestudy_gc_CA3_2023_11_06.Rds"))
+
+
+
+#Load LA data 
+
+
+NY1_LA <- readRDS(here::here("data","main","casestudies","casestudy_LA_NY1_2023_11_06.Rds"))
+NY2_LA <- readRDS(here::here("data","main","casestudies","casestudy_LA_NY2_2023_11_06.Rds"))
+NY3_LA <- readRDS(here::here("data","main","casestudies","casestudy_LA_NY3_2023_11_06.Rds"))
+
+CA1_LA <- readRDS(here::here("data","main","casestudies","casestudy_LA_CA1_2023_11_06.Rds"))
+CA2_LA <- readRDS(here::here("data","main","casestudies","casestudy_LA_CA2_2023_11_06.Rds"))
+CA3_LA <- readRDS(here::here("data","main","casestudies","casestudy_LA_CA3_2023_11_06.Rds"))
+
+```
+
+
+GC-IFQ
+```{r}
+
+## New York Bight 
+
+Inside_NY1_GC <- NY1_GC %>% filter(in_closure == "TRUE")
+
+Inside_NY2_GC <- NY2_GC %>% filter(in_closure == "TRUE")
+
+Inside_NY3_GC <- NY3_GC %>% filter(in_closure == "TRUE")
+
+
+dropped_values_NY_1_2_GC <- anti_join(Inside_NY1_GC, Inside_NY2_GC, by = c("TRIPID" = "TRIPID"))
+
+dropped_values_NY_2_3_GC <- anti_join(Inside_NY2_GC, Inside_NY3_GC, by = c("TRIPID" = "TRIPID"))
+
+
+
+## Central Atlantic 
+
+Inside_CA1_GC <- CA1_GC %>% filter(in_closure == "TRUE")
+
+Inside_CA2_GC <- CA2_GC %>% filter(in_closure == "TRUE")
+
+Inside_CA3_GC <- CA3_GC %>% filter(in_closure == "TRUE")
+
+
+dropped_values_CA_1_2_GC <- anti_join(Inside_CA1_GC, Inside_CA2_GC, by = c("TRIPID" = "TRIPID"))
+
+dropped_values_CA_2_3_GC <- anti_join(Inside_CA2_GC, Inside_CA3_GC, by = c("TRIPID" = "TRIPID"))
+
+dropped_values_CA_1_3_GC <- anti_join(Inside_CA1_GC, Inside_CA3_GC, by = c("TRIPID" = "TRIPID"))
+
+
+```
+
+
+Limited Access
+```{r}
+
+## New York Bight 
+
+Inside_NY1_LA <- NY1_LA %>% filter(in_closure == "TRUE")
+
+Inside_NY2_LA <- NY2_LA %>% filter(in_closure == "TRUE")
+
+Inside_NY3_LA <- NY3_LA %>% filter(in_closure == "TRUE")
+
+
+dropped_values_NY_1_2_LA <- anti_join(Inside_NY1_LA, Inside_NY2_LA, by = c("TRIPID" = "TRIPID"))
+
+dropped_values_NY_2_3_LA <- anti_join(Inside_NY2_LA, Inside_NY3_LA, by = c("TRIPID" = "TRIPID"))
+
+
+
+## Central Atlantic 
+
+Inside_CA1_LA <- CA1_LA %>% filter(in_closure == "TRUE")
+
+Inside_CA2_LA <- CA2_LA %>% filter(in_closure == "TRUE")
+
+Inside_CA3_LA <- CA3_LA %>% filter(in_closure == "TRUE")
+
+
+dropped_values_CA_1_2_LA <- anti_join(Inside_CA1_LA, Inside_CA2_LA, by = c("TRIPID" = "TRIPID"))
+
+dropped_values_CA_2_3_LA <- anti_join(Inside_CA2_LA, Inside_CA3_LA, by = c("TRIPID" = "TRIPID"))
+
+dropped_values_CA_1_3_LA <- anti_join(Inside_CA1_LA, Inside_CA3_LA, by = c("TRIPID" = "TRIPID"))
+
+```
+
+```{r}
+#tests
+view_lon_lat(Inside_CA2_LA, lon = "DDLON", lat ="DDLAT")
+view_lon_lat(dropped_values_NY_2_3_LA, lon = "DDLON", lat ="DDLAT")
+view_lon_lat(Inside_CA3_LA, lon = "DDLON", lat ="DDLAT")
+
+```
+
+```{r}
+
+## New York Bight
+
+
+ Inside_NY1_AA <- Inside_CA1_LA %>% filter(fleet == "Access Area") 
+ Inside_CA1_DAS <- Inside_CA1_LA %>% filter(fleet == "Days at Sea") 
+ 
+ Inside_NY2_AA <- Inside_CA2_LA %>% filter(fleet == "Access Area") 
+ Inside_NY2_DAS <- Inside_CA2_LA %>% filter(fleet == "Days at Sea") 
+ 
+ Inside_NY3_AA <- Inside_CA3_LA %>% filter(fleet == "Access Area") 
+ Inside_NY3_DAS <- Inside_CA3_LA %>% filter(fleet == "Days at Sea") 
+ 
+ 
+ dropped_values_NY_1_2_AA <- dropped_values_NY_1_2_LA %>% filter(fleet == "Access Area") 
+ dropped_values_NY_1_2_DAS <- dropped_values_NY_1_2_LA %>% filter(fleet == "Days at Sea") 
+ 
+ dropped_values_NY_2_3_AA <- dropped_values_NY_2_3_LA %>% filter(fleet == "Access Area") 
+ dropped_values_NY_2_3_DAS <- dropped_values_NY_2_3_LA %>% filter(fleet == "Days at Sea") 
+
+ 
+ dropped_values_NY_1_3_AA <- dropped_values_NY_1_2_LA %>% filter(fleet == "Access Area") 
+ dropped_values_NY_1_3_DAS <- dropped_values_NY_1_2_LA %>% filter(fleet == "Days at Sea") 
+
+
+
+## Central Atlantic
+
+
+Inside_CA1_AA <- Inside_CA1_LA %>% filter(fleet == "Access Area") 
+Inside_CA1_DAS <- Inside_CA1_LA %>% filter(fleet == "Days at Sea") 
+ 
+Inside_CA2_AA <- Inside_CA2_LA %>% filter(fleet == "Access Area") 
+Inside_CA2_DAS <- Inside_CA2_LA %>% filter(fleet == "Days at Sea") 
+ 
+Inside_CA3_AA <- Inside_CA3_LA %>% filter(fleet == "Access Area") 
+Inside_CA3_DAS <- Inside_CA3_LA %>% filter(fleet == "Days at Sea") 
+ 
+ 
+dropped_values_CA_1_2_AA <- dropped_values_CA_1_2_LA %>% filter(fleet == "Access Area") 
+dropped_values_CA_1_2_DAS <- dropped_values_CA_1_2_LA %>% filter(fleet == "Days at Sea") 
+ 
+dropped_values_CA_2_3_AA <- dropped_values_CA_2_3_LA %>% filter(fleet == "Access Area") 
+dropped_values_CA_2_3_DAS <- dropped_values_CA_2_3_LA %>% filter(fleet == "Days at Sea") 
+
+dropped_values_CA_1_3_AA <- dropped_values_CA_1_3_LA %>% filter(fleet == "Access Area") 
+dropped_values_CA_1_3_DAS <- dropped_values_CA_1_3_LA %>% filter(fleet == "Days at Sea") 
+
+
+
+```
+
+
+
+# Save Data 
+```{r}
+# This set is only necessary if using a new data set
+
+#save(CA1_GC, CA2_GC,CA3_GC,NY1_GC,NY2_GC,NY3_GC, CA1_LA, CA2_LA,CA3_LA, NY1_LA,NY2_LA,NY3_LA ,file = "~/mchaji_net/READ-SSB-CHAJI-Effort-Displacement---Scallop/data/main/comparisons/comparasion_data_ALL.RData")
+
+
+```
+
+<br><br><br> 
+
+# Aggregate Scallop revenue CA-LA
+
+```{r}
+zone_out <- 
+zone_summary(Inside_CA1_LA , project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2022",
+         fun = "sum",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+
+
+
+zone_out <- 
+zone_summary(Inside_CA2_LA , project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2022",
+         fun = "sum",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+
+zone_out <- 
+zone_summary(Inside_CA3_LA , project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2022",
+         fun = "sum",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+
+zone_out <- 
+zone_summary(dropped_values_CA_1_3_LA , project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2022",
+         fun = "sum",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+```
+
+
+# Average Winsorized Revenue in closures CA-GCIFQ
+
+```{r}
+
+zone_out <- 
+zone_summary(dropped_values_CA_1_3_GC, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2022_win",
+         fun = "mean",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = "table")
+
+
+knitr::kable(zone_out)
+
+```
+
+
+
+```{r}
+
+
+zone_out <- 
+zone_summary(dropped_values_CA_1_2_GC, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2022_win",
+         fun = "mean",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+```
+
+```{r }
+zone_out <- 
+zone_summary(dropped_values_CA_2_3_GC, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2022_win",
+         fun = "mean",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+```
+
+
+<br><br><br>
+
+
+# Average Winsorized Revenue in CA closures by fleet LA 
+
+
+```{r}
+
+
+zone_out <- 
+zone_summary(dropped_values_CA_1_2_LA, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2022_win",
+         fun = "mean",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+```
+
+
+```{r}
+
+
+zone_out <- 
+zone_summary(dropped_values_CA_2_3_LA, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2022_win",
+         fun = "mean",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+
+```
+
+```{r}
+
+zone_out <- 
+zone_summary(dropped_values_CA_1_3_LA, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2022_win",
+         fun = "mean",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+```
+
+<br><br><br>
+# Aggregate Scallop revenue CA-GCIFQ
+
+```{r}
+zone_out <- 
+zone_summary(Inside_CA1_GC , project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2022",
+         fun = "sum",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+
+
+zone_out <- 
+zone_summary(Inside_CA2_GC , project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2022",
+         fun = "sum",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+
+zone_out <- 
+zone_summary(Inside_CA3_GC , project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2022",
+         fun = "sum",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+
+zone_out <- 
+zone_summary(dropped_values_CA_1_3_GC , project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2022",
+         fun = "sum",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+```
+<br><br><br>
+
+
+CA GC-IFQ Testing 
+```{r}
+
+BSDA::z.test(dropped_values_CA_1_3_GC$DOLLAR_2022_win,
+  y = Inside_CA3_GC$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_CA_1_3_GC$DOLLAR_2022_win),
+  sigma.y = sd(Inside_CA3_GC$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_CA_1_3_GC$DOLLAR_2022_win,
+  y = Inside_CA3_GC$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_CA_1_3_GC$DOLLAR_2022_win),
+  sigma.y = sd(Inside_CA3_GC$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_CA_1_3_GC$DOLLAR_2022_win,
+  y = Inside_CA3_GC$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_CA_1_3_GC$DOLLAR_2022_win),
+  sigma.y = sd(Inside_CA3_GC$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+```
+
+
+Limited Access z-tests
+```{r}
+
+# Access Area 
+## Phase 1 to 2
+
+BSDA::z.test(dropped_values_CA_1_2_AA$DOLLAR_2022_win,
+  y = Inside_CA2_AA$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_CA_1_2_AA$DOLLAR_2022_win),
+  sigma.y = sd(Inside_CA2_AA$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_CA_1_2_AA$DOLLAR_2022_win,
+  y = Inside_CA2_AA$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_CA_1_2_AA$DOLLAR_2022_win),
+  sigma.y = sd(Inside_CA2_AA$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_CA_1_2_AA$DOLLAR_2022_win,
+  y = Inside_CA2_AA$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_CA_1_2_AA$DOLLAR_2022_win),
+  sigma.y = sd(Inside_CA2_AA$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+## Phase 2 to 3
+BSDA::z.test(dropped_values_CA_2_3_AA$DOLLAR_2022_win,
+  y = Inside_CA2_AA$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_CA_2_3_AA$DOLLAR_2022_win),
+  sigma.y = sd(Inside_CA2_AA$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_CA_2_3_AA$DOLLAR_2022_win,
+  y = Inside_CA2_AA$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_CA_2_3_AA$DOLLAR_2022_win),
+  sigma.y = sd(Inside_CA2_AA$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_CA_2_3_AA$DOLLAR_2022_win,
+  y = Inside_CA2_AA$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_CA_2_3_AA$DOLLAR_2022_win),
+  sigma.y = sd(Inside_CA2_AA$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+## Phase 1 to 3
+
+BSDA::z.test(dropped_values_CA_1_3_AA$DOLLAR_2022_win,
+  y = Inside_CA3_AA$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_CA_1_3_AA$DOLLAR_2022_win),
+  sigma.y = sd(Inside_CA3_AA$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_CA_1_3_AA$DOLLAR_2022_win,
+  y = Inside_CA3_AA$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_CA_1_3_AA$DOLLAR_2022_win),
+  sigma.y = sd(Inside_CA3_AA$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_CA_1_3_AA$DOLLAR_2022_win,
+  y = Inside_CA3_AA$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_CA_1_3_AA$DOLLAR_2022_win),
+  sigma.y = sd(Inside_CA3_AA$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+# Days-at-Sea
+## Phase 1 to 2
+
+BSDA::z.test(dropped_values_CA_1_2_DAS$DOLLAR_2022_win,
+  y = Inside_CA2_DAS$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_CA_1_2_DAS$DOLLAR_2022_win),
+  sigma.y = sd(Inside_CA2_DAS$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_CA_1_2_DAS$DOLLAR_2022_win,
+  y = Inside_CA2_DAS$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_CA_1_2_DAS$DOLLAR_2022_win),
+  sigma.y = sd(Inside_CA2_DAS$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_CA_1_2_DAS$DOLLAR_2022_win,
+  y = Inside_CA2_DAS$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_CA_1_2_DAS$DOLLAR_2022_win),
+  sigma.y = sd(Inside_CA2_DAS$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+## Phase 2 to 3
+BSDA::z.test(dropped_values_CA_2_3_DAS$DOLLAR_2022_win,
+  y = Inside_CA2_DAS$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_CA_2_3_DAS$DOLLAR_2022_win),
+  sigma.y = sd(Inside_CA2_DAS$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_CA_2_3_DAS$DOLLAR_2022_win,
+  y = Inside_CA2_DAS$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_CA_2_3_DAS$DOLLAR_2022_win),
+  sigma.y = sd(Inside_CA2_DAS$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_CA_2_3_DAS$DOLLAR_2022_win,
+  y = Inside_CA2_DAS$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_CA_2_3_DAS$DOLLAR_2022_win),
+  sigma.y = sd(Inside_CA2_DAS$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+## Phase 1 to 3
+
+BSDA::z.test(dropped_values_CA_1_3_DAS$DOLLAR_2022_win,
+  y = Inside_CA3_DAS$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_CA_1_3_DAS$DOLLAR_2022_win),
+  sigma.y = sd(Inside_CA3_DAS$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_CA_1_3_DAS$DOLLAR_2022_win,
+  y = Inside_CA3_DAS$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_CA_1_3_DAS$DOLLAR_2022_win),
+  sigma.y = sd(Inside_CA3_DAS$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_CA_1_3_DAS$DOLLAR_2022_win,
+  y = Inside_CA3_DAS$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_CA_1_3_DAS$DOLLAR_2022_win),
+  sigma.y = sd(Inside_CA3_DAS$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+```
+
+
+
+```
+
+<br><br><br>
+
+
+
+
+Average winsorized Landed in Central Atlantic GC closures
+
+```{r}
+
+zone_out <- 
+zone_summary(dropped_values_CA_1_3_GC, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "LANDED_win",
+         fun = "mean",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+```
+
+
+
+<br><br><br> 
+
+Average winsorized Landed in closures by fleet
+
+```{r}
+
+zone_out <- 
+zone_summary(dropped_values_CA_1_3_LA, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "LANDED_win",
+         fun = "mean",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+
+```
+
+
+<br><br><br>
+GC-IFQ z-tests
+```{r}
+
+BSDA::z.test(dropped_values_CA_1_3_GC$LANDED_win,
+  y = Inside_CA3_GC$LANDED_win,
+  sigma.x = sd(dropped_values_CA_1_3_GC$LANDED_win),
+  sigma.y = sd(Inside_CA3_GC$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+BSDA::z.test(dropped_values_CA_1_3_GC$LANDED_win,
+  y = Inside_CA3_GC$LANDED_win,
+  sigma.x = sd(dropped_values_CA_1_3_GC$LANDED_win),
+  sigma.y = sd(Inside_CA3_GC$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+BSDA::z.test(dropped_values_CA_1_3_GC$LANDED_win,
+  y = Inside_CA3_GC$LANDED_win,
+  sigma.x = sd(dropped_values_CA_1_3_GC$LANDED_win),
+  sigma.y = sd(Inside_CA3_GC$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+```
+
+
+<br><br><br>
+
+
+
+
+
+Limited Access z-tests
+```{r}
+
+# Access Area 
+## Phase 1 to 2
+
+BSDA::z.test(dropped_values_CA_1_2_AA$LANDED_win,
+  y = Inside_CA2_AA$LANDED_win,
+  sigma.x = sd(dropped_values_CA_1_2_AA$LANDED_win),
+  sigma.y = sd(Inside_CA2_AA$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_CA_1_2_AA$LANDED_win,
+  y = Inside_CA2_AA$LANDED_win,
+  sigma.x = sd(dropped_values_CA_1_2_AA$LANDED_win),
+  sigma.y = sd(Inside_CA2_AA$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_CA_1_2_AA$LANDED_win,
+  y = Inside_CA2_AA$LANDED_win,
+  sigma.x = sd(dropped_values_CA_1_2_AA$LANDED_win),
+  sigma.y = sd(Inside_CA2_AA$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+## Phase 2 to 3
+BSDA::z.test(dropped_values_CA_2_3_AA$LANDED_win,
+  y = Inside_CA2_AA$LANDED_win,
+  sigma.x = sd(dropped_values_CA_2_3_AA$LANDED_win),
+  sigma.y = sd(Inside_CA2_AA$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_CA_2_3_AA$LANDED_win,
+  y = Inside_CA2_AA$LANDED_win,
+  sigma.x = sd(dropped_values_CA_2_3_AA$LANDED_win),
+  sigma.y = sd(Inside_CA2_AA$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_CA_2_3_AA$LANDED_win,
+  y = Inside_CA2_AA$LANDED_win,
+  sigma.x = sd(dropped_values_CA_2_3_AA$LANDED_win),
+  sigma.y = sd(Inside_CA2_AA$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+## Phase 1 to 3
+BSDA::z.test(dropped_values_CA_1_3_AA$LANDED_win,
+  y = Inside_CA3_AA$LANDED_win,
+  sigma.x = sd(dropped_values_CA_1_3_AA$LANDED_win),
+  sigma.y = sd(Inside_CA3_AA$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_CA_1_3_AA$LANDED_win,
+  y = Inside_CA3_AA$LANDED_win,
+  sigma.x = sd(dropped_values_CA_1_3_AA$LANDED_win),
+  sigma.y = sd(Inside_CA3_AA$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_CA_1_3_AA$LANDED_win,
+  y = Inside_CA3_AA$LANDED_win,
+  sigma.x = sd(dropped_values_CA_1_3_AA$LANDED_win),
+  sigma.y = sd(Inside_CA3_AA$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+
+# Days-at-Sea
+## Phase 1 to 2
+
+BSDA::z.test(dropped_values_CA_1_2_DAS$LANDED_win,
+  y = Inside_CA2_DAS$LANDED_win,
+  sigma.x = sd(dropped_values_CA_1_2_DAS$LANDED_win),
+  sigma.y = sd(Inside_CA2_DAS$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_CA_1_2_DAS$LANDED_win,
+  y = Inside_CA2_DAS$LANDED_win,
+  sigma.x = sd(dropped_values_CA_1_2_DAS$LANDED_win),
+  sigma.y = sd(Inside_CA2_DAS$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_CA_1_2_DAS$LANDED_win,
+  y = Inside_CA2_DAS$LANDED_win,
+  sigma.x = sd(dropped_values_CA_1_2_DAS$LANDED_win),
+  sigma.y = sd(Inside_CA2_DAS$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+## Phase 2 to 3
+BSDA::z.test(dropped_values_CA_2_3_DAS$LANDED_win,
+  y = Inside_CA2_DAS$LANDED_win,
+  sigma.x = sd(dropped_values_CA_2_3_DAS$LANDED_win),
+  sigma.y = sd(Inside_CA2_DAS$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_CA_2_3_DAS$LANDED_win,
+  y = Inside_CA2_DAS$LANDED_win,
+  sigma.x = sd(dropped_values_CA_2_3_DAS$LANDED_win),
+  sigma.y = sd(Inside_CA2_DAS$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_CA_2_3_DAS$LANDED_win,
+  y = Inside_CA2_DAS$LANDED_win,
+  sigma.x = sd(dropped_values_CA_2_3_DAS$LANDED_win),
+  sigma.y = sd(Inside_CA2_DAS$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+## Phase 1 to 3
+BSDA::z.test(dropped_values_CA_1_3_DAS$LANDED_win,
+  y = Inside_CA3_DAS$LANDED_win,
+  sigma.x = sd(dropped_values_CA_1_3_DAS$LANDED_win),
+  sigma.y = sd(Inside_CA3_DAS$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_CA_1_3_DAS$LANDED_win,
+  y = Inside_CA3_DAS$LANDED_win,
+  sigma.x = sd(dropped_values_CA_1_3_DAS$LANDED_win),
+  sigma.y = sd(Inside_CA3_DAS$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_CA_1_3_DAS$LANDED_win,
+  y = Inside_CA3_DAS$LANDED_win,
+  sigma.x = sd(dropped_values_CA_1_3_DAS$LANDED_win),
+  sigma.y = sd(Inside_CA3_DAS$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+
+```
+
+
+
+Aggegrate Winsorized Operating Profit Central Atlantic GC by closure area.
+
+```{r}
+zone_out <- 
+zone_summary(Inside_CA1_GC, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "OPERATING_PROFIT_2022_win",
+         fun = "sum",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+
+
+zone_out <- 
+zone_summary(Inside_CA3_GC, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "OPERATING_PROFIT_2022_win",
+         fun = "sum",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+
+zone_out <- 
+zone_summary(dropped_values_CA_2_3_GC, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "OPERATING_PROFIT_2022_win",
+         fun = "sum",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+
+```
+
+<br><br><br> 
+
+Average Winsorized Operating Profit Central Atlantic GC by closure area.
+
+```{r}
+zone_out <- 
+zone_summary(dropped_values_CA_2_3_GC, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "OPERATING_PROFIT_2022_win",
+         fun = "mean",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+
+```
+
+Aggregate Winsorized Operating Profit Central Atlantic LA by closure area.
+
+```{r}
+zone_out <- 
+zone_summary(Inside_CA1_LA, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "OPERATING_PROFIT_2022_win",
+         fun = "sum",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+
+
+zone_out <- 
+zone_summary(Inside_CA3_LA, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "OPERATING_PROFIT_2022_win",
+         fun = "sum",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+
+
+zone_out <- 
+zone_summary(dropped_values_CA_1_3_LA, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "OPERATING_PROFIT_2022_win",
+         fun = "sum",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+```
+
+
+<br><br><br> Average Winsorized Operating Profit in closures by fleet
+
+```{r}
+zone_out <- 
+zone_summary(dropped_values_CA_1_3_LA, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "OPERATING_PROFIT_2022_win",
+         fun = "mean",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+
+```
+
+
+
+<br><br><br>
+GCIFQ z-tests
+
+```{r}
+BSDA::z.test(dropped_values_CA_2_3_GC$OPERATING_PROFIT_2022_win,
+  y = Inside_CA3_GC$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_CA_2_3_GC$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_CA3_GC$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+BSDA::z.test(dropped_values_CA_2_3_GC$OPERATING_PROFIT_2022_win,
+  y = Inside_CA3_GC$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_CA_2_3_GC$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_CA3_GC$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_CA_2_3_GC$OPERATING_PROFIT_2022_win,
+  y = Inside_CA3_GC$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_CA_2_3_GC$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_CA3_GC$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+```
+
+
+<br><br><br>
+
+Limited Access z-tests
+```{r}
+
+# Access Area 
+## Phase 1 to 2
+
+BSDA::z.test(dropped_values_CA_1_2_AA$OPERATING_PROFIT_2022_win,
+  y = Inside_CA2_AA$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_CA_1_2_AA$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_CA2_AA$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_CA_1_2_AA$OPERATING_PROFIT_2022_win,
+  y = Inside_CA2_AA$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_CA_1_2_AA$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_CA2_AA$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_CA_1_2_AA$OPERATING_PROFIT_2022_win,
+  y = Inside_CA2_AA$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_CA_1_2_AA$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_CA2_AA$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+## Phase 2 to 3
+BSDA::z.test(dropped_values_CA_2_3_AA$OPERATING_PROFIT_2022_win,
+  y = Inside_CA2_AA$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_CA_2_3_AA$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_CA2_AA$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_CA_2_3_AA$OPERATING_PROFIT_2022_win,
+  y = Inside_CA2_AA$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_CA_2_3_AA$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_CA2_AA$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_CA_2_3_AA$OPERATING_PROFIT_2022_win,
+  y = Inside_CA2_AA$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_CA_2_3_AA$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_CA2_AA$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+## Phase 1 to 3
+BSDA::z.test(dropped_values_CA_1_3_AA$OPERATING_PROFIT_2022_win,
+  y = Inside_CA3_AA$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_CA_1_3_AA$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_CA3_AA$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_CA_1_3_AA$OPERATING_PROFIT_2022_win,
+  y = Inside_CA3_AA$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_CA_1_3_AA$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_CA3_AA$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_CA_1_3_AA$OPERATING_PROFIT_2022_win,
+  y = Inside_CA3_AA$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_CA_1_3_AA$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_CA3_AA$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+
+# Days-at-Sea
+## Phase 1 to 2
+
+BSDA::z.test(dropped_values_CA_1_2_DAS$OPERATING_PROFIT_2022_win,
+  y = Inside_CA2_DAS$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_CA_1_2_DAS$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_CA2_DAS$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_CA_1_2_DAS$OPERATING_PROFIT_2022_win,
+  y = Inside_CA2_DAS$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_CA_1_2_DAS$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_CA2_DAS$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_CA_1_2_DAS$OPERATING_PROFIT_2022_win,
+  y = Inside_CA2_DAS$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_CA_1_2_DAS$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_CA2_DAS$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+## Phase 2 to 3
+BSDA::z.test(dropped_values_CA_2_3_DAS$OPERATING_PROFIT_2022_win,
+  y = Inside_CA2_DAS$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_CA_2_3_DAS$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_CA2_DAS$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_CA_2_3_DAS$OPERATING_PROFIT_2022_win,
+  y = Inside_CA2_DAS$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_CA_2_3_DAS$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_CA2_DAS$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_CA_2_3_DAS$OPERATING_PROFIT_2022_win,
+  y = Inside_CA2_DAS$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_CA_2_3_DAS$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_CA2_DAS$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+## Phase 1 to 3
+BSDA::z.test(dropped_values_CA_1_3_DAS$OPERATING_PROFIT_2022_win,
+  y = Inside_CA3_DAS$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_CA_1_3_DAS$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_CA3_DAS$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_CA_1_3_DAS$OPERATING_PROFIT_2022_win,
+  y = Inside_CA3_DAS$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_CA_1_3_DAS$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_CA3_DAS$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_CA_1_3_DAS$OPERATING_PROFIT_2022_win,
+  y = Inside_CA3_DAS$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_CA_1_3_DAS$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_CA3_DAS$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+
+
+```
+
+
+
+
+<br><br><br>
+
+Average winsorized VPUE in GC closures
+
+```{r}
+
+zone_out <- 
+zone_summary(dropped_values_CA_1_3_GC, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "VPUE_win",
+         fun = "mean",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+
+```
+
+
+
+<br><br><br> <br><br><br>
+
+Average winsorized VPUE in closures by fleet
+
+```{r}
+
+zone_out <- 
+zone_summary(dropped_values_CA_1_3_LA, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "VPUE_win",
+         fun = "mean",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+```
+
+
+```{r}
+
+zone_out <- 
+zone_summary(dropped_values_CA_2_3_LA, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "VPUE_win",
+         fun = "mean",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+
+```
+
+
+
+<br><br><br>
+GCIFQ z-tests
+```{r}
+
+BSDA::z.test(dropped_values_CA_1_3_GC$VPUE_win,
+  y = Inside_CA3_GC$VPUE_win,
+  sigma.x = sd(dropped_values_CA_1_3_GC$VPUE_win),
+  sigma.y = sd(Inside_CA3_GC$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_CA_1_3_GC$VPUE_win,
+  y = Inside_CA3_GC$VPUE_win,
+  sigma.x = sd(dropped_values_CA_1_3_GC$VPUE_win),
+  sigma.y = sd(Inside_CA3_GC$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_CA_1_3_GC$VPUE_win,
+  y = Inside_CA3_GC$VPUE_win,
+  sigma.x = sd(dropped_values_CA_1_3_GC$VPUE_win),
+  sigma.y = sd(Inside_CA3_GC$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+```
+
+<br><br><br>
+
+
+<br><br><br>
+Limited Access z-tests
+```{r}
+
+# Access Area 
+## Phase 1 to 2
+
+BSDA::z.test(dropped_values_CA_1_2_AA$VPUE_win,
+  y = Inside_CA2_AA$VPUE_win,
+  sigma.x = sd(dropped_values_CA_1_2_AA$VPUE_win),
+  sigma.y = sd(Inside_CA2_AA$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_CA_1_2_AA$VPUE_win,
+  y = Inside_CA2_AA$VPUE_win,
+  sigma.x = sd(dropped_values_CA_1_2_AA$VPUE_win),
+  sigma.y = sd(Inside_CA2_AA$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_CA_1_2_AA$VPUE_win,
+  y = Inside_CA2_AA$VPUE_win,
+  sigma.x = sd(dropped_values_CA_1_2_AA$VPUE_win),
+  sigma.y = sd(Inside_CA2_AA$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+## Phase 2 to 3
+BSDA::z.test(dropped_values_CA_2_3_AA$VPUE_win,
+  y = Inside_CA2_AA$VPUE_win,
+  sigma.x = sd(dropped_values_CA_2_3_AA$VPUE_win),
+  sigma.y = sd(Inside_CA2_AA$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_CA_2_3_AA$VPUE_win,
+  y = Inside_CA2_AA$VPUE_win,
+  sigma.x = sd(dropped_values_CA_2_3_AA$VPUE_win),
+  sigma.y = sd(Inside_CA2_AA$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_CA_2_3_AA$VPUE_win,
+  y = Inside_CA2_AA$VPUE_win,
+  sigma.x = sd(dropped_values_CA_2_3_AA$VPUE_win),
+  sigma.y = sd(Inside_CA2_AA$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+## Phase 1 to 3
+BSDA::z.test(dropped_values_CA_1_3_AA$VPUE_win,
+  y = Inside_CA3_AA$VPUE_win,
+  sigma.x = sd(dropped_values_CA_1_3_AA$VPUE_win),
+  sigma.y = sd(Inside_CA3_AA$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_CA_1_3_AA$VPUE_win,
+  y = Inside_CA3_AA$VPUE_win,
+  sigma.x = sd(dropped_values_CA_1_3_AA$VPUE_win),
+  sigma.y = sd(Inside_CA3_AA$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_CA_1_3_AA$VPUE_win,
+  y = Inside_CA3_AA$VPUE_win,
+  sigma.x = sd(dropped_values_CA_1_3_AA$VPUE_win),
+  sigma.y = sd(Inside_CA3_AA$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+
+
+# Days-at-Sea
+## Phase 1 to 2
+
+BSDA::z.test(dropped_values_CA_1_2_DAS$VPUE_win,
+  y = Inside_CA2_DAS$VPUE_win,
+  sigma.x = sd(dropped_values_CA_1_2_DAS$VPUE_win),
+  sigma.y = sd(Inside_CA2_DAS$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_CA_1_2_DAS$VPUE_win,
+  y = Inside_CA2_DAS$VPUE_win,
+  sigma.x = sd(dropped_values_CA_1_2_DAS$VPUE_win),
+  sigma.y = sd(Inside_CA2_DAS$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_CA_1_2_DAS$VPUE_win,
+  y = Inside_CA2_DAS$VPUE_win,
+  sigma.x = sd(dropped_values_CA_1_2_DAS$VPUE_win),
+  sigma.y = sd(Inside_CA2_DAS$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+## Phase 2 to 3
+BSDA::z.test(dropped_values_CA_2_3_DAS$VPUE_win,
+  y = Inside_CA2_DAS$VPUE_win,
+  sigma.x = sd(dropped_values_CA_2_3_DAS$VPUE_win),
+  sigma.y = sd(Inside_CA2_DAS$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_CA_2_3_DAS$VPUE_win,
+  y = Inside_CA2_DAS$VPUE_win,
+  sigma.x = sd(dropped_values_CA_2_3_DAS$VPUE_win),
+  sigma.y = sd(Inside_CA2_DAS$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_CA_2_3_DAS$VPUE_win,
+  y = Inside_CA2_DAS$VPUE_win,
+  sigma.x = sd(dropped_values_CA_2_3_DAS$VPUE_win),
+  sigma.y = sd(Inside_CA2_DAS$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+## Phase 1 to 3
+BSDA::z.test(dropped_values_CA_1_3_DAS$VPUE_win,
+  y = Inside_CA3_DAS$VPUE_win,
+  sigma.x = sd(dropped_values_CA_1_3_DAS$VPUE_win),
+  sigma.y = sd(Inside_CA3_DAS$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_CA_1_3_DAS$VPUE_win,
+  y = Inside_CA3_DAS$VPUE_win,
+  sigma.x = sd(dropped_values_CA_1_3_DAS$VPUE_win),
+  sigma.y = sd(Inside_CA3_DAS$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_CA_1_3_DAS$VPUE_win,
+  y = Inside_CA3_DAS$VPUE_win,
+  sigma.x = sd(dropped_values_CA_1_3_DAS$VPUE_win),
+  sigma.y = sd(Inside_CA3_DAS$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+
+
+
+```
+<br><br><br> 
+
+
+
+# New York Bight (NY) Comparisons
+
+Aggregate Scallop revenue by closure area.
+
+```{r}
+# New York Bight (NY) Comparisons
+
+zone_out <- 
+zone_summary(Inside_NY1_GC, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2022_win",
+         fun = "sum",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+```
+
+```{r}
+
+zone_out <- 
+zone_summary(Inside_NY2_GC, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2022_win",
+         fun = "sum",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+```
+
+```{r}
+
+zone_out <- 
+zone_summary(Inside_NY3_GC, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2022_win",
+         fun = "sum",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+```
+
+
+```{r}
+zone_out <- 
+zone_summary(dropped_values_NY_1_2_GC, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2022_win",
+         fun = "sum",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+```
+
+```{r}
+
+zone_out <- 
+zone_summary(dropped_values_NY_2_3_GC, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2022_win",
+         fun = "sum",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+```
+
+
+## Average Winsorized Revenue in closures GC-IFQ
+
+```{r}
+
+zone_out <- 
+zone_summary(dropped_values_NY_1_2_GC, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2022_win",
+         fun = "mean",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+
+```
+
+```{r}
+
+zone_out <- 
+zone_summary(dropped_values_NY_2_3_GC, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2022_win",
+         fun = "mean",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+```
+
+
+<br><br><br>
+New York Bight Limited Access Aggregate Scallop revenue by closure area.
+```{r}
+
+zone_out <- 
+zone_summary(Inside_NY1_LA, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2022_win",
+         fun = "sum",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+```
+
+```{r}
+
+zone_out <- 
+zone_summary(Inside_NY2_LA, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2022_win",
+         fun = "sum",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+```
+
+```{r}
+
+zone_out <- 
+zone_summary(Inside_NY3_LA, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2022_win",
+         fun = "sum",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+```
+
+
+```{r}
+zone_out <- 
+zone_summary(dropped_values_NY_1_2_LA, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2022_win",
+         fun = "sum",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+```
+
+```{r}
+
+zone_out <- 
+zone_summary(dropped_values_NY_2_3_LA, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2022_win",
+         fun = "sum",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+```
+
+
+# Average Winsorized Revenue in closures by fleet LA 
+
+```{r}
+
+zone_out <- 
+zone_summary(dropped_values_NY_1_2_LA, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2022_win",
+         fun = "mean",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+```
+
+
+```{r}
+
+zone_out <- 
+zone_summary(dropped_values_NY_2_3_LA, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "DOLLAR_2022_win",
+         fun = "mean",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+
+```
+
+
+
+<br><br><br>
+
+GC-IFQ Testing 
+```{r}
+## Phase 1
+
+BSDA::z.test(dropped_values_NY_1_2_GC$DOLLAR_2022_win,
+  y = Inside_NY2_GC$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_NY_1_2_GC$DOLLAR_2022_win),
+  sigma.y = sd(Inside_NY2_GC$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_NY_1_2_GC$DOLLAR_2022_win,
+  y = Inside_NY2_GC$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_NY_1_2_GC$DOLLAR_2022_win),
+  sigma.y = sd(Inside_NY2_GC$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_NY_1_2_GC$DOLLAR_2022_win,
+  y = Inside_NY2_GC$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_NY_1_2_GC$DOLLAR_2022_win),
+  sigma.y = sd(Inside_NY2_GC$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+## Phase 2
+
+BSDA::z.test(dropped_values_NY_2_3_GC$DOLLAR_2022_win,
+  y = Inside_NY2_GC$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_NY_2_3_GC$DOLLAR_2022_win),
+  sigma.y = sd(Inside_NY2_GC$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_NY_2_3_GC$DOLLAR_2022_win,
+  y = Inside_NY2_GC$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_NY_2_3_GC$DOLLAR_2022_win),
+  sigma.y = sd(Inside_NY2_GC$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_NY_2_3_GC$DOLLAR_2022_win,
+  y = Inside_NY2_GC$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_NY_2_3_GC$DOLLAR_2022_win),
+  sigma.y = sd(Inside_NY2_GC$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+
+```
+
+
+Limited Access z-tests
+```{r}
+
+# Access Area 
+## Phase 1 to 2
+
+BSDA::z.test(dropped_values_NY_1_2_AA$DOLLAR_2022_win,
+  y = Inside_NY2_AA$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_NY_1_2_AA$DOLLAR_2022_win),
+  sigma.y = sd(Inside_NY2_AA$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_NY_1_2_AA$DOLLAR_2022_win,
+  y = Inside_NY2_AA$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_NY_1_2_AA$DOLLAR_2022_win),
+  sigma.y = sd(Inside_NY2_AA$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_NY_1_2_AA$DOLLAR_2022_win,
+  y = Inside_NY2_AA$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_NY_1_2_AA$DOLLAR_2022_win),
+  sigma.y = sd(Inside_NY2_AA$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+## Phase 2 to 3
+BSDA::z.test(dropped_values_NY_2_3_AA$DOLLAR_2022_win,
+  y = Inside_NY2_AA$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_NY_2_3_AA$DOLLAR_2022_win),
+  sigma.y = sd(Inside_NY2_AA$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_NY_2_3_AA$DOLLAR_2022_win,
+  y = Inside_NY2_AA$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_NY_2_3_AA$DOLLAR_2022_win),
+  sigma.y = sd(Inside_NY2_AA$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_NY_2_3_AA$DOLLAR_2022_win,
+  y = Inside_NY2_AA$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_NY_2_3_AA$DOLLAR_2022_win),
+  sigma.y = sd(Inside_NY2_AA$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+# Days-at-Sea
+## Phase 1 to 2
+
+BSDA::z.test(dropped_values_NY_1_2_DAS$DOLLAR_2022_win,
+  y = Inside_NY2_DAS$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_NY_1_2_DAS$DOLLAR_2022_win),
+  sigma.y = sd(Inside_NY2_DAS$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_NY_1_2_DAS$DOLLAR_2022_win,
+  y = Inside_NY2_DAS$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_NY_1_2_DAS$DOLLAR_2022_win),
+  sigma.y = sd(Inside_NY2_DAS$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_NY_1_2_DAS$DOLLAR_2022_win,
+  y = Inside_NY2_DAS$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_NY_1_2_DAS$DOLLAR_2022_win),
+  sigma.y = sd(Inside_NY2_DAS$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+## Phase 2 to 3
+
+BSDA::z.test(dropped_values_NY_2_3_DAS$DOLLAR_2022_win,
+  y = Inside_NY2_DAS$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_NY_2_3_DAS$DOLLAR_2022_win),
+  sigma.y = sd(Inside_NY2_DAS$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_NY_2_3_DAS$DOLLAR_2022_win,
+  y = Inside_NY2_DAS$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_NY_2_3_DAS$DOLLAR_2022_win),
+  sigma.y = sd(Inside_NY2_DAS$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_NY_2_3_DAS$DOLLAR_2022_win,
+  y = Inside_NY2_DAS$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_NY_2_3_DAS$DOLLAR_2022_win),
+  sigma.y = sd(Inside_NY2_DAS$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+
+```
+
+
+
+
+<br><br><br>
+
+
+
+
+Average winsorized Landed in closures
+
+```{r}
+
+zone_out <- 
+zone_summary(dropped_values_NY_1_2_GC, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "LANDED_win",
+         fun = "mean",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+```
+
+```{r}
+
+zone_out <- 
+zone_summary(dropped_values_NY_2_3_GC, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "LANDED_win",
+         fun = "mean",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+
+```
+
+<br><br><br> <br><br><br>
+
+Average winsorized Landed in closures by fleet
+
+```{r}
+
+zone_out <- 
+zone_summary(dropped_values_NY_1_2_LA, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "LANDED_win",
+         fun = "mean",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+
+```
+
+```{r}
+
+zone_out <- 
+zone_summary(dropped_values_NY_2_3_LA, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "LANDED_win",
+         fun = "mean",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+```
+
+<br><br><br>
+GC-IFQ z-tests
+```{r}
+## Phase 1
+BSDA::z.test(dropped_values_NY_1_2_GC$LANDED_win,
+  y = Inside_NY2_GC$LANDED_win,
+  sigma.x = sd(dropped_values_NY_1_2_GC$LANDED_win),
+  sigma.y = sd(Inside_NY2_GC$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+BSDA::z.test(dropped_values_NY_1_2_GC$LANDED_win,
+  y = Inside_NY2_GC$LANDED_win,
+  sigma.x = sd(dropped_values_NY_1_2_GC$LANDED_win),
+  sigma.y = sd(Inside_NY2_GC$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+BSDA::z.test(dropped_values_NY_1_2_GC$LANDED_win,
+  y = Inside_NY2_GC$LANDED_win,
+  sigma.x = sd(dropped_values_NY_1_2_GC$LANDED_win),
+  sigma.y = sd(Inside_NY2_GC$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+## Phase 2
+
+BSDA::z.test(dropped_values_NY_2_3_GC$LANDED_win,
+  y = Inside_NY2_GC$LANDED_win,
+  sigma.x = sd(dropped_values_NY_2_3_GC$LANDED_win),
+  sigma.y = sd(Inside_NY2_GC$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+BSDA::z.test(dropped_values_NY_2_3_GC$LANDED_win,
+  y = Inside_NY2_GC$LANDED_win,
+  sigma.x = sd(dropped_values_NY_2_3_GC$LANDED_win),
+  sigma.y = sd(Inside_NY2_GC$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+BSDA::z.test(dropped_values_NY_2_3_GC$LANDED_win,
+  y = Inside_NY2_GC$LANDED_win,
+  sigma.x = sd(dropped_values_NY_2_3_GC$LANDED_win),
+  sigma.y = sd(Inside_NY2_GC$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+```
+
+
+<br><br><br>
+
+
+
+Limited Access z-tests
+```{r}
+
+# Access Area 
+## Phase 1 to 2
+
+BSDA::z.test(dropped_values_NY_1_2_AA$LANDED_win,
+  y = Inside_NY2_AA$LANDED_win,
+  sigma.x = sd(dropped_values_NY_1_2_AA$LANDED_win),
+  sigma.y = sd(Inside_NY2_AA$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_NY_1_2_AA$LANDED_win,
+  y = Inside_NY2_AA$LANDED_win,
+  sigma.x = sd(dropped_values_NY_1_2_AA$LANDED_win),
+  sigma.y = sd(Inside_NY2_AA$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_NY_1_2_AA$LANDED_win,
+  y = Inside_NY2_AA$LANDED_win,
+  sigma.x = sd(dropped_values_NY_1_2_AA$LANDED_win),
+  sigma.y = sd(Inside_NY2_AA$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+## Phase 2 to 3
+BSDA::z.test(dropped_values_NY_2_3_AA$LANDED_win,
+  y = Inside_NY2_AA$LANDED_win,
+  sigma.x = sd(dropped_values_NY_2_3_AA$LANDED_win),
+  sigma.y = sd(Inside_NY2_AA$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_NY_2_3_AA$LANDED_win,
+  y = Inside_NY2_AA$LANDED_win,
+  sigma.x = sd(dropped_values_NY_2_3_AA$LANDED_win),
+  sigma.y = sd(Inside_NY2_AA$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_NY_2_3_AA$LANDED_win,
+  y = Inside_NY2_AA$LANDED_win,
+  sigma.x = sd(dropped_values_NY_2_3_AA$LANDED_win),
+  sigma.y = sd(Inside_NY2_AA$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+# Days-at-Sea
+## Phase 1 to 2
+
+BSDA::z.test(dropped_values_NY_1_2_DAS$LANDED_win,
+  y = Inside_NY2_DAS$LANDED_win,
+  sigma.x = sd(dropped_values_NY_1_2_DAS$LANDED_win),
+  sigma.y = sd(Inside_NY2_DAS$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_NY_1_2_DAS$LANDED_win,
+  y = Inside_NY2_DAS$LANDED_win,
+  sigma.x = sd(dropped_values_NY_1_2_DAS$LANDED_win),
+  sigma.y = sd(Inside_NY2_DAS$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_NY_1_2_DAS$LANDED_win,
+  y = Inside_NY2_DAS$LANDED_win,
+  sigma.x = sd(dropped_values_NY_1_2_DAS$LANDED_win),
+  sigma.y = sd(Inside_NY2_DAS$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+## Phase 2 to 3
+BSDA::z.test(dropped_values_NY_2_3_DAS$LANDED_win,
+  y = Inside_NY2_DAS$LANDED_win,
+  sigma.x = sd(dropped_values_NY_2_3_DAS$LANDED_win),
+  sigma.y = sd(Inside_NY2_DAS$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_NY_2_3_DAS$LANDED_win,
+  y = Inside_NY2_DAS$LANDED_win,
+  sigma.x = sd(dropped_values_NY_2_3_DAS$LANDED_win),
+  sigma.y = sd(Inside_NY2_DAS$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_NY_2_3_DAS$LANDED_win,
+  y = Inside_NY2_DAS$LANDED_win,
+  sigma.x = sd(dropped_values_NY_2_3_DAS$LANDED_win),
+  sigma.y = sd(Inside_NY2_DAS$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+
+```
+
+
+<br><br><br> 
+Aggregate Scallop Operating Profit by NY GC closure area.
+
+```{r}
+
+zone_out <- 
+zone_summary(Inside_NY1_GC, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "OPERATING_PROFIT_2022_win",
+         fun = "sum",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+
+
+
+zone_out <- 
+zone_summary(Inside_NY2_GC, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "OPERATING_PROFIT_2022_win",
+         fun = "sum",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+
+
+zone_out <- 
+zone_summary(Inside_NY3_GC, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "OPERATING_PROFIT_2022_win",
+         fun = "sum",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+```
+<br><br><br> 
+
+
+```{r}
+
+zone_out <- 
+zone_summary(dropped_values_NY_1_2_GC, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "OPERATING_PROFIT_2022_win",
+         fun = "sum",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+```
+
+
+```{r}
+
+zone_out <- 
+zone_summary(dropped_values_NY_2_3_GC, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "OPERATING_PROFIT_2022_win",
+         fun = "sum",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+```
+
+
+
+<br><br><br> 
+
+
+```{r}
+zone_out <- 
+zone_summary(dropped_values_NY_1_2_GC, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "OPERATING_PROFIT_2022_win",
+         fun = "mean",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+```
+<br><br><br> 
+
+
+
+```{r}
+zone_out <- 
+zone_summary(dropped_values_NY_2_3_GC, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "OPERATING_PROFIT_2022_win",
+         fun = "mean",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+```
+
+<br><br><br> 
+
+
+<br><br><br> 
+Aggregate Scallop Operating Profit by NY GC closure area.
+
+```{r}
+
+zone_out <- 
+zone_summary(Inside_NY1_LA, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "OPERATING_PROFIT_2022_win",
+         fun = "sum",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+
+zone_out <- 
+zone_summary(Inside_NY2_LA, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "OPERATING_PROFIT_2022_win",
+         fun = "sum",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+
+zone_out <- 
+zone_summary(Inside_NY3_LA, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "OPERATING_PROFIT_2022_win",
+         fun = "sum",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+```
+
+
+
+```{r}
+
+zone_out <- 
+zone_summary(dropped_values_NY_1_2_LA, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "OPERATING_PROFIT_2022_win",
+         fun = "sum",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+```
+
+
+```{r}
+
+zone_out <- 
+zone_summary(dropped_values_NY_2_3_LA, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "OPERATING_PROFIT_2022_win",
+         fun = "sum",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+```
+
+
+
+
+
+Average Winsorized Operating Profit in closures by fleet
+
+```{r}
+zone_out <- 
+zone_summary(dropped_values_NY_1_2_LA, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "OPERATING_PROFIT_2022_win",
+         fun = "mean",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+
+```
+
+```{r}
+zone_out <- 
+zone_summary(dropped_values_NY_2_3_LA, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "OPERATING_PROFIT_2022_win",
+         fun = "mean",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = TRUE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+
+```
+
+
+
+<br><br><br>
+
+##GCIFQ Test 
+
+```{r}
+# Phase 1 to 2 
+BSDA::z.test(dropped_values_NY_1_2_GC$OPERATING_PROFIT_2022_win,
+  y = Inside_NY2_GC$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_NY_1_2_GC$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_NY2_GC$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+BSDA::z.test(dropped_values_NY_1_2_GC$OPERATING_PROFIT_2022_win,
+  y = Inside_NY2_GC$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_NY_1_2_GC$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_NY2_GC$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_NY_1_2_GC$OPERATING_PROFIT_2022_win,
+  y = Inside_NY2_GC$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_NY_1_2_GC$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_NY2_GC$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+# Phase 2 to 3 
+
+BSDA::z.test(dropped_values_NY_2_3_GC$OPERATING_PROFIT_2022_win,
+  y = Inside_NY2_GC$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_NY_2_3_GC$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_NY3_GC$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+BSDA::z.test(dropped_values_NY_2_3_GC$OPERATING_PROFIT_2022_win,
+  y = Inside_NY2_GC$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_NY_2_3_GC$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_NY3_GC$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_NY_2_3_GC$OPERATING_PROFIT_2022_win,
+  y = Inside_NY2_GC$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_NY_2_3_GC$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_NY3_GC$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+```
+
+
+<br><br><br>
+
+Limited Access z-tests
+```{r}
+
+# Access Area 
+## Phase 1 to 2
+
+BSDA::z.test(dropped_values_NY_1_2_AA$OPERATING_PROFIT_2022_win,
+  y = Inside_NY2_AA$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_NY_1_2_AA$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_NY2_AA$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_NY_1_2_AA$OPERATING_PROFIT_2022_win,
+  y = Inside_NY2_AA$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_NY_1_2_AA$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_NY2_AA$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_NY_1_2_AA$OPERATING_PROFIT_2022_win,
+  y = Inside_NY2_AA$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_NY_1_2_AA$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_NY2_AA$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+## Phase 2 to 3
+BSDA::z.test(dropped_values_NY_2_3_AA$OPERATING_PROFIT_2022_win,
+  y = Inside_NY2_AA$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_NY_2_3_AA$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_NY3_AA$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_NY_2_3_AA$OPERATING_PROFIT_2022_win,
+  y = Inside_NY2_AA$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_NY_2_3_AA$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_NY3_AA$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_NY_2_3_AA$OPERATING_PROFIT_2022_win,
+  y = Inside_NY3_AA$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_NY_2_3_AA$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_NY3_AA$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+# Days-at-Sea
+## Phase 1 to 2
+
+BSDA::z.test(dropped_values_NY_1_2_DAS$OPERATING_PROFIT_2022_win,
+  y = Inside_NY2_DAS$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_NY_1_2_DAS$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_NY2_DAS$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_NY_1_2_DAS$OPERATING_PROFIT_2022_win,
+  y = Inside_NY2_DAS$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_NY_1_2_DAS$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_NY2_DAS$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_NY_1_2_DAS$OPERATING_PROFIT_2022_win,
+  y = Inside_NY2_DAS$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_NY_1_2_DAS$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_NY2_DAS$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+## Phase 2 to 3
+BSDA::z.test(dropped_values_NY_2_3_DAS$OPERATING_PROFIT_2022_win,
+  y = Inside_NY2_DAS$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_NY_2_3_DAS$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_NY3_DAS$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_NY_2_3_DAS$OPERATING_PROFIT_2022_win,
+  y = Inside_NY2_DAS$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_NY_2_3_DAS$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_NY3_DAS$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_NY_2_3_DAS$OPERATING_PROFIT_2022_win,
+  y = Inside_NY2_DAS$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_NY_2_3_DAS$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_NY3_DAS$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+
+```
+
+
+
+
+<br><br><br>
+
+Average winsorized VPUE in closures
+```{r}
+
+zone_out <- 
+zone_summary(dropped_values_NY_1_2_GC, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "VPUE_win",
+         fun = "mean",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+```
+
+
+```{r}
+
+zone_out <- 
+zone_summary(dropped_values_NY_2_3_GC, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "VPUE_win",
+         fun = "mean",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+```
+
+
+
+<br><br><br> <br><br><br>
+
+Average winsorized VPUE in closures by fleet
+
+```{r}
+
+zone_out <- 
+zone_summary(dropped_values_NY_1_2_LA, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "VPUE_win",
+         fun = "mean",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+```
+
+
+```{r}
+
+zone_out <- 
+zone_summary(dropped_values_NY_2_3_LA, project = project,
+         spat = scallop0322WindCloseSpatTable,
+         zone.dat = "closeID",
+         zone.spat = "LEASE_NUMB",
+         var = "VPUE_win",
+         fun = "mean",
+         group = "fleet",
+         count = FALSE, 
+         breaks = c(.001, .01, .1, .3, .5, .7),
+         na.rm = FALSE, dat.center = FALSE,
+         output = "table")
+
+knitr::kable(zone_out)
+
+```
+
+
+
+<br><br><br>
+
+##GCIFQ Test 
+
+```{r}
+# Phase 1 to 2 
+BSDA::z.test(dropped_values_NY_1_2_GC$VPUE_win,
+  y = Inside_NY2_GC$VPUE_win,
+  sigma.x = sd(dropped_values_NY_1_2_GC$VPUE_win),
+  sigma.y = sd(Inside_NY2_GC$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+BSDA::z.test(dropped_values_NY_1_2_GC$VPUE_win,
+  y = Inside_NY2_GC$VPUE_win,
+  sigma.x = sd(dropped_values_NY_1_2_GC$VPUE_win),
+  sigma.y = sd(Inside_NY2_GC$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_NY_1_2_GC$VPUE_win,
+  y = Inside_NY2_GC$VPUE_win,
+  sigma.x = sd(dropped_values_NY_1_2_GC$VPUE_win),
+  sigma.y = sd(Inside_NY2_GC$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+# Phase 2 to 3 
+
+BSDA::z.test(dropped_values_NY_2_3_GC$VPUE_win,
+  y = Inside_NY2_GC$VPUE_win,
+  sigma.x = sd(dropped_values_NY_2_3_GC$VPUE_win),
+  sigma.y = sd(Inside_NY3_GC$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+BSDA::z.test(dropped_values_NY_2_3_GC$VPUE_win,
+  y = Inside_NY2_GC$VPUE_win,
+  sigma.x = sd(dropped_values_NY_2_3_GC$VPUE_win),
+  sigma.y = sd(Inside_NY3_GC$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_NY_2_3_GC$VPUE_win,
+  y = Inside_NY2_GC$VPUE_win,
+  sigma.x = sd(dropped_values_NY_2_3_GC$VPUE_win),
+  sigma.y = sd(Inside_NY3_GC$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+```
+
+
+<br><br><br>
+
+Limited Access z-tests
+```{r}
+# LA 
+## Phase 1 to 2
+
+BSDA::z.test(dropped_values_NY_1_2_LA$VPUE_win,
+  y = Inside_NY2_LA$VPUE_win,
+  sigma.x = sd(dropped_values_NY_1_2_LA$VPUE_win),
+  sigma.y = sd(Inside_NY2_LA$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_NY_1_2_LA$VPUE_win,
+  y = Inside_NY2_LA$VPUE_win,
+  sigma.x = sd(dropped_values_NY_1_2_LA$VPUE_win),
+  sigma.y = sd(Inside_NY2_LA$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_NY_1_2_LA$VPUE_win,
+  y = Inside_NY2_LA$VPUE_win,
+  sigma.x = sd(dropped_values_NY_1_2_LA$VPUE_win),
+  sigma.y = sd(Inside_NY2_LA$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+## Phase 2 to 3
+BSDA::z.test(dropped_values_NY_2_3_LA$VPUE_win,
+  y = Inside_NY2_LA$VPUE_win,
+  sigma.x = sd(dropped_values_NY_2_3_LA$VPUE_win),
+  sigma.y = sd(Inside_NY3_LA$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_NY_2_3_LA$VPUE_win,
+  y = Inside_NY2_LA$VPUE_win,
+  sigma.x = sd(dropped_values_NY_2_3_LA$VPUE_win),
+  sigma.y = sd(Inside_NY3_LA$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_NY_2_3_LA$VPUE_win,
+  y = Inside_NY3_LA$VPUE_win,
+  sigma.x = sd(dropped_values_NY_2_3_LA$VPUE_win),
+  sigma.y = sd(Inside_NY3_LA$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+
+# Access Area 
+## Phase 1 to 2
+
+BSDA::z.test(dropped_values_NY_1_2_AA$VPUE_win,
+  y = Inside_NY2_AA$VPUE_win,
+  sigma.x = sd(dropped_values_NY_1_2_AA$VPUE_win),
+  sigma.y = sd(Inside_NY2_AA$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_NY_1_2_AA$VPUE_win,
+  y = Inside_NY2_AA$VPUE_win,
+  sigma.x = sd(dropped_values_NY_1_2_AA$VPUE_win),
+  sigma.y = sd(Inside_NY2_AA$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_NY_1_2_AA$VPUE_win,
+  y = Inside_NY2_AA$VPUE_win,
+  sigma.x = sd(dropped_values_NY_1_2_AA$VPUE_win),
+  sigma.y = sd(Inside_NY2_AA$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+## Phase 2 to 3
+BSDA::z.test(dropped_values_NY_2_3_AA$VPUE_win,
+  y = Inside_NY2_AA$VPUE_win,
+  sigma.x = sd(dropped_values_NY_2_3_AA$VPUE_win),
+  sigma.y = sd(Inside_NY3_AA$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_NY_2_3_AA$VPUE_win,
+  y = Inside_NY2_AA$VPUE_win,
+  sigma.x = sd(dropped_values_NY_2_3_AA$VPUE_win),
+  sigma.y = sd(Inside_NY3_AA$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_NY_2_3_AA$VPUE_win,
+  y = Inside_NY3_AA$VPUE_win,
+  sigma.x = sd(dropped_values_NY_2_3_AA$VPUE_win),
+  sigma.y = sd(Inside_NY3_AA$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+# Days-at-Sea
+## Phase 1 to 2
+
+BSDA::z.test(dropped_values_NY_1_2_DAS$VPUE_win,
+  y = Inside_NY2_DAS$VPUE_win,
+  sigma.x = sd(dropped_values_NY_1_2_DAS$VPUE_win),
+  sigma.y = sd(Inside_NY2_DAS$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_NY_1_2_DAS$VPUE_win,
+  y = Inside_NY2_DAS$VPUE_win,
+  sigma.x = sd(dropped_values_NY_1_2_DAS$VPUE_win),
+  sigma.y = sd(Inside_NY2_DAS$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_NY_1_2_DAS$VPUE_win,
+  y = Inside_NY2_DAS$VPUE_win,
+  sigma.x = sd(dropped_values_NY_1_2_DAS$VPUE_win),
+  sigma.y = sd(Inside_NY2_DAS$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+## Phase 2 to 3
+BSDA::z.test(dropped_values_NY_2_3_DAS$VPUE_win,
+  y = Inside_NY2_DAS$VPUE_win,
+  sigma.x = sd(dropped_values_NY_2_3_DAS$VPUE_win),
+  sigma.y = sd(Inside_NY3_DAS$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.90)
+
+
+BSDA::z.test(dropped_values_NY_2_3_DAS$VPUE_win,
+  y = Inside_NY2_DAS$VPUE_win,
+  sigma.x = sd(dropped_values_NY_2_3_DAS$VPUE_win),
+  sigma.y = sd(Inside_NY3_DAS$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.95)
+
+
+BSDA::z.test(dropped_values_NY_2_3_DAS$VPUE_win,
+  y = Inside_NY2_DAS$VPUE_win,
+  sigma.x = sd(dropped_values_NY_2_3_DAS$VPUE_win),
+  sigma.y = sd(Inside_NY3_DAS$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+
+```
+
+
