@@ -76,7 +76,7 @@ The easiest way to give feedback is by using the "Feedback/Comments" Google doc 
 
 ## Creating tables in first paper 
 
-Tables 3, 4, and 5, Scallop fishing in the Wind Lease Areas in the Northeast U.S., are created using tables from the **scallop_analysis_tiny_report.Rmd**. 
+Tables 2, 3, and 4, Scallop fishing in the Wind Lease Areas in the Northeast U.S., are created using tables from the **scallop_analysis_tiny_report.Rmd**. 
 
 In order to obtain results two params must be adjusted. 
 **First,**  input_shapefile value must be set to wind_sf_combined.RDS
@@ -93,12 +93,12 @@ Average winsorized VPUE in closures by fleet
 
 Examples of params for each table are below: 
 Examples of parameters 
-**Table 3. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.** 
+**Table 2. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.** 
 input shapefile
     value wind_sf_combined.RDS
 AA_DAS_only FALSE
 
-**Table 4.  Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day and Table 5.  Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.**
+**Table 3. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day and Table 4. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.**
 
 input_shapefile
     value wind_sf_combined.RDS
@@ -1050,7 +1050,7 @@ cpue_out$plot + angled_theme()
 ## Closure summary
 
 Number of observations.
-This chunk is used to create Table 3, Table 4, and Table 5.
+This chunk is used to create Table 2, Table 3, and Table 4.
 ```{r}
 table_convert <- c("wind_NY1.RDS","wind_NY2.RDS","wind_NY3.RDS","wind_sf_nocable_agg.RDS","wind_sf_nocable.RDS")
 out_switch <- ifelse(params$input_shapefile %in% table_convert, "table", "tab_plot")
@@ -1398,7 +1398,7 @@ if (out_switch == "table") {
 <br><br><br>
 
 Average Winsorized Revenue in closures by fleet
-This chunk is used to create Table 3, Table 4, and Table 5.
+This chunk is used to create Table 2, Table 3, and Table 4.
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -1657,7 +1657,7 @@ if (out_switch == "table") {
 <br><br><br> 
 
 Average winsorized landed in closures by fleet
-This chunk is used to create Table 3, Table 4, and Table 5.
+This chunk is used to create Table 2, Table 3, and Table 4.
 
 ```{r}
 
@@ -2467,7 +2467,7 @@ zone_out$plot }
 
 <br><br><br> 
 Average Winsorized Operating Profit in closures by fleet
-This chunk is used to create Table 3, Table 4, and Table 5.
+This chunk is used to create Table 2, Table 3, and Table 4.
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -3208,7 +3208,7 @@ if (out_switch == "table") {
 <br><br><br> <br><br><br>
 
 Average winsorized VPUE in closures by fleet
-This chunk is used to create Table 3, Table 4, and Table 5.
+This chunk is used to create Table 2, Table 3, and Table 4.
 
 ```{r}
 
