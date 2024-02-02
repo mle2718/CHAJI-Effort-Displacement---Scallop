@@ -1,0 +1,88 @@
+---
+title: "Compensation_by_state"
+author: "Marina Chaji"
+date: "2024-01-24"
+output: html_document
+---
+
+
+Introduction 
+
+This code will be used to explore the five key metrics of utility: number of trips, scallop revenue, landed pounds, operation profit, and revenue per day. All of which are calculated as averages per trip. The findings are used for discussion of compensation in the “Assessing Offshore Wind Development: A Comparative Analysis of Scallop Fishery Impacts throughout the Regulatory Process”  paper. Findings are also available in chunks throughout the scallop_tiny_report.
+
+Status of completion 
+
+Average revenue and operating profit chunks are provided as a template. Every version of shapefile used to show the stages of offshore development should be inserted into each template for therefore if using the Jan 2024 version of the paper as a baseline there should be 5 chunks for average revenue and 5 chunks for average operating profit for a total of at least 10 chunks (1) All aggregate leases, (2) New York Bight Call Area, (3) New York Bight Wind Energy Area, (4) Central Atlantic Call Area (5) Central Atlantic Wind Energy Area. 
+
+
+
+
+Load data sets 
+```{r setup, echo=FALSE}
+
+
+NY1_GC <- read_csv('scallop0322MainDataTable_ny1_2023_11_06.csv',show_col_types = FALSE)
+NY2_GC <- read_csv('scallop0322MainDataTable_ny2_2023_11_06.csv',show_col_types = FALSE)
+NY3_GC <- read_csv('scallop0322MainDataTable_ny3_2023_11_06.csv',show_col_types = FALSE)
+
+CA1_GC <- read_csv('scallop0322MainDataTable_gc_ca1_2023_11_06.csv',show_col_types = FALSE)
+CA2_GC <- read_csv('scallop0322MainDataTable_gc_ca2_2023_11_06.csv',show_col_types = FALSE)
+CA3_GC <- read_csv('scallop0322MainDataTable_gc_ca3_2023_11_06.csv',show_col_types = FALSE)
+
+
+NY1_LA <- read_csv('scallop0322MainDataTable_gc_ca1_2023_11_06.csv',show_col_types = FALSE)
+NY2_LA <- read_csv('scallop0322MainDataTable_gc_ca2_2023_11_06.csv',show_col_types = FALSE)
+NY3_LA <- read_csv('scallop0322MainDataTable_gc_ca3_2023_11_06.csv',show_col_types = FALSE)
+
+
+CA1_LA <- read_csv('scallop0322MainDataTable_gc_ca1_2023_11_06.csv',show_col_types = FALSE)
+CA2_LA <- read_csv('scallop0322MainDataTable_gc_ca2_2023_11_06.csv',show_col_types = FALSE)
+CA3_LA <- read_csv('scallop0322MainDataTable_gc_ca3_2023_11_06.csv',show_col_types = FALSE)
+
+```
+
+
+
+
+
+<br><br><br>
+
+Average Winsorized Revenue by fleet and state.
+
+```{r}
+cpue_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "DOLLAR_2022_win",
+                group = c("VTR_STATE","fleet"),
+                filter_by = "in_closure",
+                filter_value = TRUE,
+                fun = "mean")
+
+cpue_out$table %>% 
+  pretty_lab() %>%
+  pretty_tab()
+```
+
+
+
+<br><br><br>
+
+
+Average Winsorized Operating Profit by fleet and state.
+
+```{r}
+cpue_out <- 
+  species_catch(scallop0322MainDataTable, project,
+                species = "OPERATING_PROFIT_2022_win",
+                group = c("VTR_STATE","fleet"),
+                filter_by = "in_closure",
+                filter_value = TRUE,
+                fun = "mean")
+
+cpue_out$table %>% 
+  pretty_lab() %>%
+  pretty_tab()
+```
+
+
+<br><br><br>
