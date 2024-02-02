@@ -11,17 +11,17 @@ params:
       label: "DMIS_STYLE:"
       value: "live"
       input: select
-      choices: ["copyover", "live", "frozen_GARFO"]
+      choices: ["live"]
     VTR_extraction: 
       label: "VTR_extraction:"
       value: "live"
       input: select
-      choices: ["copyover", "live"]
+      choices: ["live"]
     scallop_linking_extraction: 
       label: "scallop_linking_extraction:"
       value: "live"
       input: select
-      choices: ["copyover", "live"]
+      choices: ["live"]
 ---
 
 <!---
@@ -325,19 +325,14 @@ The frozen DMIS table from the offshoreWind project (APSD_DMIS_2) is the base da
 
 
 ```{r Data Set Loading, echo=TRUE, results=FALSE,eval=TRUE}
-# Load a frozen DMIS table provided by GARFO OR
+#
 # Do a live data query on DMIS OR 
 #
-if (params$DMIS_STYLE=="frozen_GARFO"){
-  load(file.path(offshoreWind_directory, "APSD_DMIS_2.rda"))
-  APSD_DMIS_2$dbsource="frozen_GARFO"
-} else if(params$DMIS_STYLE=="live"){
-  
 con <- ROracle::dbConnect(
   drv = ROracle::Oracle(),
   username = oracle_username,
   password = oracle_password,
-  dbname = "sole")
+  dbname = "nefsc_users")
 
 APSD_DMIS_2 <- tbl(con, sql("select IMGID, DOCID, YEAR, TO_CHAR(DATE_TRIP, 'MM/DD/YY HH24:MI:SS ') AS DATE_TRIP, 
                             VTR_PORT,  VTR_STATE, TRIP_LENGTH, PERMIT, DEALER_RPT_ID, DOLLAR, POUNDS, 
@@ -349,30 +344,11 @@ APSD_DMIS_2<-APSD_DMIS_2 %>%
   APSD_DMIS_2$dbsource="live"
 
   
-} else if(params$DMIS_STYLE=="copyover"){
-# Do nothing
-}
 
-if (params$DMIS_STYLE=="frozen_GARFO" | params$DMIS_STYLE=="live"){
 APSD_DMIS_2<-merge(APSD_DMIS_2,tripid_geoids, by.x="DOCID", by.y="tripid", all.x=TRUE, all.y=FALSE)
 #save to RDS
 APSD_DMIS_2_name <-paste0("APSD_DMIS_2_",vintage_string,".Rds")
 saveRDS(APSD_DMIS_2, file=here("data","intermediate", APSD_DMIS_2_name))
-}else if(params$DMIS_STYLE=="copyover"){
-  
-  mlee_data_vintage<-list.files(path=ml.intermediate.path, pattern="APSD_DMIS_2_")
-  mlee_data_vintage<-gsub("APSD_DMIS_2_","",mlee_data_vintage )
-  mlee_data_vintage<-gsub(".Rds","",mlee_data_vintage)
-  mlee_data_vintage<-gsub(".csv","",mlee_data_vintage)
-  mlee_data_vintage<-max(mlee_data_vintage)
-  
-  APSD_static_nefsc<-file.path(net,"home2","mlee","Effort-Displacement---Scallop","data","intermediate",paste0("APSD_DMIS_2_",mlee_data_vintage, ".Rds"))
-  
-  # Copy it over to the current directory. Note that the vintage string is rewritten here, which is a little sketchy.
-  destination<-here("data","intermediate",paste0("APSD_DMIS_2_",vintage_string,".Rds"))
-                    
-  file.copy(APSD_static_nefsc,destination, overwrite=FALSE)
-}
 
 colnames(APSD_DMIS_2)
 
@@ -402,17 +378,18 @@ Some Trip-level data in the VTR schema is needed. See table at the top.  We extr
 ```{r VTR_Query, echo=TRUE, results=FALSE,eval=TRUE}
 
 # Get the live data 
-if (params$VTR_extraction=="live"){ 
-
 con <- ROracle::dbConnect(
   drv = ROracle::Oracle(),
   username = oracle_username,
   password = oracle_password,
-  dbname = "sole")
+  dbname = "nefsc_users")
 
 
 START.YEAR = 2007
 END.YEAR = 2022
+
+
+
 
 RESULT.COMPILED<-list()
 t<-1
@@ -423,27 +400,20 @@ for(i in START.YEAR:END.YEAR) {
   t<-t+1
 }    
 dbDisconnect(con)
-
-
 RESULT.COMPILED<-do.call(rbind.data.frame, RESULT.COMPILED)
+
+# This is a better way to get it out of NOAA.DOCUMENT, NEFSC_GARFO.TRIP_REPORTS_DOCUMENT, or NEFSC_GARFO.DOCUMENT)
+# 
+# 
+# CURRENT.QUERY = paste0("select docid as tripid, tripcatg, operator_name as operator, operator_num,  vessel_permit_num as permit, nrpages as nsubtrip, crew, fished as not_fished, port1_number as VTR_PORTNUM  from nefsc_garfo.trip_reports_document where date_sail BETWEEN TO_DATE('2007-JAN-01', 'YYYY-MON-DD') AND TO_DATE('2022-DEC-31', 'YYYY-MON-DD')")
+# RESULT.COMPILED <- tbl(con,sql(CURRENT.QUERY)) %>% collect()
+
+
+
+
 RESULT.COMPILED_name <-paste0("RESULT_COMPILED_",vintage_string,".Rds")
 saveRDS(RESULT.COMPILED, file=here("data","intermediate",RESULT.COMPILED_name))
 
-#save to RDS
-} else if (params$VTR_extraction=="copyover"){
-  mlee_data_vintage<-list.files(path=ml.intermediate.path, pattern="RESULT_COMPILED_")
-  mlee_data_vintage<-gsub("RESULT_COMPILED_","",mlee_data_vintage )
-  mlee_data_vintage<-gsub(".Rds","",mlee_data_vintage)
-  mlee_data_vintage<-gsub(".csv","",mlee_data_vintage)
-  mlee_data_vintage<-max(mlee_data_vintage)
-  
-  RESULT_COMPILED_static<-file.path(net,"home2","mlee","Effort-Displacement---Scallop","data","intermediate",paste0("RESULT_COMPILED_",mlee_data_vintage, ".Rds"))
-  
-  # Copy it over to the current directory. Note that the vintage string is rewritten here, which is a little sketchy.
-  destination<-here("data","intermediate",paste0("RESULT_COMPILED_",vintage_string,".Rds"))
-                    
-  file.copy(RESULT_COMPILED_static,destination, overwrite=FALSE)
-}
 
 
 colnames(RESULT.COMPILED)
@@ -458,16 +428,15 @@ We also extract the activity code from DMIS.  This will describe the type of tri
 
 We  also extract the T/F variables corresponding the the PLAN_CAT in DMIS.  
 ```{r DMIS_Query, echo=TRUE,eval=TRUE}
- if (params$scallop_linking_extraction=="live"){ 
 
 con <- ROracle::dbConnect(
   drv = ROracle::Oracle(),
   username = oracle_username,
   password = oracle_password,
-  dbname = "sole")
+  dbname = "nefsc_users")
 
 CURRENT.QUERY = paste ("SELECT TRIP_ID, DOCID, ACTIVITY_CODE, DAS_ID, LGC_A, LGC_B, LGC_C, SC_2, SC_3, SC_4, SC_5, SC_6, SC_7, SC_8, SC_9, SG_1A, SG_1B
- FROM APSD.t_ssb_trip_current@garfo_nefsc")
+ FROM NEFSC_GARFO.APSD_t_ssb_trip_current")
 
 Scallop_Linkingorg <- tbl(con,sql(CURRENT.QUERY)) %>% collect()
 
@@ -477,22 +446,7 @@ dbDisconnect(con)
 #save to RDS
 Scallop_Linkingorg_name <-paste0("Scallop_Linkingorg_",vintage_string,".Rds")
 saveRDS(Scallop_Linkingorg, file=here("data","intermediate",Scallop_Linkingorg_name))
- } else if(params$scallop_linking_extraction=="copyover"){
-   mlee_data_vintage<-list.files(path=ml.intermediate.path, pattern="Scallop_Linkingorg_")
-  mlee_data_vintage<-gsub("Scallop_Linkingorg_","",mlee_data_vintage )
-  mlee_data_vintage<-gsub(".Rds","",mlee_data_vintage)
-  mlee_data_vintage<-gsub(".csv","",mlee_data_vintage)
-  mlee_data_vintage<-max(mlee_data_vintage)
-  
-  Scallop_Linkingorg_static<-file.path(net,"home2","mlee","Effort-Displacement---Scallop","data","intermediate",paste0("Scallop_Linkingorg_",mlee_data_vintage, ".Rds"))
-  
-  # Copy it over to the current directory. Note that the vintage string is rewritten here, which is a little sketchy.
-  destination<-here("data","intermediate",paste0("Scallop_Linkingorg_",vintage_string,".Rds"))
-                    
-  file.copy(Scallop_Linkingorg_static,destination, overwrite=FALSE)
-   
-   
- }
+ 
 
 colnames(Scallop_Linkingorg)
 
