@@ -224,22 +224,22 @@ dropped_values_CA_1_3_DAS <- dropped_values_CA_1_3_LA %>% filter(fleet == "Days 
 ```{r}
  Inside_CA1_LA %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win))
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
 
 
 Inside_CA2_LA %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win))
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
 
 Inside_CA3_LA %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win))
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
 
 
 
 dropped_values_CA_1_3_LA %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win))
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
 
 ```
 
@@ -251,19 +251,19 @@ dropped_values_CA_1_3_LA %>%
 dropped_values_CA_1_3_GC %>%
   group_by(fleet) %>%
   dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
-                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win))
+                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
 
 
 dropped_values_CA_1_2_GC %>%
   group_by(fleet) %>%
   dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
-                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win))
+                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
 
 
 dropped_values_CA_2_3_GC %>%
   group_by(fleet) %>%
   dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
-                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win))
+                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
 
 
 ```
@@ -280,19 +280,19 @@ dropped_values_CA_2_3_GC %>%
 dropped_values_CA_1_3_LA %>%
   group_by(fleet) %>%
   dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
-                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win))
+                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
 
 
 dropped_values_CA_1_2_LA %>%
   group_by(fleet) %>%
   dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
-                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win))
+                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
 
 
 dropped_values_CA_2_3_LA %>%
   group_by(fleet) %>%
   dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
-                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win))
+                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
 
 
 ```
@@ -305,22 +305,22 @@ dropped_values_CA_2_3_LA %>%
 
 Inside_CA1_GC %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022=sum(DOLLAR_2022),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win))
+  dplyr::summarise(Trips=n(),DOLLAR_2022=sum(DOLLAR_2022),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
 
 
 Inside_CA2_GC %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022=sum(DOLLAR_2022),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win))
+  dplyr::summarise(Trips=n(),DOLLAR_2022=sum(DOLLAR_2022),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
 
 Inside_CA3_GC %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022=sum(DOLLAR_2022),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win))
+  dplyr::summarise(Trips=n(),DOLLAR_2022=sum(DOLLAR_2022),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
 
 
 
 dropped_values_CA_1_3_GC %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022=sum(DOLLAR_2022),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win))
+  dplyr::summarise(Trips=n(),DOLLAR_2022=sum(DOLLAR_2022),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
 
 ```
 <br><br><br>
@@ -720,24 +720,24 @@ BSDA::z.test(dropped_values_CA_1_3_DAS$LANDED_win,
 GCIFQ z-tests
 
 ```{r}
-BSDA::z.test(dropped_values_CA_2_3_GC$OPERATING_PROFIT_2022_win,
+BSDA::z.test(dropped_values_CA_1_3_GC$OPERATING_PROFIT_2022_win,
   y = Inside_CA3_GC$OPERATING_PROFIT_2022_win,
-  sigma.x = sd(dropped_values_CA_2_3_GC$OPERATING_PROFIT_2022_win),
+  sigma.x = sd(dropped_values_CA_1_3_GC$OPERATING_PROFIT_2022_win),
   sigma.y = sd(Inside_CA3_GC$OPERATING_PROFIT_2022_win),
   alternative = c("two.sided"),
   conf.level = 0.90)
 
-BSDA::z.test(dropped_values_CA_2_3_GC$OPERATING_PROFIT_2022_win,
+BSDA::z.test(dropped_values_CA_1_3_GC$OPERATING_PROFIT_2022_win,
   y = Inside_CA3_GC$OPERATING_PROFIT_2022_win,
-  sigma.x = sd(dropped_values_CA_2_3_GC$OPERATING_PROFIT_2022_win),
+  sigma.x = sd(dropped_values_CA_1_3_GC$OPERATING_PROFIT_2022_win),
   sigma.y = sd(Inside_CA3_GC$OPERATING_PROFIT_2022_win),
   alternative = c("two.sided"),
   conf.level = 0.95)
 
 
-BSDA::z.test(dropped_values_CA_2_3_GC$OPERATING_PROFIT_2022_win,
+BSDA::z.test(dropped_values_CA_1_3_GC$OPERATING_PROFIT_2022_win,
   y = Inside_CA3_GC$OPERATING_PROFIT_2022_win,
-  sigma.x = sd(dropped_values_CA_2_3_GC$OPERATING_PROFIT_2022_win),
+  sigma.x = sd(dropped_values_CA_1_3_GC$OPERATING_PROFIT_2022_win),
   sigma.y = sd(Inside_CA3_GC$OPERATING_PROFIT_2022_win),
   alternative = c("two.sided"),
   conf.level = 0.99)
@@ -1113,28 +1113,28 @@ Total revenue and operating profits
 
  Inside_NY1_GC %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win))
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
 
 
 
  Inside_NY2_GC %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win))
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
 
  Inside_NY3_GC %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win))
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
 
 
 
 
  dropped_values_NY_1_2_GC %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win))
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
 
  dropped_values_NY_2_3_GC %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win))
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
 
 
 ```
@@ -1145,28 +1145,28 @@ Total revenue and operating profits
 
  Inside_NY1_GC %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win) )
+  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win) , count_PERMITs=n_distinct(PERMIT.y))
 
 
 
  Inside_NY2_GC %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win) )
+  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win) , count_PERMITs=n_distinct(PERMIT.y))
 
  Inside_NY3_GC %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win) )
+  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win) , count_PERMITs=n_distinct(PERMIT.y))
 
 
  dropped_values_NY_1_2_GC %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win) )
+  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win) , count_PERMITs=n_distinct(PERMIT.y))
 
 
 
  dropped_values_NY_2_3_GC %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(), DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win) )
+  dplyr::summarise(Trips=n(), DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win) , count_PERMITs=n_distinct(PERMIT.y))
 ```
 
 
@@ -1180,30 +1180,30 @@ Total revenue and operating profits
 
  Inside_NY1_LA %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win) )
+  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win), count_PERMITs=n_distinct(PERMIT.y) )
 
 
 
  Inside_NY2_LA %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win) )
+  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win), count_PERMITs=n_distinct(PERMIT.y) )
 
  Inside_NY3_LA %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win) )
+  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win), count_PERMITs=n_distinct(PERMIT.y) )
 
 
 
 
  dropped_values_NY_1_2_LA %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win) )
+  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win), count_PERMITs=n_distinct(PERMIT.y) )
 
 
 
  dropped_values_NY_2_3_LA %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win) )
+  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win) , count_PERMITs=n_distinct(PERMIT.y))
 
 
 
@@ -1245,25 +1245,25 @@ BSDA::z.test(dropped_values_NY_1_2_GC$DOLLAR_2022_win,
 ## Phase 2
 
 BSDA::z.test(dropped_values_NY_2_3_GC$DOLLAR_2022_win,
-  y = Inside_NY2_GC$DOLLAR_2022_win,
+  y = Inside_NY3_GC$DOLLAR_2022_win,
   sigma.x = sd(dropped_values_NY_2_3_GC$DOLLAR_2022_win),
-  sigma.y = sd(Inside_NY2_GC$DOLLAR_2022_win),
+  sigma.y = sd(Inside_NY3_GC$DOLLAR_2022_win),
   alternative = c("two.sided"),
   conf.level = 0.90)
 
 
 BSDA::z.test(dropped_values_NY_2_3_GC$DOLLAR_2022_win,
-  y = Inside_NY2_GC$DOLLAR_2022_win,
+  y = Inside_NY3_GC$DOLLAR_2022_win,
   sigma.x = sd(dropped_values_NY_2_3_GC$DOLLAR_2022_win),
-  sigma.y = sd(Inside_NY2_GC$DOLLAR_2022_win),
+  sigma.y = sd(Inside_NY3_GC$DOLLAR_2022_win),
   alternative = c("two.sided"),
   conf.level = 0.95)
 
 
 BSDA::z.test(dropped_values_NY_2_3_GC$DOLLAR_2022_win,
-  y = Inside_NY2_GC$DOLLAR_2022_win,
+  y = Inside_NY3_GC$DOLLAR_2022_win,
   sigma.x = sd(dropped_values_NY_2_3_GC$DOLLAR_2022_win),
-  sigma.y = sd(Inside_NY2_GC$DOLLAR_2022_win),
+  sigma.y = sd(Inside_NY3_GC$DOLLAR_2022_win),
   alternative = c("two.sided"),
   conf.level = 0.99)
 
@@ -1414,23 +1414,23 @@ BSDA::z.test(dropped_values_NY_1_2_GC$LANDED_win,
 ## Phase 2
 
 BSDA::z.test(dropped_values_NY_2_3_GC$LANDED_win,
-  y = Inside_NY2_GC$LANDED_win,
+  y = Inside_NY3_GC$LANDED_win,
   sigma.x = sd(dropped_values_NY_2_3_GC$LANDED_win),
-  sigma.y = sd(Inside_NY2_GC$LANDED_win),
+  sigma.y = sd(Inside_NY3_GC$LANDED_win),
   alternative = c("two.sided"),
   conf.level = 0.90)
 
 BSDA::z.test(dropped_values_NY_2_3_GC$LANDED_win,
-  y = Inside_NY2_GC$LANDED_win,
+  y = Inside_NY3_GC$LANDED_win,
   sigma.x = sd(dropped_values_NY_2_3_GC$LANDED_win),
-  sigma.y = sd(Inside_NY2_GC$LANDED_win),
+  sigma.y = sd(Inside_NY3_GC$LANDED_win),
   alternative = c("two.sided"),
   conf.level = 0.95)
 
 BSDA::z.test(dropped_values_NY_2_3_GC$LANDED_win,
-  y = Inside_NY2_GC$LANDED_win,
+  y = Inside_NY3_GC$LANDED_win,
   sigma.x = sd(dropped_values_NY_2_3_GC$LANDED_win),
-  sigma.y = sd(Inside_NY2_GC$LANDED_win),
+  sigma.y = sd(Inside_NY3_GC$LANDED_win),
   alternative = c("two.sided"),
   conf.level = 0.99)
 
@@ -1588,14 +1588,14 @@ BSDA::z.test(dropped_values_NY_1_2_GC$OPERATING_PROFIT_2022_win,
 # Phase 2 to 3 
 
 BSDA::z.test(dropped_values_NY_2_3_GC$OPERATING_PROFIT_2022_win,
-  y = Inside_NY2_GC$OPERATING_PROFIT_2022_win,
+  y = Inside_NY3_GC$OPERATING_PROFIT_2022_win,
   sigma.x = sd(dropped_values_NY_2_3_GC$OPERATING_PROFIT_2022_win),
   sigma.y = sd(Inside_NY3_GC$OPERATING_PROFIT_2022_win),
   alternative = c("two.sided"),
   conf.level = 0.90)
 
 BSDA::z.test(dropped_values_NY_2_3_GC$OPERATING_PROFIT_2022_win,
-  y = Inside_NY2_GC$OPERATING_PROFIT_2022_win,
+  y = Inside_NY3_GC$OPERATING_PROFIT_2022_win,
   sigma.x = sd(dropped_values_NY_2_3_GC$OPERATING_PROFIT_2022_win),
   sigma.y = sd(Inside_NY3_GC$OPERATING_PROFIT_2022_win),
   alternative = c("two.sided"),
@@ -1603,7 +1603,7 @@ BSDA::z.test(dropped_values_NY_2_3_GC$OPERATING_PROFIT_2022_win,
 
 
 BSDA::z.test(dropped_values_NY_2_3_GC$OPERATING_PROFIT_2022_win,
-  y = Inside_NY2_GC$OPERATING_PROFIT_2022_win,
+  y = Inside_NY3_GC$OPERATING_PROFIT_2022_win,
   sigma.x = sd(dropped_values_NY_2_3_GC$OPERATING_PROFIT_2022_win),
   sigma.y = sd(Inside_NY3_GC$OPERATING_PROFIT_2022_win),
   alternative = c("two.sided"),
@@ -1759,14 +1759,14 @@ BSDA::z.test(dropped_values_NY_1_2_GC$VPUE_win,
 # Phase 2 to 3 
 
 BSDA::z.test(dropped_values_NY_2_3_GC$VPUE_win,
-  y = Inside_NY2_GC$VPUE_win,
+  y = Inside_NY3_GC$VPUE_win,
   sigma.x = sd(dropped_values_NY_2_3_GC$VPUE_win),
   sigma.y = sd(Inside_NY3_GC$VPUE_win),
   alternative = c("two.sided"),
   conf.level = 0.90)
 
 BSDA::z.test(dropped_values_NY_2_3_GC$VPUE_win,
-  y = Inside_NY2_GC$VPUE_win,
+  y = Inside_NY3_GC$VPUE_win,
   sigma.x = sd(dropped_values_NY_2_3_GC$VPUE_win),
   sigma.y = sd(Inside_NY3_GC$VPUE_win),
   alternative = c("two.sided"),
@@ -1774,7 +1774,7 @@ BSDA::z.test(dropped_values_NY_2_3_GC$VPUE_win,
 
 
 BSDA::z.test(dropped_values_NY_2_3_GC$VPUE_win,
-  y = Inside_NY2_GC$VPUE_win,
+  y = Inside_NY3_GC$VPUE_win,
   sigma.x = sd(dropped_values_NY_2_3_GC$VPUE_win),
   sigma.y = sd(Inside_NY3_GC$VPUE_win),
   alternative = c("two.sided"),
