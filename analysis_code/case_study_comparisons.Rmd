@@ -366,7 +366,7 @@ dropped_values_CA_2_3_GC %>%
 
 ## CA GC-IFQ Revenue Z-Tests
 
-Provides outputs for Table 8, GC Scallop trips revenue for the Central Atlantic.
+Provides outputs for Table 8, GC Scallop trips revenue for the Central Atlantic.  The first command tests the equality Winsorized Dollars for the Trips that were dropped during the CA 1 to CA 3 process (Call area to Lease Area)  against the trips that remained inside at the CA3 step (Lease Areas).  These are done at the 90, 95, and 99\% confidence levels.  Other commands are defined analgously.
 
 ```{r}
 
