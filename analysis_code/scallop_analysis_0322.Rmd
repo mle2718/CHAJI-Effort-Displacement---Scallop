@@ -131,6 +131,7 @@ if (params$location=="Woods_Hole"){
   # the most recent data
   datasets_list <- list.files(path = here("data", "main"), pattern = "final_product_lease")
   datasets_list <- gsub("final_product_lease_", "", datasets_list )
+  datasets_list <- gsub("final_product_lease", "", datasets_list )
   datasets_list <- gsub(".Rds", "", datasets_list)
   datasets_list <- gsub(".csv" ,"", datasets_list)
   vintage_string <- max(datasets_list)
