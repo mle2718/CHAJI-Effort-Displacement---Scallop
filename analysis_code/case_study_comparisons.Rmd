@@ -35,18 +35,6 @@ options(scipen=999)
 # load("~/mchaji_net/READ-SSB-CHAJI-Effort-Displacement---Scallop/data/main/comparisons/comparasion_data_ALL.RData")
 
 
-project <- "scallop0322"
- 
-  folderpath <- here("FishSETFolder")
-  proj_dir<-here("FishSETFolder") 
- 
-scallop0322TenMNSQRSpatTable <- table_view("scallop0322TenMNSQRSpatTable", 
-
-                                           project)
-
-scallop0322WindCloseSpatTable <- table_view("scallop0322WindCloseSpatTable",
-                              project)
-
 
 ```
 
@@ -228,255 +216,112 @@ dropped_values_CA_1_3_DAS <- dropped_values_CA_1_3_LA %>% filter(fleet == "Days 
 
 <br><br><br> 
 
-# Aggregate Scallop revenue CA-LA
+# Central Atlantic Section 
+
+
+# Aggregate Scallop Revenue and Operating Profit CA1, CA2, and CA3 and the Dropped Values from 1-3 for the LA Fleet
 
 ```{r}
-zone_out <- 
-zone_summary(Inside_CA1_LA , project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2022",
-         fun = "sum",
-         group = "fleet",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
+ Inside_CA1_LA %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win))
 
-knitr::kable(zone_out)
+
+Inside_CA2_LA %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win))
+
+Inside_CA3_LA %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win))
 
 
 
-zone_out <- 
-zone_summary(Inside_CA2_LA , project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2022",
-         fun = "sum",
-         group = "fleet",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-
-zone_out <- 
-zone_summary(Inside_CA3_LA , project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2022",
-         fun = "sum",
-         group = "fleet",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-
-zone_out <- 
-zone_summary(dropped_values_CA_1_3_LA , project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2022",
-         fun = "sum",
-         group = "fleet",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-```
-
-
-# Average Winsorized Revenue in closures CA-GCIFQ
-
-```{r}
-
-zone_out <- 
-zone_summary(dropped_values_CA_1_3_GC, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2022_win",
-         fun = "mean",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = FALSE, dat.center = FALSE,
-         output = "table")
-
-
-knitr::kable(zone_out)
+dropped_values_CA_1_3_LA %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win))
 
 ```
 
 
+##  Average Revenue, VPUE, Operating Profit, and  Landed weights for the Central Atlantic, GCIFQ
 
 ```{r}
 
+dropped_values_CA_1_3_GC %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
+                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win))
 
-zone_out <- 
-zone_summary(dropped_values_CA_1_2_GC, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2022_win",
-         fun = "mean",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = FALSE, dat.center = FALSE,
-         output = "table")
 
-knitr::kable(zone_out)
-```
+dropped_values_CA_1_2_GC %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
+                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win))
 
-```{r }
-zone_out <- 
-zone_summary(dropped_values_CA_2_3_GC, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2022_win",
-         fun = "mean",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = FALSE, dat.center = FALSE,
-         output = "table")
 
-knitr::kable(zone_out)
+dropped_values_CA_2_3_GC %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
+                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win))
+
+
 ```
 
 
 <br><br><br>
 
 
-# Average Winsorized Revenue in CA closures by fleet LA 
+# Average Winsorized Revenue, VPUE, Operating Profit, and Landings in CA closures by fleet LA 
 
 
 ```{r}
 
-
-zone_out <- 
-zone_summary(dropped_values_CA_1_2_LA, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2022_win",
-         fun = "mean",
-         group = "fleet",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = FALSE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-```
+dropped_values_CA_1_3_LA %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
+                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win))
 
 
-```{r}
+dropped_values_CA_1_2_LA %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
+                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win))
 
 
-zone_out <- 
-zone_summary(dropped_values_CA_2_3_LA, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2022_win",
-         fun = "mean",
-         group = "fleet",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = FALSE, dat.center = FALSE,
-         output = "table")
+dropped_values_CA_2_3_LA %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
+                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win))
 
-knitr::kable(zone_out)
 
-```
-
-```{r}
-
-zone_out <- 
-zone_summary(dropped_values_CA_1_3_LA, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2022_win",
-         fun = "mean",
-         group = "fleet",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = FALSE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
 ```
 
 <br><br><br>
-# Aggregate Scallop revenue CA-GCIFQ
+# Aggregate Scallop revenue CA1, CA2, and CA3 and the Dropped Values from 1-3 for the GCIFQ Fleet
 
 ```{r}
-zone_out <- 
-zone_summary(Inside_CA1_GC , project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2022",
-         fun = "sum",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
 
 
-zone_out <- 
-zone_summary(Inside_CA2_GC , project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2022",
-         fun = "sum",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
+Inside_CA1_GC %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022=sum(DOLLAR_2022),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win))
 
-knitr::kable(zone_out)
 
-zone_out <- 
-zone_summary(Inside_CA3_GC , project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2022",
-         fun = "sum",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
+Inside_CA2_GC %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022=sum(DOLLAR_2022),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win))
 
-knitr::kable(zone_out)
+Inside_CA3_GC %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022=sum(DOLLAR_2022),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win))
 
-zone_out <- 
-zone_summary(dropped_values_CA_1_3_GC , project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2022",
-         fun = "sum",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
 
-knitr::kable(zone_out)
+
+dropped_values_CA_1_3_GC %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022=sum(DOLLAR_2022),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win))
+
 ```
 <br><br><br>
 
@@ -675,50 +520,6 @@ BSDA::z.test(dropped_values_CA_1_3_DAS$DOLLAR_2022_win,
 
 
 
-Average winsorized Landed in Central Atlantic GC closures
-
-```{r}
-
-zone_out <- 
-zone_summary(dropped_values_CA_1_3_GC, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "LANDED_win",
-         fun = "mean",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = FALSE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-```
-
-
-
-<br><br><br> 
-
-Average winsorized Landed in closures by fleet
-
-```{r}
-
-zone_out <- 
-zone_summary(dropped_values_CA_1_3_LA, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "LANDED_win",
-         fun = "mean",
-         group = "fleet",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = FALSE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-
-```
-
 
 <br><br><br>
 GC-IFQ z-tests
@@ -913,150 +714,7 @@ BSDA::z.test(dropped_values_CA_1_3_DAS$LANDED_win,
 
 ```
 
-
-
-Aggegrate Winsorized Operating Profit Central Atlantic GC by closure area.
-
-```{r}
-zone_out <- 
-zone_summary(Inside_CA1_GC, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "OPERATING_PROFIT_2022_win",
-         fun = "sum",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-
-
-zone_out <- 
-zone_summary(Inside_CA3_GC, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "OPERATING_PROFIT_2022_win",
-         fun = "sum",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-
-zone_out <- 
-zone_summary(dropped_values_CA_2_3_GC, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "OPERATING_PROFIT_2022_win",
-         fun = "sum",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-
-```
-
-<br><br><br> 
-
-Average Winsorized Operating Profit Central Atlantic GC by closure area.
-
-```{r}
-zone_out <- 
-zone_summary(dropped_values_CA_2_3_GC, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "OPERATING_PROFIT_2022_win",
-         fun = "mean",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-
-```
-
-Aggregate Winsorized Operating Profit Central Atlantic LA by closure area.
-
-```{r}
-zone_out <- 
-zone_summary(Inside_CA1_LA, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "OPERATING_PROFIT_2022_win",
-         fun = "sum",
-         group = "fleet",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-
-
-zone_out <- 
-zone_summary(Inside_CA3_LA, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "OPERATING_PROFIT_2022_win",
-         fun = "sum",
-         group = "fleet",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-
-
-zone_out <- 
-zone_summary(dropped_values_CA_1_3_LA, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "OPERATING_PROFIT_2022_win",
-         fun = "sum",
-         group = "fleet",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-```
-
-
-<br><br><br> Average Winsorized Operating Profit in closures by fleet
-
-```{r}
-zone_out <- 
-zone_summary(dropped_values_CA_1_3_LA, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "OPERATING_PROFIT_2022_win",
-         fun = "mean",
-         group = "fleet",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-
-```
-
-
+ 
 
 <br><br><br>
 GCIFQ z-tests
@@ -1246,76 +904,6 @@ BSDA::z.test(dropped_values_CA_1_3_DAS$OPERATING_PROFIT_2022_win,
 
 
 ```
-
-
-
-
-<br><br><br>
-
-Average winsorized VPUE in GC closures
-
-```{r}
-
-zone_out <- 
-zone_summary(dropped_values_CA_1_3_GC, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "VPUE_win",
-         fun = "mean",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = FALSE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-
-```
-
-
-
-<br><br><br> <br><br><br>
-
-Average winsorized VPUE in closures by fleet
-
-```{r}
-
-zone_out <- 
-zone_summary(dropped_values_CA_1_3_LA, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "VPUE_win",
-         fun = "mean",
-         group = "fleet",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = FALSE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-```
-
-
-```{r}
-
-zone_out <- 
-zone_summary(dropped_values_CA_2_3_LA, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "VPUE_win",
-         fun = "mean",
-         group = "fleet",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = FALSE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-
-```
-
 
 
 <br><br><br>
@@ -1517,263 +1105,109 @@ BSDA::z.test(dropped_values_CA_1_3_DAS$VPUE_win,
 
 # New York Bight (NY) Comparisons
 
-Aggregate Scallop revenue by closure area.
 
+# Aggregate Scallop revenue and Operating Profit by NY 1, 2, and 3 and dropped values. GC fleet
+Total revenue and operating profits
 ```{r}
-# New York Bight (NY) Comparisons
+ 
 
-zone_out <- 
-zone_summary(Inside_NY1_GC, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2022_win",
-         fun = "sum",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
+ Inside_NY1_GC %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win))
 
-knitr::kable(zone_out)
-```
 
-```{r}
 
-zone_out <- 
-zone_summary(Inside_NY2_GC, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2022_win",
-         fun = "sum",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
+ Inside_NY2_GC %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win))
 
-knitr::kable(zone_out)
-```
+ Inside_NY3_GC %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win))
 
-```{r}
 
-zone_out <- 
-zone_summary(Inside_NY3_GC, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2022_win",
-         fun = "sum",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
 
-knitr::kable(zone_out)
+
+ dropped_values_NY_1_2_GC %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win))
+
+ dropped_values_NY_2_3_GC %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win))
+
+
 ```
 
 
-```{r}
-zone_out <- 
-zone_summary(dropped_values_NY_1_2_GC, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2022_win",
-         fun = "sum",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-```
-
+# Average Scallop revenue and Operating Profit by NY 1, 2, and 3 and dropped values. GC fleet
 ```{r}
 
-zone_out <- 
-zone_summary(dropped_values_NY_2_3_GC, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2022_win",
-         fun = "sum",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
+ Inside_NY1_GC %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win) )
 
-knitr::kable(zone_out)
+
+
+ Inside_NY2_GC %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win) )
+
+ Inside_NY3_GC %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win) )
+
+
+ dropped_values_NY_1_2_GC %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win) )
+
+
+
+ dropped_values_NY_2_3_GC %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(), DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win) )
 ```
 
 
-## Average Winsorized Revenue in closures GC-IFQ
+
+
+
+
+# Average Revenue, Operating Profit, Landed, and VPUE in closures by fleet LA 
 
 ```{r}
 
-zone_out <- 
-zone_summary(dropped_values_NY_1_2_GC, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2022_win",
-         fun = "mean",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = FALSE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-
-```
-
-```{r}
-
-zone_out <- 
-zone_summary(dropped_values_NY_2_3_GC, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2022_win",
-         fun = "mean",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = FALSE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-```
+ Inside_NY1_LA %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win) )
 
 
-<br><br><br>
-New York Bight Limited Access Aggregate Scallop revenue by closure area.
-```{r}
 
-zone_out <- 
-zone_summary(Inside_NY1_LA, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2022_win",
-         fun = "sum",
-         group = "fleet",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
+ Inside_NY2_LA %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win) )
 
-knitr::kable(zone_out)
-```
-
-```{r}
-
-zone_out <- 
-zone_summary(Inside_NY2_LA, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2022_win",
-         fun = "sum",
-         group = "fleet",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-```
-
-```{r}
-
-zone_out <- 
-zone_summary(Inside_NY3_LA, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2022_win",
-         fun = "sum",
-         group = "fleet",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-```
+ Inside_NY3_LA %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win) )
 
 
-```{r}
-zone_out <- 
-zone_summary(dropped_values_NY_1_2_LA, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2022_win",
-         fun = "sum",
-         group = "fleet",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-```
-
-```{r}
-
-zone_out <- 
-zone_summary(dropped_values_NY_2_3_LA, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2022_win",
-         fun = "sum",
-         group = "fleet",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-```
 
 
-# Average Winsorized Revenue in closures by fleet LA 
-
-```{r}
-
-zone_out <- 
-zone_summary(dropped_values_NY_1_2_LA, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2022_win",
-         fun = "mean",
-         group = "fleet",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = FALSE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-```
+ dropped_values_NY_1_2_LA %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win) )
 
 
-```{r}
 
-zone_out <- 
-zone_summary(dropped_values_NY_2_3_LA, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "DOLLAR_2022_win",
-         fun = "mean",
-         group = "fleet",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = FALSE, dat.center = FALSE,
-         output = "table")
+ dropped_values_NY_2_3_LA %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win) )
 
-knitr::kable(zone_out)
+
+
+
 
 ```
 
@@ -1952,89 +1386,6 @@ BSDA::z.test(dropped_values_NY_2_3_DAS$DOLLAR_2022_win,
 
 
 <br><br><br>
-
-
-
-
-Average winsorized Landed in closures
-
-```{r}
-
-zone_out <- 
-zone_summary(dropped_values_NY_1_2_GC, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "LANDED_win",
-         fun = "mean",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = FALSE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-```
-
-```{r}
-
-zone_out <- 
-zone_summary(dropped_values_NY_2_3_GC, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "LANDED_win",
-         fun = "mean",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = FALSE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-
-```
-
-<br><br><br> <br><br><br>
-
-Average winsorized Landed in closures by fleet
-
-```{r}
-
-zone_out <- 
-zone_summary(dropped_values_NY_1_2_LA, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "LANDED_win",
-         fun = "mean",
-         group = "fleet",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = FALSE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-
-```
-
-```{r}
-
-zone_out <- 
-zone_summary(dropped_values_NY_2_3_LA, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "LANDED_win",
-         fun = "mean",
-         group = "fleet",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = FALSE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-```
-
-<br><br><br>
 GC-IFQ z-tests
 ```{r}
 ## Phase 1
@@ -2201,268 +1552,7 @@ BSDA::z.test(dropped_values_NY_2_3_DAS$LANDED_win,
 ```
 
 
-<br><br><br> 
-Aggregate Scallop Operating Profit by NY GC closure area.
 
-```{r}
-
-zone_out <- 
-zone_summary(Inside_NY1_GC, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "OPERATING_PROFIT_2022_win",
-         fun = "sum",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-
-
-
-zone_out <- 
-zone_summary(Inside_NY2_GC, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "OPERATING_PROFIT_2022_win",
-         fun = "sum",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-
-
-zone_out <- 
-zone_summary(Inside_NY3_GC, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "OPERATING_PROFIT_2022_win",
-         fun = "sum",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-```
-<br><br><br> 
-
-
-```{r}
-
-zone_out <- 
-zone_summary(dropped_values_NY_1_2_GC, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "OPERATING_PROFIT_2022_win",
-         fun = "sum",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-```
-
-
-```{r}
-
-zone_out <- 
-zone_summary(dropped_values_NY_2_3_GC, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "OPERATING_PROFIT_2022_win",
-         fun = "sum",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-```
-
-
-
-<br><br><br> 
-
-
-```{r}
-zone_out <- 
-zone_summary(dropped_values_NY_1_2_GC, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "OPERATING_PROFIT_2022_win",
-         fun = "mean",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-```
-<br><br><br> 
-
-
-
-```{r}
-zone_out <- 
-zone_summary(dropped_values_NY_2_3_GC, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "OPERATING_PROFIT_2022_win",
-         fun = "mean",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-```
-
-<br><br><br> 
-
-
-<br><br><br> 
-Aggregate Scallop Operating Profit by NY GC closure area.
-
-```{r}
-
-zone_out <- 
-zone_summary(Inside_NY1_LA, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "OPERATING_PROFIT_2022_win",
-         fun = "sum",
-         group = "fleet",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-
-zone_out <- 
-zone_summary(Inside_NY2_LA, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "OPERATING_PROFIT_2022_win",
-         fun = "sum",
-         group = "fleet",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-
-zone_out <- 
-zone_summary(Inside_NY3_LA, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "OPERATING_PROFIT_2022_win",
-         fun = "sum",
-         group = "fleet",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-```
-
-
-
-```{r}
-
-zone_out <- 
-zone_summary(dropped_values_NY_1_2_LA, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "OPERATING_PROFIT_2022_win",
-         fun = "sum",
-         group = "fleet",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-```
-
-
-```{r}
-
-zone_out <- 
-zone_summary(dropped_values_NY_2_3_LA, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "OPERATING_PROFIT_2022_win",
-         fun = "sum",
-         group = "fleet",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-```
-
-
-
-
-
-Average Winsorized Operating Profit in closures by fleet
-
-```{r}
-zone_out <- 
-zone_summary(dropped_values_NY_1_2_LA, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "OPERATING_PROFIT_2022_win",
-         fun = "mean",
-         group = "fleet",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-
-```
-
-```{r}
-zone_out <- 
-zone_summary(dropped_values_NY_2_3_LA, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "OPERATING_PROFIT_2022_win",
-         fun = "mean",
-         group = "fleet",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = TRUE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-
-```
 
 
 
@@ -2636,88 +1726,6 @@ BSDA::z.test(dropped_values_NY_2_3_DAS$OPERATING_PROFIT_2022_win,
 
 
 <br><br><br>
-
-Average winsorized VPUE in closures
-```{r}
-
-zone_out <- 
-zone_summary(dropped_values_NY_1_2_GC, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "VPUE_win",
-         fun = "mean",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = FALSE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-```
-
-
-```{r}
-
-zone_out <- 
-zone_summary(dropped_values_NY_2_3_GC, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "VPUE_win",
-         fun = "mean",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = FALSE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-```
-
-
-
-<br><br><br> <br><br><br>
-
-Average winsorized VPUE in closures by fleet
-
-```{r}
-
-zone_out <- 
-zone_summary(dropped_values_NY_1_2_LA, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "VPUE_win",
-         fun = "mean",
-         group = "fleet",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = FALSE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-```
-
-
-```{r}
-
-zone_out <- 
-zone_summary(dropped_values_NY_2_3_LA, project = project,
-         spat = scallop0322WindCloseSpatTable,
-         zone.dat = "closeID",
-         zone.spat = "LEASE_NUMB",
-         var = "VPUE_win",
-         fun = "mean",
-         group = "fleet",
-         count = FALSE, 
-         breaks = c(.001, .01, .1, .3, .5, .7),
-         na.rm = FALSE, dat.center = FALSE,
-         output = "table")
-
-knitr::kable(zone_out)
-
-```
-
-
 
 <br><br><br>
 
