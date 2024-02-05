@@ -10,6 +10,8 @@ output: html_document
  
 This report uses data sets from the tiny reports to estimate based on our five key metrics: trips, ex-vessel scallop revenue, scallop landings, operating profit, and revenue per day across the Limited Access and General Category-IFQ fleets. The Limited Access fleet is characterized by metiers, Access Area (AA) & Days-at-Sea(DAS). We also test for equality of means in areas excluded as regulatory processes occur using z-tests between phases, i.e., Call Area(s) to Wind Energy Area(s) and Wind Energy Area(s) to Lease Area(s) in the New York Bight (NY) & Central Atlantic (CA) regions. 
 
+Note to find outputs used in tables throughout the methods paper use the following to search "Provides outputs for" the text after will provide the appropriate table number, fleet, and variable(s) used.
+
 
 ```{r setup, echo=FALSE}
 
@@ -244,38 +246,28 @@ dropped_values_CA_1_3_LA %>%
 ```
 
 
-##  Average Revenue, VPUE, Operating Profit, and  Landed weights for the Central Atlantic, GCIFQ
-
-```{r}
-
-dropped_values_CA_1_3_GC %>%
-  group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
-                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
-
-
-dropped_values_CA_1_2_GC %>%
-  group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
-                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
-
-
-dropped_values_CA_2_3_GC %>%
-  group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
-                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
-
-
-```
-
-
-<br><br><br>
-
 
 # Average Winsorized Revenue, VPUE, Operating Profit, and Landings in CA closures by fleet LA 
 
+Provides outputs for Table 9 & Table 10, Limited Access Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic.
 
 ```{r}
+Inside_CA1_LA %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
+                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
+
+
+Inside_CA2_LA %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
+                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
+
+
+Inside_CA3_LA %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
+                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
 
 dropped_values_CA_1_3_LA %>%
   group_by(fleet) %>%
@@ -325,8 +317,58 @@ dropped_values_CA_1_3_GC %>%
 ```
 <br><br><br>
 
+##  Average Winsorized Revenue, VPUE, Operating Profit, and Landed weights for the Central Atlantic, GCIFQ
 
-CA GC-IFQ Testing 
+Provides outputs for Table 8, GC Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic.
+
+```{r}
+
+Inside_CA1_GC %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
+                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
+
+
+Inside_CA2_GC %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
+                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
+
+
+Inside_CA3_GC %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
+                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
+
+
+
+dropped_values_CA_1_3_GC %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
+                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
+
+
+dropped_values_CA_1_2_GC %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
+                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
+
+
+dropped_values_CA_2_3_GC %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
+                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
+
+
+```
+
+
+<br><br><br>
+
+# CA GC-IFQ Revenue Z-Tests
+
+Provides outputs for Table 8, GC Scallop trips revenue for the Central Atlantic.
+
 ```{r}
 
 BSDA::z.test(dropped_values_CA_1_3_GC$DOLLAR_2022_win,
@@ -355,7 +397,10 @@ BSDA::z.test(dropped_values_CA_1_3_GC$DOLLAR_2022_win,
 ```
 
 
-Limited Access z-tests
+# CA Limited Access Revenue Z-Tests
+
+Provides outputs for Table 9 & Table 10, Limited Access Scallop trips revenue for the Central Atlantic.
+
 ```{r}
 
 # Access Area 
@@ -521,8 +566,10 @@ BSDA::z.test(dropped_values_CA_1_3_DAS$DOLLAR_2022_win,
 
 
 
-<br><br><br>
-GC-IFQ z-tests
+# CA GC-IFQ Landed z-tests
+
+Provides outputs for Table 8, GC Scallop trips landings for the Central Atlantic.
+
 ```{r}
 
 BSDA::z.test(dropped_values_CA_1_3_GC$LANDED_win,
@@ -556,7 +603,10 @@ BSDA::z.test(dropped_values_CA_1_3_GC$LANDED_win,
 
 
 
-Limited Access z-tests
+# CA Limited Access Landed z-tests
+
+Provides outputs for Table 9 & Table 10, Limited Access Scallop trips landings for the Central Atlantic.
+
 ```{r}
 
 # Access Area 
@@ -717,7 +767,9 @@ BSDA::z.test(dropped_values_CA_1_3_DAS$LANDED_win,
  
 
 <br><br><br>
-GCIFQ z-tests
+# CA GCIFQ Operating Profit z-tests
+
+Provides outputs for Table 9 & Table 10, Limited Access Scallop trips operating profit for the Central Atlantic.
 
 ```{r}
 BSDA::z.test(dropped_values_CA_1_3_GC$OPERATING_PROFIT_2022_win,
@@ -746,7 +798,10 @@ BSDA::z.test(dropped_values_CA_1_3_GC$OPERATING_PROFIT_2022_win,
 
 <br><br><br>
 
-Limited Access z-tests
+# CA Limited Access Operating Profit z-tests
+
+Provides outputs for Table 9 & Table 10, Limited Access Scallop trips, operating profit for the Central Atlantic
+
 ```{r}
 
 # Access Area 
@@ -907,7 +962,10 @@ BSDA::z.test(dropped_values_CA_1_3_DAS$OPERATING_PROFIT_2022_win,
 
 
 <br><br><br>
-GCIFQ z-tests
+# CA GCIFQ z-tests VPUE
+
+Provides outputs for Table 8, CA GC Scallop trips revenue per day for the Central Atlantic.
+
 ```{r}
 
 BSDA::z.test(dropped_values_CA_1_3_GC$VPUE_win,
@@ -939,7 +997,10 @@ BSDA::z.test(dropped_values_CA_1_3_GC$VPUE_win,
 
 
 <br><br><br>
-Limited Access z-tests
+# CA Limited Access z-tests VPUE
+
+Provides outputs for Table 9 & Table 10, Limited Access Scallop trips average revenue per day for the Central Atlantic.
+
 ```{r}
 
 # Access Area 
@@ -1140,14 +1201,15 @@ Total revenue and operating profits
 ```
 
 
-# Average Scallop revenue and Operating Profit by NY 1, 2, and 3 and dropped values. GC fleet
+# Average Winsorized Scallop revenue and Operating Profit by NY 1, 2, and 3 and dropped values. GC fleet
+
+Provides outputs for Table 5, NY GC trips, average scallop revenue, average landings, average operating profit, and average revenue per day for New York Bight.
+
 ```{r}
 
  Inside_NY1_GC %>%
   group_by(fleet) %>%
   dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win) , count_PERMITs=n_distinct(PERMIT.y))
-
-
 
  Inside_NY2_GC %>%
   group_by(fleet) %>%
@@ -1163,7 +1225,6 @@ Total revenue and operating profits
   dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win) , count_PERMITs=n_distinct(PERMIT.y))
 
 
-
  dropped_values_NY_2_3_GC %>%
   group_by(fleet) %>%
   dplyr::summarise(Trips=n(), DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win) , count_PERMITs=n_distinct(PERMIT.y))
@@ -1174,7 +1235,9 @@ Total revenue and operating profits
 
 
 
-# Average Revenue, Operating Profit, Landed, and VPUE in closures by fleet LA 
+# Average Winsorized Revenue, Operating Profit, Landed, and VPUE in closures by fleet LA 
+
+Provides outputs for Table 6 & Table 7, Limited Access Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for New York Bight.
 
 ```{r}
 
@@ -1215,7 +1278,10 @@ Total revenue and operating profits
 
 <br><br><br>
 
-GC-IFQ Testing 
+# NY GC-IFQ Revenue Z-Tests 
+
+Provides outputs for Table 5, GC Scallop trips scallop revenue for New York Bight.
+
 ```{r}
 ## Phase 1
 
@@ -1272,7 +1338,10 @@ BSDA::z.test(dropped_values_NY_2_3_GC$DOLLAR_2022_win,
 ```
 
 
-Limited Access z-tests
+# NY Limited Access Revenue z-tests
+
+Provides outputs for Table 6 & Table 7, Limited Access Scallop trips scallop revenue for New York Bight.
+
 ```{r}
 
 # Access Area 
@@ -1386,7 +1455,10 @@ BSDA::z.test(dropped_values_NY_2_3_DAS$DOLLAR_2022_win,
 
 
 <br><br><br>
-GC-IFQ z-tests
+# NY GC-IFQ Landed z-tests
+
+Provides outputs for Table 5, GC Scallop trips landings for New York Bight.
+
 ```{r}
 ## Phase 1
 BSDA::z.test(dropped_values_NY_1_2_GC$LANDED_win,
@@ -1442,7 +1514,10 @@ BSDA::z.test(dropped_values_NY_2_3_GC$LANDED_win,
 
 
 
-Limited Access z-tests
+# NY Limited Access Landed z-tests
+
+Provides outputs for Table 6 & Table 7, landings for New York Bight.
+
 ```{r}
 
 # Access Area 
@@ -1558,7 +1633,10 @@ BSDA::z.test(dropped_values_NY_2_3_DAS$LANDED_win,
 
 <br><br><br>
 
-##GCIFQ Test 
+# NY GCIFQ Operating Profit Z-Tests 
+
+Provides outputs for Table 5, GC Scallop trips operating profit for New York Bight.
+
 
 ```{r}
 # Phase 1 to 2 
@@ -1613,7 +1691,10 @@ BSDA::z.test(dropped_values_NY_2_3_GC$OPERATING_PROFIT_2022_win,
 
 <br><br><br>
 
-Limited Access z-tests
+# NY Limited Access Operating Profit z-tests 
+
+Provides outputs for Table 5, GC Scallop trips operating profit for New York Bight.
+
 ```{r}
 
 # Access Area 
@@ -1729,7 +1810,10 @@ BSDA::z.test(dropped_values_NY_2_3_DAS$OPERATING_PROFIT_2022_win,
 
 <br><br><br>
 
-##GCIFQ Test 
+# NY GCIFQ VPUE Z-Tests 
+
+Provides outputs for Table 5, GC Scallop trips revenue per day for New York Bight.
+
 
 ```{r}
 # Phase 1 to 2 
@@ -1784,7 +1868,10 @@ BSDA::z.test(dropped_values_NY_2_3_GC$VPUE_win,
 
 <br><br><br>
 
-Limited Access z-tests
+# NY Limited Access VPUE z-tests
+
+Provides outputs for Table 6 & Table 7, Limited Access Scallop trips revenue per day for New York Bight.
+
 ```{r}
 # LA 
 ## Phase 1 to 2
