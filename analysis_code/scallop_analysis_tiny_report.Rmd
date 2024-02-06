@@ -1106,7 +1106,11 @@ cpue_out$plot + angled_theme()
 ## Closure summary
 
 Number of observations.
+
 This chunk is used to create Table 2, Table 3, and Table 4.
+
+Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - "Over the 15-year study period, 7% (6,602) of the GC-IFQ fleet trips occurred within Lease Areas; these trips accounted for approximately ~7% (38M) of the GC-IFQ fleet’s scallop revenue and 7% ($29M) of operating profit."
+
 ```{r}
 table_convert <- c("wind_NY1.RDS","wind_NY2.RDS","wind_NY3.RDS","wind_sf_nocable_agg.RDS","wind_sf_nocable.RDS", "wind_CA1.Rds","wind_CA2.Rds","wind_CA3.Rds" )
 
@@ -1251,6 +1255,7 @@ if (out_switch == "table") {
 
 Aggregate Winsorized Scallop revenue by closure area.
 
+Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S.  - ";these trips accounted for approximately ~7% ($38M) of the GC-IFQ fleet’s scallop revenue and 7% (29M) of operating profit."
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -1479,8 +1484,12 @@ if (out_switch == "table") {
 
 <br><br><br>
 
-Average Winsorized Revenue in closures by fleet
+# Average Winsorized Revenue in closures by fleet
+
 This chunk is used to create Table 2, Table 3, and Table 4.
+
+Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - "Mean scallop revenues and landings from trips inside the Lease Areas are slightly higher than outside the Lease Areas at conventional significance levels (Table 3)."
+
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -1738,8 +1747,11 @@ if (out_switch == "table") {
 
 <br><br><br> 
 
-Average winsorized landed in closures by fleet
+# Average winsorized landed in closures by fleet
 This chunk is used to create Table 2, Table 3, and Table 4.
+
+Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - "Mean scallop revenues and landings from trips inside the Lease Areas are slightly higher than outside the Lease Areas at conventional significance levels (Table 3)."
+
 
 ```{r}
 
@@ -1965,6 +1977,7 @@ cpue_out$table %>%
 
 <br><br><br> Percent of Scallop revenue by closure area.
 
+
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -2001,6 +2014,8 @@ if (out_switch == "table") {
 
 
 <br><br><br> Percent of Scallop winsorized revenue by closure area.
+
+Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - "Over the 15-year study period, 7% (6,602) of the GC-IFQ fleet trips occurred within Lease Areas; these trips accounted for approximately ~7% (38M) of the GC-IFQ fleet’s scallop revenue and 7% ($29M) of operating profit."
 
 ```{r}
 zone_out <- 
@@ -2076,6 +2091,7 @@ if (out_switch == "table") {
 <br><br><br>
 
 Percent of Scallop winsorized revenue by fleet.
+
 
 ```{r}
 zone_out <- 
@@ -2154,6 +2170,9 @@ zone_out$plot }
 <br><br><br> 
 
 Total Winsorized Operating Profit by closure area.
+
+
+
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -2362,6 +2381,8 @@ if (out_switch == "table") {
 
 Percent of Scallop winsorized profit by fleet.
 
+Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - "Over the 15-year study period, 7% (6,602) of the GC-IFQ fleet trips occurred within Lease Areas; these trips accounted for approximately ~7% (38M) of the GC-IFQ fleet’s scallop revenue and 7% ($29M) of operating profit."
+
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -2548,8 +2569,12 @@ zone_out$plot }
 ```
 
 <br><br><br> 
-Average Winsorized Operating Profit in closures by fleet
+#Average Winsorized Operating Profit in closures by fleet
+
 This chunk is used to create Table 2, Table 3, and Table 4.
+
+Section 4.1 - "However, mean operating profits and revenue per day inside the Lease areas are slightly lower." 
+
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -3289,8 +3314,11 @@ if (out_switch == "table") {
 
 <br><br><br> <br><br><br>
 
-Average winsorized VPUE in closures by fleet
+#Average winsorized VPUE in closures by fleet
+
 This chunk is used to create Table 2, Table 3, and Table 4.
+
+Section 4.1 - "However, mean operating profits and revenue per day inside the Lease areas are slightly lower." 
 
 ```{r}
 
