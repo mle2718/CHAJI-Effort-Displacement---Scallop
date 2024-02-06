@@ -87,6 +87,9 @@ here::i_am("analysis_code/scallop_analysis_0322.Rmd")
 # helper functions
 source(here("analysis_code", "format_helpers.R"))
 
+dir.create(here("data", "main","casestudies"), showWarnings="FALSE")
+
+
 project <- "scallop0322"
 pounds_to_kg<-2.20462
 # disable scientific notation
