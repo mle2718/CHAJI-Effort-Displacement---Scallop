@@ -812,6 +812,9 @@ Leases by Year
 
 ```{r}
 
+# This creates Figure 2,  Offshore Wind Lease Areas approved within federal waters of the Northeast region of the United States, in the scallop methods paper.  
+
+
 Lease_starting_years <- scallop0322MainDataTable %>%
                           select(LEASE_DATE,NAME) %>%
                           distinct(NAME,LEASE_DATE) %>%
@@ -825,6 +828,8 @@ Lease_starting_years <- Lease_starting_years %>%
                               arrange(LEASE_DATE1) %>%
                               group_by(LEASE_DATE1) %>%
                                       summarise(n = n())
+
+# The code below sets 0s for the years that have no federal leases which is manually set. This can be improved down the line but works for now. 
 dat <- data.frame(
   LEASE_DATE1 = c(2007,2008,2009,2010,2011,2018,2020),
   n = (0)
@@ -834,15 +839,17 @@ Lease_starting_years <- full_join(Lease_starting_years,dat)
 Lease_starting_years <- Lease_starting_years %>% arrange(LEASE_DATE1)
                              
 
-# Uniform color
+# Creates bar graph used in Figure 2, Offshore Wind Lease Areas approved within federal waters of the Northeast region of the United States, in the scallop methods paper.
 barplot(height=Lease_starting_years$'n', names=Lease_starting_years$LEASE_DATE1, 
         col="light blue",
         ylab = "Number of Leases", xlab = "Year",
         ylim=c(0,10),
-        las = 2
+        las = 2,
+        horiz = FALSE,
+        cex.lab = 0.8,
+        cex.axis = 0.8,
+        cex.names = 0.8
         )
-
-
 
 ```
 
