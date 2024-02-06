@@ -108,6 +108,9 @@ This chunk "resets" my project by erasing it. This is just to keep things tidy a
 avoid potential errors when kitting the doc. 
 
 At the dialog box, select the directory that contains the "FishSETFolder" or the directory in which you want the "FishSETFolder" to be created.  But don't select the "FishSETFolder" directory itself. 
+
+If you don't have a FishSETFolder, the subsequent ``load_maindat()'' in the data_readin chunk will probably fail. The easiest thing to do is to create a FishSETFolder.  
+
 ```{r project_cleanup,eval=TRUE}
 
   folderpath <- here("FishSETFolder")
