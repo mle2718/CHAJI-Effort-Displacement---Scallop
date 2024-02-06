@@ -808,6 +808,46 @@ agg_helper(scallop0322MainDataTable, value = "in_closure",
 
 <br><br><br>
 
+Leases by Year
+
+```{r}
+
+Lease_starting_years <- scallop0322MainDataTable %>%
+                          select(LEASE_DATE,NAME) %>%
+                          distinct(NAME,LEASE_DATE) %>%
+                            filter(!is.na(NAME))
+                           
+
+Lease_starting_years$LEASE_DATE1 <- lubridate::year(Lease_starting_years$LEASE_DATE)
+
+
+Lease_starting_years <- Lease_starting_years %>% 
+                              arrange(LEASE_DATE1) %>%
+                              group_by(LEASE_DATE1) %>%
+                                      summarise(n = n())
+dat <- data.frame(
+  LEASE_DATE1 = c(2007,2008,2009,2010,2011,2018,2020),
+  n = (0)
+)
+
+Lease_starting_years <- full_join(Lease_starting_years,dat)
+Lease_starting_years <- Lease_starting_years %>% arrange(LEASE_DATE1)
+                             
+
+# Uniform color
+barplot(height=Lease_starting_years$'n', names=Lease_starting_years$LEASE_DATE1, 
+        col="light blue",
+        ylab = "Number of Leases", xlab = "Year",
+        ylim=c(0,10),
+        las = 2
+        )
+
+
+
+```
+
+<br><br><br>
+
 Observations inside/outside closures by month.
 
 ```{r}
