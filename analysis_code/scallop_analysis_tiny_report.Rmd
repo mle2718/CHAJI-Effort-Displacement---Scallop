@@ -23,7 +23,7 @@ params:
     - Seattle
   input_shapefile:
     
-    value: wind_Central_Atlantic_1.RDS
+    value: wind_Central_Atlantic_3.RDS
     choices:
     - wind_NY1.RDS
     - wind_NY2.RDS
@@ -576,6 +576,8 @@ scallop0322MainDataTable <-
 
 ### VPUE
 
+Section 3. Data and Methods - "Revenue per day is calculated by dividing gross revenues (from all species caught) by the length of a trip in days."
+
 Same as above but with revenue instead of meat KG
 
 ```{r}
@@ -606,6 +608,9 @@ scallop0322MainDataTable <-
 
 <br><br>
 
+Section 3. Methods and Data -  "Operating profits are gross receipts (from all species) minus variable operative costs which are obtained from Werner et al (2020)."
+
+
 ```{r}
 #Calculate operating profit by subtracting nominal trip costs from nominal aggregated revenues. Then deal with real. 
 scallop0322MainDataTable$OPERATING_PROFIT <- 
@@ -620,6 +625,8 @@ scallop0322MainDataTable$OPERATING_PROFIT_2022 <-
 ### Create new indicator variables with winsor approach 
 
 Winsorized variables for revenue, landed, operating profit, and VPUE
+
+Note from Section 3. Data and Methods - "Scallop revenues are gross receipts derived from scallops revenues.",  "Landings are the weight of scallops, in meat pounds, corresponding to those trips." and "To ensure data is not affected by outliers, the revenue, landings, and operating cost metrics were winsorized at the 1st and 99th percentile."
 ```{r}
 scallop0322MainDataTable$DOLLAR_2022_win <- 
   datawizard::winsorize(scallop0322MainDataTable$DOLLAR_2022, threshold = 0.01)
@@ -705,6 +712,8 @@ agg_helper(scallop0322MainDataTable, value = "in_closure", count = TRUE) %>%
 ```
 
 <br><br><br> Observations inside/outside closures by fleet.
+
+Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - "Over the 15-year study period, 7% (6,602) of the GC-IFQ fleet trips occurred within Lease Areas;" - This uses the wind_sf_combined.RDS input shapefile
 
 ```{r}
 agg_helper(scallop0322MainDataTable, group = "fleet", 
@@ -1099,7 +1108,8 @@ cpue_out$plot + angled_theme()
 Number of observations.
 This chunk is used to create Table 2, Table 3, and Table 4.
 ```{r}
-table_convert <- c("wind_NY1.RDS","wind_NY2.RDS","wind_NY3.RDS","wind_sf_nocable_agg.RDS","wind_sf_nocable.RDS")
+table_convert <- c("wind_NY1.RDS","wind_NY2.RDS","wind_NY3.RDS","wind_sf_nocable_agg.RDS","wind_sf_nocable.RDS", "wind_CA1.Rds","wind_CA2.Rds","wind_CA3.Rds" )
+
 out_switch <- ifelse(params$input_shapefile %in% table_convert, "table", "tab_plot")
 
 zone_out <- 
@@ -1107,6 +1117,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable, 
          zone.dat = "closeID",
          zone.spat = "LEASE_NUMB",
+         group = "fleet",
          count = TRUE,
          breaks = c(1, 10, 50, 100, 250, 500, 750, 1000, 1252),
          na.rm = FALSE, dat.center = FALSE, 
@@ -1123,7 +1134,31 @@ if (out_switch == "table") {
 }
 ```
 
+
+```{r, eval=eval_next}
+  zone_out$table %>%
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+
+```
+
 <br><br><br>
+
+This chunk is used to check confidentiality for Table 2, Table 3, and Table 4.
+```{r}
+scallop0322MainDataTable %>%
+  filter(in_closure == TRUE) %>%
+  select(fleet,PERMIT.y) %>% 
+  group_by(fleet) %>%
+  summarise(count_PERMITs=n_distinct(PERMIT.y))
+    
+```
+
+
+
+<br><br><br>
+
+
 
 Duplicate trips by closure area. This shows whether observations that occurred in a closure area came from duplicate trip IDs.
 
