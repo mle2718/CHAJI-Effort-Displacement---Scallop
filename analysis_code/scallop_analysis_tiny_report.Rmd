@@ -93,12 +93,12 @@ Average winsorized VPUE in closures by fleet
 
 Examples of params for each table are below: 
 Examples of parameters 
-**Table 2. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.** 
+Table 2. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day. 
 input shapefile
     value wind_sf_combined.RDS
 AA_DAS_only FALSE
 
-**Table 3. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day and Table 4. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.**
+Table 3. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day and Table 4. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.
 
 input_shapefile
     value wind_sf_combined.RDS
@@ -1395,6 +1395,9 @@ if (out_switch == "table") {
 
 <br><br><br> Box Plots of Revenues in and outside of closures
 
+**Z-tests comparing average winsorized revenue of trips inside and outside of potential offshore wind development areas / closures**
+
+
 Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - Code chunk below creates Table 2. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.
 
 Shapefile: wind_NYx - Section 4.2 The Adaptive Wind Development Processes -  New York Bight - Code chunk below creates Table 5. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the New York Bight region.
@@ -1521,7 +1524,7 @@ if (out_switch == "table") {
 
 <br><br><br>
 
-Average Winsorized Revenue in closures by fleet
+**Average Winsorized Revenue in closures by fleet**
 
 Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - Code chunk below creates Table 2. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 3. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 4. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.
 
@@ -1618,7 +1621,8 @@ if (out_switch == "table") {
 
 <br><br><br> Box Plots of Landed in and outside of closures
 
- Z-tests comparing Landed averages per trip between trips inside and outside of potential offshore wind development areas / closures
+**Z-tests comparing average winsorized landed of trips inside and outside of potential offshore wind development areas / closures**
+
 
 Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - Code chunk below creates Table 2. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.
 
@@ -1737,6 +1741,8 @@ BSDA::z.test(in_closure_scallop0322MainDataTable_DAS$LANDED,
 
 ```
 
+
+
 Shapefile: Wind_sf_combined - Section 4.1 - Scallop fishing in the Wind Lease Areas in the Northeast U.S. - "In general, AA trips inside the Lease areas are slightly worse than trips outside the lease areas: mean values of revenue, landed pounds, and revenue per day are lower inside the Lease Areas than outside at conventional significance levels."
 
 
@@ -1811,7 +1817,7 @@ if (out_switch == "table") {
 
 <br><br><br> 
 
-Average winsorized landed in closures by fleet
+**Average winsorized landed in closures by fleet**
 
 Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - Code chunk below creates Table 2. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 3. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 4. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.
 
@@ -1954,7 +1960,6 @@ if (out_switch == "table") {
 
 ```
 
-Z-tests comparing revenue averages per trip of trips inside and outside of potential offshore wind development areas / closures
 
 ```{r}
 
@@ -1978,6 +1983,8 @@ BSDA::z.test(in_closure_scallop0322MainDataTable_DAS$DOLLAR_2022,
   conf.level = 0.95)
 }
 ```
+
+**Z-tests comparing average winsorized revenue of trips inside and outside of potential offshore wind development areas / closures**
 
 
 Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - Code chunk below creates Table 3. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 4. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.
@@ -2364,7 +2371,8 @@ boxplot(out_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022_win,
 
 ```
 
-Z-tests comparing operating profit per trip of trips inside and outside of potential offshore wind development areas / closures
+**Z-tests comparing average winsorized operating profit of trips inside and outside of potential offshore wind development areas / closures**
+
  
 Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - Code chunk below creates Table 2. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.
 
@@ -2677,7 +2685,7 @@ zone_out$plot }
 ```
 
 <br><br><br> 
-#Average Winsorized Operating Profit in closures by fleet
+**Average Winsorized Operating Profit in closures by fleet**
 
 Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - Code chunk below creates Table 2. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 3. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 4. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.
 
@@ -3288,7 +3296,7 @@ boxplot(out_closure_scallop0322MainDataTable$VPUE_win,
   notch = TRUE)
 ```
 
-Z-tests comparing winsorized revenue per trip (VPUE) of trips inside and outside of potential offshore wind development areas / closures
+**Z-tests comparing average winsorized revenue per trip (VPUE) of trips inside and outside of potential offshore wind development areas / closures**
 
 Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - Code chunk below creates Table 2. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.
 
@@ -3332,8 +3340,6 @@ BSDA::z.test(in_closure_scallop0322MainDataTable_DAS$VPUE,
   conf.level = 0.95)
 }
 ```
-
-Z-test of Winsorized average revenue per trip (VPUE) comparing trips inside and outside of assigned potential lease development areas / closures
 
 
 Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - Code chunk below creates Table 3. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 4. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.
@@ -3449,7 +3455,7 @@ if (out_switch == "table") {
 
 <br><br><br> <br><br><br>
 
-Average winsorized VPUE in closures by fleet
+**Average winsorized VPUE in closures by fleet**
 
 Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - Code chunk below creates Table 2. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 3. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 4. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.
 
