@@ -1114,9 +1114,25 @@ cpue_out$plot + angled_theme()
 
 Number of observations.
 
-This chunk is used to create Table 2, Table 3, and Table 4.
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - Code chunk below creates Table 2. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.
 
-Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - "Over the 15-year study period, 7% (6,602) of the GC-IFQ fleet trips occurred within Lease Areas; these trips accounted for approximately ~7% (38M) of the GC-IFQ fleet’s scallop revenue and 7% ($29M) of operating profit."
+Shapefile: wind_NYx - Section 4.2 The Adaptive Wind Development Processes -  New York Bight - Code chunk below creates Table 5. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the New York Bight region.
+
+Shapefile: wind_CAx - Section 4.2 The Adaptive Wind Development Processes -  Central Atlantic - Code chunk below creates Table 8. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
+
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - "Over the 15-year study period, 7% (6,602) of the GC-IFQ fleet trips occurred within Lease Areas; these trips accounted for approximately ~7% (38M) of the GC-IFQ fleet’s scallop revenue and 7% ($29M) of operating profit."
+
+
+Shapefile: wind_NY1 - Section 4.2 The Adaptive Wind Development Processes - New York Bight - "Within the New York Bight Call Area, scallop fishing has occurred to a relatively large extent; 23,655 trips in the LA and GC-IFQ fleets took place during fishing years 2007-2021. These trips were primarily from the GC-IFQ fleet. Nearly 20% (19,781) of all trips taken by the GC-IFQ fleet were inside the New York Bight Call Area, a relatively inshore location accessible to smaller fishing vessels. "
+
+
+Shapefile: wind_NY2 and wind_NY3 - Section 4.2 The Adaptive Wind Development Processes - New York Bight - "LA-DAS trips were most disproportionate at aggregate levels between the Wind Energy Area and Lease Area phases where operating profit and scallop revenue were disproportionately smaller (~25%). The LA-DAS metier had the highest total operating profit and scallop revenues despite accounting for only 16% of total trips in New York Bight Call Areas."
+
+Shapefile: wind_CA1 and wind_CA2 - Section 4.2 The Adaptive Wind Development Processes - Central Atlantic - “In the Central Atlantic region, The GC-IFQ fleet performed more trips than the LA fleet; The number of trips taken by the GC-IFQ fleet ultimately decreased by almost 57% from Call Area to Wind Energy Area, significantly less than the reduction in land size considered for development.“ and "The number of impacted trips significantly decreased (~97%) between phases of this metier." and Section 5 Discussion and Conclusions - "The GC-IFQ fleet, with a higher trip frequency in the Central Atlantic compared to the LA fleet, underwent a nearly 57% reduction in trips from the Call Area to the Final Wind Energy Area."
+
+Shapefile: wind_CA1 and wind_CA2 - Section Appendix A. - The Adaptive Wind Development Processes - Central Atlantic - "The fleet experienced a 94% reduction in trips from Call Area to Final Wind Energy Area; but yields higher revenues, landed, profits, and revenue per day on average across each trip compared to the GC-IFQ fleet." and Section 5 Discussion and Conclusions 5 - "The LA fleet experienced a profound 94% reduction in trips from the Call Area to the Final Wind Energy Area, with statistically significant impacts on average revenue, landed, profits, and revenue per day observed at each wind development stage."
+
 
 ```{r}
 table_convert <- c("wind_NY1.RDS","wind_NY2.RDS","wind_NY3.RDS","wind_sf_nocable_agg.RDS","wind_sf_nocable.RDS", "wind_CA1.Rds","wind_CA2.Rds","wind_CA3.Rds" )
@@ -1262,8 +1278,13 @@ if (out_switch == "table") {
 
 #Aggregate Winsorized Scallop revenue by closure area.
 
-Shapefile: wind_sf_combined - Section 4.1 - Scallop fishing in the Wind Lease Areas in the Northeast U.S. - ";these trips accounted for approximately ~7% ($38M) of the GC-IFQ fleet’s scallop revenue and 7% (29M) of operating profit."
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - and Section 5. - Discussion and Conclusions - “Over the 15-year study period, 3% (1,447) of the LA trips occurred within Lease Areas (Figure 5); these trips accounted for approximately 4% (279M) of LA fleet scallop revenue and 3% (259M) of operating profit.”
 
+Shapefile: wind_NY1 and wind_NY2 - Section 4.2 The Adaptive Wind Development Processes - "Aggregate operating profit and scallop revenue between the Call Area and Wind Energy Area phases are found to have disproportionately large (~61%), relative to the reduction size of the wind development areas."
+
+Shapefile: wind_NY2 and wind_NY3 - Section 4.2 The Adaptive Wind Development Processes -"LA-DAS trips were most disproportionate at aggregate levels between the Wind Energy Area and Lease Area phases where operating profit and scallop revenue were disproportionately smaller (~25%). The LA-DAS metier had the highest total operating profit and scallop revenues despite accounting for only 16% of total trips in New York Bight Call Areas."
+
+Shapefile: wind_CA1 and wind_CA2 - Section 4.2 The Adaptive Wind Development Processes - Central Atlantic - "At aggregate levels, operating profit and scallop revenues were significantly smaller (~66%) than the reduction size of the potential wind development areas. Impacted footprint was also drastically disproportionate with only a 61% reduction in trips."  
 
 ```{r}
 zone_out <- 
@@ -1272,6 +1293,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          zone.dat = "closeID",
          zone.spat = "LEASE_NUMB",
          var = "DOLLAR_2022_win",
+         group = "fleet",
          fun = "sum",
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
@@ -2078,7 +2100,7 @@ if (out_switch == "table") {
 
 <br><br><br> Percent of Scallop winsorized revenue by closure area.
 
-Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - "Over the 15-year study period, 7% (6,602) of the GC-IFQ fleet trips occurred within Lease Areas; these trips accounted for approximately ~7% (38M) of the GC-IFQ fleet’s scallop revenue and 7% ($29M) of operating profit."
+Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - and Section 5 - Discussion and Conclusions - "Over the 15-year study period, 7% (6,602) of the GC-IFQ fleet trips occurred within Lease Areas; these trips accounted for approximately ~7% (38M) of the GC-IFQ fleet’s scallop revenue and 7% ($29M) of operating profit."
 
 ```{r}
 zone_out <- 
@@ -2194,7 +2216,7 @@ if (out_switch == "table") {
 
 <br><br><br> 
 
-Total Operating Profit by closure area.
+Total/Aggregate Operating Profit by closure area.
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -2232,8 +2254,13 @@ zone_out$plot }
 
 <br><br><br> 
 
-Total Winsorized Operating Profit by closure area.
+Total/Aggregate Winsorized Operating Profit by closure area.
 
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. -  “Over the 15-year study period, 3% (1,447) of the LA trips occurred within Lease Areas (Figure 5); these trips accounted for approximately 4% (279M) of LA fleet scallop revenue and 3% (259M) of operating profit.”
+
+Shapefile: wind_NY1 and wind_NY2 - Section 4.2 The Adaptive Wind Development Processes - "Aggregate operating profit and scallop revenue between the Call Area and Wind Energy Area phases are found to have disproportionately large (~61%), relative to the reduction size of the wind development areas."
+
+Shapefile: wind_NY2 and wind_NY3 - Section 4.2 The Adaptive Wind Development Processes -"LA-DAS trips were most disproportionate at aggregate levels between the Wind Energy Area and Lease Area phases where operating profit and scallop revenue were disproportionately smaller (~25%). The LA-DAS metier had the highest total operating profit and scallop revenues despite accounting for only 16% of total trips in New York Bight Call Areas."
 
 
 ```{r}
