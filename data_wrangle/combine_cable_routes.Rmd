@@ -272,6 +272,14 @@ wind_sf_combined$LEASE_NUMB <- "Combined Leases"
 
 ```
 
+Section 4.2 The Adaptive Wind Development Processes - New York Bight - "The New York Bight Call areas covered 1,733,470 acres; the Wind Energy areas covered 806,697, and the final Lease Areas covered 487,843, which is just 28% of the size of the Call Areas" 
+
+Section 4.2 The Adaptive Wind Development Processes - New York Bight - "As the development process moved from Call Area to Wind Energy Area and then to Lease Area, the footprint considered for wind development shrunk dramatically, first by 53% and then by an additional 39% (Figure 6). While the New York Bight Lease Areas are 28% of the size of the Call Areas, the number of impacted is just 23% of the number of trips in the Call Areas."
+
+Section 4.2 The Adaptive Wind Development Processes - Central Atlantic - "In 2022, BOEM unveiled 4.7M acres in Call Areas off the coast of Delaware, Maryland, and Virginia. Subsequently, in 2023, over 350,000 acres were designated as Wind Energy Areas in this region. As the regulatory process unfolded, a noteworthy reduction occurred between these two phases, amounting to an overall reduction of over 90% in the areas considered for offshore wind development in the region." 
+
+
+Section 5 Discussion and Conclusions - "The Central Atlantic, a historically important region for scallop harvest, underwent a transformative development in offshore wind, marked by the announcement of Call Areas in was substantial: over 90%. "
 ```{r}
 # Adding an area values for shapefiles in the NY Bight, Central Atlantic, and all leases to compare changes over time by area 
 ## note that area is in meters squared but can be changed later
