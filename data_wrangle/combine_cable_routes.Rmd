@@ -291,8 +291,16 @@ wind_NY2$area_ms2 <- sf::st_area(wind_NY2)
 wind_NY3$area_ms2 <- sf::st_area(wind_NY3)
 
 wind_Central_Atlantic_1$area_ms2 <- sf::st_area(wind_Central_Atlantic_1)
+  wind_Central_Atlantic_1 <- wind_Central_Atlantic_1 %>% 
+                                          mutate(area_ms2_sum = sum(area_ms2))
+  wind_Central_Atlantic_1 <- wind_Central_Atlantic_1[1,]
+  
 wind_Central_Atlantic_2$area_ms2 <- sf::st_area(wind_Central_Atlantic_2)
+
 wind_Central_Atlantic_3$area_ms2 <- sf::st_area(wind_Central_Atlantic_3)
+   wind_Central_Atlantic_3 <- wind_Central_Atlantic_3 %>% 
+                                          mutate(area_ms2_sum = sum(area_ms2))
+      wind_Central_Atlantic_3 <- wind_Central_Atlantic_3[1,]                                    
 
 
 ```
@@ -306,9 +314,19 @@ area_calc <- c(wind_NY1$area_ms2,wind_NY2$area_ms2,wind_NY3$area_ms2)
 wind_NY_area_differences <- data.frame(area_name,area_calc)
 
 units(wind_NY_area_differences$area_calc) <- NULL
-wind_NY_area_differences$change <- ((wind_NY_area_differences$area_calc/lag(wind_NY_area_differences$area_calc) - 1) * 100)
-  
+wind_NY_area_differences$percent_change <- ((wind_NY_area_differences$area_calc/lag(wind_NY_area_differences$area_calc) - 1) * 100)
+print(wind_NY_area_differences)
 
+
+units(wind_Central_Atlantic_1$area_ms2_sum) <- NULL
+units(wind_Central_Atlantic_3$area_ms2_sum) <- NULL
+
+area_name <- c(wind_Central_Atlantic_1$LEASE_NUMB,wind_Central_Atlantic_3$LEASE_NUMB)
+area_calc <- c(wind_Central_Atlantic_1$area_ms2_sum,wind_Central_Atlantic_3$area_ms2_sum)
+wind_CA_area_differences <- data.frame(area_name,area_calc)
+
+wind_CA_area_differences$percent_change <- ((wind_CA_area_differences$area_calc/lag(wind_CA_area_differences$area_calc) - 1) * 100)
+print(wind_CA_area_differences)
 ```
 
 
