@@ -626,7 +626,8 @@ scallop0322MainDataTable$OPERATING_PROFIT_2022 <-
 
 Winsorized variables for revenue, landed, operating profit, and VPUE
 
-Note from Section 3. Data and Methods - "Scallop revenues are gross receipts derived from scallops revenues.",  "Landings are the weight of scallops, in meat pounds, corresponding to those trips." and "To ensure data is not affected by outliers, the revenue, landings, and operating cost metrics were winsorized at the 1st and 99th percentile."
+Shapefile: Wind_sf_combined - Section 3. Data and Methods - "Scallop revenues are gross receipts derived from scallops revenues.",  "Landings are the weight of scallops, in meat pounds, corresponding to those trips." and "To ensure data is not affected by outliers, the revenue, landings, and operating cost metrics were winsorized at the 1st and 99th percentile."
+
 ```{r}
 scallop0322MainDataTable$DOLLAR_2022_win <- 
   datawizard::winsorize(scallop0322MainDataTable$DOLLAR_2022, threshold = 0.01)
@@ -714,6 +715,9 @@ agg_helper(scallop0322MainDataTable, value = "in_closure", count = TRUE) %>%
 <br><br><br> Observations inside/outside closures by fleet.
 
 Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - "Over the 15-year study period, 7% (6,602) of the GC-IFQ fleet trips occurred within Lease Areas;" - This uses the wind_sf_combined.RDS input shapefile
+
+
+Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - "Relatively little Access Area fishing by the LA fleet overlaps with the lease areas: just 73 trips over the past 15 years (representing well under 1% of all AA trips) occurred inside the lease areas (Table 4)."
 
 ```{r}
 agg_helper(scallop0322MainDataTable, group = "fleet", 
@@ -1253,9 +1257,11 @@ if (out_switch == "table") {
 <br><br><br>
 
 
-Aggregate Winsorized Scallop revenue by closure area.
+#Aggregate Winsorized Scallop revenue by closure area.
 
-Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S.  - ";these trips accounted for approximately ~7% ($38M) of the GC-IFQ fleet’s scallop revenue and 7% (29M) of operating profit."
+Shapefile: wind_sf_combined - Section 4.1 - Scallop fishing in the Wind Lease Areas in the Northeast U.S. - ";these trips accounted for approximately ~7% ($38M) of the GC-IFQ fleet’s scallop revenue and 7% (29M) of operating profit."
+
+
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -1486,9 +1492,12 @@ if (out_switch == "table") {
 
 # Average Winsorized Revenue in closures by fleet
 
-This chunk is used to create Table 2, Table 3, and Table 4.
+This chunk is used to create Table 2, Table 3, and Table 4 using the following shapefile: Wind_sf_combined 
 
-Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - "Mean scallop revenues and landings from trips inside the Lease Areas are slightly higher than outside the Lease Areas at conventional significance levels (Table 3)."
+Shapefile: Wind_sf_combined - Section 4.1 - Scallop fishing in the Wind Lease Areas in the Northeast U.S. - "Mean scallop revenues and landings from trips inside the Lease Areas are slightly higher than outside the Lease Areas at conventional significance levels (Table 3)."
+
+Shapefile: Wind_sf_combined - Section 4.1 - Scallop fishing in the Wind Lease Areas in the Northeast U.S. - "In general, AA trips inside the Lease areas are slightly worse than trips outside the lease areas: mean values of revenue, landed pounds, and revenue per day are lower inside the Lease Areas than outside at conventional significance levels."
+
 
 ```{r}
 zone_out <- 
@@ -1570,6 +1579,10 @@ if (out_switch == "table") {
 
 
 <br><br><br> Box Plots of Landed in and outside of closures
+
+# Z-tests comparing Landed averages per trip between trips inside and outside of potential offshore wind development areas / closures
+
+
 
 ```{r}
 # To perform the t-tests and make boxplots, observations are separated into two separate samples, inside and outside of closures
@@ -1682,6 +1695,7 @@ BSDA::z.test(in_closure_scallop0322MainDataTable_DAS$LANDED,
 
 ```
 
+Shapefile: Wind_sf_combined - Section 4.1 - Scallop fishing in the Wind Lease Areas in the Northeast U.S. - "In general, AA trips inside the Lease areas are slightly worse than trips outside the lease areas: mean values of revenue, landed pounds, and revenue per day are lower inside the Lease Areas than outside at conventional significance levels."
 
 ```{r}
 # LA Trip Type - Winsorized
@@ -1748,9 +1762,13 @@ if (out_switch == "table") {
 <br><br><br> 
 
 # Average winsorized landed in closures by fleet
-This chunk is used to create Table 2, Table 3, and Table 4.
 
-Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - "Mean scallop revenues and landings from trips inside the Lease Areas are slightly higher than outside the Lease Areas at conventional significance levels (Table 3)."
+This chunk is used to create Table 2, Table 3, and Table 4 using the following Shapefile: Wind_sf_combined 
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - "Mean scallop revenues and landings from trips inside the Lease Areas are slightly higher than outside the Lease Areas at conventional significance levels (Table 3)."
+
+
+Shapefile: Wind_sf_combined - Section 4.1 - "In general, AA trips inside the Lease areas are slightly worse than trips outside the lease areas: mean values of revenue, landed pounds, and revenue per day are lower inside the Lease Areas than outside at conventional significance levels."
 
 
 ```{r}
@@ -1881,6 +1899,8 @@ if (out_switch == "table") {
 
 ```
 
+# Z-tests comparing revenue averages per trip of trips inside and outside of potential offshore wind development areas / closures
+
 ```{r}
 
 # LA Trip Type
@@ -1903,6 +1923,9 @@ BSDA::z.test(in_closure_scallop0322MainDataTable_DAS$DOLLAR_2022,
   conf.level = 0.95)
 }
 ```
+
+
+Shapefile: Wind_sf_combined - Section 4.1 - Scallop fishing in the Wind Lease Areas in the Northeast U.S. - "In general, AA trips inside the Lease areas are slightly worse than trips outside the lease areas: mean values of revenue, landed pounds, and revenue per day are lower inside the Lease Areas than outside at conventional significance levels."
 
 ```{r}
 # LA Trip Type - Winsorized
@@ -2573,7 +2596,9 @@ zone_out$plot }
 
 This chunk is used to create Table 2, Table 3, and Table 4.
 
-Section 4.1 - "However, mean operating profits and revenue per day inside the Lease areas are slightly lower." 
+Shapefile: Wind_sf_combined - Section 4.1 - "However, mean operating profits and revenue per day inside the Lease areas are slightly lower." 
+
+Shapefile: Wind_sf_combined - Section 4.1 - " In general, AA trips inside the Lease areas are slightly worse than trips outside the lease areas: mean values of revenue, landed pounds, and revenue per day are lower inside the Lease Areas than outside at conventional significance levels."  
 
 ```{r}
 zone_out <- 
@@ -3211,6 +3236,10 @@ BSDA::z.test(in_closure_scallop0322MainDataTable_DAS$VPUE,
 }
 ```
 
+# Z-test of Winsorized VPUE comparing trips inside and outside of assigned potential lease development areas / closures
+
+Shapefile: Wind_sf_combined - Section 4.1 - "In general, AA trips inside the Lease areas are slightly worse than trips outside the lease areas: mean values of revenue, landed pounds, and revenue per day are lower inside the Lease Areas than outside at conventional significance levels."
+
 ```{r}
 # LA Trip Type - Winsorized
 if (params$AA_DAS_only==TRUE){
@@ -3316,9 +3345,13 @@ if (out_switch == "table") {
 
 #Average winsorized VPUE in closures by fleet
 
-This chunk is used to create Table 2, Table 3, and Table 4.
+This chunk is used to create Table 2, Table 3, and Table 4 using the following shapefile: Wind_sf_combined 
 
-Section 4.1 - "However, mean operating profits and revenue per day inside the Lease areas are slightly lower." 
+Shapefile: Wind_sf_combined - Section 4.1 - "However, mean operating profits and revenue per day inside the Lease areas are slightly lower." 
+
+Shapefile: Wind_sf_combined - Section 4.1 - "In general, AA trips inside the Lease areas are slightly worse than trips outside the lease areas: mean values of revenue, landed pounds, and revenue per day are lower inside the Lease Areas than outside at conventional significance levels."
+
+
 
 ```{r}
 
