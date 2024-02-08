@@ -258,36 +258,36 @@ Provides outputs for Table 9 & Table 10, Limited Access Scallop trips, average s
 Inside_CA1_LA %>%
   group_by(fleet) %>%
   dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
-                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
+                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win))
 
 
 Inside_CA2_LA %>%
   group_by(fleet) %>%
   dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
-                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
+                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win))
 
 
 Inside_CA3_LA %>%
   group_by(fleet) %>%
   dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
-                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
+                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win) )
 
 dropped_values_CA_1_3_LA %>%
   group_by(fleet) %>%
   dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
-                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
+                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win) )
 
 
 dropped_values_CA_1_2_LA %>%
   group_by(fleet) %>%
   dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
-                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
+                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win) )
 
 
 dropped_values_CA_2_3_LA %>%
   group_by(fleet) %>%
   dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
-                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
+                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win) )
 
 
 ```
@@ -327,38 +327,38 @@ Provides outputs for Table 8, GC Scallop trips, average scallop revenue, average
 Inside_CA1_GC %>%
   group_by(fleet) %>%
   dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
-                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
+                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win) )
 
 
 Inside_CA2_GC %>%
   group_by(fleet) %>%
   dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
-                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
+                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win) )
 
 
 Inside_CA3_GC %>%
   group_by(fleet) %>%
   dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
-                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
+                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win) )
 
 
 
 dropped_values_CA_1_3_GC %>%
   group_by(fleet) %>%
   dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
-                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
+                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win) )
 
 
 dropped_values_CA_1_2_GC %>%
   group_by(fleet) %>%
   dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
-                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
+                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win) )
 
 
 dropped_values_CA_2_3_GC %>%
   group_by(fleet) %>%
   dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
-                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
+                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win) )
 
 
 ```
@@ -1179,29 +1179,61 @@ Provides outputs for Table 5, NY GC trips, average scallop revenue, average land
 
  Inside_NY1_GC %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win) , count_PERMITs=n_distinct(PERMIT.y))
+  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win)  )
 
  Inside_NY2_GC %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win) , count_PERMITs=n_distinct(PERMIT.y))
+  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win)  )
 
  Inside_NY3_GC %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win) , count_PERMITs=n_distinct(PERMIT.y))
+  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win)  )
 
 
  dropped_values_NY_1_2_GC %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win) , count_PERMITs=n_distinct(PERMIT.y))
+  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win)  )
 
 
  dropped_values_NY_2_3_GC %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(), DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win) , count_PERMITs=n_distinct(PERMIT.y))
+  dplyr::summarise(Trips=n(), DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win)  )
 ```
 
 
 
+## Aggregate Scallop revenue and Operating Profit by NY 1, 2, and 3 and dropped values. LA fleet
+Total revenue and operating profits
+```{r}
+ 
+
+ Inside_NY1_LA %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
+
+
+
+ Inside_NY2_LA %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
+
+ Inside_NY3_LA %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
+
+
+
+
+ dropped_values_NY_1_2_LA %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
+
+ dropped_values_NY_2_3_LA %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
+
+
+```
 
 
 
@@ -1213,30 +1245,30 @@ Provides outputs for Table 6 & Table 7, Limited Access Scallop trips, average sc
 
  Inside_NY1_LA %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win), count_PERMITs=n_distinct(PERMIT.y) )
+  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win))
 
 
 
  Inside_NY2_LA %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win), count_PERMITs=n_distinct(PERMIT.y) )
+  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win))
 
  Inside_NY3_LA %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win), count_PERMITs=n_distinct(PERMIT.y) )
+  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win))
 
 
 
 
  dropped_values_NY_1_2_LA %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win), count_PERMITs=n_distinct(PERMIT.y) )
+  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win))
 
 
 
  dropped_values_NY_2_3_LA %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win) , count_PERMITs=n_distinct(PERMIT.y))
+  dplyr::summarise(Trips=n(),DOLLAR_2022=mean(DOLLAR_2022),OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), LANDED_win=mean(LANDED_win),VPUE_win=mean(VPUE_win))
 
 
 
