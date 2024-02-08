@@ -26,8 +26,6 @@ input_shapefile_vals_to_loop2<-c("wind_NY1.RDS","wind_NY2.RDS","wind_NY3.RDS","w
 
 ```
 
-Note to find outputs used in tables throughout the methods paper use the following to search "Provides outputs for" the text after will provide the appropriate table number, fleet, and variable(s) used.
-
 
 
 
@@ -225,8 +223,6 @@ dropped_values_CA_1_3_LA %>%
 
 ## Average Winsorized Revenue, VPUE, Operating Profit, and Landings in CA closures by fleet LA 
 
-Provides outputs for Table 9 & Table 10, Limited Access Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic.
-
 ```{r}
 Inside_CA1_LA %>%
   group_by(fleet,VTR_STATE) %>%
@@ -292,8 +288,6 @@ dropped_values_CA_1_3_GC %>%
 ```
 
 ##Average Winsorized Revenue, VPUE, Operating Profit, and Landed weights for the Central Atlantic, GCIFQ
-
-Provides outputs for Table 8, GC Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic.
 
 ```{r}
 
@@ -377,8 +371,6 @@ Total revenue and operating profits
 
 ## Average Winsorized Scallop revenue and Operating Profit by NY 1, 2, and 3 and dropped values. GC fleet
 
-Provides outputs for Table 5, NY GC trips, average scallop revenue, average landings, average operating profit, and average revenue per day for New York Bight.
-
 ```{r}
 
  Inside_NY1_GC %>%
@@ -442,8 +434,6 @@ Total revenue and operating profits
 
 
 ## Average Winsorized Revenue, Operating Profit, Landed, and VPUE in closures by fleet LA 
-
-Provides outputs for Table 6 & Table 7, Limited Access Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for New York Bight.
 
 ```{r}
 
