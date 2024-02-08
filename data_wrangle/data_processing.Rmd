@@ -258,6 +258,8 @@ Scallops$SOURCE<- NULL
 
 #Construct scallop fishing year variable
 
+Section 3 Data and Methods "We include data from scallop fishing years 2007-2021, covering March 2007 through March 2022."
+
 ```{r scallop_fishing_years, echo=TRUE}
 
 Scallops$scallop_fishing_year<-"None"
@@ -375,6 +377,8 @@ group_by("YEAR") %>%
 
 # Converting Revenues to Real Dollars 
 
+Section 3. Data and Methods - "All economic values were normalized to the second quarter of 2022 using the GDP Implicit Price Deflator."
+
 Revenues (DOLLAR) are nominal.  Trip costs are now provided in nominal terms.  However, we need Real values to compare across time. This code pull deflators st. louis federal reserve.
 
 ```{r obtain and set fred API key, echo=TRUE}
@@ -454,7 +458,9 @@ VTR_DMIS_AC$qdate <- NULL
 
 # Data Aggregating Trip Revenues & Delete duplicate TRIPIDs
 
-Subtrips are generated when a vessel switches gear or statistical areas. Subtrips have identical TRIPID/DOCID.  A trip may have many (8+) subtrips, but the majority of trips observed only have one subtrip (95.7% using original VTR & DMIS merged data set). If a trip has just 1 subtrip, the trip took place in a single statistical area.  If a trip crosses four different statistical areas, the NSUBTRIP is then equal to 4, and the landings, value, latitude, and longitude are reported separately for each area. 
+Section 3 Data and Methods - "Fishing vessel operators file one Vessel Trip Report (VTR) per combination of statistical area (Figure 4) and gear fished on a trip. Over 95% of LA and 99% of GC-IFQ trips in our dataset contain only one VTR record"
+
+Subtrips are generated when a vessel switches gear or statistical areas. Subtrips have identical TRIPID/DOCID.  A trip may have many (8+) subtrips, but the majority of trips observed only have one subtrip (95.7% using original VTR & DMIS merged data set). If a trip has just 1 subtrip, the trip took place in a single statistical area. If a trip crosses four different statistical areas, the NSUBTRIP is then equal to 4, and the landings, value, latitude, and longitude are reported separately for each area. 
 
 
 ```{r count_subtrips by fleet, echo=TRUE}
