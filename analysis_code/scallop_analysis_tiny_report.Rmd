@@ -23,7 +23,7 @@ params:
     - Seattle
   input_shapefile:
     
-    value: wind_Central_Atlantic_1.RDS
+    value: wind_Central_Atlantic_3.RDS
     choices:
     - wind_NY1.RDS
     - wind_NY2.RDS
@@ -93,12 +93,12 @@ Average winsorized VPUE in closures by fleet
 
 Examples of params for each table are below: 
 Examples of parameters 
-**Table 2. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.** 
+Table 2. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day. 
 input shapefile
     value wind_sf_combined.RDS
 AA_DAS_only FALSE
 
-**Table 3. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day and Table 4. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.**
+Table 3. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day and Table 4. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.
 
 input_shapefile
     value wind_sf_combined.RDS
@@ -581,6 +581,8 @@ scallop0322MainDataTable <-
 
 ### VPUE
 
+Section 3. Data and Methods - "Revenue per day is calculated by dividing gross revenues (from all species caught) by the length of a trip in days."
+
 Same as above but with revenue instead of meat KG
 
 ```{r}
@@ -611,6 +613,9 @@ scallop0322MainDataTable <-
 
 <br><br>
 
+Section 3. Methods and Data -  "Operating profits are gross receipts (from all species) minus variable operative costs which are obtained from Werner et al (2020)."
+
+
 ```{r}
 #Calculate operating profit by subtracting nominal trip costs from nominal aggregated revenues. Then deal with real. 
 scallop0322MainDataTable$OPERATING_PROFIT <- 
@@ -625,6 +630,9 @@ scallop0322MainDataTable$OPERATING_PROFIT_2022 <-
 ### Create new indicator variables with winsor approach 
 
 Winsorized variables for revenue, landed, operating profit, and VPUE
+
+Shapefile: Wind_sf_combined - Section 3. Data and Methods - "Scallop revenues are gross receipts derived from scallops revenues.",  "Landings are the weight of scallops, in meat pounds, corresponding to those trips." and "To ensure data is not affected by outliers, the revenue, landings, and operating cost metrics were winsorized at the 1st and 99th percentile."
+
 ```{r}
 scallop0322MainDataTable$DOLLAR_2022_win <- 
   datawizard::winsorize(scallop0322MainDataTable$DOLLAR_2022, threshold = 0.01)
@@ -710,6 +718,14 @@ agg_helper(scallop0322MainDataTable, value = "in_closure", count = TRUE) %>%
 ```
 
 <br><br><br> Observations inside/outside closures by fleet.
+
+Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - "Over the 15-year study period, 7% (6,602) of the GC-IFQ fleet trips occurred within Lease Areas;" - This uses the wind_sf_combined.RDS input shapefile
+
+
+Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - "Relatively little Access Area fishing by the LA fleet overlaps with the lease areas: just 73 trips over the past 15 years (representing well under 1% of all AA trips) occurred inside the lease areas (Table 4)."
+
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - "There is more overlap between the DAS fishing by the LA fleet: 1,376 trips, representing just over 7% of all DAS trips, occurred inside the lease areas (Table 5)"
 
 ```{r}
 agg_helper(scallop0322MainDataTable, group = "fleet", 
@@ -809,6 +825,53 @@ agg_helper(scallop0322MainDataTable, value = "in_closure",
   rename("Outside closure(s)" = "FALSE", "Inside closure(s)" = "TRUE") %>% 
   pretty_lab(ignore = "scallop_fishing_year") %>% 
   pretty_tab()
+```
+
+<br><br><br>
+
+Leases by Year
+
+```{r}
+
+# This creates outputs for Figure 2,  Offshore Wind Lease Areas approved within federal waters of the Northeast region of the United States, in the scallop methods paper.  
+
+
+Lease_starting_years <- scallop0322MainDataTable %>%
+                          select(LEASE_DATE,NAME) %>%
+                          distinct(NAME,LEASE_DATE) %>%
+                            filter(!is.na(NAME))
+                           
+
+Lease_starting_years$LEASE_DATE1 <- lubridate::year(Lease_starting_years$LEASE_DATE)
+
+
+Lease_starting_years <- Lease_starting_years %>% 
+                              arrange(LEASE_DATE1) %>%
+                              group_by(LEASE_DATE1) %>%
+                                      summarise(n = n())
+
+# The code below sets 0s for the years that have no federal leases which is manually set. This can be improved down the line but works for now. 
+dat <- data.frame(
+  LEASE_DATE1 = c(2007,2008,2009,2010,2011,2018,2020),
+  n = (0)
+)
+
+Lease_starting_years <- full_join(Lease_starting_years,dat)
+Lease_starting_years <- Lease_starting_years %>% arrange(LEASE_DATE1)
+                             
+
+# creates outputs for bar graph used in Figure 2, Offshore Wind Lease Areas approved within federal waters of the Northeast region of the United States, in the scallop methods paper.
+barplot(height=Lease_starting_years$'n', names=Lease_starting_years$LEASE_DATE1, 
+        col="light blue",
+        ylab = "Number of Leases", xlab = "Year",
+        ylim=c(0,10),
+        las = 2,
+        horiz = FALSE,
+        cex.lab = 0.8,
+        cex.axis = 0.8,
+        cex.names = 0.8
+        )
+
 ```
 
 <br><br><br>
@@ -1055,9 +1118,30 @@ cpue_out$plot + angled_theme()
 ## Closure summary
 
 Number of observations.
-This chunk is used to create Table 2, Table 3, and Table 4.
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - Code chunk below creates outputs for Table 2. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.
+
+Shapefile: wind_NYx - Section 4.2 The Adaptive Wind Development Processes -  New York Bight - Code chunk below creates outputs for Table 5. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the New York Bight region.
+
+Shapefile: wind_CAx - Section 4.2 The Adaptive Wind Development Processes -  Central Atlantic - Code chunk below creates outputs for Table 8. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
+
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - "Over the 15-year study period, 7% (6,602) of the GC-IFQ fleet trips occurred within Lease Areas; these trips accounted for approximately ~7% (38M) of the GC-IFQ fleet’s scallop revenue and 7% ($29M) of operating profit."
+
+
+Shapefile: wind_NY1 - Section 4.2 The Adaptive Wind Development Processes - New York Bight - "Within the New York Bight Call Area, scallop fishing has occurred to a relatively large extent; 23,655 trips in the LA and GC-IFQ fleets took place during fishing years 2007-2021. These trips were primarily from the GC-IFQ fleet. Nearly 20% (19,781) of all trips taken by the GC-IFQ fleet were inside the New York Bight Call Area, a relatively inshore location accessible to smaller fishing vessels. "
+
+
+Shapefile: wind_NY2 and wind_NY3 - Section 4.2 The Adaptive Wind Development Processes - New York Bight - "LA-DAS trips were most disproportionate at aggregate levels between the Wind Energy Area and Lease Area phases where operating profit and scallop revenue were disproportionately smaller (~25%). The LA-DAS metier had the highest total operating profit and scallop revenues despite accounting for only 16% of total trips in New York Bight Call Areas."
+
+Shapefile: wind_CA1 and wind_CA2 - Section 4.2 The Adaptive Wind Development Processes - Central Atlantic - “In the Central Atlantic region, The GC-IFQ fleet performed more trips than the LA fleet; The number of trips taken by the GC-IFQ fleet ultimately decreased by almost 57% from Call Area to Wind Energy Area, significantly less than the reduction in land size considered for development.“ and "The number of impacted trips significantly decreased (~97%) between phases of this metier." and Section 5 Discussion and Conclusions - "The GC-IFQ fleet, with a higher trip frequency in the Central Atlantic compared to the LA fleet, underwent a nearly 57% reduction in trips from the Call Area to the Final Wind Energy Area."
+
+Shapefile: wind_CA1 and wind_CA2 - Section Appendix A. - The Adaptive Wind Development Processes - Central Atlantic - "The fleet experienced a 94% reduction in trips from Call Area to Final Wind Energy Area; but yields higher revenues, landed, profits, and revenue per day on average across each trip compared to the GC-IFQ fleet." and Section 5 Discussion and Conclusions 5 - "The LA fleet experienced a profound 94% reduction in trips from the Call Area to the Final Wind Energy Area, with statistically significant impacts on average revenue, landed, profits, and revenue per day observed at each wind development stage."
+
+
 ```{r}
-table_convert <- c("wind_NY1.RDS","wind_NY2.RDS","wind_NY3.RDS","wind_sf_nocable_agg.RDS","wind_sf_nocable.RDS")
+table_convert <- c("wind_NY1.RDS","wind_NY2.RDS","wind_NY3.RDS","wind_sf_nocable_agg.RDS","wind_sf_nocable.RDS", "wind_CA1.Rds","wind_CA2.Rds","wind_CA3.Rds" )
+
 out_switch <- ifelse(params$input_shapefile %in% table_convert, "table", "tab_plot")
 
 zone_out <- 
@@ -1065,6 +1149,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          spat = scallop0322WindCloseSpatTable, 
          zone.dat = "closeID",
          zone.spat = "LEASE_NUMB",
+         group = "fleet",
          count = TRUE,
          breaks = c(1, 10, 50, 100, 250, 500, 750, 1000, 1252),
          na.rm = FALSE, dat.center = FALSE, 
@@ -1081,7 +1166,31 @@ if (out_switch == "table") {
 }
 ```
 
+
+```{r, eval=eval_next}
+  zone_out$table %>%
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+
+```
+
 <br><br><br>
+
+This chunk is used to check confidentiality for Table 2, Table 3, and Table 4.
+```{r}
+scallop0322MainDataTable %>%
+  filter(in_closure == TRUE) %>%
+  select(fleet,PERMIT.y) %>% 
+  group_by(fleet) %>%
+  summarise(count_PERMITs=n_distinct(PERMIT.y))
+    
+```
+
+
+
+<br><br><br>
+
+
 
 Duplicate trips by closure area. This shows whether observations that occurred in a closure area came from duplicate trip IDs.
 
@@ -1172,7 +1281,15 @@ if (out_switch == "table") {
 <br><br><br>
 
 
-Aggregate Winsorized Scallop revenue by closure area.
+#Aggregate Winsorized Scallop revenue by closure area.
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - and Section 5. - Discussion and Conclusions - “Over the 15-year study period, 3% (1,447) of the LA trips occurred within Lease Areas (Figure 5); these trips accounted for approximately 4% (279M) of LA fleet scallop revenue and 3% (259M) of operating profit.”
+
+Shapefile: wind_NY1 and wind_NY2 - Section 4.2 The Adaptive Wind Development Processes - New York Bight - "Aggregate operating profit and scallop revenue between the Call Area and Wind Energy Area phases are found to have disproportionately large (~61%), relative to the reduction size of the wind development areas."
+
+Shapefile: wind_NY2 and wind_NY3 - Section 4.2 The Adaptive Wind Development Processes - New York Bight -"LA-DAS trips were most disproportionate at aggregate levels between the Wind Energy Area and Lease Area phases where operating profit and scallop revenue were disproportionately smaller (~25%). The LA-DAS metier had the highest total operating profit and scallop revenues despite accounting for only 16% of total trips in New York Bight Call Areas."
+
+Shapefile: wind_CA1 and wind_CA2 - Section 4.2 The Adaptive Wind Development Processes - Central Atlantic - "At aggregate levels, operating profit and scallop revenues were significantly smaller (~66%) than the reduction size of the potential wind development areas. Impacted footprint was also drastically disproportionate with only a 61% reduction in trips."  
 
 ```{r}
 zone_out <- 
@@ -1181,6 +1298,7 @@ zone_summary(scallop0322MainDataTable, project = project,
          zone.dat = "closeID",
          zone.spat = "LEASE_NUMB",
          var = "DOLLAR_2022_win",
+         group = "fleet",
          fun = "sum",
          count = FALSE, 
          breaks = c(.001, .01, .1, .3, .5, .7),
@@ -1281,6 +1399,15 @@ if (out_switch == "table") {
 ```
 
 <br><br><br> Box Plots of Revenues in and outside of closures
+
+**Z-tests comparing average winsorized revenue of trips inside and outside of potential offshore wind development areas / closures**
+
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - Code chunk below creates outputs for Table 2. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.
+
+Shapefile: wind_NYx - Section 4.2 The Adaptive Wind Development Processes -  New York Bight - Code chunk below creates outputs for Table 5. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the New York Bight region.
+
+Shapefile: wind_CAx - Section 4.2 The Adaptive Wind Development Processes -  Central Atlantic - Code chunk below creates outputs for Table 8. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
 
 ```{r}
 # To perform the t-tests and make boxplots, observations are separated into two separate samples, inside and outside of closures
@@ -1402,8 +1529,22 @@ if (out_switch == "table") {
 
 <br><br><br>
 
-Average Winsorized Revenue in closures by fleet
-This chunk is used to create Table 2, Table 3, and Table 4.
+**Average Winsorized Revenue in closures by fleet**
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - Code chunk below creates outputs for Table 2. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 3. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 4. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.
+
+Shapefile: wind_NYx - Section 4.2 The Adaptive Wind Development Processes  New York Bight - Code chunk below creates outputs for Table 5. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the New York Bight region.; Table 6. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for New York Bight.; Table 7. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for New York Bight.
+
+Shapefile: wind_CAx - Section 4.2 The Adaptive Wind Development Processes  Central Atlantic - Code chunk below creates outputs for Table 8. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.; Table 9. Limited Access (AA) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.; Table 10. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
+
+
+Shapefile: Wind_sf_combined - Section 4.1 - Scallop fishing in the Wind Lease Areas in the Northeast U.S. - "Mean scallop revenues and landings from trips inside the Lease Areas are slightly higher than outside the Lease Areas at conventional significance levels (Table 3)."
+
+Shapefile: Wind_sf_combined - Section 4.1 - Scallop fishing in the Wind Lease Areas in the Northeast U.S. - "In general, AA trips inside the Lease areas are slightly worse than trips outside the lease areas: mean values of revenue, landed pounds, and revenue per day are lower inside the Lease Areas than outside at conventional significance levels."
+
+
+
+
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -1484,6 +1625,15 @@ if (out_switch == "table") {
 
 
 <br><br><br> Box Plots of Landed in and outside of closures
+
+**Z-tests comparing average winsorized landed of trips inside and outside of potential offshore wind development areas / closures**
+
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - Code chunk below creates outputs for Table 2. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.
+
+Shapefile: wind_NYx - Section 4.2 The Adaptive Wind Development Processes -  New York Bight - Code chunk below creates outputs for Table 5. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the New York Bight region.
+
+Shapefile: wind_CAx - Section 4.2 The Adaptive Wind Development Processes -  Central Atlantic - Code chunk below creates outputs for Table 8. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
 
 ```{r}
 # To perform the t-tests and make boxplots, observations are separated into two separate samples, inside and outside of closures
@@ -1597,6 +1747,17 @@ BSDA::z.test(in_closure_scallop0322MainDataTable_DAS$LANDED,
 ```
 
 
+
+Shapefile: Wind_sf_combined - Section 4.1 - Scallop fishing in the Wind Lease Areas in the Northeast U.S. - "In general, AA trips inside the Lease areas are slightly worse than trips outside the lease areas: mean values of revenue, landed pounds, and revenue per day are lower inside the Lease Areas than outside at conventional significance levels."
+
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - Code chunk below creates outputs for Table 3. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 4. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.
+
+Shapefile: wind_NYx - Section 4.2 The Adaptive Wind Development Processes - New York Bight - Code chunk below creates outputs for Table 6. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for New York Bight.; Table 7. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for New York Bight.
+
+Shapefile: wind_CAx - Section 4.2 The Adaptive Wind Development Processes - Central Atlantic - Code chunk below creates outputs for Table 9. Limited Access (AA) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.; Table 10. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
+
+
 ```{r}
 # LA Trip Type - Winsorized
 if (params$AA_DAS_only==TRUE){
@@ -1661,8 +1822,20 @@ if (out_switch == "table") {
 
 <br><br><br> 
 
-Average winsorized landed in closures by fleet
-This chunk is used to create Table 2, Table 3, and Table 4.
+**Average winsorized landed in closures by fleet**
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - Code chunk below creates outputs for Table 2. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 3. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 4. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.
+
+Shapefile: wind_NYx - Section 4.2 The Adaptive Wind Development Processes  New York Bight - Code chunk below creates outputs for Table 5. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the New York Bight region.; Table 6. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for New York Bight.; Table 7. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for New York Bight.
+
+Shapefile: wind_CAx - Section 4.2 The Adaptive Wind Development Processes  Central Atlantic - Code chunk below creates outputs for Table 8. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.; Table 9. Limited Access (AA) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.; Table 10. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
+
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - "Mean scallop revenues and landings from trips inside the Lease Areas are slightly higher than outside the Lease Areas at conventional significance levels (Table 3)."
+
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S.- "In general, AA trips inside the Lease areas are slightly worse than trips outside the lease areas: mean values of revenue, landed pounds, and revenue per day are lower inside the Lease Areas than outside at conventional significance levels."
+
 
 ```{r}
 
@@ -1792,6 +1965,7 @@ if (out_switch == "table") {
 
 ```
 
+
 ```{r}
 
 # LA Trip Type
@@ -1814,6 +1988,18 @@ BSDA::z.test(in_closure_scallop0322MainDataTable_DAS$DOLLAR_2022,
   conf.level = 0.95)
 }
 ```
+
+**Z-tests comparing average winsorized revenue of trips inside and outside of potential offshore wind development areas / closures**
+
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - Code chunk below creates outputs for Table 3. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 4. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.
+
+Shapefile: wind_NYx - Section 4.2 The Adaptive Wind Development Processes  New York Bight - Code chunk below creates outputs for Table 6. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for New York Bight.; Table 7. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for New York Bight.
+
+Shapefile: wind_CAx - Section 4.2 The Adaptive Wind Development Processes  Central Atlantic - Code chunk below creates outputs for Table 9. Limited Access (AA) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.; Table 10. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
+
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - This chunk is used to create Table 3 and Table 4.
 
 ```{r}
 # LA Trip Type - Winsorized
@@ -1888,6 +2074,7 @@ cpue_out$table %>%
 
 <br><br><br> Percent of Scallop revenue by closure area.
 
+
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -1924,6 +2111,8 @@ if (out_switch == "table") {
 
 
 <br><br><br> Percent of Scallop winsorized revenue by closure area.
+
+Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - and Section 5 Discussion and Conclusions - "Over the 15-year study period, 7% (6,602) of the GC-IFQ fleet trips occurred within Lease Areas; these trips accounted for approximately ~7% (38M) of the GC-IFQ fleet’s scallop revenue and 7% ($29M) of operating profit."
 
 ```{r}
 zone_out <- 
@@ -2000,6 +2189,7 @@ if (out_switch == "table") {
 
 Percent of Scallop winsorized revenue by fleet.
 
+
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -2038,7 +2228,7 @@ if (out_switch == "table") {
 
 <br><br><br> 
 
-Total Operating Profit by closure area.
+Total/Aggregate Operating Profit by closure area.
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -2076,7 +2266,15 @@ zone_out$plot }
 
 <br><br><br> 
 
-Total Winsorized Operating Profit by closure area.
+Total/Aggregate Winsorized Operating Profit by closure area.
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. -  “Over the 15-year study period, 3% (1,447) of the LA trips occurred within Lease Areas (Figure 5); these trips accounted for approximately 4% (279M) of LA fleet scallop revenue and 3% (259M) of operating profit.”
+
+Shapefile: wind_NY1 and wind_NY2 - Section 4.2 The Adaptive Wind Development Processes - "Aggregate operating profit and scallop revenue between the Call Area and Wind Energy Area phases are found to have disproportionately large (~61%), relative to the reduction size of the wind development areas."
+
+Shapefile: wind_NY2 and wind_NY3 - Section 4.2 The Adaptive Wind Development Processes -"LA-DAS trips were most disproportionate at aggregate levels between the Wind Energy Area and Lease Area phases where operating profit and scallop revenue were disproportionately smaller (~25%). The LA-DAS metier had the highest total operating profit and scallop revenues despite accounting for only 16% of total trips in New York Bight Call Areas."
+
+
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -2176,9 +2374,18 @@ boxplot(out_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022_win,
   horizontal = TRUE,
   notch = TRUE)
 
+```
 
+**Z-tests comparing average winsorized operating profit of trips inside and outside of potential offshore wind development areas / closures**
 
+ 
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - Code chunk below creates outputs for Table 2. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.
 
+Shapefile: wind_NYx - Section 4.2 The Adaptive Wind Development Processes -  New York Bight - Code chunk below creates outputs for Table 5. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the New York Bight region.
+
+Shapefile: wind_CAx - Section 4.2 The Adaptive Wind Development Processes -  Central Atlantic - Code chunk below creates outputs for Table 8. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
+
+```{r}
 BSDA::z.test(out_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022,
   y = in_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022,
   sigma.x = sd(out_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022),
@@ -2217,6 +2424,16 @@ BSDA::z.test(in_closure_scallop0322MainDataTable_DAS$OPERATING_PROFIT_2022,
 
 
 ```
+<br><br><br> 
+ 
+ Z-tests comparing winsorized operating profit per trip of trips inside and outside of potential offshore wind development areas / closures
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - Code chunk below creates outputs for Table 3. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 4. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.
+
+Shapefile: wind_NYx - Section 4.2 The Adaptive Wind Development Processes -  New York Bight - Code chunk below creates outputs for Table 6. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for New York Bight.; Table 7. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for New York Bight.
+
+Shapefile: wind_CAx - Section 4.2 The Adaptive Wind Development Processes -  Central Atlantic - Code chunk below creates outputs for Table 9. Limited Access (AA) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.; Table 10. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
+
 
 ```{r}
 # LA Trip Type - Winsorized
@@ -2284,6 +2501,8 @@ if (out_switch == "table") {
 
 
 Percent of Scallop winsorized profit by fleet.
+
+Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - "Over the 15-year study period, 7% (6,602) of the GC-IFQ fleet trips occurred within Lease Areas; these trips accounted for approximately ~7% (38M) of the GC-IFQ fleet’s scallop revenue and 7% ($29M) of operating profit."
 
 ```{r}
 zone_out <- 
@@ -2471,8 +2690,19 @@ zone_out$plot }
 ```
 
 <br><br><br> 
-Average Winsorized Operating Profit in closures by fleet
-This chunk is used to create Table 2, Table 3, and Table 4.
+**Average Winsorized Operating Profit in closures by fleet**
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - Code chunk below creates outputs for Table 2. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 3. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 4. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.
+
+Shapefile: wind_NYx - Section 4.2 The Adaptive Wind Development Processes  New York Bight - Code chunk below creates outputs for Table 5. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the New York Bight region.; Table 6. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for New York Bight.; Table 7. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for New York Bight.
+
+Shapefile: wind_CAx - Section 4.2 The Adaptive Wind Development Processes  Central Atlantic - Code chunk below creates outputs for Table 8. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.; Table 9. Limited Access (AA) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.; Table 10. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
+
+
+Shapefile: Wind_sf_combined - Section 4.1 - "However, mean operating profits and revenue per day inside the Lease areas are slightly lower." 
+
+Shapefile: Wind_sf_combined - Section 4.1 - " In general, AA trips inside the Lease areas are slightly worse than trips outside the lease areas: mean values of revenue, landed pounds, and revenue per day are lower inside the Lease Areas than outside at conventional significance levels."  
+
 ```{r}
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
@@ -3069,10 +3299,17 @@ boxplot(out_closure_scallop0322MainDataTable$VPUE_win,
   border = "black",
   horizontal = TRUE,
   notch = TRUE)
+```
 
+**Z-tests comparing average winsorized revenue per trip (VPUE) of trips inside and outside of potential offshore wind development areas / closures**
 
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - Code chunk below creates outputs for Table 2. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.
 
+Shapefile: wind_NYx - Section 4.2 The Adaptive Wind Development Processes -  New York Bight - Code chunk below creates outputs for Table 5. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the New York Bight region.
 
+Shapefile: wind_CAx - Section 4.2 The Adaptive Wind Development Processes -  Central Atlantic - Code chunk below creates outputs for Table 8. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
+
+```{r}
 BSDA::z.test(out_closure_scallop0322MainDataTable$VPUE,
   y = in_closure_scallop0322MainDataTable$VPUE,
   sigma.x = sd(out_closure_scallop0322MainDataTable$VPUE),
@@ -3109,6 +3346,17 @@ BSDA::z.test(in_closure_scallop0322MainDataTable_DAS$VPUE,
 }
 ```
 
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - Code chunk below creates outputs for Table 3. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 4. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.
+
+Shapefile: wind_NYx - Section 4.2 The Adaptive Wind Development Processes - New York Bight - Code chunk below creates outputs for Table 6. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for New York Bight.; Table 7. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for New York Bight.
+
+Shapefile: wind_CAx - Section 4.2 The Adaptive Wind Development Processes - Central Atlantic - Code chunk below creates outputs for Table 9. Limited Access (AA) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.; Table 10. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
+
+
+Shapefile: Wind_sf_combined - Section 4.1 - "In general, AA trips inside the Lease areas are slightly worse than trips outside the lease areas: mean values of revenue, landed pounds, and revenue per day are lower inside the Lease Areas than outside at conventional significance levels."
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - This chunk is used to create Table 3 and Table 4.
 ```{r}
 # LA Trip Type - Winsorized
 if (params$AA_DAS_only==TRUE){
@@ -3212,8 +3460,20 @@ if (out_switch == "table") {
 
 <br><br><br> <br><br><br>
 
-Average winsorized VPUE in closures by fleet
-This chunk is used to create Table 2, Table 3, and Table 4.
+**Average winsorized VPUE in closures by fleet**
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - Code chunk below creates outputs for Table 2. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 3. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 4. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.
+
+Shapefile: wind_NYx - Section 4.2 The Adaptive Wind Development Processes - New York Bight - Code chunk below creates outputs for Table 5. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the New York Bight region.; Table 6. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for New York Bight.; Table 7. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for New York Bight.
+
+Shapefile: wind_CAx - Section 4.2 The Adaptive Wind Development Processes - Central Atlantic - Code chunk below creates outputs for Table 8. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.; Table 9. Limited Access (AA) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.; Table 10. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
+
+
+Shapefile: Wind_sf_combined - Section 4.1 - "However, mean operating profits and revenue per day inside the Lease areas are slightly lower." 
+
+Shapefile: Wind_sf_combined - Section 4.1 - "In general, AA trips inside the Lease areas are slightly worse than trips outside the lease areas: mean values of revenue, landed pounds, and revenue per day are lower inside the Lease Areas than outside at conventional significance levels."
+
+
 
 ```{r}
 
@@ -3320,7 +3580,7 @@ agg_helper(scallop0322MainDataTable, "NSUBTRIP",
 
 <br><br>
 
-## Correlation Matrix
+Correlation Matrix
 
 ```{r}
 corr <- 
