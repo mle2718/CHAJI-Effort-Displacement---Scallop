@@ -280,54 +280,6 @@ Section 4.2 The Adaptive Wind Development Processes - Central Atlantic - "In 202
 
 
 Section 5 Discussion and Conclusions - "The Central Atlantic, a historically important region for scallop harvest, underwent a transformative development in offshore wind, marked by the announcement of Call Areas in was substantial: over 90%. "
-```{r}
-# Adding an area values for shapefiles in the NY Bight, Central Atlantic, and all leases to compare changes over time by area 
-## note that area is in meters squared but can be changed later
-
-wind_sf$area_ms2 <- sf::st_area(wind_sf)
-
-wind_NY1$area_ms2 <- sf::st_area(wind_NY1)
-wind_NY2$area_ms2 <- sf::st_area(wind_NY2)
-wind_NY3$area_ms2 <- sf::st_area(wind_NY3)
-
-wind_Central_Atlantic_1$area_ms2 <- sf::st_area(wind_Central_Atlantic_1)
-  wind_Central_Atlantic_1 <- wind_Central_Atlantic_1 %>% 
-                                          mutate(area_ms2_sum = sum(area_ms2))
-  wind_Central_Atlantic_1 <- wind_Central_Atlantic_1[1,]
-  
-wind_Central_Atlantic_2$area_ms2 <- sf::st_area(wind_Central_Atlantic_2)
-
-wind_Central_Atlantic_3$area_ms2 <- sf::st_area(wind_Central_Atlantic_3)
-   wind_Central_Atlantic_3 <- wind_Central_Atlantic_3 %>% 
-                                          mutate(area_ms2_sum = sum(area_ms2))
-      wind_Central_Atlantic_3 <- wind_Central_Atlantic_3[1,]                                    
-
-
-```
-
-
-```{r}
-# Calculating percent change between areas of matching shapefiles
-
-area_name <- c(wind_NY1$LEASE_NUMB,wind_NY2$LEASE_NUMB,wind_NY3$LEASE_NUMB)
-area_calc <- c(wind_NY1$area_ms2,wind_NY2$area_ms2,wind_NY3$area_ms2)
-wind_NY_area_differences <- data.frame(area_name,area_calc)
-
-units(wind_NY_area_differences$area_calc) <- NULL
-wind_NY_area_differences$percent_change <- ((wind_NY_area_differences$area_calc/lag(wind_NY_area_differences$area_calc) - 1) * 100)
-print(wind_NY_area_differences)
-
-
-units(wind_Central_Atlantic_1$area_ms2_sum) <- NULL
-units(wind_Central_Atlantic_3$area_ms2_sum) <- NULL
-
-area_name <- c(wind_Central_Atlantic_1$LEASE_NUMB,wind_Central_Atlantic_3$LEASE_NUMB)
-area_calc <- c(wind_Central_Atlantic_1$area_ms2_sum,wind_Central_Atlantic_3$area_ms2_sum)
-wind_CA_area_differences <- data.frame(area_name,area_calc)
-
-wind_CA_area_differences$percent_change <- ((wind_CA_area_differences$area_calc/lag(wind_CA_area_differences$area_calc) - 1) * 100)
-print(wind_CA_area_differences)
-```
 
 
 ```{r}
@@ -396,5 +348,54 @@ saveRDS(wind_Central_Atlantic_2,file=file.path(lease_dirpath,"wind_Central_Atlan
 saveRDS(wind_Central_Atlantic_3,file=file.path(lease_dirpath,"wind_Central_Atlantic_3.RDS"))
 
 
+```
+
+```{r}
+# Adding an area values for shapefiles in the NY Bight, Central Atlantic, and all leases to compare changes over time by area 
+## note that area is in meters squared but can be changed later
+
+wind_sf$area_ms2 <- sf::st_area(wind_sf)
+
+wind_NY1$area_ms2 <- sf::st_area(wind_NY1)
+wind_NY2$area_ms2 <- sf::st_area(wind_NY2)
+wind_NY3$area_ms2 <- sf::st_area(wind_NY3)
+
+wind_Central_Atlantic_1$area_ms2 <- sf::st_area(wind_Central_Atlantic_1)
+  wind_Central_Atlantic_1 <- wind_Central_Atlantic_1 %>% 
+                                          mutate(area_ms2_sum = sum(area_ms2))
+  wind_Central_Atlantic_1 <- wind_Central_Atlantic_1[1,]
+  
+wind_Central_Atlantic_2$area_ms2 <- sf::st_area(wind_Central_Atlantic_2)
+
+wind_Central_Atlantic_3$area_ms2 <- sf::st_area(wind_Central_Atlantic_3)
+   wind_Central_Atlantic_3 <- wind_Central_Atlantic_3 %>% 
+                                          mutate(area_ms2_sum = sum(area_ms2))
+      wind_Central_Atlantic_3 <- wind_Central_Atlantic_3[1,]                                    
+
+
+```
+
+
+```{r}
+# Calculating percent change between areas of matching shapefiles
+
+area_name <- c(wind_NY1$LEASE_NUMB,wind_NY2$LEASE_NUMB,wind_NY3$LEASE_NUMB)
+area_calc <- c(wind_NY1$area_ms2,wind_NY2$area_ms2,wind_NY3$area_ms2)
+wind_NY_area_differences <- data.frame(area_name,area_calc)
+
+units(wind_NY_area_differences$area_calc) <- NULL
+wind_NY_area_differences$percent_change <- ((wind_NY_area_differences$area_calc/lag(wind_NY_area_differences$area_calc) - 1) * 100)
+print(wind_NY_area_differences)
+
+
+units(wind_Central_Atlantic_1$area_ms2_sum) <- NULL
+units(wind_Central_Atlantic_3$area_ms2_sum) <- NULL
+
+area_name <- c(wind_Central_Atlantic_1$LEASE_NUMB,wind_Central_Atlantic_3$LEASE_NUMB)
+area_calc <- c(wind_Central_Atlantic_1$area_ms2_sum,wind_Central_Atlantic_3$area_ms2_sum)
+wind_CA_area_differences <- data.frame(area_name,area_calc)
+
+wind_CA_area_differences$percent_change <- ((wind_CA_area_differences$area_calc/lag(wind_CA_area_differences$area_calc) - 1) * 100)
+print(wind_CA_area_differences)
 ```
 
