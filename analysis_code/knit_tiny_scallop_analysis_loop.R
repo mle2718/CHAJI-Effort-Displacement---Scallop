@@ -7,7 +7,7 @@ library("rmarkdown")
 here::i_am("analysis_code/knit_tiny_scallop_analysis_loop.R")
 
 #create a directory in main for the casestudy data to go
-dir.create(here("data","main","casestudies"), showWarnings="FALSE")
+dir.create(here::here("data","main","casestudies"), showWarnings="FALSE")
 
 # Define the "things" you want to loop over.
 AADAS_Vals_to_loop<-c(TRUE,FALSE) # TRUE is the AADAS fleet. FALSE is the IFQ fleet
@@ -21,8 +21,8 @@ input_shapefile_vals_to_loop2<-c("wind_NY1.RDS","wind_NY2.RDS","wind_NY3.RDS","w
 
 ##################################################################################
 # The combine_cable_routes.Rmd must be rendered to process the cable route and finagle the shapefiles into a format required by FishSET
-rmarkdown::render(here("data_wrangle","combine_cable_routes.Rmd"),
-                  output_file = here("data_wrangle","combine_cable_routes.html"))
+rmarkdown::render(here::here("data_wrangle","combine_cable_routes.Rmd"),
+                  output_file = here::here("data_wrangle","combine_cable_routes.html"))
 ##################################################################################
 
 
@@ -30,12 +30,12 @@ rmarkdown::render(here("data_wrangle","combine_cable_routes.Rmd"),
 ##################################################################################
 #Define a function that passes parameters into the rmarkdown::render function
 render_tiny_report = function(AA_DAS_only, subtrip_aggregate, input_shapefile) {
-  rmarkdown::render(here("analysis_code","scallop_analysis_tiny_report.Rmd"), params = list(
+  rmarkdown::render(here::here("analysis_code","scallop_analysis_tiny_report.Rmd"), params = list(
     AA_DAS_only = AA_DAS_only,
     subtrip_aggregate = subtrip_aggregate,
     input_shapefile=input_shapefile
   ),
-  output_file = here("results",paste0("scallop_tiny_AA_",AA_DAS_only,"_subtripaggregate_",subtrip_aggregate,"_shapefile_", gsub(".RDS", "",input_shapefile ), ".html")
+  output_file = here::here("results",paste0("scallop_tiny_AA_",AA_DAS_only,"_subtripaggregate_",subtrip_aggregate,"_shapefile_", gsub(".RDS", "",input_shapefile ), ".html")
   ))
 }
 ################################################################################## 
