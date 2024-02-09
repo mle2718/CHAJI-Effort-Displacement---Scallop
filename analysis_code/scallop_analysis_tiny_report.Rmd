@@ -1121,7 +1121,7 @@ cpue_out$plot + angled_theme()
 **Number of observations.**
 
 ```{r}
-table_convert <- c("wind_NY1.RDS","wind_NY2.RDS","wind_NY3.RDS","wind_sf_nocable_agg.RDS","wind_sf_nocable.RDS", "wind_CA1.Rds","wind_CA2.Rds","wind_CA3.Rds" )
+table_convert <- c("wind_NY1.RDS","wind_NY2.RDS","wind_NY3.RDS","wind_sf_nocable_agg.RDS","wind_sf_nocable.RDS", "wind_Central_Atlantic_3.RDS","wind_Central_Atlantic_2.RDS","wind_Central_Atlantic_1.RDS")
 
 out_switch <- ifelse(params$input_shapefile %in% table_convert, "table", "tab_plot")
 
@@ -3494,9 +3494,6 @@ Shapefile: wind_CA1 and wind_CA2 - Section Appendix A. - The Adaptive Wind Devel
 
 
 ```{r}
-table_convert <- c("wind_NY1.RDS","wind_NY2.RDS","wind_NY3.RDS","wind_sf_nocable_agg.RDS","wind_sf_nocable.RDS", "wind_CA1.Rds","wind_CA2.Rds","wind_CA3.Rds" )
-
-out_switch <- ifelse(params$input_shapefile %in% table_convert, "table", "tab_plot")
 
 zone_out <- 
 zone_summary(scallop0322MainDataTable, project = project,
