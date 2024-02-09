@@ -367,6 +367,12 @@ wind_Central_Atlantic_1$area_ms2 <- sf::st_area(wind_Central_Atlantic_1)
   
 wind_Central_Atlantic_2$area_ms2 <- sf::st_area(wind_Central_Atlantic_2)
 
+#We don't use CA2,but i'm putting this in here to match the others, just in case
+wind_Central_Atlantic_2 <- wind_Central_Atlantic_2 %>% 
+                                          mutate(area_ms2_sum = sum(area_ms2))
+
+
+
 wind_Central_Atlantic_3$area_ms2 <- sf::st_area(wind_Central_Atlantic_3)
    wind_Central_Atlantic_3 <- wind_Central_Atlantic_3 %>% 
                                           mutate(area_ms2_sum = sum(area_ms2))
