@@ -47,6 +47,7 @@ PreRelease -- controls the location of FishSET package. Set to FALSE to load wit
 --->
 ```
 ## Warning and Options
+This .Rmd can be knit to html directly, but it is far more useful to pass in different parameters by using *knit_tiny_scallop_analysis_loop.R*.
 
 Please be careful with interpretation. Some outputs are uninterpretable when certain options are selected. For example, when we *do not* aggregate subtrips to trips:
 
