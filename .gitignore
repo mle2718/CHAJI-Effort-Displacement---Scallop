@@ -18,3 +18,5 @@ scallop_zone_assignment_files
 *.log
 *.RData
 *.Rdata
+.Rdata
+.RData
