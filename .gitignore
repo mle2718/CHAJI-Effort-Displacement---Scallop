@@ -16,3 +16,5 @@ scallop_zone_assignment_files
 .Renviron
 *.html
 *.log
+*.RData
+*.Rdata
