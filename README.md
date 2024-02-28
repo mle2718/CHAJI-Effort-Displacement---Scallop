@@ -24,7 +24,7 @@ The data extraction code was primarily been developed by Marina Chaji and ran on
 *   Rstudio server Version 1.4.1103
 
 In preparation for the retirement on the Neptune server, development was moved to individual containers in July 2023. This code will run on the standard NEFSC R container, which is running R 4.3.0 (2023-04-21)
-The data analysis code runs properly.  The containers do not support RODBC, so all of the data extraction code has to be switched to ROracle.  Only some of it has been switched over.
+The data analysis code runs properly.  The containers do not support RODBC, so all of the data extraction code was switched to ROracle.
 
 # Getting started
 
