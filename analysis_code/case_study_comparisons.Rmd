@@ -258,31 +258,31 @@ dropped_values_CA_1_3_LA %>%
 ```{r}
 Inside_CA1_LA %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
-                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win))
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win), LANDED_win=mean(LANDED_win),
+                   OPERATING_win=mean(OPERATING_PROFIT_2022_win),VPUE_win=mean(VPUE_win) )
 
 
 # Inside_CA2_LA %>%
 #   group_by(fleet) %>%
-#   dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
-#                    LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win))
+#  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win), LANDED_win=mean(LANDED_win),
+#                   OPERATING_win=mean(OPERATING_PROFIT_2022_win),VPUE_win=mean(VPUE_win) )
 
 
 Inside_CA3_LA %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
-                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win) )
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win), LANDED_win=mean(LANDED_win),
+                   OPERATING_win=mean(OPERATING_PROFIT_2022_win),VPUE_win=mean(VPUE_win) )
 
 dropped_values_CA_1_3_LA %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
-                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win) )
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win), LANDED_win=mean(LANDED_win),
+                   OPERATING_win=mean(OPERATING_PROFIT_2022_win),VPUE_win=mean(VPUE_win) )
 
 
 # dropped_values_CA_1_2_LA %>%
 #   group_by(fleet) %>%
-#   dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
-#                    LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win) )
+#  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win), LANDED_win=mean(LANDED_win),
+#                   OPERATING_win=mean(OPERATING_PROFIT_2022_win),VPUE_win=mean(VPUE_win) )
 # 
 # 
 # dropped_values_CA_2_3_LA %>%
@@ -328,39 +328,39 @@ dropped_values_CA_1_3_GC %>%
 
 Inside_CA1_GC %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
-                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win) )
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),LANDED_win=mean(LANDED_win), 
+                  OPERATING_win=mean(OPERATING_PROFIT_2022_win), VPUE_win=mean(VPUE_win)  )
 
 
 # Inside_CA2_GC %>%
 #   group_by(fleet) %>%
-#   dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
-#                    LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win) )
+#  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),LANDED_win=mean(LANDED_win), 
+#                  OPERATING_win=mean(OPERATING_PROFIT_2022_win), VPUE_win=mean(VPUE_win)  )
 
 
 Inside_CA3_GC %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
-                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win) )
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),LANDED_win=mean(LANDED_win), 
+                  OPERATING_win=mean(OPERATING_PROFIT_2022_win), VPUE_win=mean(VPUE_win)  )
 
 
 
 dropped_values_CA_1_3_GC %>%
   group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
-                   LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win) )
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),LANDED_win=mean(LANDED_win), 
+                  OPERATING_win=mean(OPERATING_PROFIT_2022_win), VPUE_win=mean(VPUE_win)  )
 
 
 # dropped_values_CA_1_2_GC %>%
 #   group_by(fleet) %>%
-#   dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
-#                    LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win) )
+#  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),LANDED_win=mean(LANDED_win), 
+#                  OPERATING_win=mean(OPERATING_PROFIT_2022_win), VPUE_win=mean(VPUE_win)  )
 # 
 # 
 # dropped_values_CA_2_3_GC %>%
 #   group_by(fleet) %>%
-#   dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
-#                    LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win) )
+#  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),LANDED_win=mean(LANDED_win), 
+#                  OPERATING_win=mean(OPERATING_PROFIT_2022_win), VPUE_win=mean(VPUE_win)  )
 
 
 ```
