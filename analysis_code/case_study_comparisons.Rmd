@@ -373,23 +373,7 @@ dropped_values_CA_1_3_GC %>%
 
 The first command tests the equality Winsorized Dollars for the Trips that were dropped during the CA 1 to CA 3 process (Call area to Lease Area)  against the trips that remained inside at the CA3 step (Lease Areas).  These are done at the 90, 95, and 99\% confidence levels.  Other commands are defined analgously.
 
-```{r}
-
-BSDA::z.test(dropped_values_CA_1_3_GC$DOLLAR_2022_win,
-  y = Inside_CA3_GC$DOLLAR_2022_win,
-  sigma.x = sd(dropped_values_CA_1_3_GC$DOLLAR_2022_win),
-  sigma.y = sd(Inside_CA3_GC$DOLLAR_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_CA_1_3_GC$DOLLAR_2022_win,
-  y = Inside_CA3_GC$DOLLAR_2022_win,
-  sigma.x = sd(dropped_values_CA_1_3_GC$DOLLAR_2022_win),
-  sigma.y = sd(Inside_CA3_GC$DOLLAR_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
+```{r, CA1_to_3GC_Dollar_tests}
 
 BSDA::z.test(dropped_values_CA_1_3_GC$DOLLAR_2022_win,
   y = Inside_CA3_GC$DOLLAR_2022_win,
@@ -406,57 +390,7 @@ BSDA::z.test(dropped_values_CA_1_3_GC$DOLLAR_2022_win,
 Section 4.2 The Adaptive Wind Development Processes -  Central Atlantic - Code chunk below creates output for Table 9. Limited Access (AA) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.; Table 10. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
 
 
-```{r}
-
-# Access Area 
-## Phase 1 to 2
-
-BSDA::z.test(dropped_values_CA_1_2_AA$DOLLAR_2022_win,
-  y = Inside_CA2_AA$DOLLAR_2022_win,
-  sigma.x = sd(dropped_values_CA_1_2_AA$DOLLAR_2022_win),
-  sigma.y = sd(Inside_CA2_AA$DOLLAR_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_CA_1_2_AA$DOLLAR_2022_win,
-  y = Inside_CA2_AA$DOLLAR_2022_win,
-  sigma.x = sd(dropped_values_CA_1_2_AA$DOLLAR_2022_win),
-  sigma.y = sd(Inside_CA2_AA$DOLLAR_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
-BSDA::z.test(dropped_values_CA_1_2_AA$DOLLAR_2022_win,
-  y = Inside_CA2_AA$DOLLAR_2022_win,
-  sigma.x = sd(dropped_values_CA_1_2_AA$DOLLAR_2022_win),
-  sigma.y = sd(Inside_CA2_AA$DOLLAR_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.99)
-
-## Phase 2 to 3
-BSDA::z.test(dropped_values_CA_2_3_AA$DOLLAR_2022_win,
-  y = Inside_CA2_AA$DOLLAR_2022_win,
-  sigma.x = sd(dropped_values_CA_2_3_AA$DOLLAR_2022_win),
-  sigma.y = sd(Inside_CA2_AA$DOLLAR_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_CA_2_3_AA$DOLLAR_2022_win,
-  y = Inside_CA2_AA$DOLLAR_2022_win,
-  sigma.x = sd(dropped_values_CA_2_3_AA$DOLLAR_2022_win),
-  sigma.y = sd(Inside_CA2_AA$DOLLAR_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
-BSDA::z.test(dropped_values_CA_2_3_AA$DOLLAR_2022_win,
-  y = Inside_CA2_AA$DOLLAR_2022_win,
-  sigma.x = sd(dropped_values_CA_2_3_AA$DOLLAR_2022_win),
-  sigma.y = sd(Inside_CA2_AA$DOLLAR_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.99)
+```{r, CA1_to_3AA_Dollar_tests}
 
 ## Phase 1 to 3
 
@@ -465,92 +399,10 @@ BSDA::z.test(dropped_values_CA_1_3_AA$DOLLAR_2022_win,
   sigma.x = sd(dropped_values_CA_1_3_AA$DOLLAR_2022_win),
   sigma.y = sd(Inside_CA3_AA$DOLLAR_2022_win),
   alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_CA_1_3_AA$DOLLAR_2022_win,
-  y = Inside_CA3_AA$DOLLAR_2022_win,
-  sigma.x = sd(dropped_values_CA_1_3_AA$DOLLAR_2022_win),
-  sigma.y = sd(Inside_CA3_AA$DOLLAR_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
-BSDA::z.test(dropped_values_CA_1_3_AA$DOLLAR_2022_win,
-  y = Inside_CA3_AA$DOLLAR_2022_win,
-  sigma.x = sd(dropped_values_CA_1_3_AA$DOLLAR_2022_win),
-  sigma.y = sd(Inside_CA3_AA$DOLLAR_2022_win),
-  alternative = c("two.sided"),
   conf.level = 0.99)
 
-# Days-at-Sea
-## Phase 1 to 2
-
-BSDA::z.test(dropped_values_CA_1_2_DAS$DOLLAR_2022_win,
-  y = Inside_CA2_DAS$DOLLAR_2022_win,
-  sigma.x = sd(dropped_values_CA_1_2_DAS$DOLLAR_2022_win),
-  sigma.y = sd(Inside_CA2_DAS$DOLLAR_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_CA_1_2_DAS$DOLLAR_2022_win,
-  y = Inside_CA2_DAS$DOLLAR_2022_win,
-  sigma.x = sd(dropped_values_CA_1_2_DAS$DOLLAR_2022_win),
-  sigma.y = sd(Inside_CA2_DAS$DOLLAR_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
-BSDA::z.test(dropped_values_CA_1_2_DAS$DOLLAR_2022_win,
-  y = Inside_CA2_DAS$DOLLAR_2022_win,
-  sigma.x = sd(dropped_values_CA_1_2_DAS$DOLLAR_2022_win),
-  sigma.y = sd(Inside_CA2_DAS$DOLLAR_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.99)
-
-
-## Phase 2 to 3
-BSDA::z.test(dropped_values_CA_2_3_DAS$DOLLAR_2022_win,
-  y = Inside_CA2_DAS$DOLLAR_2022_win,
-  sigma.x = sd(dropped_values_CA_2_3_DAS$DOLLAR_2022_win),
-  sigma.y = sd(Inside_CA2_DAS$DOLLAR_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_CA_2_3_DAS$DOLLAR_2022_win,
-  y = Inside_CA2_DAS$DOLLAR_2022_win,
-  sigma.x = sd(dropped_values_CA_2_3_DAS$DOLLAR_2022_win),
-  sigma.y = sd(Inside_CA2_DAS$DOLLAR_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
-BSDA::z.test(dropped_values_CA_2_3_DAS$DOLLAR_2022_win,
-  y = Inside_CA2_DAS$DOLLAR_2022_win,
-  sigma.x = sd(dropped_values_CA_2_3_DAS$DOLLAR_2022_win),
-  sigma.y = sd(Inside_CA2_DAS$DOLLAR_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.99)
 
 ## Phase 1 to 3
-
-BSDA::z.test(dropped_values_CA_1_3_DAS$DOLLAR_2022_win,
-  y = Inside_CA3_DAS$DOLLAR_2022_win,
-  sigma.x = sd(dropped_values_CA_1_3_DAS$DOLLAR_2022_win),
-  sigma.y = sd(Inside_CA3_DAS$DOLLAR_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_CA_1_3_DAS$DOLLAR_2022_win,
-  y = Inside_CA3_DAS$DOLLAR_2022_win,
-  sigma.x = sd(dropped_values_CA_1_3_DAS$DOLLAR_2022_win),
-  sigma.y = sd(Inside_CA3_DAS$DOLLAR_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
 
 BSDA::z.test(dropped_values_CA_1_3_DAS$DOLLAR_2022_win,
   y = Inside_CA3_DAS$DOLLAR_2022_win,
@@ -565,21 +417,8 @@ BSDA::z.test(dropped_values_CA_1_3_DAS$DOLLAR_2022_win,
 
  Section 4.2 The Adaptive Wind Development Processes -  Central Atlantic - Code chunk below creates output for Table 8. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
 
-```{r}
+```{r, CA1_to_3GC_Landed_tests}
 
-BSDA::z.test(dropped_values_CA_1_3_GC$LANDED_win,
-  y = Inside_CA3_GC$LANDED_win,
-  sigma.x = sd(dropped_values_CA_1_3_GC$LANDED_win),
-  sigma.y = sd(Inside_CA3_GC$LANDED_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-BSDA::z.test(dropped_values_CA_1_3_GC$LANDED_win,
-  y = Inside_CA3_GC$LANDED_win,
-  sigma.x = sd(dropped_values_CA_1_3_GC$LANDED_win),
-  sigma.y = sd(Inside_CA3_GC$LANDED_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
 
 BSDA::z.test(dropped_values_CA_1_3_GC$LANDED_win,
   y = Inside_CA3_GC$LANDED_win,
@@ -597,74 +436,9 @@ BSDA::z.test(dropped_values_CA_1_3_GC$LANDED_win,
  Section 4.2 The Adaptive Wind Development Processes -  Central Atlantic - Code chunk below creates output for Table 9. Limited Access (AA) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.; Table 10. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
 
 
-```{r}
-
-# Access Area 
-## Phase 1 to 2
-
-BSDA::z.test(dropped_values_CA_1_2_AA$LANDED_win,
-  y = Inside_CA2_AA$LANDED_win,
-  sigma.x = sd(dropped_values_CA_1_2_AA$LANDED_win),
-  sigma.y = sd(Inside_CA2_AA$LANDED_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_CA_1_2_AA$LANDED_win,
-  y = Inside_CA2_AA$LANDED_win,
-  sigma.x = sd(dropped_values_CA_1_2_AA$LANDED_win),
-  sigma.y = sd(Inside_CA2_AA$LANDED_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
-BSDA::z.test(dropped_values_CA_1_2_AA$LANDED_win,
-  y = Inside_CA2_AA$LANDED_win,
-  sigma.x = sd(dropped_values_CA_1_2_AA$LANDED_win),
-  sigma.y = sd(Inside_CA2_AA$LANDED_win),
-  alternative = c("two.sided"),
-  conf.level = 0.99)
-
-## Phase 2 to 3
-BSDA::z.test(dropped_values_CA_2_3_AA$LANDED_win,
-  y = Inside_CA2_AA$LANDED_win,
-  sigma.x = sd(dropped_values_CA_2_3_AA$LANDED_win),
-  sigma.y = sd(Inside_CA2_AA$LANDED_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_CA_2_3_AA$LANDED_win,
-  y = Inside_CA2_AA$LANDED_win,
-  sigma.x = sd(dropped_values_CA_2_3_AA$LANDED_win),
-  sigma.y = sd(Inside_CA2_AA$LANDED_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
-BSDA::z.test(dropped_values_CA_2_3_AA$LANDED_win,
-  y = Inside_CA2_AA$LANDED_win,
-  sigma.x = sd(dropped_values_CA_2_3_AA$LANDED_win),
-  sigma.y = sd(Inside_CA2_AA$LANDED_win),
-  alternative = c("two.sided"),
-  conf.level = 0.99)
+```{r, CA1_to_3AA_Landed_tests}
 
 ## Phase 1 to 3
-BSDA::z.test(dropped_values_CA_1_3_AA$LANDED_win,
-  y = Inside_CA3_AA$LANDED_win,
-  sigma.x = sd(dropped_values_CA_1_3_AA$LANDED_win),
-  sigma.y = sd(Inside_CA3_AA$LANDED_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_CA_1_3_AA$LANDED_win,
-  y = Inside_CA3_AA$LANDED_win,
-  sigma.x = sd(dropped_values_CA_1_3_AA$LANDED_win),
-  sigma.y = sd(Inside_CA3_AA$LANDED_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
 
 BSDA::z.test(dropped_values_CA_1_3_AA$LANDED_win,
   y = Inside_CA3_AA$LANDED_win,
@@ -676,72 +450,7 @@ BSDA::z.test(dropped_values_CA_1_3_AA$LANDED_win,
 
 
 # Days-at-Sea
-## Phase 1 to 2
-
-BSDA::z.test(dropped_values_CA_1_2_DAS$LANDED_win,
-  y = Inside_CA2_DAS$LANDED_win,
-  sigma.x = sd(dropped_values_CA_1_2_DAS$LANDED_win),
-  sigma.y = sd(Inside_CA2_DAS$LANDED_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_CA_1_2_DAS$LANDED_win,
-  y = Inside_CA2_DAS$LANDED_win,
-  sigma.x = sd(dropped_values_CA_1_2_DAS$LANDED_win),
-  sigma.y = sd(Inside_CA2_DAS$LANDED_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
-BSDA::z.test(dropped_values_CA_1_2_DAS$LANDED_win,
-  y = Inside_CA2_DAS$LANDED_win,
-  sigma.x = sd(dropped_values_CA_1_2_DAS$LANDED_win),
-  sigma.y = sd(Inside_CA2_DAS$LANDED_win),
-  alternative = c("two.sided"),
-  conf.level = 0.99)
-
-
-## Phase 2 to 3
-BSDA::z.test(dropped_values_CA_2_3_DAS$LANDED_win,
-  y = Inside_CA2_DAS$LANDED_win,
-  sigma.x = sd(dropped_values_CA_2_3_DAS$LANDED_win),
-  sigma.y = sd(Inside_CA2_DAS$LANDED_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_CA_2_3_DAS$LANDED_win,
-  y = Inside_CA2_DAS$LANDED_win,
-  sigma.x = sd(dropped_values_CA_2_3_DAS$LANDED_win),
-  sigma.y = sd(Inside_CA2_DAS$LANDED_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
-BSDA::z.test(dropped_values_CA_2_3_DAS$LANDED_win,
-  y = Inside_CA2_DAS$LANDED_win,
-  sigma.x = sd(dropped_values_CA_2_3_DAS$LANDED_win),
-  sigma.y = sd(Inside_CA2_DAS$LANDED_win),
-  alternative = c("two.sided"),
-  conf.level = 0.99)
-
 ## Phase 1 to 3
-BSDA::z.test(dropped_values_CA_1_3_DAS$LANDED_win,
-  y = Inside_CA3_DAS$LANDED_win,
-  sigma.x = sd(dropped_values_CA_1_3_DAS$LANDED_win),
-  sigma.y = sd(Inside_CA3_DAS$LANDED_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_CA_1_3_DAS$LANDED_win,
-  y = Inside_CA3_DAS$LANDED_win,
-  sigma.x = sd(dropped_values_CA_1_3_DAS$LANDED_win),
-  sigma.y = sd(Inside_CA3_DAS$LANDED_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
 
 BSDA::z.test(dropped_values_CA_1_3_DAS$LANDED_win,
   y = Inside_CA3_DAS$LANDED_win,
@@ -760,21 +469,7 @@ BSDA::z.test(dropped_values_CA_1_3_DAS$LANDED_win,
  Section 4.2 The Adaptive Wind Development Processes -  Central Atlantic - Code chunk below creates output for Table 8. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
 
 
-```{r}
-BSDA::z.test(dropped_values_CA_1_3_GC$OPERATING_PROFIT_2022_win,
-  y = Inside_CA3_GC$OPERATING_PROFIT_2022_win,
-  sigma.x = sd(dropped_values_CA_1_3_GC$OPERATING_PROFIT_2022_win),
-  sigma.y = sd(Inside_CA3_GC$OPERATING_PROFIT_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-BSDA::z.test(dropped_values_CA_1_3_GC$OPERATING_PROFIT_2022_win,
-  y = Inside_CA3_GC$OPERATING_PROFIT_2022_win,
-  sigma.x = sd(dropped_values_CA_1_3_GC$OPERATING_PROFIT_2022_win),
-  sigma.y = sd(Inside_CA3_GC$OPERATING_PROFIT_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
+```{r, CA1_to_3GC_OperatingProfit_tests}
 
 BSDA::z.test(dropped_values_CA_1_3_GC$OPERATING_PROFIT_2022_win,
   y = Inside_CA3_GC$OPERATING_PROFIT_2022_win,
@@ -789,74 +484,10 @@ BSDA::z.test(dropped_values_CA_1_3_GC$OPERATING_PROFIT_2022_win,
  Section 4.2 The Adaptive Wind Development Processes -  Central Atlantic - Code chunk below creates output for Table 9. Limited Access (AA) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.; Table 10. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
 
 
-```{r}
+```{r, CA1_to_3AA_OperatingProfit_tests}
 
 # Access Area 
-## Phase 1 to 2
-
-BSDA::z.test(dropped_values_CA_1_2_AA$OPERATING_PROFIT_2022_win,
-  y = Inside_CA2_AA$OPERATING_PROFIT_2022_win,
-  sigma.x = sd(dropped_values_CA_1_2_AA$OPERATING_PROFIT_2022_win),
-  sigma.y = sd(Inside_CA2_AA$OPERATING_PROFIT_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_CA_1_2_AA$OPERATING_PROFIT_2022_win,
-  y = Inside_CA2_AA$OPERATING_PROFIT_2022_win,
-  sigma.x = sd(dropped_values_CA_1_2_AA$OPERATING_PROFIT_2022_win),
-  sigma.y = sd(Inside_CA2_AA$OPERATING_PROFIT_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
-BSDA::z.test(dropped_values_CA_1_2_AA$OPERATING_PROFIT_2022_win,
-  y = Inside_CA2_AA$OPERATING_PROFIT_2022_win,
-  sigma.x = sd(dropped_values_CA_1_2_AA$OPERATING_PROFIT_2022_win),
-  sigma.y = sd(Inside_CA2_AA$OPERATING_PROFIT_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.99)
-
-## Phase 2 to 3
-BSDA::z.test(dropped_values_CA_2_3_AA$OPERATING_PROFIT_2022_win,
-  y = Inside_CA2_AA$OPERATING_PROFIT_2022_win,
-  sigma.x = sd(dropped_values_CA_2_3_AA$OPERATING_PROFIT_2022_win),
-  sigma.y = sd(Inside_CA2_AA$OPERATING_PROFIT_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_CA_2_3_AA$OPERATING_PROFIT_2022_win,
-  y = Inside_CA2_AA$OPERATING_PROFIT_2022_win,
-  sigma.x = sd(dropped_values_CA_2_3_AA$OPERATING_PROFIT_2022_win),
-  sigma.y = sd(Inside_CA2_AA$OPERATING_PROFIT_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
-BSDA::z.test(dropped_values_CA_2_3_AA$OPERATING_PROFIT_2022_win,
-  y = Inside_CA2_AA$OPERATING_PROFIT_2022_win,
-  sigma.x = sd(dropped_values_CA_2_3_AA$OPERATING_PROFIT_2022_win),
-  sigma.y = sd(Inside_CA2_AA$OPERATING_PROFIT_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.99)
-
 ## Phase 1 to 3
-BSDA::z.test(dropped_values_CA_1_3_AA$OPERATING_PROFIT_2022_win,
-  y = Inside_CA3_AA$OPERATING_PROFIT_2022_win,
-  sigma.x = sd(dropped_values_CA_1_3_AA$OPERATING_PROFIT_2022_win),
-  sigma.y = sd(Inside_CA3_AA$OPERATING_PROFIT_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_CA_1_3_AA$OPERATING_PROFIT_2022_win,
-  y = Inside_CA3_AA$OPERATING_PROFIT_2022_win,
-  sigma.x = sd(dropped_values_CA_1_3_AA$OPERATING_PROFIT_2022_win),
-  sigma.y = sd(Inside_CA3_AA$OPERATING_PROFIT_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
 
 BSDA::z.test(dropped_values_CA_1_3_AA$OPERATING_PROFIT_2022_win,
   y = Inside_CA3_AA$OPERATING_PROFIT_2022_win,
@@ -868,72 +499,8 @@ BSDA::z.test(dropped_values_CA_1_3_AA$OPERATING_PROFIT_2022_win,
 
 
 # Days-at-Sea
-## Phase 1 to 2
-
-BSDA::z.test(dropped_values_CA_1_2_DAS$OPERATING_PROFIT_2022_win,
-  y = Inside_CA2_DAS$OPERATING_PROFIT_2022_win,
-  sigma.x = sd(dropped_values_CA_1_2_DAS$OPERATING_PROFIT_2022_win),
-  sigma.y = sd(Inside_CA2_DAS$OPERATING_PROFIT_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_CA_1_2_DAS$OPERATING_PROFIT_2022_win,
-  y = Inside_CA2_DAS$OPERATING_PROFIT_2022_win,
-  sigma.x = sd(dropped_values_CA_1_2_DAS$OPERATING_PROFIT_2022_win),
-  sigma.y = sd(Inside_CA2_DAS$OPERATING_PROFIT_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
-BSDA::z.test(dropped_values_CA_1_2_DAS$OPERATING_PROFIT_2022_win,
-  y = Inside_CA2_DAS$OPERATING_PROFIT_2022_win,
-  sigma.x = sd(dropped_values_CA_1_2_DAS$OPERATING_PROFIT_2022_win),
-  sigma.y = sd(Inside_CA2_DAS$OPERATING_PROFIT_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.99)
-
-
-## Phase 2 to 3
-BSDA::z.test(dropped_values_CA_2_3_DAS$OPERATING_PROFIT_2022_win,
-  y = Inside_CA2_DAS$OPERATING_PROFIT_2022_win,
-  sigma.x = sd(dropped_values_CA_2_3_DAS$OPERATING_PROFIT_2022_win),
-  sigma.y = sd(Inside_CA2_DAS$OPERATING_PROFIT_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_CA_2_3_DAS$OPERATING_PROFIT_2022_win,
-  y = Inside_CA2_DAS$OPERATING_PROFIT_2022_win,
-  sigma.x = sd(dropped_values_CA_2_3_DAS$OPERATING_PROFIT_2022_win),
-  sigma.y = sd(Inside_CA2_DAS$OPERATING_PROFIT_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
-BSDA::z.test(dropped_values_CA_2_3_DAS$OPERATING_PROFIT_2022_win,
-  y = Inside_CA2_DAS$OPERATING_PROFIT_2022_win,
-  sigma.x = sd(dropped_values_CA_2_3_DAS$OPERATING_PROFIT_2022_win),
-  sigma.y = sd(Inside_CA2_DAS$OPERATING_PROFIT_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.99)
 
 ## Phase 1 to 3
-BSDA::z.test(dropped_values_CA_1_3_DAS$OPERATING_PROFIT_2022_win,
-  y = Inside_CA3_DAS$OPERATING_PROFIT_2022_win,
-  sigma.x = sd(dropped_values_CA_1_3_DAS$OPERATING_PROFIT_2022_win),
-  sigma.y = sd(Inside_CA3_DAS$OPERATING_PROFIT_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_CA_1_3_DAS$OPERATING_PROFIT_2022_win,
-  y = Inside_CA3_DAS$OPERATING_PROFIT_2022_win,
-  sigma.x = sd(dropped_values_CA_1_3_DAS$OPERATING_PROFIT_2022_win),
-  sigma.y = sd(Inside_CA3_DAS$OPERATING_PROFIT_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
 
 BSDA::z.test(dropped_values_CA_1_3_DAS$OPERATING_PROFIT_2022_win,
   y = Inside_CA3_DAS$OPERATING_PROFIT_2022_win,
@@ -953,23 +520,7 @@ BSDA::z.test(dropped_values_CA_1_3_DAS$OPERATING_PROFIT_2022_win,
  Section 4.2 The Adaptive Wind Development Processes -  Central Atlantic - Code chunk below creates output for Table 8. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
 
 
-```{r}
-
-BSDA::z.test(dropped_values_CA_1_3_GC$VPUE_win,
-  y = Inside_CA3_GC$VPUE_win,
-  sigma.x = sd(dropped_values_CA_1_3_GC$VPUE_win),
-  sigma.y = sd(Inside_CA3_GC$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_CA_1_3_GC$VPUE_win,
-  y = Inside_CA3_GC$VPUE_win,
-  sigma.x = sd(dropped_values_CA_1_3_GC$VPUE_win),
-  sigma.y = sd(Inside_CA3_GC$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
+```{r, CA1_to_3GC_VPUE_tests}
 
 BSDA::z.test(dropped_values_CA_1_3_GC$VPUE_win,
   y = Inside_CA3_GC$VPUE_win,
@@ -985,75 +536,10 @@ BSDA::z.test(dropped_values_CA_1_3_GC$VPUE_win,
  Section 4.2 The Adaptive Wind Development Processes -  Central Atlantic - Code chunk below creates output for Table 9. Limited Access (AA) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.; Table 10. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
 
 
-```{r}
+```{r, CA1_to_3AA_VPUE_tests}
 
 # Access Area 
-## Phase 1 to 2
-
-BSDA::z.test(dropped_values_CA_1_2_AA$VPUE_win,
-  y = Inside_CA2_AA$VPUE_win,
-  sigma.x = sd(dropped_values_CA_1_2_AA$VPUE_win),
-  sigma.y = sd(Inside_CA2_AA$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_CA_1_2_AA$VPUE_win,
-  y = Inside_CA2_AA$VPUE_win,
-  sigma.x = sd(dropped_values_CA_1_2_AA$VPUE_win),
-  sigma.y = sd(Inside_CA2_AA$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
-BSDA::z.test(dropped_values_CA_1_2_AA$VPUE_win,
-  y = Inside_CA2_AA$VPUE_win,
-  sigma.x = sd(dropped_values_CA_1_2_AA$VPUE_win),
-  sigma.y = sd(Inside_CA2_AA$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.99)
-
-## Phase 2 to 3
-BSDA::z.test(dropped_values_CA_2_3_AA$VPUE_win,
-  y = Inside_CA2_AA$VPUE_win,
-  sigma.x = sd(dropped_values_CA_2_3_AA$VPUE_win),
-  sigma.y = sd(Inside_CA2_AA$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_CA_2_3_AA$VPUE_win,
-  y = Inside_CA2_AA$VPUE_win,
-  sigma.x = sd(dropped_values_CA_2_3_AA$VPUE_win),
-  sigma.y = sd(Inside_CA2_AA$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
-BSDA::z.test(dropped_values_CA_2_3_AA$VPUE_win,
-  y = Inside_CA2_AA$VPUE_win,
-  sigma.x = sd(dropped_values_CA_2_3_AA$VPUE_win),
-  sigma.y = sd(Inside_CA2_AA$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.99)
-
 ## Phase 1 to 3
-BSDA::z.test(dropped_values_CA_1_3_AA$VPUE_win,
-  y = Inside_CA3_AA$VPUE_win,
-  sigma.x = sd(dropped_values_CA_1_3_AA$VPUE_win),
-  sigma.y = sd(Inside_CA3_AA$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_CA_1_3_AA$VPUE_win,
-  y = Inside_CA3_AA$VPUE_win,
-  sigma.x = sd(dropped_values_CA_1_3_AA$VPUE_win),
-  sigma.y = sd(Inside_CA3_AA$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
 BSDA::z.test(dropped_values_CA_1_3_AA$VPUE_win,
   y = Inside_CA3_AA$VPUE_win,
   sigma.x = sd(dropped_values_CA_1_3_AA$VPUE_win),
@@ -1065,73 +551,8 @@ BSDA::z.test(dropped_values_CA_1_3_AA$VPUE_win,
 
 
 # Days-at-Sea
-## Phase 1 to 2
-
-BSDA::z.test(dropped_values_CA_1_2_DAS$VPUE_win,
-  y = Inside_CA2_DAS$VPUE_win,
-  sigma.x = sd(dropped_values_CA_1_2_DAS$VPUE_win),
-  sigma.y = sd(Inside_CA2_DAS$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_CA_1_2_DAS$VPUE_win,
-  y = Inside_CA2_DAS$VPUE_win,
-  sigma.x = sd(dropped_values_CA_1_2_DAS$VPUE_win),
-  sigma.y = sd(Inside_CA2_DAS$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
-BSDA::z.test(dropped_values_CA_1_2_DAS$VPUE_win,
-  y = Inside_CA2_DAS$VPUE_win,
-  sigma.x = sd(dropped_values_CA_1_2_DAS$VPUE_win),
-  sigma.y = sd(Inside_CA2_DAS$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.99)
-
-
-## Phase 2 to 3
-BSDA::z.test(dropped_values_CA_2_3_DAS$VPUE_win,
-  y = Inside_CA2_DAS$VPUE_win,
-  sigma.x = sd(dropped_values_CA_2_3_DAS$VPUE_win),
-  sigma.y = sd(Inside_CA2_DAS$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_CA_2_3_DAS$VPUE_win,
-  y = Inside_CA2_DAS$VPUE_win,
-  sigma.x = sd(dropped_values_CA_2_3_DAS$VPUE_win),
-  sigma.y = sd(Inside_CA2_DAS$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
-BSDA::z.test(dropped_values_CA_2_3_DAS$VPUE_win,
-  y = Inside_CA2_DAS$VPUE_win,
-  sigma.x = sd(dropped_values_CA_2_3_DAS$VPUE_win),
-  sigma.y = sd(Inside_CA2_DAS$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.99)
 
 ## Phase 1 to 3
-BSDA::z.test(dropped_values_CA_1_3_DAS$VPUE_win,
-  y = Inside_CA3_DAS$VPUE_win,
-  sigma.x = sd(dropped_values_CA_1_3_DAS$VPUE_win),
-  sigma.y = sd(Inside_CA3_DAS$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_CA_1_3_DAS$VPUE_win,
-  y = Inside_CA3_DAS$VPUE_win,
-  sigma.x = sd(dropped_values_CA_1_3_DAS$VPUE_win),
-  sigma.y = sd(Inside_CA3_DAS$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
 BSDA::z.test(dropped_values_CA_1_3_DAS$VPUE_win,
   y = Inside_CA3_DAS$VPUE_win,
   sigma.x = sd(dropped_values_CA_1_3_DAS$VPUE_win),
@@ -1294,24 +715,8 @@ Section 4.2 The Adaptive Wind Development Processes -  New York Bight - Code chu
 
 Section 4.2 The Adaptive Wind Development Processes -  New York Bight - Code chunk below creates output for Table 5. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the New York Bight region.
 
-```{r}
+```{r, NY_GC_Revenue_tests}
 ## Phase 1
-
-BSDA::z.test(dropped_values_NY_1_2_GC$DOLLAR_2022_win,
-  y = Inside_NY2_GC$DOLLAR_2022_win,
-  sigma.x = sd(dropped_values_NY_1_2_GC$DOLLAR_2022_win),
-  sigma.y = sd(Inside_NY2_GC$DOLLAR_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_NY_1_2_GC$DOLLAR_2022_win,
-  y = Inside_NY2_GC$DOLLAR_2022_win,
-  sigma.x = sd(dropped_values_NY_1_2_GC$DOLLAR_2022_win),
-  sigma.y = sd(Inside_NY2_GC$DOLLAR_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
 
 BSDA::z.test(dropped_values_NY_1_2_GC$DOLLAR_2022_win,
   y = Inside_NY2_GC$DOLLAR_2022_win,
@@ -1321,22 +726,6 @@ BSDA::z.test(dropped_values_NY_1_2_GC$DOLLAR_2022_win,
   conf.level = 0.99)
 
 ## Phase 2
-
-BSDA::z.test(dropped_values_NY_2_3_GC$DOLLAR_2022_win,
-  y = Inside_NY3_GC$DOLLAR_2022_win,
-  sigma.x = sd(dropped_values_NY_2_3_GC$DOLLAR_2022_win),
-  sigma.y = sd(Inside_NY3_GC$DOLLAR_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_NY_2_3_GC$DOLLAR_2022_win,
-  y = Inside_NY3_GC$DOLLAR_2022_win,
-  sigma.x = sd(dropped_values_NY_2_3_GC$DOLLAR_2022_win),
-  sigma.y = sd(Inside_NY3_GC$DOLLAR_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
 
 BSDA::z.test(dropped_values_NY_2_3_GC$DOLLAR_2022_win,
   y = Inside_NY3_GC$DOLLAR_2022_win,
@@ -1355,27 +744,10 @@ BSDA::z.test(dropped_values_NY_2_3_GC$DOLLAR_2022_win,
 Section 4.2 The Adaptive Wind Development Processes -  New York Bight - Code chunk below creates output for Table 6. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for New York Bight.; Table 7. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for New York Bight.
 
 
-```{r}
+```{r, NY_LA_Revenue_tests}
 
 # Access Area 
 ## Phase 1 to 2
-
-BSDA::z.test(dropped_values_NY_1_2_AA$DOLLAR_2022_win,
-  y = Inside_NY2_AA$DOLLAR_2022_win,
-  sigma.x = sd(dropped_values_NY_1_2_AA$DOLLAR_2022_win),
-  sigma.y = sd(Inside_NY2_AA$DOLLAR_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_NY_1_2_AA$DOLLAR_2022_win,
-  y = Inside_NY2_AA$DOLLAR_2022_win,
-  sigma.x = sd(dropped_values_NY_1_2_AA$DOLLAR_2022_win),
-  sigma.y = sd(Inside_NY2_AA$DOLLAR_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
 BSDA::z.test(dropped_values_NY_1_2_AA$DOLLAR_2022_win,
   y = Inside_NY2_AA$DOLLAR_2022_win,
   sigma.x = sd(dropped_values_NY_1_2_AA$DOLLAR_2022_win),
@@ -1385,23 +757,7 @@ BSDA::z.test(dropped_values_NY_1_2_AA$DOLLAR_2022_win,
 
 ## Phase 2 to 3
 BSDA::z.test(dropped_values_NY_2_3_AA$DOLLAR_2022_win,
-  y = Inside_NY2_AA$DOLLAR_2022_win,
-  sigma.x = sd(dropped_values_NY_2_3_AA$DOLLAR_2022_win),
-  sigma.y = sd(Inside_NY2_AA$DOLLAR_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_NY_2_3_AA$DOLLAR_2022_win,
-  y = Inside_NY2_AA$DOLLAR_2022_win,
-  sigma.x = sd(dropped_values_NY_2_3_AA$DOLLAR_2022_win),
-  sigma.y = sd(Inside_NY2_AA$DOLLAR_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
-BSDA::z.test(dropped_values_NY_2_3_AA$DOLLAR_2022_win,
-  y = Inside_NY2_AA$DOLLAR_2022_win,
+  y = Inside_NY3_AA$DOLLAR_2022_win,
   sigma.x = sd(dropped_values_NY_2_3_AA$DOLLAR_2022_win),
   sigma.y = sd(Inside_NY2_AA$DOLLAR_2022_win),
   alternative = c("two.sided"),
@@ -1416,52 +772,16 @@ BSDA::z.test(dropped_values_NY_1_2_DAS$DOLLAR_2022_win,
   sigma.x = sd(dropped_values_NY_1_2_DAS$DOLLAR_2022_win),
   sigma.y = sd(Inside_NY2_DAS$DOLLAR_2022_win),
   alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_NY_1_2_DAS$DOLLAR_2022_win,
-  y = Inside_NY2_DAS$DOLLAR_2022_win,
-  sigma.x = sd(dropped_values_NY_1_2_DAS$DOLLAR_2022_win),
-  sigma.y = sd(Inside_NY2_DAS$DOLLAR_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
-BSDA::z.test(dropped_values_NY_1_2_DAS$DOLLAR_2022_win,
-  y = Inside_NY2_DAS$DOLLAR_2022_win,
-  sigma.x = sd(dropped_values_NY_1_2_DAS$DOLLAR_2022_win),
-  sigma.y = sd(Inside_NY2_DAS$DOLLAR_2022_win),
-  alternative = c("two.sided"),
   conf.level = 0.99)
 
 
 ## Phase 2 to 3
-
 BSDA::z.test(dropped_values_NY_2_3_DAS$DOLLAR_2022_win,
-  y = Inside_NY2_DAS$DOLLAR_2022_win,
-  sigma.x = sd(dropped_values_NY_2_3_DAS$DOLLAR_2022_win),
-  sigma.y = sd(Inside_NY2_DAS$DOLLAR_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_NY_2_3_DAS$DOLLAR_2022_win,
-  y = Inside_NY2_DAS$DOLLAR_2022_win,
-  sigma.x = sd(dropped_values_NY_2_3_DAS$DOLLAR_2022_win),
-  sigma.y = sd(Inside_NY2_DAS$DOLLAR_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
-BSDA::z.test(dropped_values_NY_2_3_DAS$DOLLAR_2022_win,
-  y = Inside_NY2_DAS$DOLLAR_2022_win,
+  y = Inside_NY3_DAS$DOLLAR_2022_win,
   sigma.x = sd(dropped_values_NY_2_3_DAS$DOLLAR_2022_win),
   sigma.y = sd(Inside_NY2_DAS$DOLLAR_2022_win),
   alternative = c("two.sided"),
   conf.level = 0.99)
-
-
-
 ```
 
 
@@ -1472,21 +792,8 @@ BSDA::z.test(dropped_values_NY_2_3_DAS$DOLLAR_2022_win,
 Section 4.2 The Adaptive Wind Development Processes -  New York Bight - Code chunk below creates output for Table 5. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the New York Bight region.
 
 
-```{r}
+```{r, NY_GC_Landed_tests}
 ## Phase 1
-BSDA::z.test(dropped_values_NY_1_2_GC$LANDED_win,
-  y = Inside_NY2_GC$LANDED_win,
-  sigma.x = sd(dropped_values_NY_1_2_GC$LANDED_win),
-  sigma.y = sd(Inside_NY2_GC$LANDED_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-BSDA::z.test(dropped_values_NY_1_2_GC$LANDED_win,
-  y = Inside_NY2_GC$LANDED_win,
-  sigma.x = sd(dropped_values_NY_1_2_GC$LANDED_win),
-  sigma.y = sd(Inside_NY2_GC$LANDED_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
 
 BSDA::z.test(dropped_values_NY_1_2_GC$LANDED_win,
   y = Inside_NY2_GC$LANDED_win,
@@ -1497,21 +804,6 @@ BSDA::z.test(dropped_values_NY_1_2_GC$LANDED_win,
 
 
 ## Phase 2
-
-BSDA::z.test(dropped_values_NY_2_3_GC$LANDED_win,
-  y = Inside_NY3_GC$LANDED_win,
-  sigma.x = sd(dropped_values_NY_2_3_GC$LANDED_win),
-  sigma.y = sd(Inside_NY3_GC$LANDED_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-BSDA::z.test(dropped_values_NY_2_3_GC$LANDED_win,
-  y = Inside_NY3_GC$LANDED_win,
-  sigma.x = sd(dropped_values_NY_2_3_GC$LANDED_win),
-  sigma.y = sd(Inside_NY3_GC$LANDED_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
 BSDA::z.test(dropped_values_NY_2_3_GC$LANDED_win,
   y = Inside_NY3_GC$LANDED_win,
   sigma.x = sd(dropped_values_NY_2_3_GC$LANDED_win),
@@ -1529,27 +821,10 @@ BSDA::z.test(dropped_values_NY_2_3_GC$LANDED_win,
 Section 4.2 The Adaptive Wind Development Processes -  New York Bight - Code chunk below creates output for Table 6. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for New York Bight.; Table 7. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for New York Bight.
 
 
-```{r}
+```{r, NY_LA_Landed_tests}
 
 # Access Area 
 ## Phase 1 to 2
-
-BSDA::z.test(dropped_values_NY_1_2_AA$LANDED_win,
-  y = Inside_NY2_AA$LANDED_win,
-  sigma.x = sd(dropped_values_NY_1_2_AA$LANDED_win),
-  sigma.y = sd(Inside_NY2_AA$LANDED_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_NY_1_2_AA$LANDED_win,
-  y = Inside_NY2_AA$LANDED_win,
-  sigma.x = sd(dropped_values_NY_1_2_AA$LANDED_win),
-  sigma.y = sd(Inside_NY2_AA$LANDED_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
 BSDA::z.test(dropped_values_NY_1_2_AA$LANDED_win,
   y = Inside_NY2_AA$LANDED_win,
   sigma.x = sd(dropped_values_NY_1_2_AA$LANDED_win),
@@ -1559,23 +834,7 @@ BSDA::z.test(dropped_values_NY_1_2_AA$LANDED_win,
 
 ## Phase 2 to 3
 BSDA::z.test(dropped_values_NY_2_3_AA$LANDED_win,
-  y = Inside_NY2_AA$LANDED_win,
-  sigma.x = sd(dropped_values_NY_2_3_AA$LANDED_win),
-  sigma.y = sd(Inside_NY2_AA$LANDED_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_NY_2_3_AA$LANDED_win,
-  y = Inside_NY2_AA$LANDED_win,
-  sigma.x = sd(dropped_values_NY_2_3_AA$LANDED_win),
-  sigma.y = sd(Inside_NY2_AA$LANDED_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
-BSDA::z.test(dropped_values_NY_2_3_AA$LANDED_win,
-  y = Inside_NY2_AA$LANDED_win,
+  y = Inside_NY3_AA$LANDED_win,
   sigma.x = sd(dropped_values_NY_2_3_AA$LANDED_win),
   sigma.y = sd(Inside_NY2_AA$LANDED_win),
   alternative = c("two.sided"),
@@ -1590,44 +849,14 @@ BSDA::z.test(dropped_values_NY_1_2_DAS$LANDED_win,
   sigma.x = sd(dropped_values_NY_1_2_DAS$LANDED_win),
   sigma.y = sd(Inside_NY2_DAS$LANDED_win),
   alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_NY_1_2_DAS$LANDED_win,
-  y = Inside_NY2_DAS$LANDED_win,
-  sigma.x = sd(dropped_values_NY_1_2_DAS$LANDED_win),
-  sigma.y = sd(Inside_NY2_DAS$LANDED_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
-BSDA::z.test(dropped_values_NY_1_2_DAS$LANDED_win,
-  y = Inside_NY2_DAS$LANDED_win,
-  sigma.x = sd(dropped_values_NY_1_2_DAS$LANDED_win),
-  sigma.y = sd(Inside_NY2_DAS$LANDED_win),
-  alternative = c("two.sided"),
   conf.level = 0.99)
 
 
 ## Phase 2 to 3
-BSDA::z.test(dropped_values_NY_2_3_DAS$LANDED_win,
-  y = Inside_NY2_DAS$LANDED_win,
-  sigma.x = sd(dropped_values_NY_2_3_DAS$LANDED_win),
-  sigma.y = sd(Inside_NY2_DAS$LANDED_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
 
 
 BSDA::z.test(dropped_values_NY_2_3_DAS$LANDED_win,
-  y = Inside_NY2_DAS$LANDED_win,
-  sigma.x = sd(dropped_values_NY_2_3_DAS$LANDED_win),
-  sigma.y = sd(Inside_NY2_DAS$LANDED_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
-BSDA::z.test(dropped_values_NY_2_3_DAS$LANDED_win,
-  y = Inside_NY2_DAS$LANDED_win,
+  y = Inside_NY3_DAS$LANDED_win,
   sigma.x = sd(dropped_values_NY_2_3_DAS$LANDED_win),
   sigma.y = sd(Inside_NY2_DAS$LANDED_win),
   alternative = c("two.sided"),
@@ -1648,22 +877,8 @@ Section 4.2 The Adaptive Wind Development Processes -  New York Bight - Code chu
 
 
 
-```{r}
+```{r, NY_GC_Operating_profit_tests}
 # Phase 1 to 2 
-BSDA::z.test(dropped_values_NY_1_2_GC$OPERATING_PROFIT_2022_win,
-  y = Inside_NY2_GC$OPERATING_PROFIT_2022_win,
-  sigma.x = sd(dropped_values_NY_1_2_GC$OPERATING_PROFIT_2022_win),
-  sigma.y = sd(Inside_NY2_GC$OPERATING_PROFIT_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-BSDA::z.test(dropped_values_NY_1_2_GC$OPERATING_PROFIT_2022_win,
-  y = Inside_NY2_GC$OPERATING_PROFIT_2022_win,
-  sigma.x = sd(dropped_values_NY_1_2_GC$OPERATING_PROFIT_2022_win),
-  sigma.y = sd(Inside_NY2_GC$OPERATING_PROFIT_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
 
 BSDA::z.test(dropped_values_NY_1_2_GC$OPERATING_PROFIT_2022_win,
   y = Inside_NY2_GC$OPERATING_PROFIT_2022_win,
@@ -1680,21 +895,6 @@ BSDA::z.test(dropped_values_NY_2_3_GC$OPERATING_PROFIT_2022_win,
   sigma.x = sd(dropped_values_NY_2_3_GC$OPERATING_PROFIT_2022_win),
   sigma.y = sd(Inside_NY3_GC$OPERATING_PROFIT_2022_win),
   alternative = c("two.sided"),
-  conf.level = 0.90)
-
-BSDA::z.test(dropped_values_NY_2_3_GC$OPERATING_PROFIT_2022_win,
-  y = Inside_NY3_GC$OPERATING_PROFIT_2022_win,
-  sigma.x = sd(dropped_values_NY_2_3_GC$OPERATING_PROFIT_2022_win),
-  sigma.y = sd(Inside_NY3_GC$OPERATING_PROFIT_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
-BSDA::z.test(dropped_values_NY_2_3_GC$OPERATING_PROFIT_2022_win,
-  y = Inside_NY3_GC$OPERATING_PROFIT_2022_win,
-  sigma.x = sd(dropped_values_NY_2_3_GC$OPERATING_PROFIT_2022_win),
-  sigma.y = sd(Inside_NY3_GC$OPERATING_PROFIT_2022_win),
-  alternative = c("two.sided"),
   conf.level = 0.99)
 ```
 
@@ -1702,27 +902,10 @@ BSDA::z.test(dropped_values_NY_2_3_GC$OPERATING_PROFIT_2022_win,
 
 Section 4.2 The Adaptive Wind Development Processes -  New York Bight - Code chunk below creates output for Table 5. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the New York Bight region.
 
-```{r}
+```{r, NY_LA_Operating_profit_tests}
 
 # Access Area 
 ## Phase 1 to 2
-
-BSDA::z.test(dropped_values_NY_1_2_AA$OPERATING_PROFIT_2022_win,
-  y = Inside_NY2_AA$OPERATING_PROFIT_2022_win,
-  sigma.x = sd(dropped_values_NY_1_2_AA$OPERATING_PROFIT_2022_win),
-  sigma.y = sd(Inside_NY2_AA$OPERATING_PROFIT_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_NY_1_2_AA$OPERATING_PROFIT_2022_win,
-  y = Inside_NY2_AA$OPERATING_PROFIT_2022_win,
-  sigma.x = sd(dropped_values_NY_1_2_AA$OPERATING_PROFIT_2022_win),
-  sigma.y = sd(Inside_NY2_AA$OPERATING_PROFIT_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
 BSDA::z.test(dropped_values_NY_1_2_AA$OPERATING_PROFIT_2022_win,
   y = Inside_NY2_AA$OPERATING_PROFIT_2022_win,
   sigma.x = sd(dropped_values_NY_1_2_AA$OPERATING_PROFIT_2022_win),
@@ -1731,22 +914,6 @@ BSDA::z.test(dropped_values_NY_1_2_AA$OPERATING_PROFIT_2022_win,
   conf.level = 0.99)
 
 ## Phase 2 to 3
-BSDA::z.test(dropped_values_NY_2_3_AA$OPERATING_PROFIT_2022_win,
-  y = Inside_NY2_AA$OPERATING_PROFIT_2022_win,
-  sigma.x = sd(dropped_values_NY_2_3_AA$OPERATING_PROFIT_2022_win),
-  sigma.y = sd(Inside_NY3_AA$OPERATING_PROFIT_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_NY_2_3_AA$OPERATING_PROFIT_2022_win,
-  y = Inside_NY2_AA$OPERATING_PROFIT_2022_win,
-  sigma.x = sd(dropped_values_NY_2_3_AA$OPERATING_PROFIT_2022_win),
-  sigma.y = sd(Inside_NY3_AA$OPERATING_PROFIT_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
 BSDA::z.test(dropped_values_NY_2_3_AA$OPERATING_PROFIT_2022_win,
   y = Inside_NY3_AA$OPERATING_PROFIT_2022_win,
   sigma.x = sd(dropped_values_NY_2_3_AA$OPERATING_PROFIT_2022_win),
@@ -1757,23 +924,6 @@ BSDA::z.test(dropped_values_NY_2_3_AA$OPERATING_PROFIT_2022_win,
 
 # Days-at-Sea
 ## Phase 1 to 2
-
-BSDA::z.test(dropped_values_NY_1_2_DAS$OPERATING_PROFIT_2022_win,
-  y = Inside_NY2_DAS$OPERATING_PROFIT_2022_win,
-  sigma.x = sd(dropped_values_NY_1_2_DAS$OPERATING_PROFIT_2022_win),
-  sigma.y = sd(Inside_NY2_DAS$OPERATING_PROFIT_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_NY_1_2_DAS$OPERATING_PROFIT_2022_win,
-  y = Inside_NY2_DAS$OPERATING_PROFIT_2022_win,
-  sigma.x = sd(dropped_values_NY_1_2_DAS$OPERATING_PROFIT_2022_win),
-  sigma.y = sd(Inside_NY2_DAS$OPERATING_PROFIT_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
 BSDA::z.test(dropped_values_NY_1_2_DAS$OPERATING_PROFIT_2022_win,
   y = Inside_NY2_DAS$OPERATING_PROFIT_2022_win,
   sigma.x = sd(dropped_values_NY_1_2_DAS$OPERATING_PROFIT_2022_win),
@@ -1784,23 +934,7 @@ BSDA::z.test(dropped_values_NY_1_2_DAS$OPERATING_PROFIT_2022_win,
 
 ## Phase 2 to 3
 BSDA::z.test(dropped_values_NY_2_3_DAS$OPERATING_PROFIT_2022_win,
-  y = Inside_NY2_DAS$OPERATING_PROFIT_2022_win,
-  sigma.x = sd(dropped_values_NY_2_3_DAS$OPERATING_PROFIT_2022_win),
-  sigma.y = sd(Inside_NY3_DAS$OPERATING_PROFIT_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_NY_2_3_DAS$OPERATING_PROFIT_2022_win,
-  y = Inside_NY2_DAS$OPERATING_PROFIT_2022_win,
-  sigma.x = sd(dropped_values_NY_2_3_DAS$OPERATING_PROFIT_2022_win),
-  sigma.y = sd(Inside_NY3_DAS$OPERATING_PROFIT_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
-BSDA::z.test(dropped_values_NY_2_3_DAS$OPERATING_PROFIT_2022_win,
-  y = Inside_NY2_DAS$OPERATING_PROFIT_2022_win,
+  y = Inside_NY3_DAS$OPERATING_PROFIT_2022_win,
   sigma.x = sd(dropped_values_NY_2_3_DAS$OPERATING_PROFIT_2022_win),
   sigma.y = sd(Inside_NY3_DAS$OPERATING_PROFIT_2022_win),
   alternative = c("two.sided"),
@@ -1820,23 +954,8 @@ Section 4.2 The Adaptive Wind Development Processes -  New York Bight - Code chu
 
 
 
-```{r}
+```{r, NY_GC_VPUE_tests}
 # Phase 1 to 2 
-BSDA::z.test(dropped_values_NY_1_2_GC$VPUE_win,
-  y = Inside_NY2_GC$VPUE_win,
-  sigma.x = sd(dropped_values_NY_1_2_GC$VPUE_win),
-  sigma.y = sd(Inside_NY2_GC$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-BSDA::z.test(dropped_values_NY_1_2_GC$VPUE_win,
-  y = Inside_NY2_GC$VPUE_win,
-  sigma.x = sd(dropped_values_NY_1_2_GC$VPUE_win),
-  sigma.y = sd(Inside_NY2_GC$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
 BSDA::z.test(dropped_values_NY_1_2_GC$VPUE_win,
   y = Inside_NY2_GC$VPUE_win,
   sigma.x = sd(dropped_values_NY_1_2_GC$VPUE_win),
@@ -1846,22 +965,6 @@ BSDA::z.test(dropped_values_NY_1_2_GC$VPUE_win,
 
 
 # Phase 2 to 3 
-
-BSDA::z.test(dropped_values_NY_2_3_GC$VPUE_win,
-  y = Inside_NY3_GC$VPUE_win,
-  sigma.x = sd(dropped_values_NY_2_3_GC$VPUE_win),
-  sigma.y = sd(Inside_NY3_GC$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-BSDA::z.test(dropped_values_NY_2_3_GC$VPUE_win,
-  y = Inside_NY3_GC$VPUE_win,
-  sigma.x = sd(dropped_values_NY_2_3_GC$VPUE_win),
-  sigma.y = sd(Inside_NY3_GC$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
 BSDA::z.test(dropped_values_NY_2_3_GC$VPUE_win,
   y = Inside_NY3_GC$VPUE_win,
   sigma.x = sd(dropped_values_NY_2_3_GC$VPUE_win),
@@ -1877,25 +980,9 @@ BSDA::z.test(dropped_values_NY_2_3_GC$VPUE_win,
 Section 4.2 The Adaptive Wind Development Processes -  New York Bight - Code chunk below creates output for Table 6. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for New York Bight.; Table 7. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for New York Bight.
 
 
-```{r}
+```{r, NY_LA_VPUE_tests}
 # LA 
 ## Phase 1 to 2
-
-BSDA::z.test(dropped_values_NY_1_2_LA$VPUE_win,
-  y = Inside_NY2_LA$VPUE_win,
-  sigma.x = sd(dropped_values_NY_1_2_LA$VPUE_win),
-  sigma.y = sd(Inside_NY2_LA$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_NY_1_2_LA$VPUE_win,
-  y = Inside_NY2_LA$VPUE_win,
-  sigma.x = sd(dropped_values_NY_1_2_LA$VPUE_win),
-  sigma.y = sd(Inside_NY2_LA$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
 
 BSDA::z.test(dropped_values_NY_1_2_LA$VPUE_win,
   y = Inside_NY2_LA$VPUE_win,
@@ -1905,22 +992,6 @@ BSDA::z.test(dropped_values_NY_1_2_LA$VPUE_win,
   conf.level = 0.99)
 
 ## Phase 2 to 3
-BSDA::z.test(dropped_values_NY_2_3_LA$VPUE_win,
-  y = Inside_NY2_LA$VPUE_win,
-  sigma.x = sd(dropped_values_NY_2_3_LA$VPUE_win),
-  sigma.y = sd(Inside_NY3_LA$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_NY_2_3_LA$VPUE_win,
-  y = Inside_NY2_LA$VPUE_win,
-  sigma.x = sd(dropped_values_NY_2_3_LA$VPUE_win),
-  sigma.y = sd(Inside_NY3_LA$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
 BSDA::z.test(dropped_values_NY_2_3_LA$VPUE_win,
   y = Inside_NY3_LA$VPUE_win,
   sigma.x = sd(dropped_values_NY_2_3_LA$VPUE_win),
@@ -1932,23 +1003,6 @@ BSDA::z.test(dropped_values_NY_2_3_LA$VPUE_win,
 
 # Access Area 
 ## Phase 1 to 2
-
-BSDA::z.test(dropped_values_NY_1_2_AA$VPUE_win,
-  y = Inside_NY2_AA$VPUE_win,
-  sigma.x = sd(dropped_values_NY_1_2_AA$VPUE_win),
-  sigma.y = sd(Inside_NY2_AA$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_NY_1_2_AA$VPUE_win,
-  y = Inside_NY2_AA$VPUE_win,
-  sigma.x = sd(dropped_values_NY_1_2_AA$VPUE_win),
-  sigma.y = sd(Inside_NY2_AA$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
 BSDA::z.test(dropped_values_NY_1_2_AA$VPUE_win,
   y = Inside_NY2_AA$VPUE_win,
   sigma.x = sd(dropped_values_NY_1_2_AA$VPUE_win),
@@ -1957,22 +1011,6 @@ BSDA::z.test(dropped_values_NY_1_2_AA$VPUE_win,
   conf.level = 0.99)
 
 ## Phase 2 to 3
-BSDA::z.test(dropped_values_NY_2_3_AA$VPUE_win,
-  y = Inside_NY2_AA$VPUE_win,
-  sigma.x = sd(dropped_values_NY_2_3_AA$VPUE_win),
-  sigma.y = sd(Inside_NY3_AA$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_NY_2_3_AA$VPUE_win,
-  y = Inside_NY2_AA$VPUE_win,
-  sigma.x = sd(dropped_values_NY_2_3_AA$VPUE_win),
-  sigma.y = sd(Inside_NY3_AA$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
 BSDA::z.test(dropped_values_NY_2_3_AA$VPUE_win,
   y = Inside_NY3_AA$VPUE_win,
   sigma.x = sd(dropped_values_NY_2_3_AA$VPUE_win),
@@ -1983,23 +1021,6 @@ BSDA::z.test(dropped_values_NY_2_3_AA$VPUE_win,
 
 # Days-at-Sea
 ## Phase 1 to 2
-
-BSDA::z.test(dropped_values_NY_1_2_DAS$VPUE_win,
-  y = Inside_NY2_DAS$VPUE_win,
-  sigma.x = sd(dropped_values_NY_1_2_DAS$VPUE_win),
-  sigma.y = sd(Inside_NY2_DAS$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_NY_1_2_DAS$VPUE_win,
-  y = Inside_NY2_DAS$VPUE_win,
-  sigma.x = sd(dropped_values_NY_1_2_DAS$VPUE_win),
-  sigma.y = sd(Inside_NY2_DAS$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
 BSDA::z.test(dropped_values_NY_1_2_DAS$VPUE_win,
   y = Inside_NY2_DAS$VPUE_win,
   sigma.x = sd(dropped_values_NY_1_2_DAS$VPUE_win),
@@ -2010,23 +1031,7 @@ BSDA::z.test(dropped_values_NY_1_2_DAS$VPUE_win,
 
 ## Phase 2 to 3
 BSDA::z.test(dropped_values_NY_2_3_DAS$VPUE_win,
-  y = Inside_NY2_DAS$VPUE_win,
-  sigma.x = sd(dropped_values_NY_2_3_DAS$VPUE_win),
-  sigma.y = sd(Inside_NY3_DAS$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.90)
-
-
-BSDA::z.test(dropped_values_NY_2_3_DAS$VPUE_win,
-  y = Inside_NY2_DAS$VPUE_win,
-  sigma.x = sd(dropped_values_NY_2_3_DAS$VPUE_win),
-  sigma.y = sd(Inside_NY3_DAS$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
-
-
-BSDA::z.test(dropped_values_NY_2_3_DAS$VPUE_win,
-  y = Inside_NY2_DAS$VPUE_win,
+  y = Inside_NY3_DAS$VPUE_win,
   sigma.x = sd(dropped_values_NY_2_3_DAS$VPUE_win),
   sigma.y = sd(Inside_NY3_DAS$VPUE_win),
   alternative = c("two.sided"),
