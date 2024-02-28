@@ -220,352 +220,6 @@ dropped_values_CA_1_3_DAS <- dropped_values_CA_1_3_LA %>% filter(fleet == "Days 
 
 
 ```
-
-# Central Atlantic Section 
-
-
-## Aggregate Scallop Revenue and Operating Profit CA1, CA2, and CA3 and the Dropped Values from 1-3 for the LA Fleet
-
-```{r}
- Inside_CA1_LA %>%
-  group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
-
-
-# Inside_CA2_LA %>%
-#   group_by(fleet) %>%
-#   dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
-
-Inside_CA3_LA %>%
-  group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
-
-
-
-dropped_values_CA_1_3_LA %>%
-  group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
-
-```
-
-
-
-## Average Winsorized Revenue, VPUE, Operating Profit, and Landings in CA closures by fleet LA 
-
- Section 4.2 The Adaptive Wind Development Processes -  Central Atlantic - Code chunk below creates output for Table 9. Limited Access (AA) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.; Table 10. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
-
-
-```{r}
-Inside_CA1_LA %>%
-  group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win), LANDED_win=mean(LANDED_win),
-                   OPERATING_win=mean(OPERATING_PROFIT_2022_win),VPUE_win=mean(VPUE_win) )
-
-
-# Inside_CA2_LA %>%
-#   group_by(fleet) %>%
-#  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win), LANDED_win=mean(LANDED_win),
-#                   OPERATING_win=mean(OPERATING_PROFIT_2022_win),VPUE_win=mean(VPUE_win) )
-
-
-Inside_CA3_LA %>%
-  group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win), LANDED_win=mean(LANDED_win),
-                   OPERATING_win=mean(OPERATING_PROFIT_2022_win),VPUE_win=mean(VPUE_win) )
-
-dropped_values_CA_1_3_LA %>%
-  group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win), LANDED_win=mean(LANDED_win),
-                   OPERATING_win=mean(OPERATING_PROFIT_2022_win),VPUE_win=mean(VPUE_win) )
-
-
-# dropped_values_CA_1_2_LA %>%
-#   group_by(fleet) %>%
-#  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win), LANDED_win=mean(LANDED_win),
-#                   OPERATING_win=mean(OPERATING_PROFIT_2022_win),VPUE_win=mean(VPUE_win) )
-# 
-# 
-# dropped_values_CA_2_3_LA %>%
-#   group_by(fleet) %>%
-#   dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
-#                    LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win) )
-
-
-```
-
-## Aggregate Scallop revenue CA1, CA2, and CA3 and the Dropped Values from 1-3 for the GCIFQ Fleet
-
-```{r}
-
-
-Inside_CA1_GC %>%
-  group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
-
-
-# Inside_CA2_GC %>%
-#   group_by(fleet) %>%
-#   dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
-
-Inside_CA3_GC %>%
-  group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
-
-
-
-dropped_values_CA_1_3_GC %>%
-  group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
-
-```
-
-##Average Winsorized Revenue, VPUE, Operating Profit, and Landed weights for the Central Atlantic, GCIFQ
-
- Section 4.2 The Adaptive Wind Development Processes -  Central Atlantic - Code chunk below creates output for Table 8. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
-
-
-```{r}
-
-Inside_CA1_GC %>%
-  group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),LANDED_win=mean(LANDED_win), 
-                  OPERATING_win=mean(OPERATING_PROFIT_2022_win), VPUE_win=mean(VPUE_win)  )
-
-
-# Inside_CA2_GC %>%
-#   group_by(fleet) %>%
-#  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),LANDED_win=mean(LANDED_win), 
-#                  OPERATING_win=mean(OPERATING_PROFIT_2022_win), VPUE_win=mean(VPUE_win)  )
-
-
-Inside_CA3_GC %>%
-  group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),LANDED_win=mean(LANDED_win), 
-                  OPERATING_win=mean(OPERATING_PROFIT_2022_win), VPUE_win=mean(VPUE_win)  )
-
-
-
-dropped_values_CA_1_3_GC %>%
-  group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),LANDED_win=mean(LANDED_win), 
-                  OPERATING_win=mean(OPERATING_PROFIT_2022_win), VPUE_win=mean(VPUE_win)  )
-
-
-# dropped_values_CA_1_2_GC %>%
-#   group_by(fleet) %>%
-#  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),LANDED_win=mean(LANDED_win), 
-#                  OPERATING_win=mean(OPERATING_PROFIT_2022_win), VPUE_win=mean(VPUE_win)  )
-# 
-# 
-# dropped_values_CA_2_3_GC %>%
-#   group_by(fleet) %>%
-#  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),LANDED_win=mean(LANDED_win), 
-#                  OPERATING_win=mean(OPERATING_PROFIT_2022_win), VPUE_win=mean(VPUE_win)  )
-
-
-```
-
-
-## CA GC-IFQ Revenue Z-Tests
-
- Section 4.2 The Adaptive Wind Development Processes -  Central Atlantic - Code chunk below creates output for Table 8. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
-
-
-The first command tests the equality Winsorized Dollars for the Trips that were dropped during the CA 1 to CA 3 process (Call area to Lease Area)  against the trips that remained inside at the CA3 step (Lease Areas).  These are done at the 90, 95, and 99\% confidence levels.  Other commands are defined analgously.
-
-```{r, CA1_to_3GC_Dollar_tests}
-
-BSDA::z.test(dropped_values_CA_1_3_GC$DOLLAR_2022_win,
-  y = Inside_CA3_GC$DOLLAR_2022_win,
-  sigma.x = sd(dropped_values_CA_1_3_GC$DOLLAR_2022_win),
-  sigma.y = sd(Inside_CA3_GC$DOLLAR_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.99)
-
-```
-
-
-## CA Limited Access Revenue Z-Tests
-
-Section 4.2 The Adaptive Wind Development Processes -  Central Atlantic - Code chunk below creates output for Table 9. Limited Access (AA) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.; Table 10. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
-
-
-```{r, CA1_to_3AA_Dollar_tests}
-
-## Phase 1 to 3
-
-BSDA::z.test(dropped_values_CA_1_3_AA$DOLLAR_2022_win,
-  y = Inside_CA3_AA$DOLLAR_2022_win,
-  sigma.x = sd(dropped_values_CA_1_3_AA$DOLLAR_2022_win),
-  sigma.y = sd(Inside_CA3_AA$DOLLAR_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.99)
-
-
-## Phase 1 to 3
-
-BSDA::z.test(dropped_values_CA_1_3_DAS$DOLLAR_2022_win,
-  y = Inside_CA3_DAS$DOLLAR_2022_win,
-  sigma.x = sd(dropped_values_CA_1_3_DAS$DOLLAR_2022_win),
-  sigma.y = sd(Inside_CA3_DAS$DOLLAR_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.99)
-
-```
-
-## CA GC-IFQ Landed z-tests
-
- Section 4.2 The Adaptive Wind Development Processes -  Central Atlantic - Code chunk below creates output for Table 8. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
-
-```{r, CA1_to_3GC_Landed_tests}
-
-
-BSDA::z.test(dropped_values_CA_1_3_GC$LANDED_win,
-  y = Inside_CA3_GC$LANDED_win,
-  sigma.x = sd(dropped_values_CA_1_3_GC$LANDED_win),
-  sigma.y = sd(Inside_CA3_GC$LANDED_win),
-  alternative = c("two.sided"),
-  conf.level = 0.99)
-
-
-```
-
-
-## CA Limited Access Landed z-tests
-
- Section 4.2 The Adaptive Wind Development Processes -  Central Atlantic - Code chunk below creates output for Table 9. Limited Access (AA) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.; Table 10. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
-
-
-```{r, CA1_to_3AA_Landed_tests}
-
-## Phase 1 to 3
-
-BSDA::z.test(dropped_values_CA_1_3_AA$LANDED_win,
-  y = Inside_CA3_AA$LANDED_win,
-  sigma.x = sd(dropped_values_CA_1_3_AA$LANDED_win),
-  sigma.y = sd(Inside_CA3_AA$LANDED_win),
-  alternative = c("two.sided"),
-  conf.level = 0.99)
-
-
-
-# Days-at-Sea
-## Phase 1 to 3
-
-BSDA::z.test(dropped_values_CA_1_3_DAS$LANDED_win,
-  y = Inside_CA3_DAS$LANDED_win,
-  sigma.x = sd(dropped_values_CA_1_3_DAS$LANDED_win),
-  sigma.y = sd(Inside_CA3_DAS$LANDED_win),
-  alternative = c("two.sided"),
-  conf.level = 0.99)
-
-
-
-```
-
-
-## CA GCIFQ Operating Profit z-tests
-
- Section 4.2 The Adaptive Wind Development Processes -  Central Atlantic - Code chunk below creates output for Table 8. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
-
-
-```{r, CA1_to_3GC_OperatingProfit_tests}
-
-BSDA::z.test(dropped_values_CA_1_3_GC$OPERATING_PROFIT_2022_win,
-  y = Inside_CA3_GC$OPERATING_PROFIT_2022_win,
-  sigma.x = sd(dropped_values_CA_1_3_GC$OPERATING_PROFIT_2022_win),
-  sigma.y = sd(Inside_CA3_GC$OPERATING_PROFIT_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.99)
-```
-
-## CA Limited Access Operating Profit z-tests
-
- Section 4.2 The Adaptive Wind Development Processes -  Central Atlantic - Code chunk below creates output for Table 9. Limited Access (AA) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.; Table 10. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
-
-
-```{r, CA1_to_3AA_OperatingProfit_tests}
-
-# Access Area 
-## Phase 1 to 3
-
-BSDA::z.test(dropped_values_CA_1_3_AA$OPERATING_PROFIT_2022_win,
-  y = Inside_CA3_AA$OPERATING_PROFIT_2022_win,
-  sigma.x = sd(dropped_values_CA_1_3_AA$OPERATING_PROFIT_2022_win),
-  sigma.y = sd(Inside_CA3_AA$OPERATING_PROFIT_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.99)
-
-
-
-# Days-at-Sea
-
-## Phase 1 to 3
-
-BSDA::z.test(dropped_values_CA_1_3_DAS$OPERATING_PROFIT_2022_win,
-  y = Inside_CA3_DAS$OPERATING_PROFIT_2022_win,
-  sigma.x = sd(dropped_values_CA_1_3_DAS$OPERATING_PROFIT_2022_win),
-  sigma.y = sd(Inside_CA3_DAS$OPERATING_PROFIT_2022_win),
-  alternative = c("two.sided"),
-  conf.level = 0.99)
-
-
-
-
-```
-
-
-## CA GCIFQ z-tests VPUE
-
- Section 4.2 The Adaptive Wind Development Processes -  Central Atlantic - Code chunk below creates output for Table 8. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
-
-
-```{r, CA1_to_3GC_VPUE_tests}
-
-BSDA::z.test(dropped_values_CA_1_3_GC$VPUE_win,
-  y = Inside_CA3_GC$VPUE_win,
-  sigma.x = sd(dropped_values_CA_1_3_GC$VPUE_win),
-  sigma.y = sd(Inside_CA3_GC$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.99)
-
-```
-
-## CA Limited Access z-tests VPUE
-
- Section 4.2 The Adaptive Wind Development Processes -  Central Atlantic - Code chunk below creates output for Table 9. Limited Access (AA) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.; Table 10. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
-
-
-```{r, CA1_to_3AA_VPUE_tests}
-
-# Access Area 
-## Phase 1 to 3
-BSDA::z.test(dropped_values_CA_1_3_AA$VPUE_win,
-  y = Inside_CA3_AA$VPUE_win,
-  sigma.x = sd(dropped_values_CA_1_3_AA$VPUE_win),
-  sigma.y = sd(Inside_CA3_AA$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.99)
-
-
-
-
-# Days-at-Sea
-
-## Phase 1 to 3
-BSDA::z.test(dropped_values_CA_1_3_DAS$VPUE_win,
-  y = Inside_CA3_DAS$VPUE_win,
-  sigma.x = sd(dropped_values_CA_1_3_DAS$VPUE_win),
-  sigma.y = sd(Inside_CA3_DAS$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.99)
-
-
-
-
-
-```
-
 # New York Bight (NY) Comparisons
 
 
@@ -1036,6 +690,352 @@ BSDA::z.test(dropped_values_NY_2_3_DAS$VPUE_win,
   sigma.y = sd(Inside_NY3_DAS$VPUE_win),
   alternative = c("two.sided"),
   conf.level = 0.99)
+
+
+
+```
+
+
+# Central Atlantic Section 
+
+
+## Aggregate Scallop Revenue and Operating Profit CA1, CA2, and CA3 and the Dropped Values from 1-3 for the LA Fleet
+
+```{r}
+ Inside_CA1_LA %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
+
+
+# Inside_CA2_LA %>%
+#   group_by(fleet) %>%
+#   dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
+
+Inside_CA3_LA %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
+
+
+
+dropped_values_CA_1_3_LA %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
+
+```
+
+
+
+## Average Winsorized Revenue, VPUE, Operating Profit, and Landings in CA closures by fleet LA 
+
+ Section 4.2 The Adaptive Wind Development Processes -  Central Atlantic - Code chunk below creates output for Table 9. Limited Access (AA) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.; Table 10. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
+
+
+```{r}
+Inside_CA1_LA %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win), LANDED_win=mean(LANDED_win),
+                   OPERATING_win=mean(OPERATING_PROFIT_2022_win),VPUE_win=mean(VPUE_win) )
+
+
+# Inside_CA2_LA %>%
+#   group_by(fleet) %>%
+#  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win), LANDED_win=mean(LANDED_win),
+#                   OPERATING_win=mean(OPERATING_PROFIT_2022_win),VPUE_win=mean(VPUE_win) )
+
+
+Inside_CA3_LA %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win), LANDED_win=mean(LANDED_win),
+                   OPERATING_win=mean(OPERATING_PROFIT_2022_win),VPUE_win=mean(VPUE_win) )
+
+dropped_values_CA_1_3_LA %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win), LANDED_win=mean(LANDED_win),
+                   OPERATING_win=mean(OPERATING_PROFIT_2022_win),VPUE_win=mean(VPUE_win) )
+
+
+# dropped_values_CA_1_2_LA %>%
+#   group_by(fleet) %>%
+#  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win), LANDED_win=mean(LANDED_win),
+#                   OPERATING_win=mean(OPERATING_PROFIT_2022_win),VPUE_win=mean(VPUE_win) )
+# 
+# 
+# dropped_values_CA_2_3_LA %>%
+#   group_by(fleet) %>%
+#   dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),VPUE_win=mean(VPUE_win),
+#                    LANDED_win=mean(LANDED_win), OPERATING_win=mean(OPERATING_PROFIT_2022_win) )
+
+
+```
+
+## Aggregate Scallop revenue CA1, CA2, and CA3 and the Dropped Values from 1-3 for the GCIFQ Fleet
+
+```{r}
+
+
+Inside_CA1_GC %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
+
+
+# Inside_CA2_GC %>%
+#   group_by(fleet) %>%
+#   dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
+
+Inside_CA3_GC %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
+
+
+
+dropped_values_CA_1_3_GC %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
+
+```
+
+##Average Winsorized Revenue, VPUE, Operating Profit, and Landed weights for the Central Atlantic, GCIFQ
+
+ Section 4.2 The Adaptive Wind Development Processes -  Central Atlantic - Code chunk below creates output for Table 8. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
+
+
+```{r}
+
+Inside_CA1_GC %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),LANDED_win=mean(LANDED_win), 
+                  OPERATING_win=mean(OPERATING_PROFIT_2022_win), VPUE_win=mean(VPUE_win)  )
+
+
+# Inside_CA2_GC %>%
+#   group_by(fleet) %>%
+#  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),LANDED_win=mean(LANDED_win), 
+#                  OPERATING_win=mean(OPERATING_PROFIT_2022_win), VPUE_win=mean(VPUE_win)  )
+
+
+Inside_CA3_GC %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),LANDED_win=mean(LANDED_win), 
+                  OPERATING_win=mean(OPERATING_PROFIT_2022_win), VPUE_win=mean(VPUE_win)  )
+
+
+
+dropped_values_CA_1_3_GC %>%
+  group_by(fleet) %>%
+  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),LANDED_win=mean(LANDED_win), 
+                  OPERATING_win=mean(OPERATING_PROFIT_2022_win), VPUE_win=mean(VPUE_win)  )
+
+
+# dropped_values_CA_1_2_GC %>%
+#   group_by(fleet) %>%
+#  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),LANDED_win=mean(LANDED_win), 
+#                  OPERATING_win=mean(OPERATING_PROFIT_2022_win), VPUE_win=mean(VPUE_win)  )
+# 
+# 
+# dropped_values_CA_2_3_GC %>%
+#   group_by(fleet) %>%
+#  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),LANDED_win=mean(LANDED_win), 
+#                  OPERATING_win=mean(OPERATING_PROFIT_2022_win), VPUE_win=mean(VPUE_win)  )
+
+
+```
+
+
+## CA GC-IFQ Revenue Z-Tests
+
+ Section 4.2 The Adaptive Wind Development Processes -  Central Atlantic - Code chunk below creates output for Table 8. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
+
+
+The first command tests the equality Winsorized Dollars for the Trips that were dropped during the CA 1 to CA 3 process (Call area to Lease Area)  against the trips that remained inside at the CA3 step (Lease Areas).  These are done at the 90, 95, and 99\% confidence levels.  Other commands are defined analgously.
+
+```{r, CA1_to_3GC_Dollar_tests}
+
+BSDA::z.test(dropped_values_CA_1_3_GC$DOLLAR_2022_win,
+  y = Inside_CA3_GC$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_CA_1_3_GC$DOLLAR_2022_win),
+  sigma.y = sd(Inside_CA3_GC$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+```
+
+
+## CA Limited Access Revenue Z-Tests
+
+Section 4.2 The Adaptive Wind Development Processes -  Central Atlantic - Code chunk below creates output for Table 9. Limited Access (AA) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.; Table 10. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
+
+
+```{r, CA1_to_3AA_Dollar_tests}
+
+## Phase 1 to 3
+
+BSDA::z.test(dropped_values_CA_1_3_AA$DOLLAR_2022_win,
+  y = Inside_CA3_AA$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_CA_1_3_AA$DOLLAR_2022_win),
+  sigma.y = sd(Inside_CA3_AA$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+## Phase 1 to 3
+
+BSDA::z.test(dropped_values_CA_1_3_DAS$DOLLAR_2022_win,
+  y = Inside_CA3_DAS$DOLLAR_2022_win,
+  sigma.x = sd(dropped_values_CA_1_3_DAS$DOLLAR_2022_win),
+  sigma.y = sd(Inside_CA3_DAS$DOLLAR_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+```
+
+## CA GC-IFQ Landed z-tests
+
+ Section 4.2 The Adaptive Wind Development Processes -  Central Atlantic - Code chunk below creates output for Table 8. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
+
+```{r, CA1_to_3GC_Landed_tests}
+
+
+BSDA::z.test(dropped_values_CA_1_3_GC$LANDED_win,
+  y = Inside_CA3_GC$LANDED_win,
+  sigma.x = sd(dropped_values_CA_1_3_GC$LANDED_win),
+  sigma.y = sd(Inside_CA3_GC$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+```
+
+
+## CA Limited Access Landed z-tests
+
+ Section 4.2 The Adaptive Wind Development Processes -  Central Atlantic - Code chunk below creates output for Table 9. Limited Access (AA) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.; Table 10. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
+
+
+```{r, CA1_to_3AA_Landed_tests}
+
+## Phase 1 to 3
+
+BSDA::z.test(dropped_values_CA_1_3_AA$LANDED_win,
+  y = Inside_CA3_AA$LANDED_win,
+  sigma.x = sd(dropped_values_CA_1_3_AA$LANDED_win),
+  sigma.y = sd(Inside_CA3_AA$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+
+# Days-at-Sea
+## Phase 1 to 3
+
+BSDA::z.test(dropped_values_CA_1_3_DAS$LANDED_win,
+  y = Inside_CA3_DAS$LANDED_win,
+  sigma.x = sd(dropped_values_CA_1_3_DAS$LANDED_win),
+  sigma.y = sd(Inside_CA3_DAS$LANDED_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+
+```
+
+
+## CA GCIFQ Operating Profit z-tests
+
+ Section 4.2 The Adaptive Wind Development Processes -  Central Atlantic - Code chunk below creates output for Table 8. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
+
+
+```{r, CA1_to_3GC_OperatingProfit_tests}
+
+BSDA::z.test(dropped_values_CA_1_3_GC$OPERATING_PROFIT_2022_win,
+  y = Inside_CA3_GC$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_CA_1_3_GC$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_CA3_GC$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+```
+
+## CA Limited Access Operating Profit z-tests
+
+ Section 4.2 The Adaptive Wind Development Processes -  Central Atlantic - Code chunk below creates output for Table 9. Limited Access (AA) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.; Table 10. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
+
+
+```{r, CA1_to_3AA_OperatingProfit_tests}
+
+# Access Area 
+## Phase 1 to 3
+
+BSDA::z.test(dropped_values_CA_1_3_AA$OPERATING_PROFIT_2022_win,
+  y = Inside_CA3_AA$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_CA_1_3_AA$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_CA3_AA$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+
+# Days-at-Sea
+
+## Phase 1 to 3
+
+BSDA::z.test(dropped_values_CA_1_3_DAS$OPERATING_PROFIT_2022_win,
+  y = Inside_CA3_DAS$OPERATING_PROFIT_2022_win,
+  sigma.x = sd(dropped_values_CA_1_3_DAS$OPERATING_PROFIT_2022_win),
+  sigma.y = sd(Inside_CA3_DAS$OPERATING_PROFIT_2022_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+
+
+```
+
+
+## CA GCIFQ z-tests VPUE
+
+ Section 4.2 The Adaptive Wind Development Processes -  Central Atlantic - Code chunk below creates output for Table 8. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
+
+
+```{r, CA1_to_3GC_VPUE_tests}
+
+BSDA::z.test(dropped_values_CA_1_3_GC$VPUE_win,
+  y = Inside_CA3_GC$VPUE_win,
+  sigma.x = sd(dropped_values_CA_1_3_GC$VPUE_win),
+  sigma.y = sd(Inside_CA3_GC$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+```
+
+## CA Limited Access z-tests VPUE
+
+ Section 4.2 The Adaptive Wind Development Processes -  Central Atlantic - Code chunk below creates output for Table 9. Limited Access (AA) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.; Table 10. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
+
+
+```{r, CA1_to_3AA_VPUE_tests}
+
+# Access Area 
+## Phase 1 to 3
+BSDA::z.test(dropped_values_CA_1_3_AA$VPUE_win,
+  y = Inside_CA3_AA$VPUE_win,
+  sigma.x = sd(dropped_values_CA_1_3_AA$VPUE_win),
+  sigma.y = sd(Inside_CA3_AA$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
+
+
+# Days-at-Sea
+
+## Phase 1 to 3
+BSDA::z.test(dropped_values_CA_1_3_DAS$VPUE_win,
+  y = Inside_CA3_DAS$VPUE_win,
+  sigma.x = sd(dropped_values_CA_1_3_DAS$VPUE_win),
+  sigma.y = sd(Inside_CA3_DAS$VPUE_win),
+  alternative = c("two.sided"),
+  conf.level = 0.99)
+
+
 
 
 
