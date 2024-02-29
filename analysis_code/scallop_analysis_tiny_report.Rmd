@@ -11,7 +11,7 @@ output:
   pdf_document:
     toc: yes
 params:
-  AA_DAS_only: TRUE
+  AA_DAS_only: FALSE
   subtrip_aggregate: TRUE
   BIN_GEARS: TRUE
   location:
@@ -23,7 +23,7 @@ params:
     - Seattle
   input_shapefile:
     
-    value: wind_Central_Atlantic_3.RDS
+    value: wind_sf_combined.RDS
     choices:
     - wind_NY1.RDS
     - wind_NY2.RDS
@@ -3615,6 +3615,12 @@ if (out_switch == "table") {
   zone_out$plot
 }
 ```
+```{r, eval=eval_next}
+  zone_out$table %>%
+    pretty_lab() %>% 
+    pretty_tab_sb(width = "40%")
+```
+
 
 <br><br><br>
 
