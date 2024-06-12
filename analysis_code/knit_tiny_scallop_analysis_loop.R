@@ -1,4 +1,4 @@
-# Small R script to render lots of variations of the scallop_report_322.Rmd. This allows us to pass in different shapefiles or do different aggregations.  
+# Small R script to render lots of variations of the scallop_analysis_tiny_report.Rmd. This allows us to pass in different shapefiles or do different aggregations.  
 # Borrowed heavily from https://bookdown.org/yihui/rmarkdown/params-knit.html
 
 library("here")
