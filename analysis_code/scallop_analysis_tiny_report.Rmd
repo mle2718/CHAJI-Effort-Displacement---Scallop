@@ -3137,7 +3137,7 @@ t.test(out_closure_scallop0322MainDataTable$VPUE_win,y=in_closure_scallop0322Mai
 # LA Trip Type
 if (params$AA_DAS_only==TRUE){
   
-  t.test(in_closure_scallop0322MainDataTable_AA$VPUE,y=out_closure_scallop0322MainDataTable_AA$VPUE, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+  t.test(out_closure_scallop0322MainDataTable_AA$VPUE,y=in_closure_scallop0322MainDataTable_AA$VPUE, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
 
   
 }
@@ -3145,7 +3145,7 @@ if (params$AA_DAS_only==TRUE){
 # DAS Trip Type
 if (params$AA_DAS_only==TRUE){
   
-    t.test(in_closure_scallop0322MainDataTable_DAS$VPUE,y=out_closure_scallop0322MainDataTable_DAS$VPUE, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+    t.test(out_closure_scallop0322MainDataTable_DAS$VPUE,y=in_closure_scallop0322MainDataTable_DAS$VPUE, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
 
 }
 ```
@@ -3155,7 +3155,7 @@ if (params$AA_DAS_only==TRUE){
 # LA Trip Type - Winsorized
 if (params$AA_DAS_only==TRUE){
   
-      t.test(in_closure_scallop0322MainDataTable_AA$VPUE_win,y=out_closure_scallop0322MainDataTable_AA$VPUE_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+      t.test(out_closure_scallop0322MainDataTable_AA$VPUE_win,y=in_closure_scallop0322MainDataTable_AA$VPUE_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
 
   
   
@@ -3164,7 +3164,7 @@ if (params$AA_DAS_only==TRUE){
 
 # DAS Trip Type - Winsorized
 if (params$AA_DAS_only==TRUE){
-        t.test(in_closure_scallop0322MainDataTable_DAS$VPUE_win,y=out_closure_scallop0322MainDataTable_DAS$VPUE_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+        t.test(out_closure_scallop0322MainDataTable_DAS$VPUE_win,y=in_closure_scallop0322MainDataTable_DAS$VPUE_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
 
 }
 
@@ -3553,14 +3553,14 @@ t.test(out_closure_scallop0322MainDataTable$DOLLAR_2022_win,y=in_closure_scallop
 
 # LA Trip Type - Winsorized
 if (params$AA_DAS_only==TRUE){
-  t.test(in_closure_scallop0322MainDataTable_AA$DOLLAR_2022_win,y=out_closure_scallop0322MainDataTable_AA$DOLLAR_2022_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+  t.test(out_closure_scallop0322MainDataTable_AA$DOLLAR_2022_win,y=in_closure_scallop0322MainDataTable_AA$DOLLAR_2022_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
 
 }
 
 # DAS Trip Type - Winsorized
 if (params$AA_DAS_only==TRUE){
   
-    t.test(in_closure_scallop0322MainDataTable_DAS$DOLLAR_2022_win,y=out_closure_scallop0322MainDataTable_DAS$DOLLAR_2022_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+    t.test(out_closure_scallop0322MainDataTable_DAS$DOLLAR_2022_win,y=in_closure_scallop0322MainDataTable_DAS$DOLLAR_2022_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
 
 }
 
@@ -3649,13 +3649,13 @@ t.test(out_closure_scallop0322MainDataTable$LANDED_win,y=in_closure_scallop0322M
 if (params$AA_DAS_only==TRUE){
   
   
-  t.test(in_closure_scallop0322MainDataTable_AA$LANDED_win,y=out_closure_scallop0322MainDataTable_AA$LANDED_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+  t.test(out_closure_scallop0322MainDataTable_AA$LANDED_win,y=in_closure_scallop0322MainDataTable_AA$LANDED_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
 
 }
 
 # DAS Trip Type - Winsorized
 if (params$AA_DAS_only==TRUE){
-    t.test(in_closure_scallop0322MainDataTable_DAS$LANDED_win,y=out_closure_scallop0322MainDataTable_DAS$LANDED_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+    t.test(out_closure_scallop0322MainDataTable_DAS$LANDED_win,y=in_closure_scallop0322MainDataTable_DAS$LANDED_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
 
 }
 
@@ -3780,14 +3780,14 @@ Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Area
 
 # LA Trip Type - Winsorized
 if (params$AA_DAS_only==TRUE){
-      t.test(in_closure_scallop0322MainDataTable_AA$OPERATING_PROFIT_2022_win,y=out_closure_scallop0322MainDataTable_AA$OPERATING_PROFIT_2022_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+      t.test(out_closure_scallop0322MainDataTable_AA$OPERATING_PROFIT_2022_win,y=in_closure_scallop0322MainDataTable_AA$OPERATING_PROFIT_2022_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
 
   }
 
 # DAS Trip Type - Winsorized
 if (params$AA_DAS_only==TRUE){
   
-        t.test(in_closure_scallop0322MainDataTable_DAS$OPERATING_PROFIT_2022_win,y=out_closure_scallop0322MainDataTable_DAS$OPERATING_PROFIT_2022_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+        t.test(out_closure_scallop0322MainDataTable_DAS$OPERATING_PROFIT_2022_win,y=in_closure_scallop0322MainDataTable_DAS$OPERATING_PROFIT_2022_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
 
 }
 
@@ -3874,20 +3874,15 @@ t.test(out_closure_scallop0322MainDataTable$VPUE_win,y=in_closure_scallop0322Mai
 # LA Trip Type - Winsorized
 if (params$AA_DAS_only==TRUE){
   
-t.test(in_closure_scallop0322MainDataTable_AA$VPUE_win,y=out_closure_scallop0322MainDataTable_AA$VPUE_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+t.test(out_closure_scallop0322MainDataTable_AA$VPUE_win,y=in_closure_scallop0322MainDataTable_AA$VPUE_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
 
 }
 
 # DAS Trip Type - Winsorized
 if (params$AA_DAS_only==TRUE){
-  t.test(in_closure_scallop0322MainDataTable_DAS$VPUE_win,y=out_closure_scallop0322MainDataTable_DAS$VPUE_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+  t.test(out_closure_scallop0322MainDataTable_DAS$VPUE_win,y=in_closure_scallop0322MainDataTable_DAS$VPUE_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
 
-BSDA::z.test(in_closure_scallop0322MainDataTable_DAS$VPUE_win,
-  y = $VPUE_win,
-  sigma.x = sd(in_closure_scallop0322MainDataTable_DAS$VPUE_win),
-  sigma.y = sd(out_closure_scallop0322MainDataTable_DAS$VPUE_win),
-  alternative = c("two.sided"),
-  conf.level = 0.95)
+
 }
 
 ```
