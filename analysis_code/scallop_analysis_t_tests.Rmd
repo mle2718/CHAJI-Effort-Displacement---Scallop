@@ -1,0 +1,1401 @@
+---
+title: "Mini Scallop Data Summary"
+author: "Alan Haynie, Melanie Harsch, Bryce McManus"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    keep_md: yes
+    toc: yes
+    toc_float: yes
+    code_folding: show
+  pdf_document:
+    toc: yes
+params:
+  AA_DAS_only: FALSE
+  subtrip_aggregate: TRUE
+  BIN_GEARS: TRUE
+  location:
+    label: 'Location:'
+    value: Woods_Hole
+    input: select
+    choices:
+    - Woods_Hole
+    - Seattle
+  input_shapefile:
+    
+    value: wind_sf_combined.RDS
+    choices:
+    - wind_NY1.RDS
+    - wind_NY2.RDS
+    - wind_NY3.RDS
+    - wind_Central_Atlantic_1.RDS
+    - wind_Central_Atlantic_2.RDS
+    - wind_Central_Atlantic_3.RDS
+    - wind_sf_final.RDS
+    - wind_sf_nocable.RDS
+    - wind_sf_combined.RDS
+---
+
+```{=html}
+<!---
+YAML options: 
+
+
+location --- NEFSC folks should set location=Woods_Hole. AK folks should set it to Seattle. This just controls where the data is read in from.
+
+PreRelease -- controls the location of FishSET package. Set to FALSE to load without options. Set to TRUE to load from a particular lib.loc
+--->
+```
+## Warning and Options
+This .Rmd can be knit to html directly, but it is far more useful to pass in different parameters by using *knit_tiny_scallop_analysis_loop.R*.
+
+Please be careful with interpretation. Some outputs are uninterpretable when certain options are selected. For example, when we *do not* aggregate subtrips to trips:
+
+1.  the "per-unit-effort" outputs are not meaningful.
+2.  Any statistics that are averaged are now averaged over subtrips, so this may not have a meaning either.
+
+There may be other, so think carefully.
+
+1.  Your location is `r params$location`.
+2.  The value of AA_DAS is `r params$AA_DAS_only`.
+3.  The value of subtrip_aggregate is `r params$subtrip_aggregate`.
+4.  The value of BIN_GEARS is `r params$BIN_GEARS`.
+5.  The input shapefile has been set to `r params$input_shapefile`.
+
+This is a very short version of the scallop_analysis
+
+## Introduction
+
+This summary was done using a combination of FishSET console functions, the tidyverse (mainly dplyr and tidyr), and a few formatting functions. There is an option to hide the code chunks at the top and a floating table of contents. All results are included in the output (apologies for the general messiness). You'll need to download the html file to view the results (if you try to view the html file in Google Drive it will only show the raw html).
+
+Here's some background on how FishSET works: Everything that runs through FishSET is saved to the "FishSET Folder", which houses all the user's FishSET projects. The FishSET Folder gets created when a user first loads FishSET. Each project folder contains a FishSET Database (sqlite), a log of the function calls, metadata, automatically saved output, and a few other useful features. The project name for this summary is "scallop0322" (the last four digits are month and year) which you'll see in the names of the saved tables.
+
+The easiest way to give feedback is by using the "Feedback/Comments" Google doc in the "Confidential NE scallop data analysis 03/22" folder. It includes an outline of the summary and a general feedback section to help organize the comments. Please let us know what you find helpful or unhelpful, what feels unnecessary or underdeveloped, or any thoughts or suggestions you may have.
+
+<br><br>
+
+
+## Creating tables in first paper 
+
+Tables 2, 3, and 4, Scallop fishing in the Wind Lease Areas in the Northeast U.S., are created using tables from the **scallop_analysis_tiny_report.Rmd**. 
+
+In order to obtain results two params must be adjusted. 
+**First,**  input_shapefile value must be set to wind_sf_combined.RDS
+**Second**, AA_DAS_only will be set according to the fleet/metier type listed in the table. AA_DAS_only: TRUE for LA fleet or  AA_DAS_only: FALSE for GC-IFQ fleet.  
+
+Afterwards, results are collected and pasted into tables in google sheets from the following 5 code chunks:
+
+Number of observations
+Average Winsorized Revenue in closures by fleet
+Average winsorized landed in closures by fleet
+Average Winsorized Operating Profit in closures by fleet
+Average winsorized VPUE in closures by fleet
+
+
+Examples of params for each table are below: 
+Examples of parameters 
+Table 2. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day. 
+input shapefile
+    value wind_sf_combined.RDS
+AA_DAS_only FALSE
+
+Table 3. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day and Table 4. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.
+
+input_shapefile
+    value wind_sf_combined.RDS
+AA_DAS_only TRUE
+
+
+<br><br>
+
+## Library
+
+```{r setup, echo=FALSE}
+
+library(FishSET)
+
+#library("tidyverse")
+tidyverse_short <- c("dplyr",  "ggplot2", "magrittr", "tidyr", "lubridate") 
+lapply(tidyverse_short, require, character.only = TRUE)
+rm(tidyverse_short)
+library(kableExtra) # table formatting 
+library(sf) # converting geometry points to separate cols
+library(stats)
+library(here)
+here::i_am("analysis_code/scallop_analysis_tiny_report.Rmd")
+# helper functions
+source(here("analysis_code", "format_helpers.R"))
+dir.create(here("data", "main","casestudies"), showWarnings="FALSE")
+
+project <- "scallop0322"
+pounds_to_kg<-2.20462
+# disable scientific notation
+options(scipen=999)
+
+AA_DAS_param_hack <-params$AA_DAS_only
+
+params$input_shapefile
+
+shapefile_shortname<-params$input_shapefile
+shapefile_shortname<-gsub(".RDS","",shapefile_shortname)
+shapefile_shortname<-gsub("Central_Atlantic_","CA",shapefile_shortname)
+shapefile_shortname<-gsub("wind_NY","NY",shapefile_shortname)
+shapefile_shortname<-gsub("wind_","",shapefile_shortname)
+
+fleet<-"NA"
+if (params$AA_DAS_only==TRUE){
+  fleet<-"LA"
+}
+if (params$AA_DAS_only==FALSE){
+  fleet<-"gc"
+}
+
+
+```
+
+<br><br>
+
+## Reset project
+
+FishSET stores data in a directory called "FishSETFolder". You can put this directory anywhere you want.
+
+This chunk "resets" my project by erasing it. This is just to keep things tidy and avoid potential errors when kitting the doc.
+
+At the dialog box, select the directory that contains the "FishSETFolder" or the directory in which you want the "FishSETFolder" to be created. But don't select the "FishSETFolder" directory itself.
+
+If you don't have a FishSETFolder, the subsequent ``load_maindat()'' in the data_readin chunk will probably fail. The easiest thing to do is to create a FishSETFolder.  
+
+
+```{r project_cleanup,eval=TRUE}
+
+  folderpath <- here("FishSETFolder")
+  proj_dir<-here()
+  unlink(here(folderpath,project), recursive = TRUE)
+
+```
+
+<br><br>
+
+## Data Import
+
+```{r data_readin, eval=TRUE}
+#For Woods_Hole users, read in the most recent data in data/main
+
+if (params$location=="Woods_Hole"){
+  # This code looks into /data/main and sets the vintage_string according to 
+  # the most recent data
+  datasets_list <- list.files(path = here("data", "main"), pattern = "final_product_lease")
+  datasets_list <- gsub("final_product_lease_", "", datasets_list )
+  datasets_list <- gsub("final_product_lease", "", datasets_list )
+  datasets_list <- gsub(".Rds", "", datasets_list)
+  datasets_list <- gsub(".csv" ,"", datasets_list)
+  vintage_string <- max(datasets_list)
+  rm(datasets_list)
+  dat_filepath <- here("data", "main", paste0("final_product_lease_", vintage_string, ".Rds"))
+} else if (params$location=="Seattle"){
+  dat_filepath <- paste0("~/NE Scallops/data/updated/", 
+                         "June 22/NE NW Collab/",
+                         "final_product_lease_2022_05_25.Rds")
+}
+
+final_product_lease <- readRDS(dat_filepath)
+# needed to rename this for now since it matches the name outputted from the
+# zone assignment function we use. 
+#final_product_lease <- final_product_lease %>% rename(Zone_ID = "ZoneID") 
+final_product_lease$scallop_fishing_year<-as.numeric(final_product_lease$scallop_fishing_year)
+
+# convert the scallop_fishing_year variable into a "date" format that is amenable to the vessel_count() function
+final_product_lease$scallop_fishing_yearD <- lubridate::date_decimal(final_product_lease$scallop_fishing_year)
+
+
+final_product_lease <- final_product_lease %>%
+  mutate(KILOGRAMS = POUNDS/pounds_to_kg,
+         LANDED_KG=LANDED/pounds_to_kg) 
+
+# converted column types to be compatible with tiny report  
+final_product_lease$IMGID <- as.numeric(final_product_lease$IMGID)
+final_product_lease$DEALER_RPT_ID <- as.numeric(final_product_lease$DEALER_RPT_ID)
+final_product_lease$VTR_PORTNUM<- as.integer(final_product_lease$VTR_PORTNUM)
+final_product_lease$YEAR<-as.integer(final_product_lease$YEAR)
+final_product_lease$PERMIT.y<- as.integer(final_product_lease$PERMIT.y)
+final_product_lease$DEALNUM<- as.integer(final_product_lease$DEALNUM)
+
+
+#A column of ones. Useful for many things
+final_product_lease$ones<-1
+
+
+
+load_maindata(dat = final_product_lease, project = project, over_write = TRUE)
+
+```
+
+<br><br>
+
+### Spatial data
+
+Since sqlite can't save spatial data, we save it as a GeoJSON file in the project's data folder.
+
+```{r}
+ ten_filepath <- here("data", "external", "shapefiles", 
+                      "Ten Minute Squares Cut North and Greater Atlantic")
+
+# loads lease area combined w/ cable routes (saved locally) created from
+# data_wrangle/combine_cable_routes.Rmd
+lease_filepath <- here("data", "main", "spatial", params$input_shapefile)
+
+load_spatial(lease_filepath, name = "WindClose", over_write = TRUE, project,
+             data.type = "RDS")
+load_spatial(ten_filepath, name = "TenMNSQR", over_write = TRUE, project,
+             data.type = "shape")
+
+scallop0322TenMNSQRSpatTable <- table_view("scallop0322TenMNSQRSpatTable", 
+                                           project)
+scallop0322WindCloseSpatTable <- table_view("scallop0322WindCloseSpatTable",
+                                            project)
+```
+
+<br><br>
+
+This data contains `r nrow(scallop0322MainDataTable)` rows and `r ncol(scallop0322MainDataTable)` variables.
+
+<br><br>
+
+## Assign Fleets and Subset
+
+We will want to do this before the rest of the QA/QC. There are always lots of broken bits, but many of them are going to be in the "other" fleet.
+
+### Fleet assignment
+
+```{r}
+#Parse the first 2 digits of Area Identifier
+scallop0322MainDataTable <-
+  scallop0322MainDataTable %>% 
+  mutate(`Area_ID2` = substr(`Area Identifier`, 1, 2))
+```
+
+```{r create_fleet_tabs}
+ fleet_tab_AA_DAS <- data.frame(
+  
+  condition = c('`Plan Code` == "SES" & `Program Code` == "SAA"',
+                '`Plan Code` == "SES" & `Program Code` == "SCA"',
+                '`Plan Code` == "SES" & `Program Code` == "SCG" & `Area_ID2` != "NG"',
+                '`Plan Code` == "SES" & `Program Code` == "SCG" & `Area_ID2` == "NG"'),
+  fleet = c("Access Area", "Days at Sea", "GCIFQ", "GCNGOM")
+)
+  fleet_tab_LA_GC_IFQ <- data.frame(
+  
+  condition = c('`Plan Code` == "SES" & `Program Code` == "SAA" | 
+                `Plan Code` == "SES" & `Program Code` == "SCA"',
+                '`Plan Code` == "SES" & `Program Code` == "SCG" & `Area_ID2` != "NG"',
+                '`Plan Code` == "SES" & `Program Code` == "SCG" & `Area_ID2` == "NG"'),
+  fleet = c("Limited Access", "GCIFQ", "GCNGOM")
+  )
+
+```
+
+
+
+```{r}
+# save fleet appropriate table to FishSET DB
+
+
+if (params$AA_DAS_only==TRUE){
+ fleet_table(scallop0322MainDataTable, 
+            project = project,
+            table = fleet_tab_AA_DAS, save = TRUE)
+} else if (params$AA_DAS_only==FALSE){
+  fleet_table(scallop0322MainDataTable, 
+            project = project,
+            table = fleet_tab_LA_GC_IFQ, save = TRUE)
+}
+  
+
+# Create fleet column 
+fleet_tab_name <- list_tables(project, type = "fleet") # grab tab name
+
+scallop0322MainDataTable <- 
+  fleet_assign(scallop0322MainDataTable, project = project, 
+               fleet_tab = fleet_tab_name)
+```
+
+<br><br>
+
+### Subset
+
+1.  Subset to just the Limited Access Fleet when AA_DAS_only is TRUE.
+2.  Subset to just the General Category IFQ fleet when AA_DAS_only is FALSE
+
+```{r subset_fleet, eval=TRUE}
+
+if (params$AA_DAS_only==TRUE){
+   
+  scallop0322MainDataTable <- 
+    scallop0322MainDataTable %>% 
+    filter(fleet == "Access Area" | fleet == "Days at Sea")
+  
+  } else if (params$AA_DAS_only==FALSE){
+    scallop0322MainDataTable <- 
+    scallop0322MainDataTable %>% 
+    filter(fleet == "GCIFQ")
+  }
+
+```
+
+<br><br>
+
+<br><br><br>
+
+### Bin Gears
+
+```{r bin_gears}
+if (params$BIN_GEARS==TRUE){
+
+scallop0322MainDataTable$GEARCODE_OLD<-scallop0322MainDataTable$GEARCODE
+#Anything with "DREDGE" in the GEARCODE will be rebinned to "DREDGE" 
+pat_match<-"*DREDGE*"
+reg_pat<-glob2rx(pat_match)
+scallop0322MainDataTable$GEARCODE[grep(reg_pat,scallop0322MainDataTable$GEARCODE)]<-'DREDGE'
+#Look at the GEARCODE NOW, there should be 'DREDGE', 'TRAWL-BOTTOM', and some funky stuff
+table(scallop0322MainDataTable$GEARCODE)
+scallop0322MainDataTable$GEARCODE[!(scallop0322MainDataTable$GEARCODE %in%c('DREDGE','TRAWL-BOTTOM'))]<-'OTHER'
+}
+```
+
+
+## Aggregate subtrips to trips
+
+ 
+The input data ``final_product_lease`` contains subtrips, not trips. This code chunk contracts trips to a single row, applying subtrip attributes for the most valuable subtrip (``max(DOLLAR)``)to the entire trip.
+
+ 
+```{r construct_trip_aggregates, echo=TRUE, eval=TRUE}
+
+ 
+if (params$subtrip_aggregate==TRUE){ 
+ 
+# aggregate DOLLAR, POUNDS, LANDED by TRIPID and filter by max(DOLLAR)
+
+scallop0322MainDataTable <- 
+  scallop0322MainDataTable %>%
+  group_by(TRIPID) %>%
+  mutate(Agg_DOLLAR = sum(DOLLAR),Agg_DOLLAR_2022 = sum(DOLLAR_2022), Agg_POUNDS = sum(POUNDS), Agg_LANDED = sum(LANDED), Agg_DOLLAR_ALL_SP_2022 = sum(DOLLAR_ALL_SP_2022))%>% 
+  arrange(desc(DOLLAR)) %>%
+  dplyr::filter(row_number()==1) %>% 
+  dplyr::select(-DOLLAR, -POUNDS, -LANDED,-DOLLAR_ALL_SP_2022, -DOLLAR_2022) %>% 
+  rename(DOLLAR = "Agg_DOLLAR", POUNDS = "Agg_POUNDS", LANDED = "Agg_LANDED", DOLLAR_ALL_SP_2022 = "Agg_DOLLAR_ALL_SP_2022", DOLLAR_2022="Agg_DOLLAR_2022") %>% 
+ ungroup()
+
+ 
+scallop0322MainDataTable <- scallop0322MainDataTable %>%
+ mutate(KILOGRAMS = POUNDS/pounds_to_kg, LANDED_KG=LANDED/pounds_to_kg)
+
+ 
+## Test out 
+sum(duplicated(scallop0322MainDataTable$TRIPID))
+stopifnot(sum(duplicated(scallop0322MainDataTable$TRIPID))==0)
+ }
+
+ 
+```
+
+## Calculate Operating Profit 
+
+```{r calculate operating profit, echo=TRUE, eval=TRUE}
+
+ 
+#Calculate operating profit by subtracting nominal trip costs from nominal aggregated revenues. Then deal with real. 
+
+scallop0322MainDataTable$OPERATING_PROFIT <- 
+ (scallop0322MainDataTable$DOLLAR_ALL_SP - scallop0322MainDataTable$TRIP_COST_NOMINALDOLS_WINSOR)
+
+ 
+scallop0322MainDataTable$OPERATING_PROFIT_2022 <- 
+ 	 (scallop0322MainDataTable$DOLLAR_ALL_SP_2022 -  scallop0322MainDataTable$TRIP_COST_WINSOR_2022_DOL)
+
+ 
+#Remove NAs in operating profits and replace with column mean
+sum(is.na(scallop0322MainDataTable$OPERATING_PROFIT_2022))
+scallop0322MainDataTable$OPERATING_PROFIT_2022[is.na(scallop0322MainDataTable$OPERATING_PROFIT_2022)] <- mean(scallop0322MainDataTable$OPERATING_PROFIT_2022, na.rm = TRUE)
+
+```
+
+
+## Active Vessels
+
+vessel count by year.
+
+```{r}
+ves_out <- 
+vessel_count(scallop0322MainDataTable, project,
+             v_id = "PERMIT.y",
+             date = "scallop_fishing_yearD",
+             period = "year", type = "line")
+
+ves_out$table %>% pretty_tab()
+
+ves_out$plot 
+
+```
+
+<br><br>
+
+### Duplicate trip IDs
+
+```{r}
+# add a duplicate trip column
+dup_ind <- duplicated(scallop0322MainDataTable$TRIPID)
+dup_ids <- unique(scallop0322MainDataTable$TRIPID[dup_ind])
+
+scallop0322MainDataTable <- 
+  scallop0322MainDataTable %>% 
+  mutate(dup_trip = TRIPID %in% dup_ids)
+
+# number of obs from duplicate tripIDs 
+sum(scallop0322MainDataTable$dup_trip)
+```
+
+<br><br>
+
+## QAQC
+
+This section includes our standard QAQC checks. Here I'm only checking whether a potential issue exists and not changing the data in any way (except in the empty variable section).
+
+<br><br>
+
+### NA check
+
+```{r}
+na_filter(scallop0322MainDataTable, 
+          project = project, 
+          replace = FALSE, remove = FALSE, 
+          rep.value = NA, over_write = FALSE)
+```
+
+<br><br>
+
+### NaN check
+
+```{r}
+nan_filter(scallop0322MainDataTable, 
+           project = project, 
+           replace = FALSE, remove = FALSE, 
+           rep.value = NA, over_write = FALSE)
+```
+
+<br><br>
+
+### Unique rows
+
+```{r}
+unique_filter(scallop0322MainDataTable, project = project, remove = FALSE)
+```
+
+<br><br>
+
+### Empty variables
+
+By "empty" we mean containing all NAs.
+
+```{r}
+empty_vars_filter(scallop0322MainDataTable, project = project, remove = FALSE)
+
+```
+
+<br><br>
+
+### Lon/Lat format
+
+```{r}
+degree(scallop0322MainDataTable, project = project,
+       lat = "DDLAT", lon = "DDLON", 
+       latsign = NULL, lonsign = NULL,
+       replace = FALSE)
+```
+
+<br><br>
+
+### Spatial QAQC
+
+```{r}
+spat_qaqc_out <-
+spatial_qaqc(scallop0322MainDataTable, project = project,
+             spat = scallop0322TenMNSQRSpatTable, lon.dat = "DDLON", lat.dat = "DDLAT")
+
+spat_qaqc_out$dataset <- NULL # drop dataset
+spat_qaqc_out$spatial_summary %>% 
+  pretty_lab(cols = "n") %>% 
+   pretty_tab() 
+spat_qaqc_out[2:4]
+```
+
+<br><br>
+
+## Data creation
+
+### Finagle Live pounds to meat weights
+
+```{r}
+# rename POUNDS to LIVE_POUNDS for clarity.  Convert live pounds to meat pounds.
+scallop0322MainDataTable$LIVE_POUNDS <- scallop0322MainDataTable$POUNDS
+scallop0322MainDataTable$MEAT_POUNDS <- scallop0322MainDataTable$POUNDS/8.33
+scallop0322MainDataTable$POUNDS <-NULL
+
+scallop0322MainDataTable$LIVE_KG <- scallop0322MainDataTable$LIVE_POUNDS/pounds_to_kg
+scallop0322MainDataTable$MEAT_KG <- scallop0322MainDataTable$MEAT_POUNDS/pounds_to_kg
+
+
+
+```
+
+### CPUE
+
+Here I creating a CPUE variable using TRIP_LENGTH and MEAT_KG. I'm also filtering out any infinite values.
+
+```{r}
+scallop0322MainDataTable <- 
+  cpue(scallop0322MainDataTable, project,
+       xWeight = "MEAT_KG",
+       xTime = "TRIP_LENGTH", 
+       name = "CPUE")
+
+scallop0322MainDataTable <- 
+  scallop0322MainDataTable %>% 
+  filter(!is.infinite(CPUE))
+```
+
+<br><br>
+
+#### CPUE Percent Rank
+
+Add a percent rank column to filter outliers.
+
+```{r}
+outlier_table(scallop0322MainDataTable, project, x = "CPUE")
+
+scallop0322MainDataTable <- 
+  scallop0322MainDataTable %>% 
+  mutate(CPUE_p = percent_rank(CPUE))
+```
+
+<br><br>
+
+### VPUE
+
+Section 3. Data and Methods - "Revenue per day is calculated by dividing gross revenues (from all species caught) by the length of a trip in days."
+
+Same as above but with revenue instead of meat KG
+
+```{r}
+scallop0322MainDataTable <- 
+  cpue(scallop0322MainDataTable, project,
+       xWeight = "DOLLAR_2022",
+       xTime = "TRIP_LENGTH", 
+       name = "VPUE")
+
+scallop0322MainDataTable <- 
+  scallop0322MainDataTable %>% 
+  filter(!is.infinite(VPUE))
+```
+
+<br><br>
+
+#### VPUE Percent Rank
+
+Add a percent rank column to filter outliers.
+
+```{r}
+outlier_table(scallop0322MainDataTable, project, x = "VPUE")
+
+scallop0322MainDataTable <- 
+  scallop0322MainDataTable %>% 
+  mutate(VPUE_p = percent_rank(VPUE))
+```
+
+<br><br>
+
+Section 3. Methods and Data -  "Operating profits are gross receipts (from all species) minus variable operative costs which are obtained from Werner et al (2020)."
+
+
+```{r}
+#Calculate operating profit by subtracting nominal trip costs from nominal aggregated revenues. Then deal with real. 
+scallop0322MainDataTable$OPERATING_PROFIT <- 
+  (scallop0322MainDataTable$DOLLAR_ALL_SP - scallop0322MainDataTable$TRIP_COST_NOMINALDOLS_WINSOR)
+
+
+scallop0322MainDataTable$OPERATING_PROFIT_2022 <- 
+  (scallop0322MainDataTable$DOLLAR_ALL_SP_2022 - scallop0322MainDataTable$TRIP_COST_WINSOR_2022_DOL)
+```  
+
+
+### Create new indicator variables with winsor approach 
+
+Winsorized variables for revenue, landed, operating profit, and VPUE
+
+Shapefile: Wind_sf_combined - Section 3. Data and Methods - "Scallop revenues are gross receipts derived from scallops revenues.",  "Landings are the weight of scallops, in meat pounds, corresponding to those trips." and "To ensure data is not affected by outliers, the revenue, landings, and operating cost metrics were winsorized at the 1st and 99th percentile."
+
+```{r}
+scallop0322MainDataTable$DOLLAR_2022_win <- 
+  datawizard::winsorize(scallop0322MainDataTable$DOLLAR_2022, threshold = 0.01)
+
+scallop0322MainDataTable$LANDED_win <- datawizard::winsorize(scallop0322MainDataTable$LANDED, threshold = 0.01)
+
+scallop0322MainDataTable$DOLLAR_ALL_SP_win <- 
+  datawizard::winsorize(scallop0322MainDataTable$DOLLAR_ALL_SP_2022, threshold = 0.01) 
+
+scallop0322MainDataTable$OPERATING_PROFIT_2022_win <- 
+  (scallop0322MainDataTable$DOLLAR_ALL_SP_win - scallop0322MainDataTable$TRIP_COST_WINSOR_2022_DOL)
+
+scallop0322MainDataTable$VPUE_win<- 
+  datawizard::winsorize(scallop0322MainDataTable$VPUE, threshold = 0.01)
+
+
+#Remove NAs in operating profits and replace with column mean
+sum(is.na(scallop0322MainDataTable$OPERATING_PROFIT_2022_win))
+scallop0322MainDataTable$OPERATING_PROFIT_2022_win[is.na(scallop0322MainDataTable$OPERATING_PROFIT_2022_win)] <- mean(scallop0322MainDataTable$OPERATING_PROFIT_2022_win, na.rm = TRUE)
+
+
+
+```
+<br><br>
+
+
+### Closure area assignment
+
+```{r}
+scallop0322MainDataTable <- 
+  assignment_column(scallop0322MainDataTable, project = project,
+                    spat = scallop0322WindCloseSpatTable, 
+                    lon.dat = "DDLON",
+                    lat.dat = "DDLAT", 
+                    cat = "LEASE_NUMB",
+                    name = "closeID",
+                    closest.pt = FALSE,
+                    hull.polygon = FALSE) 
+
+scallop0322MainDataTable <- 
+  scallop0322MainDataTable %>% 
+  mutate(in_closure = !is.na(closeID))
+```
+
+
+#save to RDS for case study comparisons 
+
+```{r, manually save data for case study comparisons}	
+
+# Names for saved files will need to be changed manually depending on the shapefile input and fleet type i.e. Limited Access New York Bight Call Area will need to be changed to rds_savename<-paste0("scallop0322MainDataTable_NYB1_LA",vintage_string,".Rds") 
+
+
+rds_savename<-paste0("casestudy_",fleet,"_",shapefile_shortname,"_",vintage_string,".Rds")	
+csv_savename<-paste0("casestudy_",fleet,"_",shapefile_shortname,"_",vintage_string,".csv")	
+saveRDS(scallop0322MainDataTable, file=here("data","main","casestudies",rds_savename))	
+write.csv(scallop0322MainDataTable,file=here("data","main","casestudies",csv_savename), row.names = FALSE)	
+
+```
+
+
+<br><br><br>
+
+Checking whether FishSET closure area assignment matches with what's in the scallop data. This isn't quite the right check. We haven't been consistent with names.
+
+```{r}
+scallop0322MainDataTable %>% 
+  mutate(closure_match = closeID == NAME) %>% 
+  count(closure_match) %>% 
+  pretty_lab() %>% 
+  pretty_tab()
+```
+
+<br><br><br>
+
+`r sum(scallop0322MainDataTable$in_closure)` observations (`r round(sum(scallop0322MainDataTable$in_closure)/nrow(scallop0322MainDataTable) * 100, 2)`%) occurred inside a closure area.
+
+```{r}
+agg_helper(scallop0322MainDataTable, value = "in_closure", count = TRUE) %>% 
+  pivot_wider(names_from = "in_closure", values_from = "n") %>% 
+  rename("Outside Closure(s)" = "FALSE", "Inside Closure(s)" = "TRUE") %>% 
+  pretty_lab() %>% 
+  pretty_tab()
+```
+
+<br><br><br> Box Plots of Revenues in and outside of closures &
+t-tests comparing average revenue of trips inside and outside of potential offshore wind development areas / closures
+
+
+
+```{r}
+# To perform the t-tests and make boxplots, observations are separated into two separate samples, inside and outside of closures
+in_closure_scallop0322MainDataTable <- scallop0322MainDataTable %>% filter(in_closure == "TRUE")
+out_closure_scallop0322MainDataTable <- scallop0322MainDataTable %>% filter(in_closure == "FALSE")
+
+boxplot(in_closure_scallop0322MainDataTable$DOLLAR_2022,
+  main = "Revenue in 2021 Dollars",
+  xlab = "USD$",
+  ylab = "Revenue",
+  col = "white",
+  border = "black",
+  horizontal = TRUE,
+  notch = TRUE)
+
+boxplot(out_closure_scallop0322MainDataTable$DOLLAR_2022,
+  main = "Revenue in 2021 Dollars",
+  xlab = "USD$",
+  ylab = "Revenue",
+  col = "white",
+  border = "black",
+  horizontal = TRUE,
+  notch = TRUE)
+
+
+ggpubr::ggdensity(out_closure_scallop0322MainDataTable$DOLLAR_2022, 
+          main = "Revenues Outside of Closure",
+          xlab = "USD$")
+
+ggpubr::ggdensity(in_closure_scallop0322MainDataTable$DOLLAR_2022, 
+          main = "Revenues In Closure",
+          xlab = "USD$")
+
+
+
+
+ggpubr::ggdensity(out_closure_scallop0322MainDataTable$DOLLAR_2022_win, 
+          main = "Winsorized Revenues Outside of Closure",
+          xlab = "USD$")
+
+ggpubr::ggdensity(in_closure_scallop0322MainDataTable$DOLLAR_2022_win, 
+          main = "Winsorized Revenues In Closure",
+          xlab = "USD$")
+
+boxplot(in_closure_scallop0322MainDataTable$DOLLAR_2022_win,
+  main = "Revenue in 2021 Dollars",
+  xlab = "USD$",
+  ylab = "Winsorized Revenues",
+  col = "white",
+  border = "black",
+  horizontal = TRUE,
+  notch = TRUE)
+
+boxplot(out_closure_scallop0322MainDataTable$DOLLAR_2022_win,
+  main = "Revenue in 2021 Dollars",
+  xlab = "USD$",
+  ylab = "Winsorized Revenues",
+  col = "white",
+  border = "black",
+  horizontal = TRUE,
+  notch = TRUE)
+
+
+t.test(out_closure_scallop0322MainDataTable$DOLLAR_2022,y=in_closure_scallop0322MainDataTable$DOLLAR_2022, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+t.test(out_closure_scallop0322MainDataTable$DOLLAR_2022_win,y=in_closure_scallop0322MainDataTable$DOLLAR_2022_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+
+```
+
+
+
+<br><br><br> Box Plots of Landed in and outside of closures
+
+
+```{r}
+# To perform the t-tests and make boxplots, observations are separated into two separate samples, inside and outside of closures
+
+boxplot(in_closure_scallop0322MainDataTable$LANDED,
+  main = "Revenue in 2021 Dollars",
+  xlab = "USD$",
+  ylab = "Revenue",
+  col = "white",
+  border = "black",
+  horizontal = TRUE,
+  notch = TRUE)
+
+boxplot(out_closure_scallop0322MainDataTable$LANDED,
+  main = "Revenue in 2021 Dollars",
+  xlab = "USD$",
+  ylab = "Revenue",
+  col = "white",
+  border = "black",
+  horizontal = TRUE,
+  notch = TRUE)
+
+
+ggpubr::ggdensity(out_closure_scallop0322MainDataTable$LANDED, 
+          main = "Revenues Outside of Closure",
+          xlab = "USD$")
+
+ggpubr::ggdensity(in_closure_scallop0322MainDataTable$LANDED, 
+          main = "Revenues In Closure",
+          xlab = "USD$")
+
+
+
+ggpubr::ggdensity(out_closure_scallop0322MainDataTable$LANDED_win, 
+          main = "Winsorized Revenues Outside of Closure",
+          xlab = "USD$")
+
+ggpubr::ggdensity(in_closure_scallop0322MainDataTable$LANDED_win, 
+          main = "Winsorized Revenues In Closure",
+          xlab = "USD$")
+
+boxplot(in_closure_scallop0322MainDataTable$LANDED_win,
+  main = "Revenue in 2021 Dollars",
+  xlab = "USD$",
+  ylab = "Winsorized Revenues",
+  col = "white",
+  border = "black",
+  horizontal = TRUE,
+  notch = TRUE)
+
+boxplot(out_closure_scallop0322MainDataTable$LANDED_win,
+  main = "Revenue in 2021 Dollars",
+  xlab = "USD$",
+  ylab = "Winsorized Revenues",
+  col = "white",
+  border = "black",
+  horizontal = TRUE,
+  notch = TRUE)
+
+```
+
+**t-tests comparing average winsorized landed of trips inside and outside of potential offshore wind development areas / closures**
+
+
+```{r}
+
+
+t.test(out_closure_scallop0322MainDataTable$LANDED,y=in_closure_scallop0322MainDataTable$LANDED, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+
+t.test(out_closure_scallop0322MainDataTable$LANDED_win,y=in_closure_scallop0322MainDataTable$LANDED_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+
+#Set up fleet type t test
+
+if (params$AA_DAS_only==TRUE){
+ in_closure_scallop0322MainDataTable_AA <- in_closure_scallop0322MainDataTable %>% filter(fleet == "Access Area") 
+ in_closure_scallop0322MainDataTable_DAS <- in_closure_scallop0322MainDataTable %>% filter(fleet == "Days at Sea") 
+ out_closure_scallop0322MainDataTable_AA <- out_closure_scallop0322MainDataTable %>% filter(fleet == "Access Area")
+ out_closure_scallop0322MainDataTable_DAS <- out_closure_scallop0322MainDataTable %>% filter(fleet == "Days at Sea") }
+
+
+
+# LA Trip Type
+if (params$AA_DAS_only==TRUE){
+  t.test(in_closure_scallop0322MainDataTable_AA$LANDED,y=out_closure_scallop0322MainDataTable_AA$LANDED, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+}
+
+# DAS Trip Type
+if (params$AA_DAS_only==TRUE){
+    t.test(in_closure_scallop0322MainDataTable_DAS$LANDED,y=in_closure_scallop0322MainDataTable_DAS$LANDED, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+}
+
+```
+
+
+
+```{r}
+# LA Trip Type - Winsorized
+if (params$AA_DAS_only==TRUE){
+  
+    t.test(in_closure_scallop0322MainDataTable_AA$LANDED_win,y=out_closure_scallop0322MainDataTable_AA$LANDED_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+}
+
+# DAS Trip Type - Winsorized
+if (params$AA_DAS_only==TRUE){
+      t.test(in_closure_scallop0322MainDataTable_DAS$LANDED_win,y=out_closure_scallop0322MainDataTable_DAS$LANDED_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+}
+
+
+```
+
+
+
+```{r}
+
+# LA Trip Type
+if (params$AA_DAS_only==TRUE){
+  t.test(in_closure_scallop0322MainDataTable_AA$DOLLAR_2022,y=out_closure_scallop0322MainDataTable_AA$DOLLAR_2022, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+}
+
+# DAS Trip Type
+if (params$AA_DAS_only==TRUE){
+    t.test(in_closure_scallop0322MainDataTable_DAS$DOLLAR_2022,y=out_closure_scallop0322MainDataTable_DAS$DOLLAR_2022, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+}
+```
+
+**Z-tests comparing average winsorized revenue of trips inside and outside of potential offshore wind development areas / closures**
+
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - Code chunk below creates outputs for Table 3. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 4. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.
+
+Shapefile: wind_NYx - Section 4.2 The Adaptive Wind Development Processes  New York Bight - Code chunk below creates outputs for Table 6. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for New York Bight.; Table 7. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for New York Bight.
+
+Shapefile: wind_CAx - Section 4.2 The Adaptive Wind Development Processes  Central Atlantic - Code chunk below creates outputs for Table 9. Limited Access (AA) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.; Table 10. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.
+
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - This chunk is used to create Table 3 and Table 4.
+
+```{r}
+# LA Trip Type - Winsorized
+if (params$AA_DAS_only==TRUE){
+  t.test(in_closure_scallop0322MainDataTable_AA$DOLLAR_2022_win,y=out_closure_scallop0322MainDataTable_AA$DOLLAR_2022_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+}
+
+# DAS Trip Type - Winsorized
+if (params$AA_DAS_only==TRUE){
+    t.test(in_closure_scallop0322MainDataTable_DAS$DOLLAR_2022_win,y=out_closure_scallop0322MainDataTable_DAS$DOLLAR_2022_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+}
+
+
+
+```
+
+
+<br><br><br> Box Plots of Operating Profits in and outside of closures
+
+```{r}
+# To perform the t-tests and make boxplots, observations are separated into two separate samples, inside and outside of closures
+in_closure_scallop0322MainDataTable <- scallop0322MainDataTable %>% filter(in_closure == "TRUE")
+out_closure_scallop0322MainDataTable <- scallop0322MainDataTable %>% filter(in_closure == "FALSE")
+
+boxplot(in_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022,
+  main = "Revenue in 2021 Dollars",
+  xlab = "USD$",
+  ylab = "Revenue",
+  col = "white",
+  border = "black",
+  horizontal = TRUE,
+  notch = TRUE)
+
+boxplot(out_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022,
+  main = "Revenue in 2021 Dollars",
+  xlab = "USD$",
+  ylab = "Revenue",
+  col = "white",
+  border = "black",
+  horizontal = TRUE,
+  notch = TRUE)
+
+
+ggpubr::ggdensity(out_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022, 
+          main = "Revenues Outside of Closure",
+          xlab = "USD$")
+
+ggpubr::ggdensity(in_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022, 
+          main = "Revenues In Closure",
+          xlab = "USD$")
+
+
+
+# Winsorize Data
+
+ggpubr::ggdensity(out_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022_win, 
+          main = "Winsorized Revenues Outside of Closure",
+          xlab = "USD$")
+
+ggpubr::ggdensity(in_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022_win, 
+          main = "Winsorized Revenues In Closure",
+          xlab = "USD$")
+
+boxplot(in_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022_win,
+  main = "Operating Profit in 2021 Dollars inside Potential Development Area",
+  xlab = "USD$",
+  ylab = "Winsorized Revenues",
+  col = "white",
+  border = "black",
+  horizontal = TRUE,
+  notch = TRUE)
+
+boxplot(out_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022_win,
+  main = "Operating Profit in 2021 Dollars outside Potential Development Area",
+  xlab = "USD$",
+  ylab = "Operating Profit",
+  col = "white",
+  border = "black",
+  horizontal = TRUE,
+  notch = TRUE)
+
+```
+
+**Z-tests comparing average winsorized operating profit of trips inside and outside of potential offshore wind development areas / closures**
+
+
+
+```{r}
+
+
+t.test(out_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022,y=in_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+t.test(out_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022_win,y=in_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+
+
+# LA Trip Type
+if (params$AA_DAS_only==TRUE){
+  
+  t.test(in_closure_scallop0322MainDataTable_AA$OPERATING_PROFIT_2022,y=out_closure_scallop0322MainDataTable_AA$OPERATING_PROFIT_2022, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+}
+
+# DAS Trip Type
+if (params$AA_DAS_only==TRUE){
+  
+    t.test(in_closure_scallop0322MainDataTable_DAS$OPERATING_PROFIT_2022,y=out_closure_scallop0322MainDataTable_DAS$OPERATING_PROFIT_2022, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+}
+
+
+```
+<br><br><br> 
+ 
+
+
+```{r}
+# LA Trip Type - Winsorized
+if (params$AA_DAS_only==TRUE){
+      t.test(in_closure_scallop0322MainDataTable_AA$OPERATING_PROFIT_2022_win,y=out_closure_scallop0322MainDataTable_AA$OPERATING_PROFIT_2022_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+  
+}
+
+# DAS Trip Type - Winsorized
+if (params$AA_DAS_only==TRUE){
+        t.test(in_closure_scallop0322MainDataTable_DAS$OPERATING_PROFIT_2022_win,y=out_closure_scallop0322MainDataTable_DAS$OPERATING_PROFIT_2022_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+}
+
+
+```
+
+
+<br><br><br> Box Plots of VPUE in and outside of closures
+
+```{r}
+# To perform the t-tests and make boxplots, observations are separated into two separate samples, inside and outside of closures
+
+boxplot(in_closure_scallop0322MainDataTable$VPUE,
+  main = "Revenue in 2021 Dollars",
+  xlab = "USD$",
+  ylab = "Revenue",
+  col = "white",
+  border = "black",
+  horizontal = TRUE,
+  notch = TRUE)
+
+boxplot(out_closure_scallop0322MainDataTable$VPUE,
+  main = "Revenue in 2021 Dollars",
+  xlab = "USD$",
+  ylab = "Revenue",
+  col = "white",
+  border = "black",
+  horizontal = TRUE,
+  notch = TRUE)
+
+
+ggpubr::ggdensity(out_closure_scallop0322MainDataTable$VPUE, 
+          main = "Revenues Outside of Closure",
+          xlab = "USD$")
+
+ggpubr::ggdensity(in_closure_scallop0322MainDataTable$VPUE, 
+          main = "Revenues In Closure",
+          xlab = "USD$")
+
+
+ggpubr::ggdensity(out_closure_scallop0322MainDataTable$VPUE_win, 
+          main = "Winsorized Revenues Outside of Closure",
+          xlab = "USD$")
+
+ggpubr::ggdensity(in_closure_scallop0322MainDataTable$VPUE_win, 
+          main = "Winsorized Revenues In Closure",
+          xlab = "USD$")
+
+boxplot(in_closure_scallop0322MainDataTable$VPUE_win,
+  main = "Revenue in 2021 Dollars",
+  xlab = "USD$",
+  ylab = "Winsorized Revenues",
+  col = "white",
+  border = "black",
+  horizontal = TRUE,
+  notch = TRUE)
+
+boxplot(out_closure_scallop0322MainDataTable$VPUE_win,
+  main = "Revenue in 2021 Dollars",
+  xlab = "USD$",
+  ylab = "Winsorized Revenues",
+  col = "white",
+  border = "black",
+  horizontal = TRUE,
+  notch = TRUE)
+```
+
+**Z-tests comparing average winsorized revenue per trip (VPUE) of trips inside and outside of potential offshore wind development areas / closures**
+
+```{r}
+
+
+
+t.test(out_closure_scallop0322MainDataTable$VPUE,y=in_closure_scallop0322MainDataTable$VPUE, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+
+
+t.test(out_closure_scallop0322MainDataTable$VPUE_win,y=in_closure_scallop0322MainDataTable$VPUE_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+
+# LA Trip Type
+if (params$AA_DAS_only==TRUE){
+  
+  t.test(out_closure_scallop0322MainDataTable_AA$VPUE,y=in_closure_scallop0322MainDataTable_AA$VPUE, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+  
+}
+
+# DAS Trip Type
+if (params$AA_DAS_only==TRUE){
+  
+    t.test(out_closure_scallop0322MainDataTable_DAS$VPUE,y=in_closure_scallop0322MainDataTable_DAS$VPUE, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+}
+```
+
+
+```{r}
+# LA Trip Type - Winsorized
+if (params$AA_DAS_only==TRUE){
+  
+      t.test(out_closure_scallop0322MainDataTable_AA$VPUE_win,y=in_closure_scallop0322MainDataTable_AA$VPUE_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+  
+  
+  
+}
+
+# DAS Trip Type - Winsorized
+if (params$AA_DAS_only==TRUE){
+        t.test(out_closure_scallop0322MainDataTable_DAS$VPUE_win,y=in_closure_scallop0322MainDataTable_DAS$VPUE_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+}
+
+```
+
+
+## Z-tests: Average Revenue Winsorized 
+
+**Z-tests comparing average winsorized revenue of trips inside and outside of potential offshore wind development areas / closures**
+
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - Code chunk below creates outputs for Table 2. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 3. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 4. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.
+
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - This chunk is used to create Table 3 and Table 4.
+
+```{r}
+# GC Trip Type - Winsorized 
+
+
+
+
+t.test(out_closure_scallop0322MainDataTable$DOLLAR_2022_win,y=in_closure_scallop0322MainDataTable$DOLLAR_2022_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+
+# LA Trip Type - Winsorized
+if (params$AA_DAS_only==TRUE){
+  t.test(out_closure_scallop0322MainDataTable_AA$DOLLAR_2022_win,y=in_closure_scallop0322MainDataTable_AA$DOLLAR_2022_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+}
+
+# DAS Trip Type - Winsorized
+if (params$AA_DAS_only==TRUE){
+  
+    t.test(out_closure_scallop0322MainDataTable_DAS$DOLLAR_2022_win,y=in_closure_scallop0322MainDataTable_DAS$DOLLAR_2022_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+}
+
+```
+<br><br><br>
+
+
+## Average Landed Winsorized
+
+**Average winsorized landed in closures by fleet**
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - Code chunk below creates outputs for Table 2. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 3. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 4. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day. **(Average winsorized Landed)**
+
+Shapefile: wind_NYx - Section 4.2 The Adaptive Wind Development Processes  New York Bight - Code chunk below creates outputs for Table 5. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the New York Bight region.; Table 6. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for New York Bight.; Table 7. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for New York Bight.**(Average winsorized Landed)**
+
+Shapefile: wind_CAx - Section 4.2 The Adaptive Wind Development Processes  Central Atlantic - Code chunk below creates outputs for Table 8. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.; Table 9. Limited Access (AA) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.; Table 10. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.**(Average winsorized Landed)**
+
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - "Mean scallop revenues and landings from trips inside the Lease Areas are slightly higher than outside the Lease Areas at conventional significance levels (Table 3)."**(Average winsorized Landed)**
+
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S.- "In general, AA trips inside the Lease areas are slightly worse than trips outside the lease areas: mean values of revenue, landed pounds, and revenue per day are lower inside the Lease Areas than outside at conventional significance levels."**(Average winsorized Landed)**
+
+
+## Z-tests: Average Landed Winsorized 
+
+**Z-tests comparing average winsorized landed of trips inside and outside of potential offshore wind development areas / closures**
+
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - Code chunk below creates outputs for Table 2. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 3. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 4. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day. **(Z-tests average winsorized landed of trips inside and outside of potential offshore wind development areas / closures)**
+
+Shapefile: Wind_sf_combined - Section 4.1 - Scallop fishing in the Wind Lease Areas in the Northeast U.S. - "In general, AA trips inside the Lease areas are slightly worse than trips outside the lease areas: mean values of revenue, landed pounds, and revenue per day are lower inside the Lease Areas than outside at conventional significance levels."**(Z-tests average winsorized landed of trips inside and outside of potential offshore wind development areas / closures)**
+
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - Code chunk below creates outputs for Table 3. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 4. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.**(Z-tests average winsorized landed of trips inside and outside of potential offshore wind development areas / closures)**
+
+
+```{r}
+
+
+# Z- test Winsorized Landed GC fleet z-test
+
+
+
+t.test(out_closure_scallop0322MainDataTable$LANDED_win,y=in_closure_scallop0322MainDataTable$LANDED_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+
+
+# LA Trip Type - Winsorized
+if (params$AA_DAS_only==TRUE){
+  
+  
+  t.test(out_closure_scallop0322MainDataTable_AA$LANDED_win,y=in_closure_scallop0322MainDataTable_AA$LANDED_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+}
+
+# DAS Trip Type - Winsorized
+if (params$AA_DAS_only==TRUE){
+    t.test(out_closure_scallop0322MainDataTable_DAS$LANDED_win,y=in_closure_scallop0322MainDataTable_DAS$LANDED_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+}
+
+
+```
+
+<br><br><br>
+
+## Aggregate Operating Profit Winsorized 
+
+**Total/Aggregate Winsorized Operating Profit by closure area.**
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. -  “Over the 15-year study period, 3% (1,447) of the LA trips occurred within Lease Areas (Figure 5); these trips accounted for approximately 4% (279M) of LA fleet scallop revenue and 3% (259M) of operating profit.”
+
+Shapefile: wind_NY1 and wind_NY2 - Section 4.2 The Adaptive Wind Development Processes - "Aggregate operating profit and scallop revenue between the Call Area and Wind Energy Area phases are found to have disproportionately large (~61%), relative to the reduction size of the wind development areas."
+
+Shapefile: wind_NY2 and wind_NY3 - Section 4.2 The Adaptive Wind Development Processes -"LA-DAS trips were most disproportionate at aggregate levels between the Wind Energy Area and Lease Area phases where operating profit and scallop revenue were disproportionately smaller (~25%). The LA-DAS metier had the highest total operating profit and scallop revenues despite accounting for only 16% of total trips in New York Bight Call Areas."
+
+<br><br><br>
+## Average Operating Profit Winsorized
+
+**Average Winsorized Operating Profit in closures by fleet**
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - Code chunk below creates outputs for Table 2. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 3. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 4. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.**(Average Winsorized Operating Profit)**
+
+Shapefile: wind_NYx - Section 4.2 The Adaptive Wind Development Processes  New York Bight - Code chunk below creates outputs for Table 5. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the New York Bight region.; Table 6. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for New York Bight.; Table 7. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for New York Bight.**(Average Winsorized Operating Profit)**
+
+Shapefile: wind_CAx - Section 4.2 The Adaptive Wind Development Processes  Central Atlantic - Code chunk below creates outputs for Table 8. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.; Table 9. Limited Access (AA) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.; Table 10. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.**(Average Winsorized Operating Profit)**
+
+
+Shapefile: Wind_sf_combined - Section 4.1 - "However, mean operating profits and revenue per day inside the Lease areas are slightly lower." **(Average Winsorized Operating Profit)**
+
+Shapefile: Wind_sf_combined - Section 4.1 - " In general, AA trips inside the Lease areas are slightly worse than trips outside the lease areas: mean values of revenue, landed pounds, and revenue per day are lower inside the Lease Areas than outside at conventional significance levels."**(Average Winsorized Operating Profit)**
+
+<br><br><br>
+
+## Z-tests: Average Operating Profit Winsorized
+
+**Z-tests comparing average winsorized operating profit of trips inside and outside of potential offshore wind development areas / closures**
+
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - Code chunk below creates outputs for Table 2. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 3. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 4. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.**(Z-tests comparing winsorized operating profit)**
+
+```{r}
+
+# GC Trip Type - Winsorized 
+
+    t.test(out_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022_win,y=in_closure_scallop0322MainDataTable$OPERATING_PROFIT_2022_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+
+
+# LA Trip Type - Winsorized
+if (params$AA_DAS_only==TRUE){
+      t.test(out_closure_scallop0322MainDataTable_AA$OPERATING_PROFIT_2022_win,y=in_closure_scallop0322MainDataTable_AA$OPERATING_PROFIT_2022_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+  }
+
+# DAS Trip Type - Winsorized
+if (params$AA_DAS_only==TRUE){
+  
+        t.test(out_closure_scallop0322MainDataTable_DAS$OPERATING_PROFIT_2022_win,y=in_closure_scallop0322MainDataTable_DAS$OPERATING_PROFIT_2022_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+}
+
+
+```
+
+<br><br><br>
+
+## Average Revenue per Trip (VPUE) Winsorized
+
+**Average winsorized VPUE in closures by fleet**
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - Code chunk below creates outputs for Table 2. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 3. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 4. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.**(Average winsorized VPUE)**
+
+Shapefile: wind_NYx - Section 4.2 The Adaptive Wind Development Processes - New York Bight - Code chunk below creates outputs for Table 5. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the New York Bight region.; Table 6. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for New York Bight.; Table 7. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for New York Bight.**(Average winsorized VPUE)**
+
+Shapefile: wind_CAx - Section 4.2 The Adaptive Wind Development Processes - Central Atlantic - Code chunk below creates outputs for Table 8. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.; Table 9. Limited Access (AA) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.; Table 10. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day for the Central Atlantic region.**(Average winsorized VPUE)**
+
+
+Shapefile: Wind_sf_combined - Section 4.1 - "However, mean operating profits and revenue per day inside the Lease areas are slightly lower." **(Average winsorized VPUE)**
+
+Shapefile: Wind_sf_combined - Section 4.1 - "In general, AA trips inside the Lease areas are slightly worse than trips outside the lease areas: mean values of revenue, landed pounds, and revenue per day are lower inside the Lease Areas than outside at conventional significance levels."**(Average winsorized VPUE)**
+
+
+## Z-tests: Average Revenue per Trip (VPUE) Winsorized 
+
+**Z-tests comparing average winsorized revenue per trip (VPUE) of trips inside and outside of potential offshore wind development areas / closures**
+
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - Code chunk below creates outputs for Table 2. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 3. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 4. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.**(Z-tests  average winsorized revenue per trip (VPUE))**
+
+
+Shapefile: Wind_sf_combined - Section 4.1 - "In general, AA trips inside the Lease areas are slightly worse than trips outside the lease areas: mean values of revenue, landed pounds, and revenue per day are lower inside the Lease Areas than outside at conventional significance levels."**(Z-tests  average winsorized revenue per trip (VPUE))**
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - This chunk is used to create Table 3 and Table 4.**(Z-tests  average winsorized revenue per trip (VPUE))**
+
+```{r}
+
+# Z-test GC Trip Type - Winsorized
+
+
+t.test(out_closure_scallop0322MainDataTable$VPUE_win,y=in_closure_scallop0322MainDataTable$VPUE_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+
+
+# LA Trip Type - Winsorized
+if (params$AA_DAS_only==TRUE){
+  
+t.test(out_closure_scallop0322MainDataTable_AA$VPUE_win,y=in_closure_scallop0322MainDataTable_AA$VPUE_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+}
+
+# DAS Trip Type - Winsorized
+if (params$AA_DAS_only==TRUE){
+  t.test(out_closure_scallop0322MainDataTable_DAS$VPUE_win,y=in_closure_scallop0322MainDataTable_DAS$VPUE_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+
+}
+
+```
+
+<br><br><br>
+
+##Confidentiality Test
+
+Shapefile: Wind_sf_combined - Section 4.1 Scallop fishing in the Wind Lease Areas in the Northeast U.S. - Code chunk below creates outputs for Table 2. GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 3. Limited Access (Access Area) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day.; Table 4. Limited Access (DAS) Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day. **(This chunk is used to check confidentiality for all aforementioned tables)**
