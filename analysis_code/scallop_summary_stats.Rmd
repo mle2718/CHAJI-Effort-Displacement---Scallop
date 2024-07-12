@@ -1,0 +1,595 @@
+---
+title: "Scallop Data Summary"
+author: "Alan Haynie, Melanie Harsch, Bryce McManus"
+date: '`r Sys.Date()`'
+output:
+  html_document:
+    keep_md: yes
+    toc: true
+    toc_float: true
+    code_folding: show
+params:
+    AA_DAS_only: TRUE
+    subtrip_aggregate: TRUE
+    BIN_GEARS: TRUE
+    location: 
+      label: "Location:"
+      value: Woods_Hole
+      input: select
+      choices: [Woods_Hole, Seattle]
+    input_shapefile:
+      value: "wind_sf_nocable.RDS"
+      choices: ["wind_sf_final.RDS","wind_sf_nocable.RDS"]
+
+---
+<!---
+YAML options: 
+
+
+location --- NEFSC folks should set location=Woods_Hole. AK folks should set it to Seattle. This just controls where the data is read in from.
+
+PreRelease -- controls the location of FishSET package. Set to FALSE to load without options. Set to TRUE to load from a particular lib.loc
+--->
+## Warning and Options
+Please be careful with interpretation. Some outputs are uninterpretable when certain options are selected. For example, when we *do not* aggregate subtrips to trips:
+
+1. the "per-unit-effort" outputs are not meaningful. 
+2. Any statistics that are averaged are now averaged over subtrips, so this may not have a meaning either.
+
+There may be other, so think carefully.
+
+1.  Your location is  `r params$location`.
+2.  The value of AA_DAS is `r params$AA_DAS_only`.
+3.  The value of subtrip_aggregate is `r params$subtrip_aggregate`.
+4.  The value of  BIN_GEARS is `r params$BIN_GEARS`.
+5.  The input shapefile has been set to   `r params$input_shapefile`.
+
+
+
+## Introduction 
+ 
+This summary was done using a combination of FishSET console functions, the tidyverse
+(mainly dplyr and tidyr), and a few formatting functions. There is an option to hide 
+the code chunks at the top and a floating table of contents. All results are included in the 
+output (apologies for the general messiness). You'll need to download the html
+file to view the results (if you try to view the html file in Google Drive it will 
+only show the raw html). 
+
+Here's some background on how FishSET works:
+Everything that runs through FishSET is saved to the "FishSET Folder", 
+which houses all the user's FishSET projects. The FishSET Folder gets created when a user 
+first loads FishSET. Each project folder contains a FishSET Database (sqlite), a 
+log of the function calls, metadata, automatically saved output, and a few other useful 
+features. The project name for this summary is "scallop0322" (the last four 
+digits are month and year) which you'll see in the names of the saved tables. 
+
+The easiest way to give feedback is by using the "Feedback/Comments" Google doc
+in the "Confidential NE scallop data analysis 03/22" folder. It includes an
+outline of the summary and a general feedback section to help organize the comments. 
+Please let us know what you find helpful or unhelpful, what feels unnecessary or 
+underdeveloped, or any thoughts or suggestions you may have. 
+
+<br><br>
+
+## Library
+
+```{r setup, echo=FALSE}
+library(FishSET)
+
+#library("tidyverse")
+tidyverse_short <- c("dplyr",  "ggplot2", "magrittr", "tidyr", "lubridate") 
+lapply(tidyverse_short, require, character.only = TRUE)
+rm(tidyverse_short)
+library(kableExtra) # table formatting 
+library(sf) # converting geometry points to separate cols
+library(here)
+here::i_am("analysis_code/scallop_analysis_0322.Rmd")
+# helper functions
+source(here("analysis_code", "format_helpers.R"))
+
+dir.create(here("data", "main","casestudies"), showWarnings="FALSE")
+
+
+project <- "scallop0322"
+pounds_to_kg<-2.20462
+# disable scientific notation
+options(scipen=999)
+
+AA_DAS_param_hack <-params$AA_DAS_only
+```
+
+
+
+
+<br><br>
+
+## Reset project
+
+FishSET stores data in a directory called "FishSETFolder".  You can put this directory anywhere you want.
+
+This chunk "resets" my project by erasing it. This is just to keep things tidy and
+avoid potential errors when kitting the doc. 
+
+At the dialog box, select the directory that contains the "FishSETFolder" or the directory in which you want the "FishSETFolder" to be created.  But don't select the "FishSETFolder" directory itself. 
+
+If you don't have a FishSETFolder, the subsequent ``load_maindat()'' in the data_readin chunk will probably fail. The easiest thing to do is to create a FishSETFolder.  
+
+```{r project_cleanup,eval=TRUE}
+
+  folderpath <- here("FishSETFolder")
+  proj_dir<-here()
+  unlink(here(folderpath,project), recursive = TRUE)
+
+```
+
+
+
+
+<br><br>
+
+## Data Import
+
+```{r data_readin, eval=TRUE}
+#For Woods_Hole users, read in the most recent data in data/main
+
+if (params$location=="Woods_Hole"){
+  # This code looks into /data/main and sets the vintage_string according to 
+  # the most recent data
+  datasets_list <- list.files(path = here("data", "main"), pattern = "final_product_lease")
+  datasets_list <- gsub("final_product_lease_", "", datasets_list )
+  datasets_list <- gsub("final_product_lease", "", datasets_list )
+  datasets_list <- gsub(".Rds", "", datasets_list)
+  datasets_list <- gsub(".csv" ,"", datasets_list)
+  vintage_string <- max(datasets_list)
+  rm(datasets_list)
+  dat_filepath <- here("data", "main", paste0("final_product_lease_", vintage_string, ".Rds"))
+} else if (params$location=="Seattle"){
+  dat_filepath <- paste0("~/NE Scallops/data/updated/", 
+                         "June 22/NE NW Collab/",
+                         "final_product_lease_2022_05_25.Rds")
+}
+
+final_product_lease <- readRDS(dat_filepath)
+# needed to rename this for now since it matches the name outputted from the
+# zone assignment function we use. 
+final_product_lease <- final_product_lease %>% rename(Zone_ID = "ZoneID") 
+final_product_lease$scallop_fishing_year<-as.numeric(final_product_lease$scallop_fishing_year)
+
+# convert the scallop_fishing_year variable into a "date" format that is amenable to the vessel_count() function
+final_product_lease$scallop_fishing_yearD <- lubridate::date_decimal(final_product_lease$scallop_fishing_year)
+
+
+final_product_lease <- final_product_lease %>%
+  mutate(KILOGRAMS = POUNDS/pounds_to_kg,LANDED_KG=LANDED/pounds_to_kg) 
+
+
+# converted column types to be compatible with tiny report  
+final_product_lease$IMGID <- as.numeric(final_product_lease$IMGID)
+final_product_lease$DEALER_RPT_ID <- as.numeric(final_product_lease$DEALER_RPT_ID)
+final_product_lease$VTR_PORTNUM<- as.integer(final_product_lease$VTR_PORTNUM)
+final_product_lease$YEAR<-as.integer(final_product_lease$YEAR)
+final_product_lease$PERMIT.y<- as.integer(final_product_lease$PERMIT.y)
+final_product_lease$DEALNUM<- as.integer(final_product_lease$DEALNUM)
+
+#A column of ones. Useful for many things
+final_product_lease$ones<-1
+
+
+
+load_maindata(dat = final_product_lease, project = project, over_write = TRUE)
+
+```
+<br><br>
+
+### Spatial data
+Since sqlite can't save spatial data, we save it as a GeoJSON file in the project's 
+data folder.
+```{r}
+ ten_filepath <- here("data", "external", "shapefiles", 
+                      "Ten Minute Squares Cut North and Greater Atlantic")
+
+# loads lease area combined w/ cable routes (saved locally) created from
+# data_wrangle/combine_cable_routes.Rmd
+lease_filepath <- here("data", "main", "spatial", params$input_shapefile)
+
+load_spatial(lease_filepath, name = "WindClose", over_write = TRUE, project,
+             data.type = "RDS")
+load_spatial(ten_filepath, name = "TenMNSQR", over_write = TRUE, project,
+             data.type = "shape")
+
+scallop0322TenMNSQRSpatTable <- table_view("scallop0322TenMNSQRSpatTable", 
+                                           project)
+scallop0322WindCloseSpatTable <- table_view("scallop0322WindCloseSpatTable",
+                                            project)
+```
+
+<br><br>
+
+This data contains `r nrow(scallop0322MainDataTable)` rows and 
+`r ncol(scallop0322MainDataTable)` variables. 
+
+<br><br>
+
+## Assign Fleets and Subset
+We will want to do this before the rest of the QA/QC. There are always lots of broken bits, but many of them are going to be in the "other" fleet.
+
+### Fleet assignment
+
+```{r}
+#Parse the first 2 digits of Area Identifier
+scallop0322MainDataTable <-
+  scallop0322MainDataTable %>% 
+  mutate(`Area_ID2` = substr(`Area Identifier`, 1, 2))
+```
+
+```{r create_fleet_tabs}
+ fleet_tab_AA_DAS <- data.frame(
+  
+  condition = c('`Plan Code` == "SES" & `Program Code` == "SAA"',
+                '`Plan Code` == "SES" & `Program Code` == "SCA"',
+                '`Plan Code` == "SES" & `Program Code` == "SCG" & `Area_ID2` != "NG"',
+                '`Plan Code` == "SES" & `Program Code` == "SCG" & `Area_ID2` == "NG"'),
+  fleet = c("Access Area", "Days at Sea", "GCIFQ", "GCNGOM")
+)
+  fleet_tab_LA_GC_IFQ <- data.frame(
+  
+  condition = c('`Plan Code` == "SES" & `Program Code` == "SAA" | 
+                `Plan Code` == "SES" & `Program Code` == "SCA"',
+                '`Plan Code` == "SES" & `Program Code` == "SCG" & `Area_ID2` != "NG"',
+                '`Plan Code` == "SES" & `Program Code` == "SCG" & `Area_ID2` == "NG"'),
+  fleet = c("Limited Access", "GCIFQ", "GCNGOM")
+  )
+
+```
+
+
+```{r}
+# save fleet appropriate table to FishSET DB
+
+
+if (params$AA_DAS_only==TRUE){
+ fleet_table(scallop0322MainDataTable, 
+            project = project,
+            table = fleet_tab_AA_DAS, save = TRUE)
+} else if (params$AA_DAS_only==FALSE){
+  fleet_table(scallop0322MainDataTable, 
+            project = project,
+            table = fleet_tab_LA_GC_IFQ, save = TRUE)
+}
+  
+
+# Create fleet column 
+fleet_tab_name <- list_tables(project, type = "fleet") # grab tab name
+
+scallop0322MainDataTable <- 
+  fleet_assign(scallop0322MainDataTable, project = project, 
+               fleet_tab = fleet_tab_name)
+```
+
+<br><br>
+
+### Subset
+
+1. Subset to just the Limited Access Fleet when AA_DAS_only is TRUE.
+2. Subset to just the General Category IFQ fleet when AA_DAS_only is FALSE
+
+
+```{r subset_fleet, eval=TRUE}
+
+if (params$AA_DAS_only==TRUE){
+   
+  scallop0322MainDataTable <- 
+    scallop0322MainDataTable %>% 
+    filter(fleet == "Access Area" | fleet == "Days at Sea")
+  
+  } else if (params$AA_DAS_only==FALSE){
+    scallop0322MainDataTable <- 
+    scallop0322MainDataTable %>% 
+    filter(fleet == "GCIFQ")
+  }
+
+```
+
+<br><br>
+
+
+<br><br><br>
+
+### Bin Gears
+```{r bin_gears}
+if (params$BIN_GEARS==TRUE){
+
+scallop0322MainDataTable$GEARCODE_OLD<-scallop0322MainDataTable$GEARCODE
+#Anything with "DREDGE" in the GEARCODE will be rebinned to "DREDGE" 
+pat_match<-"*DREDGE*"
+reg_pat<-glob2rx(pat_match)
+scallop0322MainDataTable$GEARCODE[grep(reg_pat,scallop0322MainDataTable$GEARCODE)]<-'DREDGE'
+#Look at the GEARCODE NOW, there should be 'DREDGE', 'TRAWL-BOTTOM', and some funky stuff
+table(scallop0322MainDataTable$GEARCODE)
+scallop0322MainDataTable$GEARCODE[!(scallop0322MainDataTable$GEARCODE %in%c('DREDGE','TRAWL-BOTTOM'))]<-'OTHER'
+}
+```
+
+## Aggregate subtrips to trips
+
+The input data ``final_product_lease`` contains subtrips, not trips. This code chunk contracts trips to a single row, applying subtrip attributes for the most valuable subtrip (``max(DOLLAR)``)to the entire trip.
+
+```{r construct_trip_aggregates, echo=TRUE, eval=TRUE}
+
+if (params$subtrip_aggregate==TRUE){
+
+# aggregate DOLLAR, POUNDS, LANDED by TRIPID and filter by max(DOLLAR)
+scallop0322MainDataTable <- 
+  scallop0322MainDataTable %>%
+  group_by(TRIPID) %>%
+  mutate(Agg_DOLLAR = sum(DOLLAR),Agg_DOLLAR_2022 = sum(DOLLAR_2022),  Agg_POUNDS = sum(POUNDS), Agg_LANDED = sum(LANDED), Agg_DOLLAR_ALL_SP_2022 = sum(DOLLAR_ALL_SP_2022))%>% 
+  arrange(desc(DOLLAR)) %>%
+  dplyr::filter(row_number()==1) %>% 
+  dplyr::select(-DOLLAR, -POUNDS, -LANDED,-DOLLAR_ALL_SP_2022, -DOLLAR_2022) %>% 
+  rename(DOLLAR = "Agg_DOLLAR", POUNDS = "Agg_POUNDS", LANDED = "Agg_LANDED", DOLLAR_ALL_SP_2022 = "Agg_DOLLAR_ALL_SP_2022", DOLLAR_2022="Agg_DOLLAR_2022") %>% 
+  ungroup()
+
+scallop0322MainDataTable <- scallop0322MainDataTable %>%
+  mutate(KILOGRAMS = POUNDS/pounds_to_kg,
+         LANDED_KG=LANDED/pounds_to_kg)
+
+
+
+## Test out 
+sum(duplicated(scallop0322MainDataTable$TRIPID))
+stopifnot(sum(duplicated(scallop0322MainDataTable$TRIPID))==0)
+}
+```
+
+
+```{r calculate operating profit, echo=TRUE, eval=TRUE}
+
+#Calculate operating profit by subtracting nominal trip costs from nominal aggregated revenues. Then deal with real. 
+scallop0322MainDataTable$OPERATING_PROFIT <- 
+  (scallop0322MainDataTable$DOLLAR_ALL_SP - scallop0322MainDataTable$TRIP_COST_NOMINALDOLS_WINSOR)
+
+
+scallop0322MainDataTable$OPERATING_PROFIT_2022 <- 
+  (scallop0322MainDataTable$DOLLAR_ALL_SP_2022 - scallop0322MainDataTable$TRIP_COST_WINSOR_2022_DOL)
+
+
+```
+
+
+<br><br>
+
+### Duplicate trip IDs
+
+```{r}
+# add a duplicate trip column
+dup_ind <- duplicated(scallop0322MainDataTable$TRIPID)
+dup_ids <- unique(scallop0322MainDataTable$TRIPID[dup_ind])
+
+scallop0322MainDataTable <- 
+  scallop0322MainDataTable %>% 
+  mutate(dup_trip = TRIPID %in% dup_ids)
+
+# number of obs from duplicate tripIDs 
+sum(scallop0322MainDataTable$dup_trip)
+```
+
+
+<br><br>
+
+## QAQC
+
+This section includes our standard QAQC checks. Here I'm only checking whether 
+a potential issue exists and not changing the data in any way (except in the
+empty variable section).
+
+<br><br>
+
+### NA check
+```{r}
+na_filter(scallop0322MainDataTable, 
+          project = project, 
+          replace = FALSE, remove = FALSE, 
+          rep.value = NA, over_write = FALSE)
+```
+
+<br><br>
+
+### NaN check
+```{r}
+nan_filter(scallop0322MainDataTable, 
+           project = project, 
+           replace = FALSE, remove = FALSE, 
+           rep.value = NA, over_write = FALSE)
+```
+
+<br><br>
+
+### Unique rows
+
+```{r}
+unique_filter(scallop0322MainDataTable, project = project, remove = FALSE)
+```
+<br><br>
+
+### Empty variables
+By "empty" we mean containing all NAs.
+```{r}
+empty_vars_filter(scallop0322MainDataTable, project = project, remove = FALSE)
+
+```
+
+<br><br>
+
+
+### Lon/Lat format
+
+```{r}
+degree(scallop0322MainDataTable, project = project,
+       lat = "DDLAT", lon = "DDLON", 
+       latsign = NULL, lonsign = NULL,
+       replace = FALSE)
+```
+<br><br>
+
+### Spatial QAQC 
+
+```{r}
+spat_qaqc_out <-
+spatial_qaqc(scallop0322MainDataTable, project = project,
+             spat = scallop0322TenMNSQRSpatTable, lon.dat = "DDLON", lat.dat = "DDLAT")
+
+spat_qaqc_out$dataset <- NULL # drop dataset
+spat_qaqc_out$spatial_summary %>% 
+  pretty_lab(cols = "n") %>% 
+   pretty_tab() 
+spat_qaqc_out[2:4]
+```
+<br><br>
+
+## Data creation
+
+### Finagle Live pounds to meat weights
+```{r}
+# rename POUNDS to LIVE_POUNDS for clarity.  Convert live pounds to meat pounds.
+scallop0322MainDataTable$LIVE_POUNDS <- scallop0322MainDataTable$POUNDS
+scallop0322MainDataTable$MEAT_POUNDS <- scallop0322MainDataTable$POUNDS/8.33
+scallop0322MainDataTable$POUNDS <-NULL
+
+scallop0322MainDataTable$LIVE_KG <- scallop0322MainDataTable$LIVE_POUNDS/pounds_to_kg
+scallop0322MainDataTable$MEAT_KG <- scallop0322MainDataTable$MEAT_POUNDS/pounds_to_kg
+
+
+
+```
+
+
+
+
+
+### CPUE
+Here I creating a CPUE variable using TRIP_LENGTH and MEAT_KG. I'm also filtering
+out any infinite values. 
+```{r}
+scallop0322MainDataTable <- 
+  cpue(scallop0322MainDataTable, project,
+       xWeight = "MEAT_KG",
+       xTime = "TRIP_LENGTH", 
+       name = "CPUE")
+
+scallop0322MainDataTable <- 
+  scallop0322MainDataTable %>% 
+  filter(!is.infinite(CPUE))
+```
+<br><br>
+
+#### CPUE Percent Rank
+Add a percent rank column to filter outliers.
+```{r}
+outlier_table(scallop0322MainDataTable, project, x = "CPUE")
+
+scallop0322MainDataTable <- 
+  scallop0322MainDataTable %>% 
+  mutate(CPUE_p = percent_rank(CPUE))
+```
+
+<br><br>
+
+### VPUE
+Same as above but with revenue instead of meat KG 
+```{r}
+scallop0322MainDataTable <- 
+  cpue(scallop0322MainDataTable, project,
+       xWeight = "DOLLAR_2022",
+       xTime = "TRIP_LENGTH", 
+       name = "VPUE")
+
+scallop0322MainDataTable <- 
+  scallop0322MainDataTable %>% 
+  filter(!is.infinite(VPUE))
+```
+<br><br>
+
+#### VPUE Percent Rank
+
+Add a percent rank column to filter outliers.
+```{r}
+outlier_table(scallop0322MainDataTable, project, x = "VPUE")
+
+scallop0322MainDataTable <- 
+  scallop0322MainDataTable %>% 
+  mutate(VPUE_p = percent_rank(VPUE))
+```
+ 
+
+
+
+
+
+
+
+### summary table
+```{r}
+summary_stats(scallop0322MainDataTable, project) %>% 
+  pretty_tab_sb()
+```
+
+Here is DOLLAR, DOLLAR_ALL_SP_2022, LANDED, and TRIP_LENGTH separately. Probably need to add a count (N) and check fleets
+```{r}
+scallop0322MainDataTable %>% 
+  summarize(across(.cols = c("DOLLAR_2022", "DOLLAR_ALL_SP_2022","LANDED", "TRIP_LENGTH"), 
+                   .fns = list(min = min, median = median, mean = mean, sd=sd, max = max,
+                               sum=sum, NAs = ~sum(is.na(.x)), UniqueObs = n_distinct, 
+                               "No. 0's" = ~sum(.x == 0)), 
+                   .names = "{.col}__{.fn}")) %>% 
+  pivot_longer(cols = everything(), values_to = "value", names_to = "summary") %>% 
+  pretty_lab() %>% 
+  separate(col = "summary", sep = "__", into = c("var", "summary")) %>% 
+  pivot_wider(names_from = "var", values_from = "value") %>% 
+  pretty_tab()
+ 
+boxplot(scallop0322MainDataTable$DOLLAR_2022,
+  main = "Revenue in 2022 Dollars",
+  xlab = "USD$",
+  ylab = "Revenue",
+  col = "white",
+  border = "black",
+  horizontal = TRUE,
+  notch = TRUE)
+
+boxplot(scallop0322MainDataTable$LANDED,
+  main = "Catch in Pounds",
+  xlab = "Pounds",
+  ylab = "Catch",
+  col = "white",
+  border = "black",
+  horizontal = TRUE,
+  notch = TRUE)
+
+boxplot(scallop0322MainDataTable$TRIP_LENGTH,
+  main = "Trip Length in Days",
+  xlab = "Trip Length",
+  ylab = "Days",
+  col = "white",
+  border = "black",
+  horizontal = TRUE,
+  notch = TRUE)
+
+```
+
+
+
+
+<br><br><br>
+Observations inside/outside closures by year and fleet. This does not work, but I'm leaving it here because some of the fishset functions may be "group" aware.
+```{r, eval=FALSE}
+agg_helper(scallop0322MainDataTable, value = "in_closure", 
+            group = c("scallop_fishing_year", "fleet"), 
+            count = TRUE) %>% 
+  pivot_wider(names_from = "in_closure", values_from = "n",
+              values_fill = 0) %>% 
+  arrange(scallop_fishing_year) %>% 
+  rename("Outside closure(s)" = "FALSE", "Inside closure(s)" = "TRUE") %>% 
+  pretty_lab(ignore = "scallop_fishing_year") %>% 
+  pretty_tab_sb(width = "50%") 
+```
+
