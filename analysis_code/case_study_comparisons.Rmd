@@ -96,6 +96,7 @@ dropped_values_NY_1_2_GC <- anti_join(Inside_NY1_GC, Inside_NY2_GC, by = c("TRIP
 
 dropped_values_NY_2_3_GC <- anti_join(Inside_NY2_GC, Inside_NY3_GC, by = c("TRIPID" = "TRIPID"))
 
+dropped_values_NY_1_3_GC <- anti_join(Inside_NY1_GC, Inside_NY3_GC, by = c("TRIPID" = "TRIPID"))
 
 
 ## Central Atlantic 
@@ -116,7 +117,7 @@ dropped_values_CA_1_3_GC <- anti_join(Inside_CA1_GC, Inside_CA3_GC, by = c("TRIP
 
 ```
 
-dropped_values_NY_1_2_GC contains observations for the GC fleet that are in the NYB Call Area (1), but not in the NYB Wind Energy Area (2).  dropped_values_NY_2_3_GC contains obsevations for the GC fleet that are in the NYB Wind Energy Area (2), but not in the NYB Lease Areas (3). Other "dropped_values" objects are named analogously.
+dropped_values_NY_1_2_GC contains observations for the GC fleet that are in the NYB Call Area (1), but not in the NYB Wind Energy Area (2).  dropped_values_NY_2_3_GC contains observations for the GC fleet that are in the NYB Wind Energy Area (2), but not in the NYB Lease Areas (3).  dropped_values_NY_1_3_GC contains observations for the GC fleet that are in the NYB Call Area (1), but not in the NYB Lease Areas (3). Other "dropped_values" objects are named analogously.
 
 
 
@@ -137,6 +138,7 @@ dropped_values_NY_1_2_LA <- anti_join(Inside_NY1_LA, Inside_NY2_LA, by = c("TRIP
 
 dropped_values_NY_2_3_LA <- anti_join(Inside_NY2_LA, Inside_NY3_LA, by = c("TRIPID" = "TRIPID"))
 
+dropped_values_NY_1_3_LA <- anti_join(Inside_NY1_LA, Inside_NY3_LA, by = c("TRIPID" = "TRIPID"))
 
 
 ## Central Atlantic 
@@ -189,7 +191,9 @@ view_lon_lat(Inside_CA3_LA, lon = "DDLON", lat ="DDLAT")
  dropped_values_NY_2_3_AA <- dropped_values_NY_2_3_LA %>% filter(fleet == "Access Area") 
  dropped_values_NY_2_3_DAS <- dropped_values_NY_2_3_LA %>% filter(fleet == "Days at Sea") 
 
- 
+ dropped_values_NY_1_3_AA <- dropped_values_NY_1_3_LA %>% filter(fleet == "Access Area") 
+ dropped_values_NY_1_3_DAS <- dropped_values_NY_1_3_LA %>% filter(fleet == "Days at Sea") 
+
 
 
 ## Central Atlantic
@@ -229,24 +233,17 @@ Total revenue and operating profits
   group_by(fleet) %>%
   dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
 
-
-
- dropped_values_NY_1_2_GC %>%
+  dropped_values_NY_1_3_GC %>%
   group_by(fleet) %>%
   dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
 
- Inside_NY2_GC %>%
-  group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
-
- 
- dropped_values_NY_2_3_GC %>%
-  group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
  
  Inside_NY3_GC %>%
   group_by(fleet) %>%
   dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
+ 
+ 
+ 
 
 ```
 
@@ -263,22 +260,10 @@ Section 4.2 The Adaptive Wind Development Processes -  New York Bight - Code chu
   dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),LANDED_win=mean(LANDED_win),
                   OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), VPUE_win=mean(VPUE_win)  )
 
- dropped_values_NY_1_2_GC %>%
+ dropped_values_NY_1_3_GC %>%
   group_by(fleet) %>%
   dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),LANDED_win=mean(LANDED_win),
                   OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), VPUE_win=mean(VPUE_win)  )
-
- Inside_NY2_GC %>%
-  group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),LANDED_win=mean(LANDED_win),
-                  OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), VPUE_win=mean(VPUE_win)  )
-
-
- dropped_values_NY_2_3_GC %>%
-  group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),LANDED_win=mean(LANDED_win),
-                  OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), VPUE_win=mean(VPUE_win)  )
-
   Inside_NY3_GC %>%
   group_by(fleet) %>%
   dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),LANDED_win=mean(LANDED_win),
@@ -327,6 +312,25 @@ t.test(dropped_values_NY_2_3_GC$OPERATING_PROFIT_2022_win,y=Inside_NY3_GC$OPERAT
 t.test(dropped_values_NY_2_3_GC$VPUE_win,y=Inside_NY3_GC$VPUE_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
 
 
+## Phase 1 to 3
+## REVENUE
+
+t.test(dropped_values_NY_1_3_GC$DOLLAR_2022_win,y=Inside_NY3_GC$DOLLAR_2022_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+## Landed
+
+t.test(dropped_values_NY_1_3_GC$LANDED_win,y=Inside_NY3_GC$LANDED_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+## Operating Profit
+t.test(dropped_values_NY_1_3_GC$OPERATING_PROFIT_2022_win,y=Inside_NY3_GC$OPERATING_PROFIT_2022_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+## VPUE
+t.test(dropped_values_NY_1_3_GC$VPUE_win,y=Inside_NY3_GC$VPUE_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+
+
+
+
 ```
 
 
@@ -348,17 +352,7 @@ Total revenue and operating profits
   group_by(fleet) %>%
   dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
 
- dropped_values_NY_1_2_LA %>%
-  group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
-
-
- Inside_NY2_LA %>%
-  group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
-
-
- dropped_values_NY_2_3_LA %>%
+ dropped_values_NY_1_3_LA %>%
   group_by(fleet) %>%
   dplyr::summarise(Trips=n(),DOLLAR_2022_win=sum(DOLLAR_2022_win),OPERATING_PROFIT_2022_win=sum(OPERATING_PROFIT_2022_win), count_PERMITs=n_distinct(PERMIT.y))
 
@@ -383,18 +377,7 @@ Section 4.2 The Adaptive Wind Development Processes -  New York Bight - Code chu
                   OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), VPUE_win=mean(VPUE_win)  )
 
 
- dropped_values_NY_1_2_LA %>%
-  group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),LANDED_win=mean(LANDED_win),
-                  OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), VPUE_win=mean(VPUE_win)  )
-
-
- Inside_NY2_LA %>%
-  group_by(fleet) %>%
-  dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),LANDED_win=mean(LANDED_win),
-                  OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), VPUE_win=mean(VPUE_win)  )
-
-  dropped_values_NY_2_3_LA %>%
+  dropped_values_NY_1_3_LA %>%
   group_by(fleet) %>%
   dplyr::summarise(Trips=n(),DOLLAR_2022_win=mean(DOLLAR_2022_win),LANDED_win=mean(LANDED_win),
                   OPERATING_PROFIT_2022_win=mean(OPERATING_PROFIT_2022_win), VPUE_win=mean(VPUE_win)  )
@@ -453,6 +436,24 @@ t.test(dropped_values_NY_2_3_DAS$OPERATING_PROFIT_2022_win,y=Inside_NY3_DAS$OPER
 ## VPUE
 t.test(dropped_values_NY_2_3_DAS$VPUE_win,y=Inside_NY3_DAS$VPUE_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
 
+
+## Phase 1 and 2
+## REVENUE
+
+t.test(dropped_values_NY_1_3_DAS$DOLLAR_2022_win,y=Inside_NY3_DAS$DOLLAR_2022_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+## Landed
+
+t.test(dropped_values_NY_1_3_DAS$LANDED_win,y=Inside_NY3_DAS$LANDED_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+## Operating Profit
+t.test(dropped_values_NY_1_3_DAS$OPERATING_PROFIT_2022_win,y=Inside_NY3_DAS$OPERATING_PROFIT_2022_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+## VPUE
+t.test(dropped_values_NY_1_3_DAS$VPUE_win,y=Inside_NY3_DAS$VPUE_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+
+
 ```
 
 
@@ -492,6 +493,26 @@ t.test(dropped_values_NY_2_3_AA$OPERATING_PROFIT_2022_win,y=Inside_NY3_AA$OPERAT
 
 ## VPUE
 t.test(dropped_values_NY_2_3_AA$VPUE_win,y=Inside_NY3_AA$VPUE_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+
+
+
+
+
+## Phase 1 and 2 combined
+## REVENUE
+
+t.test(dropped_values_NY_1_3_AA$DOLLAR_2022_win,y=Inside_NY3_AA$DOLLAR_2022_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+## Landed
+
+t.test(dropped_values_NY_1_3_AA$LANDED_win,y=Inside_NY3_AA$LANDED_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+## Operating Profit
+t.test(dropped_values_NY_1_3_AA$OPERATING_PROFIT_2022_win,y=Inside_NY3_AA$OPERATING_PROFIT_2022_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
+
+## VPUE
+t.test(dropped_values_NY_1_3_AA$VPUE_win,y=Inside_NY3_AA$VPUE_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)
 
 
 ```
