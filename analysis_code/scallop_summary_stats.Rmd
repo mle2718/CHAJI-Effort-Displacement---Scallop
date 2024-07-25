@@ -560,7 +560,7 @@ All Fleets:
 scallop0322MainDataTable %>% 
   summarize(across(.cols = c("DOLLAR_2022_win", "DOLLAR_ALL_SP_win","LANDED_win", "VPUE_win","OPERATING_PROFIT_2022_win"), 
                    .fns = list(min = min, median = median, mean = mean, sd=sd, max = max,
-                               sum=sum, NAs = ~sum(is.na(.x)), UniqueObs = n_distinct, 
+                               sum=sum, NAs = ~sum(is.na(.x)), UniqueObs = n_distinct, count=~n(),
                                "No. 0's" = ~sum(.x == 0)), 
                    .names = "{.col}__{.fn}")) %>% 
   pivot_longer(cols = everything(), values_to = "value", names_to = "summary") %>% 
@@ -570,11 +570,28 @@ scallop0322MainDataTable %>%
   pretty_tab()
  
 
+# deal with Crew and Trip_length
 scallop0322MainDataTable %>% 
-  summarize(across(.cols = c("CREW", "TRIP_LENGTH"), 
+  dplyr::filter(is.na(CREW)==FALSE) %>%
+  dplyr::filter(CREW>0) %>%
+  summarize(across(.cols = c("CREW"), 
                    .fns = list(min = min, median = median, mean = mean, sd=sd, max = max,
-                               sum=sum, UniqueObs = n_distinct),
-                   na.rm=TRUE, 
+                               sum=sum, UniqueObs = n_distinct, count=~n(), "No. 0's" = ~sum(.x == 0)),
+                   .names = "{.col}__{.fn}")) %>% 
+  pivot_longer(cols = everything(), values_to = "value", names_to = "summary") %>% 
+  pretty_lab() %>% 
+  separate(col = "summary", sep = "__", into = c("var", "summary")) %>% 
+  pivot_wider(names_from = "var", values_from = "value") %>% 
+  pretty_tab()
+
+
+
+scallop0322MainDataTable %>% 
+  dplyr::filter(is.na(TRIP_LENGTH)==FALSE) %>%
+  dplyr::filter(TRIP_LENGTH>0) %>%
+  summarize(across(.cols = c("TRIP_LENGTH"), 
+                   .fns = list(min = min, median = median, mean = mean, sd=sd, max = max,
+                               sum=sum, UniqueObs = n_distinct, count=~n(), "No. 0's" = ~sum(.x == 0)),
                    .names = "{.col}__{.fn}")) %>% 
   pivot_longer(cols = everything(), values_to = "value", names_to = "summary") %>% 
   pretty_lab() %>% 
@@ -591,9 +608,9 @@ scallop0322MainDataTable %>%
 Access Area Fleet summary statistics
 ```{r}
 AA_data %>% 
-  summarize(across(.cols = c("DOLLAR_2022_win", "DOLLAR_ALL_SP_win","LANDED_win", "VPUE_win","OPERATING_PROFIT_2022_win", "CREW", "TRIP_LENGTH"), 
+  summarize(across(.cols = c("DOLLAR_2022_win", "DOLLAR_ALL_SP_win","LANDED_win", "VPUE_win","OPERATING_PROFIT_2022_win"), 
                    .fns = list(min = min, median = median, mean = mean, sd=sd, max = max,
-                               sum=sum, NAs = ~sum(is.na(.x)), UniqueObs = n_distinct, 
+                               sum=sum, NAs = ~sum(is.na(.x)), UniqueObs = n_distinct, count=~n(),
                                "No. 0's" = ~sum(.x == 0)), 
                    .names = "{.col}__{.fn}")) %>% 
   pivot_longer(cols = everything(), values_to = "value", names_to = "summary") %>% 
@@ -604,12 +621,28 @@ AA_data %>%
  
 
 
+# deal with Crew and Trip_length
+AA_data %>% 
+  dplyr::filter(is.na(CREW)==FALSE) %>%
+  dplyr::filter(CREW>0) %>%
+  summarize(across(.cols = c("CREW"), 
+                   .fns = list(min = min, median = median, mean = mean, sd=sd, max = max,
+                               sum=sum, UniqueObs = n_distinct, count=~n(), "No. 0's" = ~sum(.x == 0)),
+                   .names = "{.col}__{.fn}")) %>% 
+  pivot_longer(cols = everything(), values_to = "value", names_to = "summary") %>% 
+  pretty_lab() %>% 
+  separate(col = "summary", sep = "__", into = c("var", "summary")) %>% 
+  pivot_wider(names_from = "var", values_from = "value") %>% 
+  pretty_tab()
+
+
 
 AA_data %>% 
-  summarize(across(.cols = c("CREW", "TRIP_LENGTH"), 
+  dplyr::filter(is.na(TRIP_LENGTH)==FALSE) %>%
+  dplyr::filter(TRIP_LENGTH>0) %>%
+  summarize(across(.cols = c("TRIP_LENGTH"), 
                    .fns = list(min = min, median = median, mean = mean, sd=sd, max = max,
-                               sum=sum, UniqueObs = n_distinct),
-                   na.rm=TRUE, 
+                               sum=sum, UniqueObs = n_distinct, count=~n(), "No. 0's" = ~sum(.x == 0)),
                    .names = "{.col}__{.fn}")) %>% 
   pivot_longer(cols = everything(), values_to = "value", names_to = "summary") %>% 
   pretty_lab() %>% 
@@ -624,9 +657,9 @@ Days-at-Sea  Fleet summary statistics
 ```{r}
 
 DAS_data %>% 
-  summarize(across(.cols = c("DOLLAR_2022_win", "DOLLAR_ALL_SP_win","LANDED_win", "VPUE_win","OPERATING_PROFIT_2022_win", "CREW", "TRIP_LENGTH"), 
+  summarize(across(.cols = c("DOLLAR_2022_win", "DOLLAR_ALL_SP_win","LANDED_win", "VPUE_win","OPERATING_PROFIT_2022_win"), 
                    .fns = list(min = min, median = median, mean = mean, sd=sd, max = max,
-                               sum=sum, NAs = ~sum(is.na(.x)), UniqueObs = n_distinct, 
+                               sum=sum, NAs = ~sum(is.na(.x)), UniqueObs = n_distinct, count=~n(),
                                "No. 0's" = ~sum(.x == 0)), 
                    .names = "{.col}__{.fn}")) %>% 
   pivot_longer(cols = everything(), values_to = "value", names_to = "summary") %>% 
@@ -636,25 +669,43 @@ DAS_data %>%
   pretty_tab()
 
 
+# deal with Crew and Trip_length
 DAS_data %>% 
-  summarize(across(.cols = c("CREW", "TRIP_LENGTH"), 
+  dplyr::filter(is.na(CREW)==FALSE) %>%
+  dplyr::filter(CREW>0) %>%
+  summarize(across(.cols = c("CREW"), 
                    .fns = list(min = min, median = median, mean = mean, sd=sd, max = max,
-                               sum=sum, UniqueObs = n_distinct),
-                   na.rm=TRUE, 
+                               sum=sum, UniqueObs = n_distinct, count=~n(), "No. 0's" = ~sum(.x == 0)),
                    .names = "{.col}__{.fn}")) %>% 
   pivot_longer(cols = everything(), values_to = "value", names_to = "summary") %>% 
   pretty_lab() %>% 
   separate(col = "summary", sep = "__", into = c("var", "summary")) %>% 
   pivot_wider(names_from = "var", values_from = "value") %>% 
   pretty_tab()
+
+
+
+DAS_data %>% 
+  dplyr::filter(is.na(TRIP_LENGTH)==FALSE) %>%
+  dplyr::filter(TRIP_LENGTH>0) %>%
+  summarize(across(.cols = c("TRIP_LENGTH"), 
+                   .fns = list(min = min, median = median, mean = mean, sd=sd, max = max,
+                               sum=sum, UniqueObs = n_distinct, count=~n(), "No. 0's" = ~sum(.x == 0)),
+                   .names = "{.col}__{.fn}")) %>% 
+  pivot_longer(cols = everything(), values_to = "value", names_to = "summary") %>% 
+  pretty_lab() %>% 
+  separate(col = "summary", sep = "__", into = c("var", "summary")) %>% 
+  pivot_wider(names_from = "var", values_from = "value") %>% 
+  pretty_tab()
+
 ```  
   
 GCIFQ summary statistics  
 ```{r}
 GCIFQ_data %>% 
-  summarize(across(.cols = c("DOLLAR_2022_win", "DOLLAR_ALL_SP_win","LANDED_win", "VPUE_win","OPERATING_PROFIT_2022_win", "CREW", "TRIP_LENGTH"), 
+  summarize(across(.cols = c("DOLLAR_2022_win", "DOLLAR_ALL_SP_win","LANDED_win", "VPUE_win","OPERATING_PROFIT_2022_win"), 
                    .fns = list(min = min, median = median, mean = mean, sd=sd, max = max,
-                               sum=sum, NAs = ~sum(is.na(.x)), UniqueObs = n_distinct, 
+                               sum=sum, NAs = ~sum(is.na(.x)), UniqueObs = n_distinct, count=~n(),
                                "No. 0's" = ~sum(.x == 0)), 
                    .names = "{.col}__{.fn}")) %>% 
   pivot_longer(cols = everything(), values_to = "value", names_to = "summary") %>% 
@@ -666,17 +717,36 @@ GCIFQ_data %>%
 
 
 
+
+# deal with Crew and Trip_length
 GCIFQ_data %>% 
-  summarize(across(.cols = c("CREW", "TRIP_LENGTH"), 
+  dplyr::filter(is.na(CREW)==FALSE) %>%
+  dplyr::filter(CREW>0) %>%
+  summarize(across(.cols = c("CREW"), 
                    .fns = list(min = min, median = median, mean = mean, sd=sd, max = max,
-                               sum=sum, UniqueObs = n_distinct),
-                   na.rm=TRUE, 
+                               sum=sum, UniqueObs = n_distinct, count=~n(), "No. 0's" = ~sum(.x == 0)),
                    .names = "{.col}__{.fn}")) %>% 
   pivot_longer(cols = everything(), values_to = "value", names_to = "summary") %>% 
   pretty_lab() %>% 
   separate(col = "summary", sep = "__", into = c("var", "summary")) %>% 
   pivot_wider(names_from = "var", values_from = "value") %>% 
   pretty_tab()
+
+
+
+GCIFQ_data %>% 
+  dplyr::filter(is.na(TRIP_LENGTH)==FALSE) %>%
+  dplyr::filter(TRIP_LENGTH>0) %>%
+  summarize(across(.cols = c("TRIP_LENGTH"), 
+                   .fns = list(min = min, median = median, mean = mean, sd=sd, max = max,
+                               sum=sum, UniqueObs = n_distinct, count=~n(), "No. 0's" = ~sum(.x == 0)),
+                   .names = "{.col}__{.fn}")) %>% 
+  pivot_longer(cols = everything(), values_to = "value", names_to = "summary") %>% 
+  pretty_lab() %>% 
+  separate(col = "summary", sep = "__", into = c("var", "summary")) %>% 
+  pivot_wider(names_from = "var", values_from = "value") %>% 
+  pretty_tab()
+
 ```
 
 
