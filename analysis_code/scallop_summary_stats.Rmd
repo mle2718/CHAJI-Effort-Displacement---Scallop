@@ -55,19 +55,8 @@ output (apologies for the general messiness). You'll need to download the html
 file to view the results (if you try to view the html file in Google Drive it will 
 only show the raw html). 
 
-Here's some background on how FishSET works:
-Everything that runs through FishSET is saved to the "FishSET Folder", 
-which houses all the user's FishSET projects. The FishSET Folder gets created when a user 
-first loads FishSET. Each project folder contains a FishSET Database (sqlite), a 
-log of the function calls, metadata, automatically saved output, and a few other useful 
-features. The project name for this summary is "scallop0322" (the last four 
-digits are month and year) which you'll see in the names of the saved tables. 
+This is a small Rmd that creates summary statistics for "all data" and for each fleet. Note, we winsorized our metrics at the fleet level.
 
-The easiest way to give feedback is by using the "Feedback/Comments" Google doc
-in the "Confidential NE scallop data analysis 03/22" folder. It includes an
-outline of the summary and a general feedback section to help organize the comments. 
-Please let us know what you find helpful or unhelpful, what feels unnecessary or 
-underdeveloped, or any thoughts or suggestions you may have. 
 
 <br><br>
 
@@ -264,36 +253,15 @@ fleet_tab_name <- list_tables(project, type = "fleet") # grab tab name
 scallop0322MainDataTable <- 
   fleet_assign(scallop0322MainDataTable, project = project, 
                fleet_tab = fleet_tab_name)
-```
 
-<br><br>
+# keep only rows corresponding to the 3 fleets that we care about.
+scallop0322MainDataTable <-scallop0322MainDataTable %>%
+  dplyr::filter(fleet %in%c("Access Area", "Days at Sea", "GCIFQ"))
 
-### Subset
-
-1. Subset to just the Limited Access Fleet when AA_DAS_only is TRUE.
-2. Subset to just the General Category IFQ fleet when AA_DAS_only is FALSE
-
-
-```{r subset_fleet, eval=TRUE}
-
-if (params$AA_DAS_only==TRUE){
-   
-  scallop0322MainDataTable <- 
-    scallop0322MainDataTable %>% 
-    filter(fleet == "Access Area" | fleet == "Days at Sea")
-  
-  } else if (params$AA_DAS_only==FALSE){
-    scallop0322MainDataTable <- 
-    scallop0322MainDataTable %>% 
-    filter(fleet == "GCIFQ")
-  }
 
 ```
 
 <br><br>
-
-
-<br><br><br>
 
 ### Bin Gears
 ```{r bin_gears}
@@ -423,7 +391,7 @@ empty_vars_filter(scallop0322MainDataTable, project = project, remove = FALSE)
 
 ### Lon/Lat format
 
-```{r}
+```{r, eval=FALSE}
 degree(scallop0322MainDataTable, project = project,
        lat = "DDLAT", lon = "DDLON", 
        latsign = NULL, lonsign = NULL,
@@ -433,7 +401,7 @@ degree(scallop0322MainDataTable, project = project,
 
 ### Spatial QAQC 
 
-```{r}
+```{r, eval=FALSE}
 spat_qaqc_out <-
 spatial_qaqc(scallop0322MainDataTable, project = project,
              spat = scallop0322TenMNSQRSpatTable, lon.dat = "DDLON", lat.dat = "DDLAT")
@@ -482,18 +450,6 @@ scallop0322MainDataTable <-
 ```
 <br><br>
 
-#### CPUE Percent Rank
-Add a percent rank column to filter outliers.
-```{r}
-outlier_table(scallop0322MainDataTable, project, x = "CPUE")
-
-scallop0322MainDataTable <- 
-  scallop0322MainDataTable %>% 
-  mutate(CPUE_p = percent_rank(CPUE))
-```
-
-<br><br>
-
 ### VPUE
 Same as above but with revenue instead of meat KG 
 ```{r}
@@ -509,23 +465,87 @@ scallop0322MainDataTable <-
 ```
 <br><br>
 
-#### VPUE Percent Rank
 
-Add a percent rank column to filter outliers.
-```{r}
-outlier_table(scallop0322MainDataTable, project, x = "VPUE")
+### Subset
 
-scallop0322MainDataTable <- 
-  scallop0322MainDataTable %>% 
-  mutate(VPUE_p = percent_rank(VPUE))
+
+```{r subset_fleet, eval=TRUE}
+
+AA_data <- 
+    scallop0322MainDataTable %>% 
+    filter(fleet == "Access Area")
+
+
+DAS_data <- 
+    scallop0322MainDataTable %>% 
+    filter(fleet == "Days at Sea")
+
+GCIFQ_data <-
+    scallop0322MainDataTable %>% 
+    filter(fleet == "GCIFQ")
+
 ```
- 
 
 
 
 
+```{r Winsorize and stitch back together, eval=TRUE}
+
+## AA fleet
+AA_data <- AA_data %>%
+dplyr::mutate(DOLLAR_2022_win=datawizard::winsorize(DOLLAR_2022, threshold = 0.01),
+              LANDED_win = datawizard::winsorize(LANDED, threshold = 0.01),
+           DOLLAR_ALL_SP_win = datawizard::winsorize(DOLLAR_ALL_SP_2022, threshold = 0.01),    
+            VPUE_win = datawizard::winsorize(VPUE, threshold = 0.01)
+)
+
+AA_data <- AA_data %>%
+  dplyr::mutate(OPERATING_PROFIT_2022_win=DOLLAR_ALL_SP_win - TRIP_COST_WINSOR_2022_DOL)
+
+sum(is.na(AA_data$OPERATING_PROFIT_2022_win))
+AA_data$OPERATING_PROFIT_2022_win[is.na(AA_data$OPERATING_PROFIT_2022_win)] <- mean(AA_data$OPERATING_PROFIT_2022_win, na.rm = TRUE)
+
+## DAS fleet
+
+DAS_data <- DAS_data %>%
+dplyr::mutate(DOLLAR_2022_win=datawizard::winsorize(DOLLAR_2022, threshold = 0.01),
+              LANDED_win = datawizard::winsorize(LANDED, threshold = 0.01),
+           DOLLAR_ALL_SP_win = datawizard::winsorize(DOLLAR_ALL_SP_2022, threshold = 0.01),    
+            VPUE_win = datawizard::winsorize(VPUE, threshold = 0.01)
+)
+
+DAS_data <- DAS_data %>%
+  dplyr::mutate(OPERATING_PROFIT_2022_win=DOLLAR_ALL_SP_win - TRIP_COST_WINSOR_2022_DOL)
+
+sum(is.na(DAS_data$OPERATING_PROFIT_2022_win))
+DAS_data$OPERATING_PROFIT_2022_win[is.na(DAS_data$OPERATING_PROFIT_2022_win)] <- mean(DAS_data$OPERATING_PROFIT_2022_win, na.rm = TRUE)
 
 
+
+## GCIFQ fleet
+
+GCIFQ_data <-GCIFQ_data %>%
+dplyr::mutate(DOLLAR_2022_win=datawizard::winsorize(DOLLAR_2022, threshold = 0.01),
+              LANDED_win = datawizard::winsorize(LANDED, threshold = 0.01),
+           DOLLAR_ALL_SP_win = datawizard::winsorize(DOLLAR_ALL_SP_2022, threshold = 0.01),    
+            VPUE_win = datawizard::winsorize(VPUE, threshold = 0.01)
+)
+
+
+GCIFQ_data <- GCIFQ_data %>%
+  dplyr::mutate(OPERATING_PROFIT_2022_win=DOLLAR_ALL_SP_win - TRIP_COST_WINSOR_2022_DOL)
+
+sum(is.na(GCIFQ_data$OPERATING_PROFIT_2022_win))
+GCIFQ_data$OPERATING_PROFIT_2022_win[is.na(GCIFQ_data$OPERATING_PROFIT_2022_win)] <- mean(GCIFQ_data$OPERATING_PROFIT_2022_win, na.rm = TRUE)
+
+scallop0322MainDataTable<-rbind(AA_data, DAS_data)
+scallop0322MainDataTable<-rbind(scallop0322MainDataTable, GCIFQ_data)
+
+
+```
+
+
+# Summary Statistics
 
 ### summary table
 ```{r}
@@ -533,10 +553,11 @@ summary_stats(scallop0322MainDataTable, project) %>%
   pretty_tab_sb()
 ```
 
+
 Here is DOLLAR, DOLLAR_ALL_SP_2022, LANDED, and TRIP_LENGTH separately. Probably need to add a count (N) and check fleets
 ```{r}
 scallop0322MainDataTable %>% 
-  summarize(across(.cols = c("DOLLAR_2022", "DOLLAR_ALL_SP_2022","LANDED", "TRIP_LENGTH"), 
+  summarize(across(.cols = c("DOLLAR_2022_win", "DOLLAR_ALL_SP_win","LANDED_win", "VPUE_win","OPERATING_PROFIT_2022_win"), 
                    .fns = list(min = min, median = median, mean = mean, sd=sd, max = max,
                                sum=sum, NAs = ~sum(is.na(.x)), UniqueObs = n_distinct, 
                                "No. 0's" = ~sum(.x == 0)), 
@@ -547,49 +568,52 @@ scallop0322MainDataTable %>%
   pivot_wider(names_from = "var", values_from = "value") %>% 
   pretty_tab()
  
-boxplot(scallop0322MainDataTable$DOLLAR_2022,
-  main = "Revenue in 2022 Dollars",
-  xlab = "USD$",
-  ylab = "Revenue",
-  col = "white",
-  border = "black",
-  horizontal = TRUE,
-  notch = TRUE)
-
-boxplot(scallop0322MainDataTable$LANDED,
-  main = "Catch in Pounds",
-  xlab = "Pounds",
-  ylab = "Catch",
-  col = "white",
-  border = "black",
-  horizontal = TRUE,
-  notch = TRUE)
-
-boxplot(scallop0322MainDataTable$TRIP_LENGTH,
-  main = "Trip Length in Days",
-  xlab = "Trip Length",
-  ylab = "Days",
-  col = "white",
-  border = "black",
-  horizontal = TRUE,
-  notch = TRUE)
-
 ```
 
-
-
-
-<br><br><br>
-Observations inside/outside closures by year and fleet. This does not work, but I'm leaving it here because some of the fishset functions may be "group" aware.
-```{r, eval=FALSE}
-agg_helper(scallop0322MainDataTable, value = "in_closure", 
-            group = c("scallop_fishing_year", "fleet"), 
-            count = TRUE) %>% 
-  pivot_wider(names_from = "in_closure", values_from = "n",
-              values_fill = 0) %>% 
-  arrange(scallop_fishing_year) %>% 
-  rename("Outside closure(s)" = "FALSE", "Inside closure(s)" = "TRUE") %>% 
-  pretty_lab(ignore = "scallop_fishing_year") %>% 
-  pretty_tab_sb(width = "50%") 
+Access Area Fleet summary statistics
+```{r}
+AA_data %>% 
+  summarize(across(.cols = c("DOLLAR_2022_win", "DOLLAR_ALL_SP_win","LANDED_win", "VPUE_win","OPERATING_PROFIT_2022_win"), 
+                   .fns = list(min = min, median = median, mean = mean, sd=sd, max = max,
+                               sum=sum, NAs = ~sum(is.na(.x)), UniqueObs = n_distinct, 
+                               "No. 0's" = ~sum(.x == 0)), 
+                   .names = "{.col}__{.fn}")) %>% 
+  pivot_longer(cols = everything(), values_to = "value", names_to = "summary") %>% 
+  pretty_lab() %>% 
+  separate(col = "summary", sep = "__", into = c("var", "summary")) %>% 
+  pivot_wider(names_from = "var", values_from = "value") %>% 
+  pretty_tab()
+ 
 ```
+Days-at-Sea  Fleet summary statistics
+```{r}
+
+DAS_data %>% 
+  summarize(across(.cols = c("DOLLAR_2022_win", "DOLLAR_ALL_SP_win","LANDED_win", "VPUE_win","OPERATING_PROFIT_2022_win"), 
+                   .fns = list(min = min, median = median, mean = mean, sd=sd, max = max,
+                               sum=sum, NAs = ~sum(is.na(.x)), UniqueObs = n_distinct, 
+                               "No. 0's" = ~sum(.x == 0)), 
+                   .names = "{.col}__{.fn}")) %>% 
+  pivot_longer(cols = everything(), values_to = "value", names_to = "summary") %>% 
+  pretty_lab() %>% 
+  separate(col = "summary", sep = "__", into = c("var", "summary")) %>% 
+  pivot_wider(names_from = "var", values_from = "value") %>% 
+  pretty_tab()
+```  
+  
+GCIFQ summary statistics  
+```{r}
+GCIFQ_data %>% 
+  summarize(across(.cols = c("DOLLAR_2022_win", "DOLLAR_ALL_SP_win","LANDED_win", "VPUE_win","OPERATING_PROFIT_2022_win"), 
+                   .fns = list(min = min, median = median, mean = mean, sd=sd, max = max,
+                               sum=sum, NAs = ~sum(is.na(.x)), UniqueObs = n_distinct, 
+                               "No. 0's" = ~sum(.x == 0)), 
+                   .names = "{.col}__{.fn}")) %>% 
+  pivot_longer(cols = everything(), values_to = "value", names_to = "summary") %>% 
+  pretty_lab() %>% 
+  separate(col = "summary", sep = "__", into = c("var", "summary")) %>% 
+  pivot_wider(names_from = "var", values_from = "value") %>% 
+  pretty_tab()
+```
+
 
