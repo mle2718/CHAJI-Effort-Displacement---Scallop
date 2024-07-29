@@ -1,10 +1,10 @@
-# Small R script to render lots of variations of the scallop_analysis_tiny_report.Rmd. This allows us to pass in different shapefiles or do different aggregations.  
+# Small R script to render lots of variations of the scallop_analysis_t_tests.Rmd. This allows us to pass in different shapefiles or do different aggregations.  
 # Borrowed heavily from https://bookdown.org/yihui/rmarkdown/params-knit.html
 
 library("here")
 library("rmarkdown")
 
-here::i_am("analysis_code/knit_tiny_scallop_analysis_loop.R")
+here::i_am("analysis_code/knit_ttest_scallop_analysis_loop.R")
 
 #create a directory in main for the casestudy data to go
 dir.create(here::here("data","main","casestudies"), showWarnings="FALSE")
@@ -16,6 +16,9 @@ subtrip_aggregate_vals_to_loop<-c(TRUE) # TRUE aggregates subtrips to trips. FAL
 # We want to be able to run the tiny "area" level analysis on all the shapefiles. I don't know if we can.
 #input_shapefile_vals_to_loop2<-c("wind_Central_Atlantic_1.RDS", "wind_Central_Atlantic_2.RDS","wind_Central_Atlantic_3.RDS", "wind_sf_nocable.RDS", "wind_sf_combined.RDS")
 input_shapefile_vals_to_loop2<-c("wind_NY1.RDS","wind_NY2.RDS","wind_NY3.RDS","wind_Central_Atlantic_1.RDS", "wind_Central_Atlantic_2.RDS","wind_Central_Atlantic_3.RDS")
+
+#Tables 2 through 4.
+input_shapefile_vals_to_loop2<-c("wind_sf_combined.RDS")
 
 
 
@@ -30,12 +33,12 @@ rmarkdown::render(here::here("data_wrangle","combine_cable_routes.Rmd"),
 ##################################################################################
 #Define a function that passes parameters into the rmarkdown::render function
 render_tiny_report = function(AA_DAS_only, subtrip_aggregate, input_shapefile) {
-  rmarkdown::render(here::here("analysis_code","scallop_analysis_tiny_report.Rmd"), params = list(
+  rmarkdown::render(here::here("analysis_code","scallop_analysis_t_tests.Rmd"), params = list(
     AA_DAS_only = AA_DAS_only,
     subtrip_aggregate = subtrip_aggregate,
     input_shapefile=input_shapefile
   ),
-  output_file = here::here("results",paste0("scallop_tiny_AA_",AA_DAS_only,"_subtripaggregate_",subtrip_aggregate,"_shapefile_", gsub(".RDS", "",input_shapefile ), ".html")
+  output_file = here::here("results",paste0("Extra_scallop_ttest_AA_",AA_DAS_only,"_subtripaggregate_",subtrip_aggregate,"_shapefile_", gsub(".RDS", "",input_shapefile ), ".html")
   ))
 }
 ################################################################################## 
