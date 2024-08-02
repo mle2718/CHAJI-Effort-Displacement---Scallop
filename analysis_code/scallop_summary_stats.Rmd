@@ -8,18 +8,6 @@ output:
     toc: true
     toc_float: true
     code_folding: show
-params:
-    AA_DAS_only: TRUE
-    subtrip_aggregate: TRUE
-    BIN_GEARS: TRUE
-    location: 
-      label: "Location:"
-      value: Woods_Hole
-      input: select
-      choices: [Woods_Hole, Seattle]
-    input_shapefile:
-      value: "wind_sf_nocable.RDS"
-      choices: ["wind_sf_final.RDS","wind_sf_nocable.RDS"]
 
 ---
 <!---
@@ -30,21 +18,6 @@ location --- NEFSC folks should set location=Woods_Hole. AK folks should set it 
 
 PreRelease -- controls the location of FishSET package. Set to FALSE to load without options. Set to TRUE to load from a particular lib.loc
 --->
-## Warning and Options
-Please be careful with interpretation. Some outputs are uninterpretable when certain options are selected. For example, when we *do not* aggregate subtrips to trips:
-
-1. the "per-unit-effort" outputs are not meaningful. 
-2. Any statistics that are averaged are now averaged over subtrips, so this may not have a meaning either.
-
-There may be other, so think carefully.
-
-1.  Your location is  `r params$location`.
-2.  The value of AA_DAS is `r params$AA_DAS_only`.
-3.  The value of subtrip_aggregate is `r params$subtrip_aggregate`.
-4.  The value of  BIN_GEARS is `r params$BIN_GEARS`.
-5.  The input shapefile has been set to   `r params$input_shapefile`.
-
-
 
 ## Introduction 
  
@@ -55,7 +28,7 @@ output (apologies for the general messiness). You'll need to download the html
 file to view the results (if you try to view the html file in Google Drive it will 
 only show the raw html). 
 
-This is a small Rmd that creates summary statistics for "all data" and for each fleet. Note, we winsorized our metrics at the fleet level.
+This is a small Rmd that creates summary statistics for "all data" and for each metier. Note, we winsorized our metrics at the metier level.
 
 
 <br><br>
@@ -84,7 +57,8 @@ pounds_to_kg<-2.20462
 # disable scientific notation
 options(scipen=999)
 
-AA_DAS_param_hack <-params$AA_DAS_only
+input_shapefile<-"wind_sf_nocable.RDS"
+
 ```
 
 
@@ -121,9 +95,6 @@ If you don't have a FishSETFolder, the subsequent ``load_maindat()'' in the data
 ```{r data_readin, eval=TRUE}
 #For Woods_Hole users, read in the most recent data in data/main
 
-if (params$location=="Woods_Hole"){
-  # This code looks into /data/main and sets the vintage_string according to 
-  # the most recent data
   datasets_list <- list.files(path = here("data", "main"), pattern = "final_product_lease")
   datasets_list <- gsub("final_product_lease_", "", datasets_list )
   datasets_list <- gsub("final_product_lease", "", datasets_list )
@@ -132,11 +103,6 @@ if (params$location=="Woods_Hole"){
   vintage_string <- max(datasets_list)
   rm(datasets_list)
   dat_filepath <- here("data", "main", paste0("final_product_lease_", vintage_string, ".Rds"))
-} else if (params$location=="Seattle"){
-  dat_filepath <- paste0("~/NE Scallops/data/updated/", 
-                         "June 22/NE NW Collab/",
-                         "final_product_lease_2022_05_25.Rds")
-}
 
 final_product_lease <- readRDS(dat_filepath)
 # needed to rename this for now since it matches the name outputted from the
@@ -179,7 +145,7 @@ data folder.
 
 # loads lease area combined w/ cable routes (saved locally) created from
 # data_wrangle/combine_cable_routes.Rmd
-lease_filepath <- here("data", "main", "spatial", params$input_shapefile)
+lease_filepath <- here("data", "main", "spatial", input_shapefile)
 
 load_spatial(lease_filepath, name = "WindClose", over_write = TRUE, project,
              data.type = "RDS")
@@ -220,14 +186,7 @@ scallop0322MainDataTable <-
                 '`Plan Code` == "SES" & `Program Code` == "SCG" & `Area_ID2` == "NG"'),
   fleet = c("Access Area", "Days at Sea", "GCIFQ", "GCNGOM")
 )
-  fleet_tab_LA_GC_IFQ <- data.frame(
   
-  condition = c('`Plan Code` == "SES" & `Program Code` == "SAA" | 
-                `Plan Code` == "SES" & `Program Code` == "SCA"',
-                '`Plan Code` == "SES" & `Program Code` == "SCG" & `Area_ID2` != "NG"',
-                '`Plan Code` == "SES" & `Program Code` == "SCG" & `Area_ID2` == "NG"'),
-  fleet = c("Limited Access", "GCIFQ", "GCNGOM")
-  )
 
 ```
 
@@ -236,16 +195,10 @@ scallop0322MainDataTable <-
 # save fleet appropriate table to FishSET DB
 
 
-if (params$AA_DAS_only==TRUE){
- fleet_table(scallop0322MainDataTable, 
+fleet_table(scallop0322MainDataTable, 
             project = project,
             table = fleet_tab_AA_DAS, save = TRUE)
-} else if (params$AA_DAS_only==FALSE){
-  fleet_table(scallop0322MainDataTable, 
-            project = project,
-            table = fleet_tab_LA_GC_IFQ, save = TRUE)
-}
-  
+
 
 # Create fleet column 
 fleet_tab_name <- list_tables(project, type = "fleet") # grab tab name
@@ -265,7 +218,6 @@ scallop0322MainDataTable <-scallop0322MainDataTable %>%
 
 ### Bin Gears
 ```{r bin_gears}
-if (params$BIN_GEARS==TRUE){
 
 scallop0322MainDataTable$GEARCODE_OLD<-scallop0322MainDataTable$GEARCODE
 #Anything with "DREDGE" in the GEARCODE will be rebinned to "DREDGE" 
@@ -275,16 +227,14 @@ scallop0322MainDataTable$GEARCODE[grep(reg_pat,scallop0322MainDataTable$GEARCODE
 #Look at the GEARCODE NOW, there should be 'DREDGE', 'TRAWL-BOTTOM', and some funky stuff
 table(scallop0322MainDataTable$GEARCODE)
 scallop0322MainDataTable$GEARCODE[!(scallop0322MainDataTable$GEARCODE %in%c('DREDGE','TRAWL-BOTTOM'))]<-'OTHER'
-}
 ```
 
-## Aggregate subtrips to trips
+### Aggregate subtrips to trips
 
 The input data ``final_product_lease`` contains subtrips, not trips. This code chunk contracts trips to a single row, applying subtrip attributes for the most valuable subtrip (``max(DOLLAR)``)to the entire trip.
 
 ```{r construct_trip_aggregates, echo=TRUE, eval=TRUE}
 
-if (params$subtrip_aggregate==TRUE){
 
 # aggregate DOLLAR, POUNDS, LANDED by TRIPID and filter by max(DOLLAR)
 scallop0322MainDataTable <- 
@@ -306,22 +256,34 @@ scallop0322MainDataTable <- scallop0322MainDataTable %>%
 ## Test out 
 sum(duplicated(scallop0322MainDataTable$TRIPID))
 stopifnot(sum(duplicated(scallop0322MainDataTable$TRIPID))==0)
-}
+
+```
+
+
+
+### Closure area assignment
+
+```{r}
+scallop0322MainDataTable <- 
+  assignment_column(scallop0322MainDataTable, project = project,
+                    spat = scallop0322WindCloseSpatTable, 
+                    lon.dat = "DDLON",
+                    lat.dat = "DDLAT", 
+                    cat = "LEASE_NUMB",
+                    name = "closeID",
+                    closest.pt = FALSE,
+                    hull.polygon = FALSE) 
+
+scallop0322MainDataTable <- 
+  scallop0322MainDataTable %>% 
+  mutate(in_closure = !is.na(closeID))
 ```
 
 
-```{r calculate operating profit, echo=TRUE, eval=TRUE}
-
-#Calculate operating profit by subtracting nominal trip costs from nominal aggregated revenues. Then deal with real. 
-scallop0322MainDataTable$OPERATING_PROFIT <- 
-  (scallop0322MainDataTable$DOLLAR_ALL_SP - scallop0322MainDataTable$TRIP_COST_NOMINALDOLS_WINSOR)
 
 
-scallop0322MainDataTable$OPERATING_PROFIT_2022 <- 
-  (scallop0322MainDataTable$DOLLAR_ALL_SP_2022 - scallop0322MainDataTable$TRIP_COST_WINSOR_2022_DOL)
 
 
-```
 
 
 <br><br>
@@ -399,21 +361,6 @@ degree(scallop0322MainDataTable, project = project,
 ```
 <br><br>
 
-### Spatial QAQC 
-
-```{r, eval=FALSE}
-spat_qaqc_out <-
-spatial_qaqc(scallop0322MainDataTable, project = project,
-             spat = scallop0322TenMNSQRSpatTable, lon.dat = "DDLON", lat.dat = "DDLAT")
-
-spat_qaqc_out$dataset <- NULL # drop dataset
-spat_qaqc_out$spatial_summary %>% 
-  pretty_lab(cols = "n") %>% 
-   pretty_tab() 
-spat_qaqc_out[2:4]
-```
-<br><br>
-
 ## Data creation
 
 ### Finagle Live pounds to meat weights
@@ -426,12 +373,7 @@ scallop0322MainDataTable$POUNDS <-NULL
 scallop0322MainDataTable$LIVE_KG <- scallop0322MainDataTable$LIVE_POUNDS/pounds_to_kg
 scallop0322MainDataTable$MEAT_KG <- scallop0322MainDataTable$MEAT_POUNDS/pounds_to_kg
 
-
-
 ```
-
-
-
 
 
 ### CPUE
@@ -491,7 +433,10 @@ GCIFQ_data <-
 
 ```{r Winsorize and stitch back together, eval=TRUE}
 
-## AA fleet
+## AA fleet and DAS fleets winsorized together.
+
+
+
 AA_data <- AA_data %>%
 dplyr::mutate(DOLLAR_2022_win=datawizard::winsorize(DOLLAR_2022, threshold = 0.01),
               LANDED_win = datawizard::winsorize(LANDED, threshold = 0.01),
@@ -499,14 +444,16 @@ dplyr::mutate(DOLLAR_2022_win=datawizard::winsorize(DOLLAR_2022, threshold = 0.0
             VPUE_win = datawizard::winsorize(VPUE, threshold = 0.01)
 )
 
+#Calculate operating profit by subtracting real trip costs from real aggregated revenues.  
 AA_data <- AA_data %>%
   dplyr::mutate(OPERATING_PROFIT_2022_win=DOLLAR_ALL_SP_win - TRIP_COST_WINSOR_2022_DOL)
 
 sum(is.na(AA_data$OPERATING_PROFIT_2022_win))
 AA_data$OPERATING_PROFIT_2022_win[is.na(AA_data$OPERATING_PROFIT_2022_win)] <- mean(AA_data$OPERATING_PROFIT_2022_win, na.rm = TRUE)
 
-## DAS fleet
 
+
+## LA-DAS Fleet
 DAS_data <- DAS_data %>%
 dplyr::mutate(DOLLAR_2022_win=datawizard::winsorize(DOLLAR_2022, threshold = 0.01),
               LANDED_win = datawizard::winsorize(LANDED, threshold = 0.01),
@@ -519,7 +466,6 @@ DAS_data <- DAS_data %>%
 
 sum(is.na(DAS_data$OPERATING_PROFIT_2022_win))
 DAS_data$OPERATING_PROFIT_2022_win[is.na(DAS_data$OPERATING_PROFIT_2022_win)] <- mean(DAS_data$OPERATING_PROFIT_2022_win, na.rm = TRUE)
-
 
 
 ## GCIFQ fleet
@@ -538,16 +484,15 @@ GCIFQ_data <- GCIFQ_data %>%
 sum(is.na(GCIFQ_data$OPERATING_PROFIT_2022_win))
 GCIFQ_data$OPERATING_PROFIT_2022_win[is.na(GCIFQ_data$OPERATING_PROFIT_2022_win)] <- mean(GCIFQ_data$OPERATING_PROFIT_2022_win, na.rm = TRUE)
 
-scallop0322MainDataTable<-rbind(AA_data, DAS_data)
-scallop0322MainDataTable<-rbind(scallop0322MainDataTable, GCIFQ_data)
-
+scallop0322MainDataTable<-rbind(AA_data, GCIFQ_data)
+scallop0322MainDataTable<-rbind(scallop0322MainDataTable, DAS_data)
 
 ```
 
 
 ## Summary Statistics
 
-### summary table
+### Summary table
 ```{r}
 summary_stats(scallop0322MainDataTable, project) %>% 
   pretty_tab_sb()
@@ -558,9 +503,9 @@ All Fleets:
 
 ```{r}
 scallop0322MainDataTable %>% 
-  summarize(across(.cols = c("DOLLAR_2022_win", "DOLLAR_ALL_SP_win","LANDED_win", "VPUE_win","OPERATING_PROFIT_2022_win"), 
-                   .fns = list(min = min, median = median, mean = mean, sd=sd, max = max,
-                               sum=sum, NAs = ~sum(is.na(.x)), UniqueObs = n_distinct, count=~n(),
+   summarize(across(.cols = c("DOLLAR_2022_win","LANDED_win", "OPERATING_PROFIT_2022_win","VPUE_win"), 
+                   .fns = list(sum=sum, mean = mean,
+                               NAs = ~sum(is.na(.x)), UniqueObs = n_distinct, count=~n(),
                                "No. 0's" = ~sum(.x == 0)), 
                    .names = "{.col}__{.fn}")) %>% 
   pivot_longer(cols = everything(), values_to = "value", names_to = "summary") %>% 
@@ -575,8 +520,7 @@ scallop0322MainDataTable %>%
   dplyr::filter(is.na(CREW)==FALSE) %>%
   dplyr::filter(CREW>0) %>%
   summarize(across(.cols = c("CREW"), 
-                   .fns = list(min = min, median = median, mean = mean, sd=sd, max = max,
-                               sum=sum, UniqueObs = n_distinct, count=~n(), "No. 0's" = ~sum(.x == 0)),
+                   .fns = list(sum=sum, mean = mean, sd=sd, max = max, count=~n(), "No. 0's" = ~sum(.x == 0)),
                    .names = "{.col}__{.fn}")) %>% 
   pivot_longer(cols = everything(), values_to = "value", names_to = "summary") %>% 
   pretty_lab() %>% 
@@ -590,8 +534,7 @@ scallop0322MainDataTable %>%
   dplyr::filter(is.na(TRIP_LENGTH)==FALSE) %>%
   dplyr::filter(TRIP_LENGTH>0) %>%
   summarize(across(.cols = c("TRIP_LENGTH"), 
-                   .fns = list(min = min, median = median, mean = mean, sd=sd, max = max,
-                               sum=sum, UniqueObs = n_distinct, count=~n(), "No. 0's" = ~sum(.x == 0)),
+                   .fns = list(sum=sum, mean = mean, sd=sd, max = max, count=~n(), "No. 0's" = ~sum(.x == 0)),
                    .names = "{.col}__{.fn}")) %>% 
   pivot_longer(cols = everything(), values_to = "value", names_to = "summary") %>% 
   pretty_lab() %>% 
@@ -604,11 +547,12 @@ scallop0322MainDataTable %>%
 ```
 
 
+### Access Area Fleet summary statistics
 
-Access Area Fleet summary statistics
+
 ```{r}
 AA_data %>% 
-  summarize(across(.cols = c("DOLLAR_2022_win", "DOLLAR_ALL_SP_win","LANDED_win", "VPUE_win","OPERATING_PROFIT_2022_win"), 
+   summarize(across(.cols = c("DOLLAR_2022_win","LANDED_win", "OPERATING_PROFIT_2022_win","VPUE_win"), 
                    .fns = list(min = min, median = median, mean = mean, sd=sd, max = max,
                                sum=sum, NAs = ~sum(is.na(.x)), UniqueObs = n_distinct, count=~n(),
                                "No. 0's" = ~sum(.x == 0)), 
@@ -626,8 +570,7 @@ AA_data %>%
   dplyr::filter(is.na(CREW)==FALSE) %>%
   dplyr::filter(CREW>0) %>%
   summarize(across(.cols = c("CREW"), 
-                   .fns = list(min = min, median = median, mean = mean, sd=sd, max = max,
-                               sum=sum, UniqueObs = n_distinct, count=~n(), "No. 0's" = ~sum(.x == 0)),
+                   .fns = list(sum=sum, mean = mean, sd=sd, max = max, count=~n(), "No. 0's" = ~sum(.x == 0)),
                    .names = "{.col}__{.fn}")) %>% 
   pivot_longer(cols = everything(), values_to = "value", names_to = "summary") %>% 
   pretty_lab() %>% 
@@ -641,8 +584,7 @@ AA_data %>%
   dplyr::filter(is.na(TRIP_LENGTH)==FALSE) %>%
   dplyr::filter(TRIP_LENGTH>0) %>%
   summarize(across(.cols = c("TRIP_LENGTH"), 
-                   .fns = list(min = min, median = median, mean = mean, sd=sd, max = max,
-                               sum=sum, UniqueObs = n_distinct, count=~n(), "No. 0's" = ~sum(.x == 0)),
+                   .fns = list(sum=sum, mean = mean, sd=sd, max = max, count=~n(), "No. 0's" = ~sum(.x == 0)),
                    .names = "{.col}__{.fn}")) %>% 
   pivot_longer(cols = everything(), values_to = "value", names_to = "summary") %>% 
   pretty_lab() %>% 
@@ -653,11 +595,11 @@ AA_data %>%
 
 
 ```
-Days-at-Sea  Fleet summary statistics
+### Days-at-Sea  Fleet summary statistics
 ```{r}
 
 DAS_data %>% 
-  summarize(across(.cols = c("DOLLAR_2022_win", "DOLLAR_ALL_SP_win","LANDED_win", "VPUE_win","OPERATING_PROFIT_2022_win"), 
+   summarize(across(.cols = c("DOLLAR_2022_win","LANDED_win", "OPERATING_PROFIT_2022_win","VPUE_win"), 
                    .fns = list(min = min, median = median, mean = mean, sd=sd, max = max,
                                sum=sum, NAs = ~sum(is.na(.x)), UniqueObs = n_distinct, count=~n(),
                                "No. 0's" = ~sum(.x == 0)), 
@@ -674,8 +616,7 @@ DAS_data %>%
   dplyr::filter(is.na(CREW)==FALSE) %>%
   dplyr::filter(CREW>0) %>%
   summarize(across(.cols = c("CREW"), 
-                   .fns = list(min = min, median = median, mean = mean, sd=sd, max = max,
-                               sum=sum, UniqueObs = n_distinct, count=~n(), "No. 0's" = ~sum(.x == 0)),
+                   .fns = list(sum=sum, mean = mean, sd=sd, max = max, count=~n(), "No. 0's" = ~sum(.x == 0)),
                    .names = "{.col}__{.fn}")) %>% 
   pivot_longer(cols = everything(), values_to = "value", names_to = "summary") %>% 
   pretty_lab() %>% 
@@ -689,8 +630,7 @@ DAS_data %>%
   dplyr::filter(is.na(TRIP_LENGTH)==FALSE) %>%
   dplyr::filter(TRIP_LENGTH>0) %>%
   summarize(across(.cols = c("TRIP_LENGTH"), 
-                   .fns = list(min = min, median = median, mean = mean, sd=sd, max = max,
-                               sum=sum, UniqueObs = n_distinct, count=~n(), "No. 0's" = ~sum(.x == 0)),
+                   .fns = list(sum=sum, mean = mean, sd=sd, max = max, count=~n(), "No. 0's" = ~sum(.x == 0)),
                    .names = "{.col}__{.fn}")) %>% 
   pivot_longer(cols = everything(), values_to = "value", names_to = "summary") %>% 
   pretty_lab() %>% 
@@ -700,20 +640,20 @@ DAS_data %>%
 
 ```  
   
-GCIFQ summary statistics  
+### GCIFQ summary statistics  
 ```{r}
+
+
 GCIFQ_data %>% 
-  summarize(across(.cols = c("DOLLAR_2022_win", "DOLLAR_ALL_SP_win","LANDED_win", "VPUE_win","OPERATING_PROFIT_2022_win"), 
-                   .fns = list(min = min, median = median, mean = mean, sd=sd, max = max,
-                               sum=sum, NAs = ~sum(is.na(.x)), UniqueObs = n_distinct, count=~n(),
+   summarize(across(.cols = c("DOLLAR_2022_win","LANDED_win", "OPERATING_PROFIT_2022_win","VPUE_win"), 
+                   .fns = list(sum=sum, mean = mean,count=~n(),
                                "No. 0's" = ~sum(.x == 0)), 
-                   .names = "{.col}__{.fn}")) %>% 
-  pivot_longer(cols = everything(), values_to = "value", names_to = "summary") %>% 
+                   .names = "{.col}__{.fn}")) %>%
+  pivot_longer(cols = everything(), values_to = "value", names_to = "summary") %>%
   pretty_lab() %>% 
-  separate(col = "summary", sep = "__", into = c("var", "summary")) %>% 
+  separate(col = "summary", sep = "__", into = c("var", "summary")) %>%
   pivot_wider(names_from = "var", values_from = "value") %>% 
   pretty_tab()
-
 
 
 
@@ -723,8 +663,7 @@ GCIFQ_data %>%
   dplyr::filter(is.na(CREW)==FALSE) %>%
   dplyr::filter(CREW>0) %>%
   summarize(across(.cols = c("CREW"), 
-                   .fns = list(min = min, median = median, mean = mean, sd=sd, max = max,
-                               sum=sum, UniqueObs = n_distinct, count=~n(), "No. 0's" = ~sum(.x == 0)),
+                   .fns = list(sum=sum, mean = mean, sd=sd, max = max, count=~n(), "No. 0's" = ~sum(.x == 0)),
                    .names = "{.col}__{.fn}")) %>% 
   pivot_longer(cols = everything(), values_to = "value", names_to = "summary") %>% 
   pretty_lab() %>% 
@@ -734,12 +673,11 @@ GCIFQ_data %>%
 
 
 
-GCIFQ_data %>% 
+temp<-GCIFQ_data %>% 
   dplyr::filter(is.na(TRIP_LENGTH)==FALSE) %>%
   dplyr::filter(TRIP_LENGTH>0) %>%
   summarize(across(.cols = c("TRIP_LENGTH"), 
-                   .fns = list(min = min, median = median, mean = mean, sd=sd, max = max,
-                               sum=sum, UniqueObs = n_distinct, count=~n(), "No. 0's" = ~sum(.x == 0)),
+                   .fns = list(sum=sum, mean = mean, sd=sd, max = max, count=~n(), "No. 0's" = ~sum(.x == 0)),
                    .names = "{.col}__{.fn}")) %>% 
   pivot_longer(cols = everything(), values_to = "value", names_to = "summary") %>% 
   pretty_lab() %>% 
@@ -748,5 +686,130 @@ GCIFQ_data %>%
   pretty_tab()
 
 ```
+
+## Manuscript Table 2
+
+
+```{r table2}
+
+
+GCIFQ_data_summary<- GCIFQ_data %>% 
+  group_by(in_closure)%>% 
+  summarize(across(.cols = c("DOLLAR_2022_win","LANDED_win", "OPERATING_PROFIT_2022_win","VPUE_win"),
+                    .fns = mean)) %>%
+  dplyr::mutate(across(where(is.numeric), \(x) round(x, 0))) %>%
+  ungroup() %>%
+  arrange(-in_closure)
+
+in_subset <- GCIFQ_data %>% filter(in_closure == "TRUE")
+out_subset <- GCIFQ_data %>% filter(in_closure == "FALSE")
+
+
+
+D<-t.test(out_subset$DOLLAR_2022_win,y=in_subset$DOLLAR_2022_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)$p.value
+
+L<-t.test(out_subset$LANDED_win,y=in_subset$LANDED_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)$p.value
+
+OP<-t.test(out_subset$OPERATING_PROFIT_2022_win,y=in_subset$OPERATING_PROFIT_2022_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)$p.value
+
+RPD<-t.test(out_subset$VPUE_win,y=in_subset$VPUE_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)$p.value
+
+pvals<-cbind("p-value",D,L,OP,RPD)
+
+colnames(pvals)<-colnames(GCIFQ_data_summary)
+
+                 
+GCIFQ_data_summary<-rbind(GCIFQ_data_summary,pvals)
+
+# the pvals are coming in as number when I cbind them. 
+kable(GCIFQ_data_summary,format.args = list(big.mark = ","),caption = "GC-IFQ Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day. P-values for H_0: means inside and outside the lease area are equal H_A: means inside and outside the leases are not. Averages computed over trips.") 
+
+```
+
+
+
+
+
+
+
+
+
+## Manuscript Table 3
+
+
+```{r table3}
+
+
+AA_data_summary<- AA_data %>% 
+  group_by(in_closure)%>% 
+  summarize(across(.cols = c("DOLLAR_2022_win","LANDED_win", "OPERATING_PROFIT_2022_win","VPUE_win"),
+                    .fns = mean)) %>%
+  dplyr::mutate(across(where(is.numeric), \(x) round(x, 0))) %>%
+  ungroup() %>%
+  arrange(-in_closure)
+
+in_subset <- AA_data %>% filter(in_closure == "TRUE")
+out_subset <- AA_data %>% filter(in_closure == "FALSE")
+
+
+
+D<-t.test(out_subset$DOLLAR_2022_win,y=in_subset$DOLLAR_2022_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)$p.value
+
+L<-t.test(out_subset$LANDED_win,y=in_subset$LANDED_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)$p.value
+
+OP<-t.test(out_subset$OPERATING_PROFIT_2022_win,y=in_subset$OPERATING_PROFIT_2022_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)$p.value
+
+RPD<-t.test(out_subset$VPUE_win,y=in_subset$VPUE_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)$p.value
+
+pvals<-cbind("p-value",D,L,OP,RPD)
+
+colnames(pvals)<-colnames(AA_data_summary)
+                   
+AA_data_summary<-rbind(AA_data_summary,pvals)
+
+kable(AA_data_summary,format.args = list(big.mark = ","),caption = "LA-AA Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day. P-values for H_0: means inside and outside the lease area are equal H_A: means inside and outside the leases are not. Averages computed over trips.")              
+
+```
+
+
+
+## Manuscript Table 4
+
+
+```{r table4}
+
+
+DAS_data_summary<- DAS_data %>% 
+  group_by(in_closure)%>% 
+  summarize(across(.cols = c("DOLLAR_2022_win","LANDED_win", "OPERATING_PROFIT_2022_win","VPUE_win"),
+                    .fns = mean)) %>%
+  dplyr::mutate(across(where(is.numeric), \(x) round(x, 0))) %>%
+  ungroup() %>%
+  arrange(-in_closure)
+
+in_subset <- DAS_data %>% filter(in_closure == "TRUE")
+out_subset <- DAS_data %>% filter(in_closure == "FALSE")
+
+
+
+D<-t.test(out_subset$DOLLAR_2022_win,y=in_subset$DOLLAR_2022_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)$p.value
+
+L<-t.test(out_subset$LANDED_win,y=in_subset$LANDED_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)$p.value
+
+OP<-t.test(out_subset$OPERATING_PROFIT_2022_win,y=in_subset$OPERATING_PROFIT_2022_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)$p.value
+
+RPD<-t.test(out_subset$VPUE_win,y=in_subset$VPUE_win, alternative=c("two.sided"), paired=FALSE, var.equal=FALSE, conf.level=0.99)$p.value
+
+pvals<-cbind("p-value",D,L,OP,RPD)
+
+colnames(pvals)<-colnames(DAS_data_summary)
+                   
+DAS_data_summary<-rbind(DAS_data_summary,pvals)
+
+kable(DAS_data_summary,format.args = list(big.mark = ","),caption = "LA-DAS Scallop trips, average scallop revenue, average landings, average operating profit, and average revenue per day. P-values for H_0: means inside and outside the lease area are equal H_A: means inside and outside the leases are not. Averages computed over trips.") 
+             
+
+```
+
 
 
