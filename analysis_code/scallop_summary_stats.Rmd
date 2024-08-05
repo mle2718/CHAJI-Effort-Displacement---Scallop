@@ -673,7 +673,7 @@ GCIFQ_data %>%
 
 
 
-temp<-GCIFQ_data %>% 
+GCIFQ_data %>% 
   dplyr::filter(is.na(TRIP_LENGTH)==FALSE) %>%
   dplyr::filter(TRIP_LENGTH>0) %>%
   summarize(across(.cols = c("TRIP_LENGTH"), 
