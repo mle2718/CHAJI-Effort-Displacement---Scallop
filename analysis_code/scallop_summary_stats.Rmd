@@ -504,8 +504,8 @@ All Fleets:
 ```{r}
 scallop0322MainDataTable %>% 
    summarize(across(.cols = c("DOLLAR_2022_win","LANDED_win", "OPERATING_PROFIT_2022_win","VPUE_win"), 
-                   .fns = list(sum=sum, mean = mean,
-                               NAs = ~sum(is.na(.x)), UniqueObs = n_distinct, count=~n(),
+                   .fns = list(min = min, median = median, mean = mean, sd=sd, max = max,
+                               sum=sum, NAs = ~sum(is.na(.x)), UniqueObs = n_distinct, count=~n(),
                                "No. 0's" = ~sum(.x == 0)), 
                    .names = "{.col}__{.fn}")) %>% 
   pivot_longer(cols = everything(), values_to = "value", names_to = "summary") %>% 
@@ -646,9 +646,10 @@ DAS_data %>%
 
 GCIFQ_data %>% 
    summarize(across(.cols = c("DOLLAR_2022_win","LANDED_win", "OPERATING_PROFIT_2022_win","VPUE_win"), 
-                   .fns = list(sum=sum, mean = mean,count=~n(),
+                   .fns = list(min = min, median = median, mean = mean, sd=sd, max = max,
+                               sum=sum, NAs = ~sum(is.na(.x)), UniqueObs = n_distinct, count=~n(),
                                "No. 0's" = ~sum(.x == 0)), 
-                   .names = "{.col}__{.fn}")) %>%
+                   .names = "{.col}__{.fn}")) %>% 
   pivot_longer(cols = everything(), values_to = "value", names_to = "summary") %>%
   pretty_lab() %>% 
   separate(col = "summary", sep = "__", into = c("var", "summary")) %>%
